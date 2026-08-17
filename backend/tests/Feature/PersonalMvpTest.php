@@ -1,0 +1,98 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\ContentPost;
+use App\Models\User;
+use Database\Seeders\DatabaseSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class PersonalMvpTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private User $user;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(DatabaseSeeder::class);
+        $this->user = User::query()->where('email', 'creator@personal.local')->firstOrFail();
+    }
+
+    public function test_feed_returns_ranked_personalized_content(): void
+    {
+        $response = $this->actingAs($this->user)->getJson('/api/feed');
+
+        $response->assertOk()
+            ->assertJsonPath('greeting_name', 'Mohamed')
+            ->assertJsonCount(12, 'items')
+            ->assertJsonStructure(['featured_opportunity', 'items' => [[
+                'id', 'hook', 'performance_ratio', 'recommendation_score', 'why_recommended', 'creator',
+            ]]]);
+
+        $scores = collect($response->json('items'))->pluck('recommendation_score');
+        $this->assertSame($scores->sortDesc()->values()->all(), $scores->values()->all());
+    }
+
+    public function test_content_can_be_saved_and_dismissed(): void
+    {
+        $post = ContentPost::query()->firstOrFail();
+
+        $this->actingAs($this->user)->postJson("/api/content/{$post->id}/save")
+            ->assertOk()->assertJson(['saved' => true]);
+        $this->assertDatabaseHas('saved_content', ['user_id' => $this->user->id, 'content_post_id' => $post->id]);
+
+        $this->actingAs($this->user)->postJson("/api/content/{$post->id}/dismiss")
+            ->assertOk()->assertJson(['dismissed' => true]);
+        $this->assertDatabaseHas('dismissed_content', ['user_id' => $this->user->id, 'content_post_id' => $post->id]);
+    }
+
+    public function test_new_moment_gets_story_intelligence_and_an_opportunity(): void
+    {
+        $response = $this->actingAs($this->user)->postJson('/api/moments', [
+            'content' => 'I realized our best marketing idea was hiding in a customer complaint after three months of building.',
+            'category' => 'Lesson',
+            'happened_at' => now()->toDateString(),
+        ]);
+
+        $response->assertCreated()->assertJsonPath('moment.story_score', 7);
+        $this->assertDatabaseHas('content_opportunities', [
+            'user_id' => $this->user->id,
+            'life_moment_id' => $response->json('moment.id'),
+            'origin' => 'life_moment',
+        ]);
+    }
+
+    public function test_remix_uses_source_pattern_and_personal_moment(): void
+    {
+        $post = ContentPost::query()->firstOrFail();
+        $moment = $this->user->moments()->firstOrFail();
+
+        $response = $this->actingAs($this->user)->postJson("/api/content/{$post->id}/remix", [
+            'format' => 'carousel',
+            'life_moment_id' => $moment->id,
+        ]);
+
+        $response->assertCreated()
+            ->assertJsonPath('remix.format', 'carousel')
+            ->assertJsonPath('remix.life_moment_id', $moment->id)
+            ->assertJsonCount(6, 'remix.generated_content.slides');
+        $this->assertSame($post->hook, $response->json('remix.generated_content.original_pattern'));
+        $this->assertSame($moment->content, $response->json('remix.generated_content.your_context'));
+    }
+
+    public function test_personal_memory_is_editable(): void
+    {
+        $this->actingAs($this->user)->patchJson('/api/me/profile', [
+            'positioning' => 'I build calm tools for independent creators.',
+            'topics' => ['Creator tools', 'Founder stories'],
+        ])->assertOk()->assertJsonPath('profile.positioning', 'I build calm tools for independent creators.');
+
+        $this->assertDatabaseHas('creator_profiles', [
+            'user_id' => $this->user->id,
+            'positioning' => 'I build calm tools for independent creators.',
+        ]);
+    }
+}
