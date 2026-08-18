@@ -69,9 +69,116 @@ const faqs = [
   }
 ]
 
+const heroPhases = [
+  { id: 'understand', tab: 'Understand me', eyebrow: 'Reading your last 40 posts' },
+  { id: 'find', tab: 'Find what works', eyebrow: 'Scanning your niche' },
+  { id: 'remix', tab: 'Remix for me', eyebrow: 'Writing your version' }
+]
+
+const profileFields = [
+  { label: 'Niche', value: 'Indie product building' },
+  { label: 'Audience', value: 'Solo founders, 22–34' },
+  { label: 'Tone', value: 'Direct · honest · dry' },
+  { label: 'Positioning', value: 'Builds in public, shows the mess' }
+]
+
+const outliers = [
+  { hook: 'The pricing mistake that cost me 8 months', ratio: 8.4, views: '1.2M', tone: '#3f6079' },
+  { hook: 'Nobody tells you this about your first 1000', ratio: 5.1, views: '740K', tone: '#6b7f8c' },
+  { hook: 'I rebuilt my whole onboarding in a weekend', ratio: 3.7, views: '410K', tone: '#8d9aa3' }
+]
+
+const remixHookFull = 'I spent four months studying creators. Then I deleted the product.'
+const HERO_PHASE_MS = 4600
+
+const activePhase = ref(0)
+const progressKey = ref(0)
+const isHovering = ref(false)
+const remixHookTyped = ref('')
+const outlierDisplay = ref(outliers.map(() => 0))
+const reducedMotion = ref(false)
+
+let phaseTimer: ReturnType<typeof setInterval> | null = null
+let typeTimer: ReturnType<typeof setInterval> | null = null
+
+function stopAutoplay() {
+  if (phaseTimer) clearInterval(phaseTimer)
+  phaseTimer = null
+}
+
+function startAutoplay() {
+  stopAutoplay()
+  if (reducedMotion.value) return
+  phaseTimer = setInterval(() => {
+    activePhase.value = (activePhase.value + 1) % heroPhases.length
+    progressKey.value++
+  }, HERO_PHASE_MS)
+}
+
+function goToPhase(index: number) {
+  if (index === activePhase.value) return
+  activePhase.value = index
+  progressKey.value++
+  startAutoplay()
+}
+
+function typeRemixHook() {
+  if (typeTimer) clearInterval(typeTimer)
+  if (reducedMotion.value) {
+    remixHookTyped.value = remixHookFull
+    return
+  }
+  remixHookTyped.value = ''
+  let i = 0
+  typeTimer = setInterval(() => {
+    i++
+    remixHookTyped.value = remixHookFull.slice(0, i)
+    if (i >= remixHookFull.length && typeTimer) clearInterval(typeTimer)
+  }, 26)
+}
+
+function animateOutliers() {
+  if (reducedMotion.value) {
+    outlierDisplay.value = outliers.map(o => o.ratio)
+    return
+  }
+  const start = performance.now()
+  const duration = 850
+  function tick(now: number) {
+    const t = Math.min(1, (now - start) / duration)
+    const eased = 1 - Math.pow(1 - t, 3)
+    outlierDisplay.value = outliers.map(o => Math.round(o.ratio * eased * 10) / 10)
+    if (t < 1) requestAnimationFrame(tick)
+  }
+  requestAnimationFrame(tick)
+}
+
+watch(activePhase, (phase) => {
+  if (phase === 1) animateOutliers()
+  if (phase === 2) typeRemixHook()
+}, { immediate: true })
+
 const revealRoot = ref<HTMLElement | null>(null)
 
+function pauseHeroAutoplay() {
+  isHovering.value = true
+  stopAutoplay()
+}
+
+function resumeHeroAutoplay() {
+  isHovering.value = false
+  startAutoplay()
+}
+
 onMounted(() => {
+  reducedMotion.value = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  if (reducedMotion.value) {
+    outlierDisplay.value = outliers.map(o => o.ratio)
+    remixHookTyped.value = remixHookFull
+  } else {
+    startAutoplay()
+  }
+
   const root = revealRoot.value
   const targets = root?.querySelectorAll('[data-reveal]')
   if (!root || !targets?.length) return
@@ -94,6 +201,11 @@ onMounted(() => {
   }, { rootMargin: '0px 0px -12% 0px', threshold: 0.15 })
 
   targets.forEach(node => observer.observe(node))
+})
+
+onUnmounted(() => {
+  stopAutoplay()
+  if (typeTimer) clearInterval(typeTimer)
 })
 </script>
 
@@ -151,54 +263,126 @@ onMounted(() => {
           <p data-reveal class="reveal mt-5 text-[13px] text-[#918d85]" style="transition-delay:220ms">Free during early access · Instagram login · Personal never posts for you</p>
         </div>
 
-        <!-- HERO MOCK -->
-        <div data-reveal class="reveal relative mx-auto mt-16 max-w-[880px]" style="transition-delay:280ms">
+        <!-- HERO MOCK: live, interactive walkthrough of the core loop -->
+        <div
+          data-reveal
+          class="reveal relative mx-auto mt-16 max-w-[880px]"
+          style="transition-delay:280ms"
+          @mouseenter="pauseHeroAutoplay"
+          @mouseleave="resumeHeroAutoplay"
+          @focusin="pauseHeroAutoplay"
+          @focusout="resumeHeroAutoplay"
+        >
           <div class="pill pill-a"><span class="dot bg-[#c85234]" />Profile understood</div>
           <div class="pill pill-b"><span class="dot bg-[#3f6079]" />12 outliers found</div>
           <div class="pill pill-c"><span class="dot bg-[#a07a2c]" />Moment linked</div>
           <div class="pill pill-d"><span class="dot bg-[#4a7a52]" />Reel drafted · 40s</div>
 
-          <div class="overflow-hidden rounded-[28px] border border-[#e2ded5] bg-[#22221f] p-2 shadow-[0_40px_90px_-40px_rgba(45,40,32,.55)]">
+          <div class="overflow-hidden rounded-[28px] border border-[#e2ded5] bg-[#22221f] p-2 shadow-[0_40px_90px_-40px_rgba(45,40,32,.55)]" :class="{ 'hero-frozen': isHovering }">
+            <!-- Instagram-stories-style phase control: watch the loop run, or drive it yourself -->
+            <div class="flex items-stretch gap-2 px-4 pt-3 pb-1 md:px-6">
+              <button
+                v-for="(phase, index) in heroPhases"
+                :key="phase.id"
+                type="button"
+                class="flex-1 py-1.5 text-left"
+                :aria-current="activePhase === index ? 'step' : undefined"
+                :aria-label="`Jump to ${phase.tab}`"
+                @click="goToPhase(index)"
+              >
+                <span class="block truncate text-[11px] font-medium tracking-[.01em] transition" :class="activePhase === index ? 'text-white' : 'text-white/40 hover:text-white/70'">{{ phase.tab }}</span>
+                <span class="mt-2 block h-[3px] w-full overflow-hidden rounded-full bg-white/15">
+                  <span v-if="index < activePhase" class="block h-full w-full rounded-full bg-white/60" />
+                  <span
+                    v-else-if="index === activePhase"
+                    :key="`bar-${progressKey}`"
+                    class="hero-progress-bar block h-full rounded-full bg-white"
+                    :style="{ animationDuration: `${HERO_PHASE_MS}ms` }"
+                  />
+                </span>
+              </button>
+            </div>
+
             <div class="rounded-[22px] bg-[#faf9f5] p-6 md:p-8">
               <div class="flex items-center justify-between border-b border-[#e6e2d9] pb-5">
                 <div>
-                  <p class="text-[10px] font-semibold uppercase tracking-[.17em] text-[#a09b91]">Monday · Your daily brief</p>
+                  <p class="text-[10px] font-semibold uppercase tracking-[.17em] text-[#a09b91]">
+                    <Transition name="fade-swap" mode="out-in"><span :key="activePhase">{{ heroPhases[activePhase].eyebrow }}</span></Transition>
+                  </p>
                   <p class="mt-2 font-serif text-[26px] leading-none tracking-[-.035em]">Good morning, Mohamed.</p>
                 </div>
                 <span class="hidden rounded-full bg-[#ecebe4] px-3.5 py-1.5 text-[12px] text-[#6f6c65] sm:inline-flex">4 opportunities</span>
               </div>
 
-              <div class="mt-6 grid gap-4 md:grid-cols-[1.15fr_1fr]">
-                <article class="rounded-2xl border border-[#e6e2d9] bg-white p-5">
-                  <div class="flex items-center justify-between">
-                    <span class="inline-flex items-center gap-1.5 rounded-full bg-[#f6e8e3] px-3 py-1 text-[11px] font-semibold text-[#a8442a]">8.4× creator average</span>
-                    <span class="text-[11px] text-[#a09b91]">18h ago</span>
-                  </div>
-                  <p class="mt-4 font-serif text-[21px] leading-[1.25] tracking-[-.02em]">“I spent four months studying creators. Then I threw the product away.”</p>
-                  <div class="mt-4 flex items-center gap-3 text-[12px] text-[#8a877f]">
-                    <span class="h-6 w-6 rounded-full bg-gradient-to-br from-[#d8c9b6] to-[#b6a894]" />
-                    @buildinpublic · 24K · Reel
-                  </div>
-                  <div class="mt-4 flex flex-wrap gap-2 border-t border-[#efece5] pt-4 text-[11px] text-[#77736c]">
-                    <span class="rounded-md bg-[#f3f1ea] px-2 py-1">Trending in your niche</span>
-                    <span class="rounded-md bg-[#f3f1ea] px-2 py-1">Similar creator size</span>
-                  </div>
-                </article>
+              <Transition name="fade-swap" mode="out-in">
+                <div :key="activePhase" class="mt-6 grid gap-4 md:grid-cols-[1.15fr_1fr] md:min-h-[268px]">
+                  <!-- LEFT: what Personal is doing right now -->
+                  <article v-if="activePhase === 0" class="rounded-2xl border border-[#e6e2d9] bg-white p-5">
+                    <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[#a09b91]">Personal understands you</p>
+                    <div class="mt-5 space-y-3.5 text-[14px]">
+                      <div
+                        v-for="(field, i) in profileFields"
+                        :key="field.label"
+                        class="hero-stagger flex items-baseline justify-between gap-6 border-b border-[#efece5] pb-3 last:border-0 last:pb-0"
+                        :style="{ animationDelay: `${i * 110}ms` }"
+                      >
+                        <span class="text-[#918d85]">{{ field.label }}</span><span class="text-right font-medium">{{ field.value }}</span>
+                      </div>
+                    </div>
+                  </article>
 
-                <div class="flex flex-col gap-4">
-                  <div class="rounded-2xl border border-[#e6e2d9] bg-white p-5">
-                    <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[#a09b91]">Why Personal recommends this</p>
-                    <p class="mt-3 text-[13px] leading-6 text-[#5f5c56]">Failure → realization → lesson is outperforming in your niche this week. You have the perfect story for it.</p>
-                  </div>
-                  <div class="rounded-2xl bg-[#22221f] p-5 text-white">
-                    <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-white/50">Your moment</p>
-                    <p class="mt-3 text-[13px] leading-6 text-white/80">“I pivoted my product after four months of research.”</p>
-                    <span class="mt-4 inline-flex h-9 items-center gap-2 rounded-full bg-white px-4 text-[12px] font-medium text-[#22221f]">
-                      <AppIcon name="sparkles" :size="14" /> Remix for me
-                    </span>
+                  <article v-else-if="activePhase === 1" class="rounded-2xl border border-[#e6e2d9] bg-white p-5">
+                    <div class="flex items-center justify-between">
+                      <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[#a09b91]">Outliers in your niche</p>
+                      <span class="text-[11px] text-[#a09b91]">still climbing</span>
+                    </div>
+                    <div class="mt-4 space-y-3">
+                      <div v-for="(row, i) in outliers" :key="row.hook" class="hero-stagger flex items-center gap-3" :style="{ animationDelay: `${i * 110}ms` }">
+                        <span class="grid h-10 w-11 shrink-0 place-items-center rounded-lg text-[12px] font-semibold tabular-nums text-white" :style="{ background: row.tone }">{{ outlierDisplay[i].toFixed(1) }}×</span>
+                        <div class="min-w-0 flex-1">
+                          <p class="truncate text-[13px] font-medium">{{ row.hook }}</p>
+                          <p class="mt-0.5 text-[11px] text-[#918d85]">{{ row.views }} views</p>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+
+                  <article v-else class="rounded-2xl border border-[#e6e2d9] bg-white p-5">
+                    <div class="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[.16em] text-[#a09b91]">
+                      <AppIcon name="sparkles" :size="12" /> Your version · Reel
+                    </div>
+                    <p class="mt-4 min-h-[4.5em] font-serif text-[19px] leading-[1.32] tracking-[-.02em]">
+                      &ldquo;{{ remixHookTyped }}<span class="hero-caret">|</span>&rdquo;
+                    </p>
+                    <p class="mt-4 text-[12px] leading-6 text-[#8a877f]">Beat 2 — what the research told me, and why I ignored it. Beat 3 — the line that made me start over.</p>
+                  </article>
+
+                  <!-- RIGHT: why, plus the moment it's built from -->
+                  <div class="flex flex-col gap-4">
+                    <div v-if="activePhase === 0" class="hero-stagger rounded-2xl border border-[#e6e2d9] bg-white p-5">
+                      <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[#a09b91]">Confidence</p>
+                      <div class="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[#efece5]"><div class="hero-confidence h-full rounded-full bg-[#c85234]" /></div>
+                      <p class="mt-3 text-[13px] leading-6 text-[#5f5c56]">Niche, audience and tone matched from your last 40 posts.</p>
+                    </div>
+                    <div v-else-if="activePhase === 1" class="hero-stagger rounded-2xl border border-[#e6e2d9] bg-white p-5">
+                      <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[#a09b91]">Why these rank first</p>
+                      <p class="mt-3 text-[13px] leading-6 text-[#5f5c56]">Failure → realization → lesson is outperforming in your niche this week — and it fits your voice.</p>
+                    </div>
+                    <div v-else class="hero-stagger rounded-2xl border border-[#e6e2d9] bg-white p-5">
+                      <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[#a09b91]">Why Personal recommends this</p>
+                      <p class="mt-3 text-[13px] leading-6 text-[#5f5c56]">Built from the outlier above and the moment you shared.</p>
+                    </div>
+
+                    <div class="hero-stagger rounded-2xl bg-[#22221f] p-5 text-white" style="animation-delay:160ms">
+                      <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-white/50">Your moment</p>
+                      <p class="mt-3 text-[13px] leading-6 text-white/80">&ldquo;I pivoted my product after four months of research.&rdquo;</p>
+                      <span class="mt-4 inline-flex h-9 items-center gap-2 rounded-full bg-white px-4 text-[12px] font-medium text-[#22221f]">
+                        <AppIcon name="sparkles" :size="14" /> Remix for me
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </Transition>
             </div>
           </div>
         </div>
@@ -459,8 +643,57 @@ onMounted(() => {
 
 .faq summary::-webkit-details-marker { display: none; }
 
+/* Hero live demo */
+.hero-progress-bar {
+  width: 0%;
+  animation-name: hero-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+.hero-frozen .hero-progress-bar { animation-play-state: paused; }
+@keyframes hero-progress {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+.hero-stagger {
+  opacity: 0;
+  animation: hero-stagger-in .5s cubic-bezier(.22, 1, .36, 1) both;
+}
+@keyframes hero-stagger-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-confidence {
+  width: 0%;
+  animation: hero-confidence-fill .9s cubic-bezier(.22, 1, .36, 1) .1s forwards;
+}
+@keyframes hero-confidence-fill {
+  to { width: 92%; }
+}
+
+.hero-caret {
+  display: inline-block;
+  margin-left: 1px;
+  animation: hero-blink 1s step-end infinite;
+}
+@keyframes hero-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.fade-swap-enter-active, .fade-swap-leave-active { transition: opacity .32s ease, transform .32s ease; }
+.fade-swap-enter-from { opacity: 0; transform: translateY(6px); }
+.fade-swap-leave-to { opacity: 0; transform: translateY(-6px); }
+
 @media (prefers-reduced-motion: reduce) {
   .js-reveal .reveal { opacity: 1; transform: none; transition: none; }
   .pill { animation: none; }
+  .hero-progress-bar { animation: none; width: 100%; }
+  .hero-stagger { animation: none; opacity: 1; }
+  .hero-confidence { animation: none; width: 92%; }
+  .hero-caret { animation: none; opacity: 0; }
+  .fade-swap-enter-active, .fade-swap-leave-active { transition: none; }
 }
 </style>

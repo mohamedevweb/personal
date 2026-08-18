@@ -7,6 +7,12 @@
       "runtimeArgs": ["run", "dev", "--prefix", "frontend"],
       "port": 3000,
       "autoPort": true
+    },
+    {
+      "name": "logo-preview",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8791", "--directory", "/private/tmp/claude-501/-Users-mohamedchettah-Project-Personal/9b4ba1df-2c3e-4952-91c1-d918075febe3/scratchpad"],
+      "port": 8791
     }
   ]
 }
