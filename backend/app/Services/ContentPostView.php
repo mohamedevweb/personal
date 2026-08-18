@@ -7,9 +7,17 @@ use App\Models\User;
 
 class ContentPostView
 {
-    /** @return array<string, mixed> */
-    public function make(ContentPost $post, User $user, ?float $recommendationScore = null): array
-    {
+    /**
+     * @param  bool|null  $isSaved  Pass a known value when rendering a batch; leaving
+     *                              it null costs one query per post.
+     * @return array<string, mixed>
+     */
+    public function make(
+        ContentPost $post,
+        User $user,
+        ?float $recommendationScore = null,
+        ?bool $isSaved = null,
+    ): array {
         $post->loadMissing('creator');
 
         return [
@@ -28,7 +36,7 @@ class ContentPostView
             'hook_analysis' => $post->hook_analysis,
             'structure_analysis' => $post->structure_analysis,
             'recommendation_score' => $recommendationScore,
-            'is_saved' => $user->savedContent()->where('content_post_id', $post->id)->exists(),
+            'is_saved' => $isSaved ?? $user->savedContent()->where('content_post_id', $post->id)->exists(),
             'creator' => [
                 'username' => $post->creator->username,
                 'display_name' => $post->creator->display_name,

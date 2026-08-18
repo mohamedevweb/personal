@@ -3,9 +3,11 @@
 namespace Tests\Feature;
 
 use App\Models\ContentPost;
+use App\Models\SavedContent;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class PersonalMvpTest extends TestCase
@@ -34,6 +36,42 @@ class PersonalMvpTest extends TestCase
 
         $scores = collect($response->json('items'))->pluck('recommendation_score');
         $this->assertSame($scores->sortDesc()->values()->all(), $scores->values()->all());
+    }
+
+    public function test_the_feed_query_count_does_not_grow_with_the_catalog(): void
+    {
+        $queries = 0;
+        DB::listen(function () use (&$queries): void {
+            $queries++;
+        });
+
+        $this->actingAs($this->user)->getJson('/api/feed')->assertOk();
+
+        // The seeder ships 40 posts; a per-post lookup would put this in the forties.
+        $this->assertLessThan(12, $queries, "The feed issued {$queries} queries.");
+    }
+
+    public function test_saved_content_is_returned_most_recently_saved_first(): void
+    {
+        $posts = ContentPost::query()->orderBy('id')->take(3)->get();
+
+        foreach ($posts as $index => $post) {
+            SavedContent::query()->create([
+                'user_id' => $this->user->id,
+                'content_post_id' => $post->id,
+                'created_at' => now()->subMinutes(10 - $index),
+                'updated_at' => now()->subMinutes(10 - $index),
+            ]);
+        }
+
+        $response = $this->actingAs($this->user)->getJson('/api/saved')->assertOk();
+
+        $expected = $posts->reverse()->pluck('id')->values()->all();
+        $returned = collect($response->json('items'))->pluck('id')
+            ->intersect($expected)->values()->all();
+
+        $this->assertSame($expected, $returned);
+        $this->assertTrue(collect($response->json('items'))->every(fn (array $item) => $item['is_saved']));
     }
 
     public function test_content_can_be_saved_and_dismissed(): void

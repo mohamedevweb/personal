@@ -34,7 +34,7 @@ onMounted(async () => {
 
 <template>
   <main v-if="post" class="mx-auto max-w-[1180px] px-5 py-8 md:px-10 md:py-12">
-    <NuxtLink to="/" class="text-sm text-[#7c7971]">← Back to your feed</NuxtLink>
+    <NuxtLink to="/feed" class="text-sm text-[#7c7971]">← Back to your feed</NuxtLink>
     <div class="mt-8 grid gap-10 lg:grid-cols-[.88fr_1.12fr]">
       <section class="lg:sticky lg:top-8 lg:self-start">
         <div class="relative aspect-[4/5] overflow-hidden rounded-[28px] bg-[#ddd8cf]"><img :src="post.thumbnail_url || ''" :alt="post.hook" class="h-full w-full object-cover"><div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/5 to-transparent"/><div class="absolute inset-x-6 bottom-6"><span class="rounded-full bg-white/15 px-3 py-1.5 text-[11px] text-white backdrop-blur">{{ post.format }}</span><h1 class="mt-4 text-[28px] font-medium leading-[1.12] tracking-[-.03em] text-white">{{ post.hook }}</h1></div></div>

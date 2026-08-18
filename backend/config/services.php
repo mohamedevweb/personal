@@ -35,6 +35,28 @@ return [
         ],
     ],
 
+    'content_generation' => [
+        'driver' => env('CONTENT_GENERATION_DRIVER', 'openai'),
+    ],
+
+    'openai' => [
+        'api_key' => env('OPENAI_API_KEY'),
+        'model' => env('OPENAI_MODEL', 'gpt-5'),
+        // Reasoning models only ("minimal" through "high"). Leave empty for the
+        // rest; sending it to a non-reasoning model is rejected.
+        'reasoning_effort' => env('OPENAI_REASONING_EFFORT', ''),
+        'max_output_tokens' => (int) env('OPENAI_MAX_OUTPUT_TOKENS', 8000),
+        'request_timeout' => (int) env('OPENAI_TIMEOUT', 120),
+    ],
+
+    'anthropic' => [
+        'api_key' => env('ANTHROPIC_API_KEY'),
+        'model' => env('ANTHROPIC_MODEL', 'claude-opus-5'),
+        'effort' => env('ANTHROPIC_EFFORT', 'medium'),
+        'max_tokens' => (int) env('ANTHROPIC_MAX_TOKENS', 8000),
+        'timeout' => (float) env('ANTHROPIC_TIMEOUT', 120),
+    ],
+
     'instagram' => [
         'app_id' => env('INSTAGRAM_APP_ID'),
         'app_secret' => env('INSTAGRAM_APP_SECRET'),

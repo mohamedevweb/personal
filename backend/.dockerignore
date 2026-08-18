@@ -1,0 +1,21 @@
+.env
+.env.*
+!.env.example
+.git
+.gitignore
+.idea
+.vscode
+.phpunit.result.cache
+# Host caches list dev-only packages that are absent from the production image.
+bootstrap/cache/*.php
+Dockerfile
+docker-compose*.yml
+node_modules
+npm-debug.log
+storage/app/public/*
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*
+tests
+vendor

@@ -82,4 +82,52 @@ class SyncInstagramAccountTest extends TestCase
         $this->assertSame(1900, $account->media()->firstOrFail()->metrics['views']);
         $this->assertContains('Saas', $user->creatorProfile()->firstOrFail()->topics);
     }
+
+    public function test_unavailable_insights_do_not_fan_out_one_request_per_metric(): void
+    {
+        config()->set('services.instagram.graph_url', 'https://graph.instagram.com');
+        config()->set('services.instagram.api_version', 'v25.0');
+
+        $user = User::factory()->create();
+        $account = InstagramAccount::query()->create([
+            'user_id' => $user->id,
+            'instagram_user_id' => '123',
+            'username' => 'founder_creator',
+            'access_token' => 'server-side-secret',
+            'token_expires_at' => now()->addMonth(),
+            'connected_at' => now(),
+        ]);
+
+        $insightsRequests = 0;
+
+        Http::fake(function ($request) use (&$insightsRequests) {
+            if (str_contains($request->url(), '/insights')) {
+                $insightsRequests++;
+
+                return Http::response(['error' => [
+                    'message' => 'The metric is not supported for this media product type.',
+                    'code' => 100,
+                ]], 400);
+            }
+
+            if (str_contains($request->url(), '/me/media')) {
+                return Http::response(['data' => [[
+                    'id' => 'media-1',
+                    'media_type' => 'IMAGE',
+                    'media_product_type' => 'FEED',
+                    'timestamp' => '2026-08-15T10:00:00+0000',
+                ]]]);
+            }
+
+            return Http::response(['id' => '123', 'username' => 'founder_creator']);
+        });
+
+        (new SyncInstagramAccount($account->id))
+            ->handle(app(InstagramAuthService::class), app(InstagramApiService::class));
+
+        // One batched attempt plus a single narrowed retry — never one call per metric.
+        $this->assertSame(2, $insightsRequests);
+        $this->assertSame([], $account->media()->firstOrFail()->metrics);
+        $this->assertSame('completed', $account->refresh()->sync_status);
+    }
 }

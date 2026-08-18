@@ -30,6 +30,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Local Development Session Endpoint
+    |--------------------------------------------------------------------------
+    |
+    | The /api/development/session endpoint mints an API token for a demo user
+    | without any credentials. It requires both a local environment and this
+    | flag, so a production deploy carrying a stale APP_ENV cannot expose it.
+    |
+    */
+
+    'enable_dev_session' => env('ENABLE_DEV_SESSION', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Debug Mode
     |--------------------------------------------------------------------------
     |

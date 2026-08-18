@@ -1,0 +1,111 @@
+name: personal
+
+# The API, the queue worker and the scheduler are the same image with different
+# commands, so they share one definition.
+x-backend: &backend
+  build:
+    context: ./backend
+    target: app
+  env_file: ./backend/.env
+  environment: &backend-env
+    DB_CONNECTION: pgsql
+    DB_HOST: postgres
+    DB_PORT: 5432
+    DB_DATABASE: ${DB_DATABASE:-personal}
+    DB_USERNAME: ${DB_USERNAME:-personal}
+    DB_PASSWORD: ${DB_PASSWORD:-personal}
+    QUEUE_CONNECTION: database
+    CACHE_STORE: database
+    SESSION_DRIVER: database
+  depends_on:
+    postgres:
+      condition: service_healthy
+  restart: unless-stopped
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-personal}
+      POSTGRES_USER: ${DB_USERNAME:-personal}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-personal}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    # Bound to the loopback interface so a desktop client (TablePlus, DBeaver,
+    # psql) can reach it without the database being reachable off this machine.
+    ports:
+      - "127.0.0.1:${DB_PORT_HOST:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-personal} -d ${DB_DATABASE:-personal}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  # Owns the schema: the only service that runs migrations.
+  app:
+    <<: *backend
+    environment:
+      <<: *backend-env
+      RUN_MIGRATIONS: "true"
+
+  web:
+    build:
+      context: ./backend
+      target: web
+    ports:
+      - "${API_PORT:-8000}:80"
+    depends_on:
+      - app
+    restart: unless-stopped
+
+  # Runs the Instagram import and any other queued work.
+  queue:
+    <<: *backend
+    command: ["php", "artisan", "queue:work", "--tries=3", "--max-time=3600"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      app:
+        condition: service_started
+
+  # Daily Instagram refresh and OAuth state cleanup.
+  scheduler:
+    <<: *backend
+    command: ["php", "artisan", "schedule:work"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      app:
+        condition: service_started
+
+  # Local database browser. Behind the "tools" profile, so it never starts with a
+  # plain `docker compose up` — it has no authentication of its own.
+  adminer:
+    image: adminer:5
+    profiles: ["tools"]
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+      ADMINER_DESIGN: dracula
+    ports:
+      - "127.0.0.1:${ADMINER_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      # Read by the browser as well as by SSR, so it has to be the URL the
+      # browser can reach — not the compose service name.
+      NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-http://localhost:8000}
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      - web
+    restart: unless-stopped
+
+volumes:
+  postgres-data:

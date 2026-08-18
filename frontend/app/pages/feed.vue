@@ -28,10 +28,14 @@ async function dismiss(post: ContentPost) {
 }
 
 async function remix(post: ContentPost) {
-  const response = await apiFetch<{ remix: { id: number } }>(`/api/content/${post.id}/remix`, {
-    method: 'POST', body: { format: 'carousel' }
-  })
-  await navigateTo(`/remix/${response.remix.id}`)
+  try {
+    const response = await apiFetch<{ remix: { id: number } }>(`/api/content/${post.id}/remix`, {
+      method: 'POST', body: { format: 'carousel' }
+    })
+    await navigateTo(`/remix/${response.remix.id}`)
+  } catch (exception: any) {
+    error.value = exception?.data?.message || 'Personal could not draft this right now. Please try again.'
+  }
 }
 
 onMounted(loadFeed)
@@ -42,8 +46,8 @@ onMounted(loadFeed)
     <header class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
       <div>
         <p class="text-[11px] font-medium uppercase tracking-[.17em] text-[#908c83]">{{ dayLabel }} · Your daily brief</p>
-        <h1 class="mt-4 font-serif text-[42px] leading-none tracking-[-.04em] md:text-[58px]">Good morning, {{ data?.greeting_name || 'Mohamed' }}.</h1>
-        <p class="mt-4 text-[16px] text-[#716e67]">I found <span class="font-medium text-[#292824]">{{ data?.opportunity_count || 12 }} content opportunities</span> for you today.</p>
+        <h1 class="mt-4 font-serif text-[42px] leading-none tracking-[-.04em] md:text-[58px]">Good morning<template v-if="data?.greeting_name">, {{ data.greeting_name }}</template>.</h1>
+        <p v-if="data" class="mt-4 text-[16px] text-[#716e67]">I found <span class="font-medium text-[#292824]">{{ data.opportunity_count }} content opportunities</span> for you today.</p>
       </div>
       <NuxtLink to="/create" class="inline-flex w-fit items-center gap-2 rounded-full bg-[#1d1d1b] px-5 py-3 text-sm font-medium text-white"><AppIcon name="plus" :size="17" />Create from scratch</NuxtLink>
     </header>

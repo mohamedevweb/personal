@@ -17,6 +17,13 @@ class SyncInstagramAccount implements ShouldQueue
 
     public int $tries = 3;
 
+    /**
+     * One import is a profile call plus up to two calls per media item, each with
+     * its own 15s HTTP timeout. This bounds the whole job so a slow or throttled
+     * Meta response cannot hold a queue worker indefinitely.
+     */
+    public int $timeout = 600;
+
     /** @var list<int> */
     public array $backoff = [30, 120, 600];
 

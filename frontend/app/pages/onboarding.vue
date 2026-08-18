@@ -34,7 +34,7 @@ onMounted(async () => {
 <template>
   <main class="min-h-screen overflow-hidden bg-[#f7f5f0]">
     <header class="flex h-20 items-center justify-between border-b border-[#dedbd3]/80 px-6 md:px-10">
-      <NuxtLink to="/" class="text-[17px] font-semibold tracking-[-0.04em]">Personal</NuxtLink>
+      <NuxtLink to="/feed" class="text-[17px] font-semibold tracking-[-0.04em]">Personal</NuxtLink>
       <span class="text-xs tracking-wide text-[#8a877f]">Your private content intelligence</span>
     </header>
 
@@ -95,7 +95,7 @@ onMounted(async () => {
 
           <NuxtLink
             v-if="status.account?.sync_status === 'completed'"
-            to="/"
+            to="/feed"
             class="mt-10 inline-flex h-14 items-center rounded-full bg-[#1d1d1b] px-7 text-sm font-medium text-white transition hover:-translate-y-0.5 hover:bg-black"
           >
             Start Personal&nbsp; →

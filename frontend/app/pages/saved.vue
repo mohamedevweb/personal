@@ -15,6 +15,6 @@ onMounted(async () => { const response = await apiFetch<{ items: ContentPost[] }
     <p class="text-[11px] font-semibold uppercase tracking-[.17em] text-[#918d85]">Your library</p><h1 class="mt-4 font-serif text-4xl tracking-[-.04em] md:text-[54px]">Saved for later.</h1><p class="mt-4 text-[#716e67]">The patterns and stories you want to return to.</p>
     <div v-if="loading" class="mt-10 h-96 animate-pulse rounded-3xl bg-[#e8e4db]" />
     <div v-else-if="items.length" class="mt-10 grid gap-6 lg:grid-cols-2"><ContentCard v-for="post in items" :key="post.id" :post="post" @save="unsave" @dismiss="unsave" @remix="remix" /></div>
-    <div v-else class="mt-16 rounded-[28px] border border-dashed border-[#cdc8be] p-12 text-center"><p class="font-serif text-2xl">Nothing saved yet.</p><p class="mt-2 text-sm text-[#77736c]">Save a strong pattern when it feels useful—not just interesting.</p><NuxtLink to="/" class="mt-6 inline-flex rounded-full bg-[#1d1d1b] px-5 py-2.5 text-sm text-white">Explore your feed</NuxtLink></div>
+    <div v-else class="mt-16 rounded-[28px] border border-dashed border-[#cdc8be] p-12 text-center"><p class="font-serif text-2xl">Nothing saved yet.</p><p class="mt-2 text-sm text-[#77736c]">Save a strong pattern when it feels useful—not just interesting.</p><NuxtLink to="/feed" class="mt-6 inline-flex rounded-full bg-[#1d1d1b] px-5 py-2.5 text-sm text-white">Explore your feed</NuxtLink></div>
   </main>
 </template>
