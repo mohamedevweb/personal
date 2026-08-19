@@ -65,6 +65,8 @@ jobs:
     needs: test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
+    # The DEPLOY_* secrets live on this GitHub environment, not on the repo.
+    environment: Production
     steps:
       - name: Deploy over SSH
         # This job does not check out the repo, so override the backend default.
