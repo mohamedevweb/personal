@@ -4,6 +4,7 @@ import type { ContentPost, Opportunity } from '~/types/product'
 const { apiFetch } = usePersonalApi()
 const { t, locale } = useI18n()
 const loading = ref(true)
+const refreshing = ref(false)
 const error = ref<string | null>(null)
 const data = ref<{ greeting_name: string, opportunity_count: number, featured_opportunity: Opportunity | null, items: ContentPost[] } | null>(null)
 const dayLabel = computed(() => new Intl.DateTimeFormat(locale.value, { weekday: 'long' }).format(new Date()))
@@ -15,6 +16,21 @@ async function loadFeed() {
     error.value = exception?.data?.message || t('feed.loadError')
   } finally {
     loading.value = false
+  }
+}
+
+async function refresh() {
+  if (refreshing.value) return
+  refreshing.value = true
+  try {
+    await apiFetch('/api/feed/refresh', { method: 'POST' })
+    // Discovery runs in the background; give it a moment, then reload.
+    await new Promise(resolve => setTimeout(resolve, 4000))
+    await loadFeed()
+  } catch (exception: any) {
+    error.value = exception?.data?.message || t('feed.loadError')
+  } finally {
+    refreshing.value = false
   }
 }
 
@@ -66,10 +82,22 @@ onMounted(loadFeed)
       </div>
     </section>
 
-    <div class="mt-12 flex items-center justify-between border-b border-[var(--line)] pb-4"><h2 class="text-sm font-medium">{{ $t('feed.worthCreating') }}</h2><span class="text-xs text-[#918d85]">{{ $t('feed.rankedForYou') }}</span></div>
+    <div class="mt-12 flex items-center justify-between border-b border-[var(--line)] pb-4">
+      <h2 class="text-sm font-medium">{{ $t('feed.worthCreating') }}</h2>
+      <button class="text-xs text-[#918d85] underline underline-offset-2 transition hover:text-[#1c1c1a] disabled:no-underline disabled:opacity-60" :disabled="refreshing || loading" @click="refresh">
+        {{ refreshing ? $t('feed.refreshing') : $t('feed.rankedForYou') }}
+      </button>
+    </div>
 
     <p v-if="error" class="mt-8 rounded-2xl border border-[#ddb9ae] bg-[#f9ece8] p-4 text-sm text-[#8b402a]">{{ error }}</p>
     <div v-if="loading" class="mt-7 grid gap-6 lg:grid-cols-2"><div v-for="i in 4" :key="i" class="h-[560px] animate-pulse rounded-[24px] bg-[#e9e5dc]" /></div>
+    <div v-else-if="data && data.items.length === 0" class="mt-7 rounded-[24px] border border-dashed border-[var(--line)] bg-[#fbfaf7] px-6 py-16 text-center">
+      <h3 class="font-serif text-2xl tracking-[-.02em]">{{ $t('feed.emptyTitle') }}</h3>
+      <p class="mx-auto mt-3 max-w-md text-sm leading-6 text-[#77736c]">{{ $t('feed.emptyBody') }}</p>
+      <button class="mt-6 inline-flex items-center gap-2 rounded-full bg-[#1d1d1b] px-5 py-3 text-sm font-medium text-white transition hover:bg-black disabled:cursor-wait disabled:opacity-60" :disabled="refreshing" @click="refresh">
+        <AppIcon name="sparkles" :size="16" />{{ refreshing ? $t('feed.refreshing') : $t('feed.refresh') }}
+      </button>
+    </div>
     <div v-else class="mt-7 grid items-start gap-6 lg:grid-cols-2">
       <ContentCard v-for="post in data?.items" :key="post.id" :post="post" @save="save" @dismiss="dismiss" @remix="remix" />
     </div>

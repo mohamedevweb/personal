@@ -32,7 +32,8 @@ const nav = [
       <div class="mt-auto space-y-2">
         <NuxtLink to="/settings" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[#77736c] hover:bg-white/60"><AppIcon name="settings" :size="18" />{{ $t('nav.settings') }}</NuxtLink>
         <div class="flex items-center gap-3 border-t border-[var(--line)] px-3 pt-5">
-          <div class="grid h-9 w-9 place-items-center rounded-full bg-[#20201e] text-xs font-medium text-white">{{ initials }}</div>
+          <img v-if="user?.avatar_url" :src="user.avatar_url" alt="" class="h-9 w-9 rounded-full bg-[#e5e1d8] object-cover">
+          <div v-else class="grid h-9 w-9 place-items-center rounded-full bg-[#20201e] text-xs font-medium text-white">{{ initials }}</div>
           <div class="min-w-0 flex-1">
             <p class="truncate text-sm font-medium">{{ user?.name || $t('common.yourWorkspace') }}</p>
             <button class="text-[11px] text-[#97938a] underline underline-offset-2 hover:text-[#1c1c1a]" @click="logout">{{ $t('common.signOut') }}</button>

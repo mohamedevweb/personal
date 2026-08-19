@@ -47,9 +47,18 @@
         "reel": "Reel drafted · 40s"
       },
       "phases": {
-        "understand": { "tab": "Understand me", "eyebrow": "Reading your last 40 posts" },
-        "find": { "tab": "Find what works", "eyebrow": "Scanning your niche" },
-        "remix": { "tab": "Remix for me", "eyebrow": "Writing your version" }
+        "understand": {
+          "tab": "Understand me",
+          "eyebrow": "Reading your last 40 posts"
+        },
+        "find": {
+          "tab": "Find what works",
+          "eyebrow": "Scanning your niche"
+        },
+        "remix": {
+          "tab": "Remix for me",
+          "eyebrow": "Writing your version"
+        }
       },
       "jumpTo": "Jump to {tab}",
       "greeting": "Good morning, Mohamed.",
@@ -264,7 +273,11 @@
     "worthCreating": "Worth creating today",
     "rankedForYou": "Ranked for you",
     "loadError": "Personal could not load today’s opportunities.",
-    "remixError": "Personal could not draft this right now. Please try again."
+    "remixError": "Personal could not draft this right now. Please try again.",
+    "emptyTitle": "No content yet.",
+    "emptyBody": "We’re finding creators in your niche. This can take a moment right after connecting Instagram.",
+    "refresh": "Refresh my feed",
+    "refreshing": "Finding content…"
   },
   "create": {
     "eyebrow": "Create",
@@ -277,9 +290,18 @@
     "pickCopyFallback": "A concrete decision creates tension, insight and a useful takeaway.",
     "createThis": "Create this →",
     "cards": {
-      "story": { "title": "Tell a story", "copy": "Turn a life moment into a narrative people remember." },
-      "teach": { "title": "Teach something", "copy": "Shape one lesson into a useful carousel." },
-      "opinion": { "title": "Share an opinion", "copy": "Build a clear, credible talking-head reel." }
+      "story": {
+        "title": "Tell a story",
+        "copy": "Turn a life moment into a narrative people remember."
+      },
+      "teach": {
+        "title": "Teach something",
+        "copy": "Shape one lesson into a useful carousel."
+      },
+      "opinion": {
+        "title": "Share an opinion",
+        "copy": "Build a clear, credible talking-head reel."
+      }
     },
     "begin": "Begin",
     "bestMaterial": "Your best raw material",

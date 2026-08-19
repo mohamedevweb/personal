@@ -26,6 +26,7 @@ class InstagramApiService
                 'follows_count',
                 'media_count',
                 'biography',
+                'website',
             ]),
         ]);
 
@@ -34,6 +35,7 @@ class InstagramApiService
             'username' => (string) $response['username'],
             'display_name' => $response['name'] ?? null,
             'bio' => $response['biography'] ?? null,
+            'website' => $response['website'] ?? null,
             'profile_picture_url' => $response['profile_picture_url'] ?? null,
             'account_type' => $response['account_type'] ?? null,
             'followers_count' => $response['followers_count'] ?? null,

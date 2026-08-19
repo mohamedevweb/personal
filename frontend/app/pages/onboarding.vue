@@ -24,6 +24,13 @@ const callbackError = computed(() => route.query.instagram === 'error'
   ? String(route.query.message || t('onboarding.cancelledError'))
   : null)
 
+// Keep the onboarding gate (auth.global) in sync the moment the import finishes,
+// so leaving for the feed is instant instead of being re-checked at the gate.
+const onboarded = useState('personal-onboarded', () => false)
+watch(() => status.value.account?.sync_status, (syncStatus) => {
+  if (status.value.connected && syncStatus === 'completed') onboarded.value = true
+})
+
 onMounted(async () => {
   await loadStatus()
   if (route.query.instagram === 'connected' || (status.value.connected && status.value.account?.sync_status !== 'completed')) {

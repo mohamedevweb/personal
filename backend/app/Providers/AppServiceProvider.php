@@ -6,6 +6,9 @@ use Anthropic\Client as AnthropicClient;
 use Anthropic\RequestOptions;
 use App\Services\ClaudeContentGenerationService;
 use App\Services\ContentGenerationService;
+use App\Services\Discovery\ApifyInstagramDiscoveryService;
+use App\Services\Discovery\ContentDiscoveryService;
+use App\Services\Discovery\MockInstagramDiscoveryService;
 use App\Services\MockContentGenerationService;
 use App\Services\OpenAiContentGenerationService;
 use GuzzleHttp\Client as GuzzleClient;
@@ -36,6 +39,17 @@ class AppServiceProvider extends ServiceProvider
                     && (bool) config('services.anthropic.api_key') => $this->app->make(ClaudeContentGenerationService::class),
 
                 default => $this->app->make(MockContentGenerationService::class),
+            };
+        });
+
+        $this->app->bind(ContentDiscoveryService::class, function (): ContentDiscoveryService {
+            // Like the generation driver, "apify" without a token degrades to the
+            // deterministic mock so the feed still fills instead of breaking.
+            return match (true) {
+                config('services.discovery.driver') === 'apify'
+                    && (bool) config('services.discovery.apify.token') => $this->app->make(ApifyInstagramDiscoveryService::class),
+
+                default => $this->app->make(MockInstagramDiscoveryService::class),
             };
         });
     }

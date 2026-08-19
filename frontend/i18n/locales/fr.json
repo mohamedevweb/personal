@@ -47,9 +47,18 @@
         "reel": "Reel rédigé · 40s"
       },
       "phases": {
-        "understand": { "tab": "Me comprendre", "eyebrow": "Lecture de vos 40 derniers posts" },
-        "find": { "tab": "Trouver ce qui marche", "eyebrow": "Analyse de votre niche" },
-        "remix": { "tab": "Remixer pour moi", "eyebrow": "Rédaction de votre version" }
+        "understand": {
+          "tab": "Me comprendre",
+          "eyebrow": "Lecture de vos 40 derniers posts"
+        },
+        "find": {
+          "tab": "Trouver ce qui marche",
+          "eyebrow": "Analyse de votre niche"
+        },
+        "remix": {
+          "tab": "Remixer pour moi",
+          "eyebrow": "Rédaction de votre version"
+        }
       },
       "jumpTo": "Aller à {tab}",
       "greeting": "Bonjour, Mohamed.",
@@ -264,7 +273,11 @@
     "worthCreating": "À créer aujourd’hui",
     "rankedForYou": "Classé pour vous",
     "loadError": "Personal n’a pas pu charger les opportunités du jour.",
-    "remixError": "Personal n’a pas pu rédiger ceci pour l’instant. Veuillez réessayer."
+    "remixError": "Personal n’a pas pu rédiger ceci pour l’instant. Veuillez réessayer.",
+    "emptyTitle": "Rien pour l’instant.",
+    "emptyBody": "On cherche des créateurs dans ta niche. Ça peut prendre un moment juste après la connexion Instagram.",
+    "refresh": "Rafraîchir mon feed",
+    "refreshing": "Recherche en cours…"
   },
   "create": {
     "eyebrow": "Créer",
@@ -277,9 +290,18 @@
     "pickCopyFallback": "Une décision concrète crée de la tension, de l’insight et un enseignement utile.",
     "createThis": "Créer ceci →",
     "cards": {
-      "story": { "title": "Raconter une histoire", "copy": "Transformez un moment de vie en récit dont on se souvient." },
-      "teach": { "title": "Enseigner", "copy": "Façonnez une leçon en un carrousel utile." },
-      "opinion": { "title": "Donner un avis", "copy": "Construisez un reel face caméra clair et crédible." }
+      "story": {
+        "title": "Raconter une histoire",
+        "copy": "Transformez un moment de vie en récit dont on se souvient."
+      },
+      "teach": {
+        "title": "Enseigner",
+        "copy": "Façonnez une leçon en un carrousel utile."
+      },
+      "opinion": {
+        "title": "Donner un avis",
+        "copy": "Construisez un reel face caméra clair et crédible."
+      }
     },
     "begin": "Commencer",
     "bestMaterial": "Votre meilleure matière brute",

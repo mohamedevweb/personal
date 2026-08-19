@@ -33,7 +33,8 @@ Route::middleware('auth:sanctum')->prefix('integrations/instagram')->group(funct
 Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('/me/profile', [ProfileController::class, 'show']);
     Route::patch('/me/profile', [ProfileController::class, 'update']);
-    Route::get('/feed', FeedController::class);
+    Route::get('/feed', [FeedController::class, 'index']);
+    Route::post('/feed/refresh', [FeedController::class, 'refresh']);
     Route::get('/content/{content}', [ContentController::class, 'show']);
     Route::post('/content/{content}/save', [ContentController::class, 'save']);
     Route::post('/content/{content}/dismiss', [ContentController::class, 'dismiss']);

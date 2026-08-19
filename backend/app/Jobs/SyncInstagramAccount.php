@@ -68,6 +68,11 @@ class SyncInstagramAccount implements ShouldQueue
             );
 
             $account->update(['sync_status' => 'finding_patterns']);
+
+            // The niche is known now, so fill the feed with matching creators. It
+            // runs as its own job so a scraper hiccup never fails the sync.
+            DiscoverNicheContent::dispatch($account->user_id);
+
             $account->update([
                 'sync_status' => 'completed',
                 'last_synced_at' => now(),

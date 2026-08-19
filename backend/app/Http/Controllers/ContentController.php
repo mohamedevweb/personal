@@ -9,13 +9,18 @@ use App\Models\Remix;
 use App\Models\SavedContent;
 use App\Services\ContentGenerationService;
 use App\Services\ContentPostView;
+use App\Services\Discovery\PostInsightService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ContentController extends Controller
 {
-    public function show(Request $request, ContentPost $content, ContentPostView $view): JsonResponse
+    public function show(Request $request, ContentPost $content, ContentPostView $view, PostInsightService $insights): JsonResponse
     {
+        // Discovered posts arrive with empty analysis; fill it the first time the
+        // post is opened so the feed stays cheap to populate.
+        $insights->ensureAnalyzed($content);
+
         return response()->json(['content' => $view->make($content, $request->user())]);
     }
 

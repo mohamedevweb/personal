@@ -16,6 +16,8 @@ class CreatorProfile extends Model
             'current_projects' => 'array',
             'goals' => 'array',
             'content_strengths' => 'array',
+            'discovery_hashtags' => 'array',
+            'discovery_refreshed_at' => 'datetime',
         ];
     }
 }

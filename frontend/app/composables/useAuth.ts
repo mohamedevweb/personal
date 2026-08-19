@@ -2,6 +2,7 @@ interface AuthUser {
   id: number
   name: string
   email: string
+  avatar_url: string | null
 }
 
 interface AuthResponse {
@@ -33,6 +34,8 @@ export function useAuth() {
     } finally {
       token.value = null
       user.value = null
+      // Clear the cached onboarding gate so the next account is re-checked.
+      useState('personal-onboarded', () => false).value = false
       await navigateTo('/login')
     }
   }

@@ -16,10 +16,13 @@ async function submit() {
   try {
     if (mode.value === 'login') {
       await login({ email: form.email, password: form.password })
+      // The onboarding gate routes users who haven't connected Instagram yet.
+      await navigateTo('/feed')
     } else {
       await register({ ...form })
+      // A brand-new account always starts with Instagram onboarding.
+      await navigateTo('/onboarding')
     }
-    await navigateTo('/feed')
   } catch (exception: any) {
     const errors = exception?.data?.errors as Record<string, string[]> | undefined
     error.value = errors ? Object.values(errors).flat()[0]! : (exception?.data?.message || t('login.genericError'))

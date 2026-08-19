@@ -29,7 +29,7 @@ class AuthController extends Controller
         ]);
 
         return response()->json([
-            'user' => $user->only(['id', 'name', 'email']),
+            'user' => $user->only(['id', 'name', 'email', 'avatar_url']),
             'token' => $user->createToken($this->tokenName($request))->plainTextToken,
         ], Response::HTTP_CREATED);
     }
@@ -50,7 +50,7 @@ class AuthController extends Controller
         }
 
         return response()->json([
-            'user' => $user->only(['id', 'name', 'email']),
+            'user' => $user->only(['id', 'name', 'email', 'avatar_url']),
             'token' => $user->createToken($this->tokenName($request))->plainTextToken,
         ]);
     }
@@ -76,7 +76,7 @@ class AuthController extends Controller
 
     public function me(Request $request): JsonResponse
     {
-        return response()->json(['user' => $request->user()->only(['id', 'name', 'email'])]);
+        return response()->json(['user' => $request->user()->only(['id', 'name', 'email', 'avatar_url'])]);
     }
 
     private function tokenName(Request $request): string

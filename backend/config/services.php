@@ -39,6 +39,28 @@ return [
         'driver' => env('CONTENT_GENERATION_DRIVER', 'openai'),
     ],
 
+    'discovery' => [
+        // "apify" scrapes real niche content; "mock" returns deterministic sample
+        // posts so the feed is testable without a paid Apify run.
+        'driver' => env('DISCOVERY_DRIVER', 'mock'),
+        'apify' => [
+            'token' => env('APIFY_TOKEN'),
+            'actor' => env('APIFY_INSTAGRAM_ACTOR', 'apify~instagram-scraper'),
+            // Cost knob: Apify bills per result written to the dataset.
+            'results_limit' => (int) env('APIFY_RESULTS_LIMIT', 30),
+            // Re-scrape post URLs to recover likes/views (hashtag pages hide them).
+            // Doubles the result count; set false for engagement-blind, half-price runs.
+            'enrich_metrics' => (bool) env('APIFY_ENRICH_METRICS', true),
+            'timeout' => (int) env('APIFY_TIMEOUT', 120),
+        ],
+        // How many hashtags an expansion produces and how long the cache holds.
+        'hashtag_limit' => (int) env('DISCOVERY_HASHTAG_LIMIT', 10),
+        'cache_days' => (int) env('DISCOVERY_CACHE_DAYS', 7),
+        // A hashtag scraped within this window is skipped, so cost scales with the
+        // number of distinct niches rather than the number of users.
+        'cooldown_days' => (int) env('DISCOVERY_COOLDOWN_DAYS', 7),
+    ],
+
     'openai' => [
         'api_key' => env('OPENAI_API_KEY'),
         'model' => env('OPENAI_MODEL', 'gpt-5'),

@@ -1,0 +1,114 @@
+<?php
+
+namespace App\Services\Llm;
+
+use Anthropic\Beta\Messages\BetaJSONOutputFormat;
+use Anthropic\Beta\Messages\BetaOutputConfig;
+use Anthropic\Beta\Messages\BetaTextBlock;
+use Anthropic\Client as AnthropicClient;
+use Illuminate\Support\Facades\Log;
+use OpenAI\Contracts\ClientContract as OpenAiClient;
+use Throwable;
+
+/**
+ * A single, best-effort JSON call to whichever language model is configured. It is
+ * used by the auxiliary features (niche expansion, post analysis) that must never
+ * break the request: every failure returns null so the caller falls back to a
+ * heuristic. It deliberately does not share the strict content-draft pipeline.
+ */
+class LlmJsonService
+{
+    public function __construct(
+        private readonly OpenAiClient $openai,
+        private readonly AnthropicClient $anthropic,
+    ) {}
+
+    /**
+     * @param  array<string, mixed>  $schema  JSON schema for the expected object.
+     * @return array<string, mixed>|null
+     */
+    public function object(string $instructions, string $input, array $schema): ?array
+    {
+        return match (true) {
+            $this->prefersOpenAi() => $this->viaOpenAi($instructions, $input, $schema),
+            (bool) config('services.anthropic.api_key') => $this->viaClaude($instructions, $input, $schema),
+            default => null,
+        };
+    }
+
+    private function prefersOpenAi(): bool
+    {
+        // Default to OpenAI whenever it has a key; only prefer Claude when it is the
+        // explicit driver. Either way a missing key drops through to the fallback.
+        if (config('services.content_generation.driver') === 'claude' && config('services.anthropic.api_key')) {
+            return false;
+        }
+
+        return (bool) config('services.openai.api_key');
+    }
+
+    /** @param array<string, mixed> $schema @return array<string, mixed>|null */
+    private function viaOpenAi(string $instructions, string $input, array $schema): ?array
+    {
+        try {
+            $response = $this->openai->responses()->create([
+                'model' => (string) config('services.openai.model'),
+                'instructions' => $instructions,
+                'input' => $input,
+                'max_output_tokens' => 2000,
+                'text' => [
+                    'format' => [
+                        'type' => 'json_schema',
+                        'name' => 'result',
+                        'strict' => true,
+                        'schema' => $schema,
+                    ],
+                ],
+            ]);
+
+            return $this->decode($response->outputText);
+        } catch (Throwable $exception) {
+            Log::warning('LLM JSON call (OpenAI) failed; using fallback.', ['exception' => $exception]);
+
+            return null;
+        }
+    }
+
+    /** @param array<string, mixed> $schema @return array<string, mixed>|null */
+    private function viaClaude(string $instructions, string $input, array $schema): ?array
+    {
+        try {
+            $message = $this->anthropic->beta->messages->create(
+                maxTokens: 2000,
+                messages: [['role' => 'user', 'content' => $input]],
+                model: (string) config('services.anthropic.model'),
+                outputConfig: BetaOutputConfig::with(
+                    format: BetaJSONOutputFormat::with(schema: $schema),
+                ),
+                system: $instructions,
+            );
+
+            foreach ($message->content as $block) {
+                if ($block instanceof BetaTextBlock) {
+                    return $this->decode($block->text);
+                }
+            }
+        } catch (Throwable $exception) {
+            Log::warning('LLM JSON call (Claude) failed; using fallback.', ['exception' => $exception]);
+        }
+
+        return null;
+    }
+
+    /** @return array<string, mixed>|null */
+    private function decode(?string $text): ?array
+    {
+        if (! is_string($text) || trim($text) === '') {
+            return null;
+        }
+
+        $decoded = json_decode($text, true);
+
+        return is_array($decoded) ? $decoded : null;
+    }
+}
