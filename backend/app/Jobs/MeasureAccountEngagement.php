@@ -10,6 +10,7 @@ use App\Services\Discovery\DiscoveredProfile;
 use App\Services\Discovery\ProfileDiscoveryService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -59,9 +60,9 @@ class MeasureAccountEngagement implements ShouldQueue
      * Creators in this niche whose measurement cooldown has lapsed. New creators
      * (never measured) are always due.
      *
-     * @return \Illuminate\Support\Collection<int, Creator>
+     * @return Collection<int, Creator>
      */
-    private function dueCreators(): \Illuminate\Support\Collection
+    private function dueCreators(): Collection
     {
         return Creator::query()
             ->where('niche', $this->niche)

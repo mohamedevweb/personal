@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Jobs\MeasureAccountEngagement;
 use App\Models\Creator;
+use App\Services\Discovery\ProfileDiscoveryService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -30,7 +31,7 @@ class MeasureAccountEngagementTest extends TestCase
             'average_likes' => 0,
         ]);
 
-        (new MeasureAccountEngagement('cuisine'))->handle(app(\App\Services\Discovery\ProfileDiscoveryService::class));
+        (new MeasureAccountEngagement('cuisine'))->handle(app(ProfileDiscoveryService::class));
 
         $creator->refresh();
 
@@ -57,7 +58,7 @@ class MeasureAccountEngagementTest extends TestCase
             ]);
         }
 
-        (new MeasureAccountEngagement('cuisine'))->handle(app(\App\Services\Discovery\ProfileDiscoveryService::class));
+        (new MeasureAccountEngagement('cuisine'))->handle(app(ProfileDiscoveryService::class));
 
         $top = Creator::query()
             ->where('niche', 'cuisine')
@@ -84,7 +85,7 @@ class MeasureAccountEngagementTest extends TestCase
             'last_measured_at' => now(),
         ]);
 
-        (new MeasureAccountEngagement('cuisine'))->handle(app(\App\Services\Discovery\ProfileDiscoveryService::class));
+        (new MeasureAccountEngagement('cuisine'))->handle(app(ProfileDiscoveryService::class));
 
         $fresh->refresh();
 
