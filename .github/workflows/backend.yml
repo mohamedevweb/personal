@@ -67,6 +67,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Deploy over SSH
+        # This job does not check out the repo, so override the backend default.
+        working-directory: ${{ github.workspace }}
         env:
           SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
           SSH_HOST: ${{ secrets.DEPLOY_HOST }}
