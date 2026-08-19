@@ -6,6 +6,7 @@ use App\Models\CreatorProfile;
 use App\Models\InstagramAccount;
 use App\Services\Instagram\InstagramApiService;
 use App\Services\Instagram\InstagramAuthService;
+use App\Services\Instagram\NicheDetectionService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Str;
@@ -29,7 +30,7 @@ class SyncInstagramAccount implements ShouldQueue
 
     public function __construct(public readonly int $instagramAccountId) {}
 
-    public function handle(InstagramAuthService $auth, InstagramApiService $api): void
+    public function handle(InstagramAuthService $auth, InstagramApiService $api, NicheDetectionService $niche): void
     {
         $account = InstagramAccount::query()->findOrFail($this->instagramAccountId);
 
@@ -52,7 +53,7 @@ class SyncInstagramAccount implements ShouldQueue
             }
 
             $account->update(['sync_status' => 'learning_style']);
-            $signals = $this->profileSignals($account, $media);
+            $signals = $niche->detect($account, $media);
 
             CreatorProfile::query()->updateOrCreate(
                 ['user_id' => $account->user_id],
@@ -86,43 +87,5 @@ class SyncInstagramAccount implements ShouldQueue
 
             throw $exception;
         }
-    }
-
-    /** @param list<array<string, mixed>> $media
-     * @return array{niche: ?string, topics: list<string>, tone: list<string>}
-     */
-    private function profileSignals(InstagramAccount $account, array $media): array
-    {
-        $captions = collect($media)->pluck('caption')->filter()->implode(' ');
-        $source = Str::lower(trim(($account->bio ?? '').' '.$captions));
-        $stopWords = ['about', 'after', 'again', 'also', 'been', 'from', 'have', 'here', 'into', 'just', 'more', 'that', 'their', 'there', 'these', 'they', 'this', 'what', 'when', 'where', 'which', 'with', 'your', 'youre'];
-
-        preg_match_all('/[\pL\pN]{4,}/u', $source, $matches);
-        $topics = collect($matches[0] ?? [])
-            ->reject(fn (string $word) => in_array($word, $stopWords, true))
-            ->countBy()
-            ->sortDesc()
-            ->keys()
-            ->take(5)
-            ->map(fn (string $word) => Str::headline($word))
-            ->values()
-            ->all();
-
-        $tone = [];
-        if (preg_match('/\b(i|my|me|we|our)\b/i', $captions)) {
-            $tone[] = 'Personal';
-        }
-        if (preg_match('/\b(how|why|lesson|learn|steps|tips)\b/i', $captions)) {
-            $tone[] = 'Educational';
-        }
-        if ($captions !== '') {
-            $tone[] = Str::length($captions) / max(count($media), 1) < 350 ? 'Concise' : 'Story-driven';
-        }
-
-        return [
-            'niche' => $topics === [] ? null : implode(' / ', array_slice($topics, 0, 2)),
-            'topics' => $topics,
-            'tone' => array_values(array_unique($tone)),
-        ];
     }
 }
