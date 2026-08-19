@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1
+ # syntax=docker/dockerfile:1
 #
 # Two build targets share one source tree:
 #   --target app  → PHP-FPM, runs the API, the queue worker and the scheduler

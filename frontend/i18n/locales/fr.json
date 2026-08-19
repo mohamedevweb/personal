@@ -18,7 +18,26 @@
     "moments": "Moments",
     "personal": "Personal",
     "saved": "Enregistrés",
-    "settings": "Réglages"
+    "settings": "Réglages",
+    "groups": {
+      "discover": "Découvrir",
+      "studio": "Studio"
+    },
+    "pattern": "Analyse",
+    "remix": "Remix"
+  },
+  "chat": {
+    "open": "Ouvrir l'assistant",
+    "close": "Fermer l'assistant",
+    "title": "Assistant",
+    "subtitle": "Imaginez votre prochain post",
+    "greeting": "Bonjour {name} — je suis votre assistant créatif. Quel moment ou quelle idée voulez-vous transformer en contenu ?",
+    "placeholder": "Demandez des accroches, des angles, des légendes…",
+    "send": "Envoyer",
+    "thinking": "Réflexion…",
+    "error": "Une erreur est survenue. Veuillez réessayer.",
+    "clear": "Effacer la conversation",
+    "ask": "Posez une question"
   },
   "landing": {
     "head": {
@@ -278,7 +297,10 @@
     "emptyTitle": "Rien pour l’instant.",
     "emptyBody": "On cherche des créateurs dans ta niche. Ça peut prendre un moment juste après la connexion Instagram.",
     "refresh": "Rafraîchir mon feed",
-    "refreshing": "Recherche en cours…"
+    "refreshing": "Recherche en cours…",
+    "opportunitiesToday": "Opportunités du jour",
+    "bestLift": "Meilleure performance du feed",
+    "whyFirst": "Pourquoi celle-ci d’abord"
   },
   "create": {
     "eyebrow": "Créer",
@@ -369,6 +391,33 @@
   "settings": {
     "eyebrow": "Réglages",
     "title": "Votre espace.",
+    "saving": "Enregistrement…",
+    "account": {
+      "title": "Compte",
+      "copy": "Votre nom et l’email avec lequel vous vous connectez.",
+      "name": "Nom",
+      "email": "Email",
+      "save": "Enregistrer",
+      "saved": "Votre compte a été mis à jour.",
+      "emailChanged": "Email mis à jour. Vérifiez votre nouvelle boîte de réception pour confirmer l’adresse.",
+      "error": "Impossible de mettre à jour votre compte. Réessayez.",
+      "verified": "Email vérifié",
+      "unverified": "Email non vérifié",
+      "verifyPrompt": "Confirmez votre email pour débloquer le reste de Personal.",
+      "resend": "Renvoyer le lien",
+      "sending": "Envoi…",
+      "resent": "Lien de vérification envoyé. Vérifiez votre boîte de réception."
+    },
+    "password": {
+      "title": "Mot de passe",
+      "copy": "Utilisez un mot de passe long et unique que vous n’utilisez nulle part ailleurs.",
+      "current": "Mot de passe actuel",
+      "new": "Nouveau mot de passe",
+      "confirm": "Confirmer le nouveau mot de passe",
+      "save": "Mettre à jour",
+      "saved": "Votre mot de passe a été mis à jour.",
+      "error": "Impossible de mettre à jour votre mot de passe. Réessayez."
+    },
     "instagram": "Instagram",
     "instagramCopy": "Les données de votre propre compte sont la vraie fondation de Personal.",
     "postsImported": "{count} posts importés · {status}",
@@ -376,6 +425,19 @@
     "continueWithInstagram": "Continuer avec Instagram",
     "privacy": "Confidentialité",
     "privacyCopy": "Les jetons d’accès Instagram restent chiffrés sur le serveur. Personal ne les expose jamais au navigateur et supprime les médias importés lorsque vous vous déconnectez."
+  },
+  "verifyEmail": {
+    "verifiedTitle": "Email confirmé.",
+    "verifiedCopy": "Votre adresse est vérifiée. Personal vous attend.",
+    "continue": "Entrer dans Personal",
+    "pendingTitle": "Confirmez votre email.",
+    "pendingCopy": "Nous avons envoyé un lien de vérification à",
+    "invalidCopy": "Ce lien de vérification est invalide ou a expiré. Envoyez-vous-en un nouveau.",
+    "sent": "Lien de vérification envoyé. Vérifiez votre boîte de réception.",
+    "resend": "Renvoyer le lien",
+    "sending": "Envoi…",
+    "signOut": "Se déconnecter",
+    "error": "Impossible d’envoyer le lien. Réessayez."
   },
   "content": {
     "backToFeed": "← Retour à votre feed",
@@ -430,6 +492,8 @@
     "saved": "Enregistré ✓",
     "save": "Enregistrer",
     "notForMe": "Pas pour moi",
-    "remixForMe": "Remixer pour moi"
+    "remixForMe": "Remixer pour moi",
+    "more": "plus",
+    "viewComments": "Voir les {count} commentaires"
   }
 }

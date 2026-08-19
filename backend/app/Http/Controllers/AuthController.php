@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,8 +29,12 @@ class AuthController extends Controller
             'password' => Hash::make($data['password']),
         ]);
 
+        // Sends the email-verification notification: the account exists but stays
+        // gated until the creator confirms the address.
+        event(new Registered($user));
+
         return response()->json([
-            'user' => $user->only(['id', 'name', 'email', 'avatar_url']),
+            'user' => $this->userPayload($user),
             'token' => $user->createToken($this->tokenName($request))->plainTextToken,
         ], Response::HTTP_CREATED);
     }
@@ -50,7 +55,7 @@ class AuthController extends Controller
         }
 
         return response()->json([
-            'user' => $user->only(['id', 'name', 'email', 'avatar_url']),
+            'user' => $this->userPayload($user),
             'token' => $user->createToken($this->tokenName($request))->plainTextToken,
         ]);
     }
@@ -76,11 +81,22 @@ class AuthController extends Controller
 
     public function me(Request $request): JsonResponse
     {
-        return response()->json(['user' => $request->user()->only(['id', 'name', 'email', 'avatar_url'])]);
+        return response()->json(['user' => $this->userPayload($request->user())]);
     }
 
     private function tokenName(Request $request): string
     {
         return str($request->userAgent() ?? 'api')->limit(60, '')->toString();
+    }
+
+    /**
+     * The public shape of a user the SPA relies on. `email_verified_at` drives the
+     * verification gate, so every auth response has to carry it.
+     *
+     * @return array<string, mixed>
+     */
+    private function userPayload(User $user): array
+    {
+        return $user->only(['id', 'name', 'email', 'avatar_url', 'email_verified_at']);
     }
 }

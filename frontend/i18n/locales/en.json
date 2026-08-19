@@ -18,7 +18,26 @@
     "moments": "Moments",
     "personal": "Personal",
     "saved": "Saved",
-    "settings": "Settings"
+    "settings": "Settings",
+    "groups": {
+      "discover": "Discover",
+      "studio": "Studio"
+    },
+    "pattern": "Pattern",
+    "remix": "Remix"
+  },
+  "chat": {
+    "open": "Open assistant",
+    "close": "Close assistant",
+    "title": "Assistant",
+    "subtitle": "Brainstorm your next post",
+    "greeting": "Hi {name} — I'm your creative assistant. What moment or idea do you want to turn into content?",
+    "placeholder": "Ask about hooks, angles, captions…",
+    "send": "Send",
+    "thinking": "Thinking…",
+    "error": "Something went wrong. Please try again.",
+    "clear": "Clear conversation",
+    "ask": "Ask anything"
   },
   "landing": {
     "head": {
@@ -278,7 +297,10 @@
     "emptyTitle": "No content yet.",
     "emptyBody": "We’re finding creators in your niche. This can take a moment right after connecting Instagram.",
     "refresh": "Refresh my feed",
-    "refreshing": "Finding content…"
+    "refreshing": "Finding content…",
+    "opportunitiesToday": "Opportunities today",
+    "bestLift": "Best lift in your feed",
+    "whyFirst": "Why this one first"
   },
   "create": {
     "eyebrow": "Create",
@@ -369,6 +391,33 @@
   "settings": {
     "eyebrow": "Settings",
     "title": "Your workspace.",
+    "saving": "Saving…",
+    "account": {
+      "title": "Account",
+      "copy": "Your name and the email you sign in with.",
+      "name": "Name",
+      "email": "Email",
+      "save": "Save changes",
+      "saved": "Your account has been updated.",
+      "emailChanged": "Email updated. Check your new inbox to confirm the address.",
+      "error": "We could not update your account. Please try again.",
+      "verified": "Email verified",
+      "unverified": "Email not verified",
+      "verifyPrompt": "Confirm your email to unlock the rest of Personal.",
+      "resend": "Resend link",
+      "sending": "Sending…",
+      "resent": "Verification link sent. Check your inbox."
+    },
+    "password": {
+      "title": "Password",
+      "copy": "Use a long, unique password you don’t use anywhere else.",
+      "current": "Current password",
+      "new": "New password",
+      "confirm": "Confirm new password",
+      "save": "Update password",
+      "saved": "Your password has been updated.",
+      "error": "We could not update your password. Please try again."
+    },
     "instagram": "Instagram",
     "instagramCopy": "Your own account data is the real foundation of Personal.",
     "postsImported": "{count} posts imported · {status}",
@@ -376,6 +425,19 @@
     "continueWithInstagram": "Continue with Instagram",
     "privacy": "Privacy",
     "privacyCopy": "Instagram access tokens stay encrypted on the server. Personal never exposes them to the browser and deletes imported media when you disconnect."
+  },
+  "verifyEmail": {
+    "verifiedTitle": "Email confirmed.",
+    "verifiedCopy": "Your address is verified. Personal is ready when you are.",
+    "continue": "Enter Personal",
+    "pendingTitle": "Confirm your email.",
+    "pendingCopy": "We sent a verification link to",
+    "invalidCopy": "That verification link is invalid or has expired. Send yourself a fresh one.",
+    "sent": "Verification link sent. Check your inbox.",
+    "resend": "Resend the link",
+    "sending": "Sending…",
+    "signOut": "Sign out",
+    "error": "We could not send the link. Please try again."
   },
   "content": {
     "backToFeed": "← Back to your feed",
@@ -430,6 +492,8 @@
     "saved": "Saved ✓",
     "save": "Save",
     "notForMe": "Not for me",
-    "remixForMe": "Remix for me"
+    "remixForMe": "Remix for me",
+    "more": "more",
+    "viewComments": "View all {count} comments"
   }
 }

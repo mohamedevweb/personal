@@ -1,6 +1,6 @@
 import type { InstagramStatusResponse } from '~/types/instagram'
 
-const publicRoutes = new Set(['/', '/login'])
+const publicRoutes = new Set(['/', '/login', '/verify-email'])
 
 export default defineNuxtRouteMiddleware(async (to) => {
   if (publicRoutes.has(to.path)) return
@@ -10,6 +10,23 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // Local development can mint a demo token; everywhere else this is a sign-in.
   if (!token.value && !(await bootstrapDevelopmentToken())) {
     return navigateTo('/login')
+  }
+
+  // Email verification gate: an account has to confirm its address before any of
+  // the app is reachable. We resolve the user once and reuse the cached state.
+  const user = useState<{ email_verified_at: string | null } | null>('personal-user', () => null)
+  if (!user.value) {
+    try {
+      const response = await apiFetch<{ user: { email_verified_at: string | null } }>('/api/auth/me')
+      user.value = response.user
+    } catch {
+      // If we cannot resolve the user, fall through rather than trapping them.
+      return
+    }
+  }
+
+  if (user.value && !user.value.email_verified_at) {
+    return navigateTo('/verify-email')
   }
 
   // First-login onboarding gate: connecting Instagram and finishing the import

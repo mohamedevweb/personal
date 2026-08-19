@@ -136,7 +136,9 @@ class DiscoverNicheContent implements ShouldQueue
                 'likes' => $post->likes,
                 'comments' => $post->comments,
                 'published_at' => $post->publishedAt,
-                'performance_ratio' => round($post->engagement() / $median, 2),
+                // Clamp to the column's decimal(6,2) ceiling: a viral post against a
+                // low median can exceed 9999.99 and would otherwise overflow the insert.
+                'performance_ratio' => min(9999.99, round($post->engagement() / $median, 2)),
                 'tags' => $post->hashtags,
                 'why_it_works' => $this->whyItWorks($post),
                 // Left empty on purpose: the full breakdown is generated lazily the

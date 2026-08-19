@@ -16,7 +16,7 @@ const loop = computed(() => [
     label: t('landing.product.blocks.understand.label'),
     title: t('landing.product.blocks.understand.title'),
     body: t('landing.product.blocks.understand.body'),
-    accent: '#c85234'
+    accent: '#b6871f'
   },
   {
     step: '02',
@@ -30,7 +30,7 @@ const loop = computed(() => [
     label: t('landing.product.blocks.remix.label'),
     title: t('landing.product.blocks.remix.title'),
     body: t('landing.product.blocks.remix.body'),
-    accent: '#a07a2c'
+    accent: '#8a6413'
   }
 ])
 
@@ -187,55 +187,55 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="revealRoot" class="min-h-screen bg-[#f7f5f0] text-[#1d1d1b] antialiased">
+  <div ref="revealRoot" class="min-h-screen bg-[#f7f7f6] text-[#17171a] antialiased">
     <!-- NAV -->
-    <header class="sticky top-0 z-40 border-b border-[#dedbd3]/70 bg-[#f7f5f0]/85 backdrop-blur-md">
+    <header class="sticky top-0 z-40 border-b border-[#e8e8e4]/70 bg-[#f7f7f6]/85 backdrop-blur-md">
       <div class="mx-auto flex h-[72px] max-w-[1160px] items-center justify-between px-6 md:px-10">
         <NuxtLink to="/" class="text-[19px] font-semibold tracking-[-0.045em]">Personal</NuxtLink>
 
-        <nav class="hidden items-center gap-9 text-[14px] text-[#6f6c65] md:flex">
-          <a href="#product" class="transition hover:text-[#1d1d1b]">{{ $t('landing.nav.product') }}</a>
-          <a href="#how" class="transition hover:text-[#1d1d1b]">{{ $t('landing.nav.how') }}</a>
-          <a href="#moments" class="transition hover:text-[#1d1d1b]">{{ $t('landing.nav.moments') }}</a>
-          <a href="#faq" class="transition hover:text-[#1d1d1b]">{{ $t('landing.nav.faq') }}</a>
+        <nav class="hidden items-center gap-9 text-[14px] text-[#6e6e73] md:flex">
+          <a href="#product" class="transition hover:text-[#17171a]">{{ $t('landing.nav.product') }}</a>
+          <a href="#how" class="transition hover:text-[#17171a]">{{ $t('landing.nav.how') }}</a>
+          <a href="#moments" class="transition hover:text-[#17171a]">{{ $t('landing.nav.moments') }}</a>
+          <a href="#faq" class="transition hover:text-[#17171a]">{{ $t('landing.nav.faq') }}</a>
         </nav>
 
         <div class="flex items-center gap-2">
           <LanguageSwitcher class="mr-1" />
-          <NuxtLink to="/login" class="hidden rounded-full px-4 py-2.5 text-[14px] text-[#6f6c65] transition hover:text-[#1d1d1b] sm:inline-flex">{{ $t('landing.nav.signIn') }}</NuxtLink>
-          <NuxtLink to="/login" class="inline-flex h-11 items-center rounded-full bg-[#1d1d1b] px-5 text-[14px] font-medium text-white transition hover:bg-black">{{ $t('landing.nav.getAccess') }}</NuxtLink>
+          <NuxtLink to="/login" class="hidden rounded-full px-4 py-2.5 text-[14px] text-[#6e6e73] transition hover:text-[#17171a] sm:inline-flex">{{ $t('landing.nav.signIn') }}</NuxtLink>
+          <NuxtLink to="/login" class="inline-flex h-11 items-center rounded-full bg-[#17171a] px-5 text-[14px] font-medium text-white transition hover:bg-black">{{ $t('landing.nav.getAccess') }}</NuxtLink>
         </div>
       </div>
     </header>
 
     <!-- HERO -->
     <section class="relative overflow-hidden px-6 pb-8 pt-16 md:px-10 md:pt-24">
-      <div class="pointer-events-none absolute -left-40 top-10 h-[520px] w-[520px] rounded-full bg-[#c85234]/10 blur-[120px]" />
+      <div class="pointer-events-none absolute -left-40 top-10 h-[520px] w-[520px] rounded-full bg-[#b6871f]/10 blur-[120px]" />
       <div class="pointer-events-none absolute -right-32 top-40 h-[460px] w-[460px] rounded-full bg-[#3f6079]/10 blur-[120px]" />
 
       <div class="relative mx-auto max-w-[1160px]">
         <div class="mx-auto max-w-3xl text-center">
-          <p data-reveal class="reveal inline-flex items-center gap-2 rounded-full border border-[#dedbd3] bg-white/70 px-4 py-1.5 text-[12px] font-medium tracking-[.02em] text-[#77736c]">
-            <span class="h-1.5 w-1.5 rounded-full bg-[#c85234]" />
+          <p data-reveal class="reveal inline-flex items-center gap-2 rounded-full border border-[#e8e8e4] bg-white/70 px-4 py-1.5 text-[12px] font-medium tracking-[.02em] text-[#6e6e73]">
+            <span class="h-1.5 w-1.5 rounded-full bg-[#b6871f]" />
             {{ $t('landing.hero.badge') }}
           </p>
 
           <h1 data-reveal class="reveal mt-8 font-serif text-[46px] leading-[1.02] tracking-[-0.045em] sm:text-[62px] md:text-[76px]" style="transition-delay:60ms" v-html="$t('landing.hero.title')" />
 
-          <p data-reveal class="reveal mx-auto mt-7 max-w-[42rem] text-[17px] leading-8 text-[#6f6c65] md:text-[19px]" style="transition-delay:120ms">
+          <p data-reveal class="reveal mx-auto mt-7 max-w-[42rem] text-[17px] leading-8 text-[#6e6e73] md:text-[19px]" style="transition-delay:120ms">
             {{ $t('landing.hero.subtitle') }}
           </p>
 
           <div data-reveal class="reveal mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row" style="transition-delay:180ms">
-            <NuxtLink to="/login" class="inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[#1d1d1b] px-8 text-[15px] font-medium text-white transition hover:-translate-y-0.5 hover:bg-black sm:w-auto">
+            <NuxtLink to="/login" class="inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[#17171a] px-8 text-[15px] font-medium text-white transition hover:-translate-y-0.5 hover:bg-black sm:w-auto">
               {{ $t('landing.hero.getAccess') }} <AppIcon name="arrow" :size="17" />
             </NuxtLink>
-            <a href="#product" class="inline-flex h-14 w-full items-center justify-center rounded-full border border-[#d8d4ca] bg-white/60 px-8 text-[15px] font-medium text-[#1d1d1b] transition hover:-translate-y-0.5 hover:bg-white sm:w-auto">
+            <a href="#product" class="inline-flex h-14 w-full items-center justify-center rounded-full border border-[#e0e0dc] bg-white/60 px-8 text-[15px] font-medium text-[#17171a] transition hover:-translate-y-0.5 hover:bg-white sm:w-auto">
               {{ $t('landing.hero.seeHow') }}
             </a>
           </div>
 
-          <p data-reveal class="reveal mt-5 text-[13px] text-[#918d85]" style="transition-delay:220ms">{{ $t('landing.hero.reassurance') }}</p>
+          <p data-reveal class="reveal mt-5 text-[13px] text-[#8f8f95]" style="transition-delay:220ms">{{ $t('landing.hero.reassurance') }}</p>
         </div>
 
         <!-- HERO MOCK: live, interactive walkthrough of the core loop -->
@@ -248,12 +248,12 @@ onUnmounted(() => {
           @focusin="pauseHeroAutoplay"
           @focusout="resumeHeroAutoplay"
         >
-          <div class="pill pill-a"><span class="dot bg-[#c85234]" />{{ $t('landing.hero.pills.profile') }}</div>
+          <div class="pill pill-a"><span class="dot bg-[#b6871f]" />{{ $t('landing.hero.pills.profile') }}</div>
           <div class="pill pill-b"><span class="dot bg-[#3f6079]" />{{ $t('landing.hero.pills.outliers') }}</div>
-          <div class="pill pill-c"><span class="dot bg-[#a07a2c]" />{{ $t('landing.hero.pills.moment') }}</div>
-          <div class="pill pill-d"><span class="dot bg-[#4a7a52]" />{{ $t('landing.hero.pills.reel') }}</div>
+          <div class="pill pill-c"><span class="dot bg-[#8a6413]" />{{ $t('landing.hero.pills.moment') }}</div>
+          <div class="pill pill-d"><span class="dot bg-[#3f7a55]" />{{ $t('landing.hero.pills.reel') }}</div>
 
-          <div class="overflow-hidden rounded-[28px] border border-[#e2ded5] bg-[#22221f] p-2 shadow-[0_40px_90px_-40px_rgba(45,40,32,.55)]" :class="{ 'hero-frozen': isHovering }">
+          <div class="overflow-hidden rounded-[28px] border border-[#e6e6e2] bg-[#0d0c0a] p-2 shadow-[0_40px_90px_-40px_rgba(45,40,32,.55)]" :class="{ 'hero-frozen': isHovering }">
             <!-- Instagram-stories-style phase control: watch the loop run, or drive it yourself -->
             <div class="flex items-stretch gap-2 px-4 pt-3 pb-1 md:px-6">
               <button
@@ -278,80 +278,80 @@ onUnmounted(() => {
               </button>
             </div>
 
-            <div class="rounded-[22px] bg-[#faf9f5] p-6 md:p-8">
-              <div class="flex items-center justify-between border-b border-[#e6e2d9] pb-5">
+            <div class="rounded-[22px] bg-[#fcfcfb] p-6 md:p-8">
+              <div class="flex items-center justify-between border-b border-[#e9e9e5] pb-5">
                 <div>
-                  <p class="text-[10px] font-semibold uppercase tracking-[.17em] text-[#a09b91]">
+                  <p class="text-[10px] font-semibold uppercase tracking-[.17em] text-[#9b9b9f]">
                     <Transition name="fade-swap" mode="out-in"><span :key="activePhase">{{ heroPhases[activePhase].eyebrow }}</span></Transition>
                   </p>
                   <p class="mt-2 font-serif text-[26px] leading-none tracking-[-.035em]">{{ $t('landing.hero.greeting') }}</p>
                 </div>
-                <span class="hidden rounded-full bg-[#ecebe4] px-3.5 py-1.5 text-[12px] text-[#6f6c65] sm:inline-flex">{{ $t('landing.hero.opportunities') }}</span>
+                <span class="hidden rounded-full bg-[#eeeeeb] px-3.5 py-1.5 text-[12px] text-[#6e6e73] sm:inline-flex">{{ $t('landing.hero.opportunities') }}</span>
               </div>
 
               <Transition name="fade-swap" mode="out-in">
                 <div :key="activePhase" class="mt-6 grid gap-4 md:grid-cols-[1.15fr_1fr] md:min-h-[268px]">
                   <!-- LEFT: what Personal is doing right now -->
-                  <article v-if="activePhase === 0" class="rounded-2xl border border-[#e6e2d9] bg-white p-5">
-                    <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[#a09b91]">{{ $t('landing.hero.understandsYou') }}</p>
+                  <article v-if="activePhase === 0" class="rounded-2xl border border-[#e9e9e5] bg-white p-5">
+                    <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[#9b9b9f]">{{ $t('landing.hero.understandsYou') }}</p>
                     <div class="mt-5 space-y-3.5 text-[14px]">
                       <div
                         v-for="(field, i) in profileFields"
                         :key="field.label"
-                        class="hero-stagger flex items-baseline justify-between gap-6 border-b border-[#efece5] pb-3 last:border-0 last:pb-0"
+                        class="hero-stagger flex items-baseline justify-between gap-6 border-b border-[#f0f0ed] pb-3 last:border-0 last:pb-0"
                         :style="{ animationDelay: `${i * 110}ms` }"
                       >
-                        <span class="text-[#918d85]">{{ field.label }}</span><span class="text-right font-medium">{{ field.value }}</span>
+                        <span class="text-[#8f8f95]">{{ field.label }}</span><span class="text-right font-medium">{{ field.value }}</span>
                       </div>
                     </div>
                   </article>
 
-                  <article v-else-if="activePhase === 1" class="rounded-2xl border border-[#e6e2d9] bg-white p-5">
+                  <article v-else-if="activePhase === 1" class="rounded-2xl border border-[#e9e9e5] bg-white p-5">
                     <div class="flex items-center justify-between">
-                      <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[#a09b91]">{{ $t('landing.hero.outliersInNiche') }}</p>
-                      <span class="text-[11px] text-[#a09b91]">{{ $t('landing.hero.stillClimbing') }}</span>
+                      <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[#9b9b9f]">{{ $t('landing.hero.outliersInNiche') }}</p>
+                      <span class="text-[11px] text-[#9b9b9f]">{{ $t('landing.hero.stillClimbing') }}</span>
                     </div>
                     <div class="mt-4 space-y-3">
                       <div v-for="(row, i) in outliers" :key="row.hook" class="hero-stagger flex items-center gap-3" :style="{ animationDelay: `${i * 110}ms` }">
                         <span class="grid h-10 w-11 shrink-0 place-items-center rounded-lg text-[12px] font-semibold tabular-nums text-white" :style="{ background: row.tone }">{{ outlierDisplay[i].toFixed(1) }}×</span>
                         <div class="min-w-0 flex-1">
                           <p class="truncate text-[13px] font-medium">{{ row.hook }}</p>
-                          <p class="mt-0.5 text-[11px] text-[#918d85]">{{ $t('landing.hero.views', { count: row.views }) }}</p>
+                          <p class="mt-0.5 text-[11px] text-[#8f8f95]">{{ $t('landing.hero.views', { count: row.views }) }}</p>
                         </div>
                       </div>
                     </div>
                   </article>
 
-                  <article v-else class="rounded-2xl border border-[#e6e2d9] bg-white p-5">
-                    <div class="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[.16em] text-[#a09b91]">
+                  <article v-else class="rounded-2xl border border-[#e9e9e5] bg-white p-5">
+                    <div class="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[.16em] text-[#9b9b9f]">
                       <AppIcon name="sparkles" :size="12" /> {{ $t('landing.hero.yourVersionReel') }}
                     </div>
                     <p class="mt-4 min-h-[4.5em] font-serif text-[19px] leading-[1.32] tracking-[-.02em]">
                       &ldquo;{{ remixHookTyped }}<span class="hero-caret">|</span>&rdquo;
                     </p>
-                    <p class="mt-4 text-[12px] leading-6 text-[#8a877f]">{{ $t('landing.hero.remixBeat') }}</p>
+                    <p class="mt-4 text-[12px] leading-6 text-[#86868b]">{{ $t('landing.hero.remixBeat') }}</p>
                   </article>
 
                   <!-- RIGHT: why, plus the moment it's built from -->
                   <div class="flex flex-col gap-4">
-                    <div v-if="activePhase === 0" class="hero-stagger rounded-2xl border border-[#e6e2d9] bg-white p-5">
-                      <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[#a09b91]">{{ $t('landing.hero.confidence') }}</p>
-                      <div class="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[#efece5]"><div class="hero-confidence h-full rounded-full bg-[#c85234]" /></div>
-                      <p class="mt-3 text-[13px] leading-6 text-[#5f5c56]">{{ $t('landing.hero.confidenceCopy') }}</p>
+                    <div v-if="activePhase === 0" class="hero-stagger rounded-2xl border border-[#e9e9e5] bg-white p-5">
+                      <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[#9b9b9f]">{{ $t('landing.hero.confidence') }}</p>
+                      <div class="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[#f0f0ed]"><div class="hero-confidence h-full rounded-full bg-[#b6871f]" /></div>
+                      <p class="mt-3 text-[13px] leading-6 text-[#4d4d51]">{{ $t('landing.hero.confidenceCopy') }}</p>
                     </div>
-                    <div v-else-if="activePhase === 1" class="hero-stagger rounded-2xl border border-[#e6e2d9] bg-white p-5">
-                      <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[#a09b91]">{{ $t('landing.hero.whyRankFirst') }}</p>
-                      <p class="mt-3 text-[13px] leading-6 text-[#5f5c56]">{{ $t('landing.hero.whyRankFirstCopy') }}</p>
+                    <div v-else-if="activePhase === 1" class="hero-stagger rounded-2xl border border-[#e9e9e5] bg-white p-5">
+                      <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[#9b9b9f]">{{ $t('landing.hero.whyRankFirst') }}</p>
+                      <p class="mt-3 text-[13px] leading-6 text-[#4d4d51]">{{ $t('landing.hero.whyRankFirstCopy') }}</p>
                     </div>
-                    <div v-else class="hero-stagger rounded-2xl border border-[#e6e2d9] bg-white p-5">
-                      <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[#a09b91]">{{ $t('landing.hero.whyRecommends') }}</p>
-                      <p class="mt-3 text-[13px] leading-6 text-[#5f5c56]">{{ $t('landing.hero.whyRecommendsCopy') }}</p>
+                    <div v-else class="hero-stagger rounded-2xl border border-[#e9e9e5] bg-white p-5">
+                      <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[#9b9b9f]">{{ $t('landing.hero.whyRecommends') }}</p>
+                      <p class="mt-3 text-[13px] leading-6 text-[#4d4d51]">{{ $t('landing.hero.whyRecommendsCopy') }}</p>
                     </div>
 
-                    <div class="hero-stagger rounded-2xl bg-[#22221f] p-5 text-white" style="animation-delay:160ms">
+                    <div class="hero-stagger rounded-2xl bg-[#0d0c0a] p-5 text-white" style="animation-delay:160ms">
                       <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-white/50">{{ $t('landing.hero.yourMoment') }}</p>
                       <p class="mt-3 text-[13px] leading-6 text-white/80">&ldquo;{{ $t('landing.hero.yourMomentQuote') }}&rdquo;</p>
-                      <span class="mt-4 inline-flex h-9 items-center gap-2 rounded-full bg-white px-4 text-[12px] font-medium text-[#22221f]">
+                      <span class="mt-4 inline-flex h-9 items-center gap-2 rounded-full bg-white px-4 text-[12px] font-medium text-[#0d0c0a]">
                         <AppIcon name="sparkles" :size="14" /> {{ $t('landing.hero.remixForMe') }}
                       </span>
                     </div>
@@ -365,14 +365,14 @@ onUnmounted(() => {
     </section>
 
     <!-- CORE LOOP STRIP -->
-    <section class="border-y border-[#dedbd3] bg-[#f2f0ea] px-6 py-8 md:px-10">
-      <div data-reveal class="reveal mx-auto flex max-w-[1160px] flex-col items-center justify-center gap-3 text-center text-[14px] text-[#6f6c65] sm:flex-row sm:gap-6">
-        <span class="font-medium text-[#1d1d1b]">{{ $t('landing.loopStrip.understand') }}</span>
-        <span class="text-[#c0bcb2]">→</span>
-        <span class="font-medium text-[#1d1d1b]">{{ $t('landing.loopStrip.find') }}</span>
-        <span class="text-[#c0bcb2]">→</span>
-        <span class="font-medium text-[#1d1d1b]">{{ $t('landing.loopStrip.remix') }}</span>
-        <span class="hidden text-[#a5a199] sm:inline">·</span>
+    <section class="border-y border-[#e8e8e4] bg-[#f2f2ef] px-6 py-8 md:px-10">
+      <div data-reveal class="reveal mx-auto flex max-w-[1160px] flex-col items-center justify-center gap-3 text-center text-[14px] text-[#6e6e73] sm:flex-row sm:gap-6">
+        <span class="font-medium text-[#17171a]">{{ $t('landing.loopStrip.understand') }}</span>
+        <span class="text-[#c9c9c5]">→</span>
+        <span class="font-medium text-[#17171a]">{{ $t('landing.loopStrip.find') }}</span>
+        <span class="text-[#c9c9c5]">→</span>
+        <span class="font-medium text-[#17171a]">{{ $t('landing.loopStrip.remix') }}</span>
+        <span class="hidden text-[#aaaaae] sm:inline">·</span>
         <span>{{ $t('landing.loopStrip.caption') }}</span>
       </div>
     </section>
@@ -381,7 +381,7 @@ onUnmounted(() => {
     <section id="product" class="scroll-mt-24 px-6 py-24 md:px-10 md:py-32">
       <div class="mx-auto max-w-[1160px]">
         <div data-reveal class="reveal max-w-3xl">
-          <p class="text-[12px] font-semibold uppercase tracking-[.18em] text-[#a09b91]">{{ $t('landing.product.eyebrow') }}</p>
+          <p class="text-[12px] font-semibold uppercase tracking-[.18em] text-[#9b9b9f]">{{ $t('landing.product.eyebrow') }}</p>
           <h2 class="mt-5 font-serif text-[38px] leading-[1.06] tracking-[-.04em] md:text-[54px]">
             {{ $t('landing.product.title') }}
           </h2>
@@ -396,28 +396,28 @@ onUnmounted(() => {
                 {{ block.label }}
               </p>
               <h3 class="mt-6 font-serif text-[28px] leading-[1.15] tracking-[-.03em] md:text-[38px]">{{ block.title }}</h3>
-              <p class="mt-5 max-w-lg text-[16px] leading-8 text-[#6f6c65]">{{ block.body }}</p>
+              <p class="mt-5 max-w-lg text-[16px] leading-8 text-[#6e6e73]">{{ block.body }}</p>
             </div>
 
             <div :class="index % 2 === 1 ? 'md:order-1' : ''">
               <!-- 01 · profile -->
-              <div v-if="index === 0" class="rounded-[24px] border border-[#e2ded5] bg-white p-7 shadow-[0_24px_60px_-40px_rgba(45,40,32,.4)]">
-                <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[#a09b91]">{{ $t('landing.hero.understandsYou') }}</p>
+              <div v-if="index === 0" class="rounded-[24px] border border-[#e6e6e2] bg-white p-7 shadow-[0_24px_60px_-40px_rgba(45,40,32,.4)]">
+                <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[#9b9b9f]">{{ $t('landing.hero.understandsYou') }}</p>
                 <div class="mt-6 space-y-5 text-[14px]">
-                  <div class="flex items-baseline justify-between gap-6 border-b border-[#efece5] pb-4">
-                    <span class="text-[#918d85]">{{ $t('landing.profileFields.niche') }}</span><span class="text-right font-medium">{{ $t('landing.profileFields.nicheValue') }}</span>
+                  <div class="flex items-baseline justify-between gap-6 border-b border-[#f0f0ed] pb-4">
+                    <span class="text-[#8f8f95]">{{ $t('landing.profileFields.niche') }}</span><span class="text-right font-medium">{{ $t('landing.profileFields.nicheValue') }}</span>
                   </div>
-                  <div class="flex items-baseline justify-between gap-6 border-b border-[#efece5] pb-4">
-                    <span class="text-[#918d85]">{{ $t('landing.profileFields.audience') }}</span><span class="text-right font-medium">{{ $t('landing.profileFields.audienceValue') }}</span>
+                  <div class="flex items-baseline justify-between gap-6 border-b border-[#f0f0ed] pb-4">
+                    <span class="text-[#8f8f95]">{{ $t('landing.profileFields.audience') }}</span><span class="text-right font-medium">{{ $t('landing.profileFields.audienceValue') }}</span>
                   </div>
-                  <div class="flex items-baseline justify-between gap-6 border-b border-[#efece5] pb-4">
-                    <span class="text-[#918d85]">{{ $t('landing.profileFields.tone') }}</span><span class="text-right font-medium">{{ $t('landing.profileFields.toneValue') }}</span>
+                  <div class="flex items-baseline justify-between gap-6 border-b border-[#f0f0ed] pb-4">
+                    <span class="text-[#8f8f95]">{{ $t('landing.profileFields.tone') }}</span><span class="text-right font-medium">{{ $t('landing.profileFields.toneValue') }}</span>
                   </div>
                   <div class="flex items-baseline justify-between gap-6">
-                    <span class="text-[#918d85]">{{ $t('landing.profileFields.positioning') }}</span><span class="text-right font-medium">{{ $t('landing.profileFields.positioningValue') }}</span>
+                    <span class="text-[#8f8f95]">{{ $t('landing.profileFields.positioning') }}</span><span class="text-right font-medium">{{ $t('landing.profileFields.positioningValue') }}</span>
                   </div>
                 </div>
-                <p class="mt-6 rounded-xl bg-[#f5f3ec] px-4 py-3 text-[12px] text-[#77736c]">{{ $t('landing.product.profileCard.notRight') }}</p>
+                <p class="mt-6 rounded-xl bg-[#f4f4f2] px-4 py-3 text-[12px] text-[#6e6e73]">{{ $t('landing.product.profileCard.notRight') }}</p>
               </div>
 
               <!-- 02 · outliers -->
@@ -426,30 +426,30 @@ onUnmounted(() => {
                   { hook: $t('landing.outliers.one'), ratio: '8.4×', views: '1.2M', tone: '#3f6079' },
                   { hook: $t('landing.outliers.two'), ratio: '5.1×', views: '740K', tone: '#6b7f8c' },
                   { hook: $t('landing.outliers.three'), ratio: '3.7×', views: '410K', tone: '#8d9aa3' }
-                ]" :key="row.hook" class="flex items-center gap-4 rounded-2xl border border-[#e2ded5] bg-white p-4">
+                ]" :key="row.hook" class="flex items-center gap-4 rounded-2xl border border-[#e6e6e2] bg-white p-4">
                   <span class="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-[12px] font-semibold text-white" :style="{ background: row.tone }">{{ row.ratio }}</span>
                   <div class="min-w-0 flex-1">
                     <p class="truncate text-[14px] font-medium">{{ row.hook }}</p>
-                    <p class="mt-1 text-[12px] text-[#918d85]">{{ $t('landing.product.outlierCaption', { views: row.views }) }}</p>
+                    <p class="mt-1 text-[12px] text-[#8f8f95]">{{ $t('landing.product.outlierCaption', { views: row.views }) }}</p>
                   </div>
                 </div>
-                <p class="pt-2 text-center text-[12px] text-[#918d85]">{{ $t('landing.product.outlierRanked') }}</p>
+                <p class="pt-2 text-center text-[12px] text-[#8f8f95]">{{ $t('landing.product.outlierRanked') }}</p>
               </div>
 
               <!-- 03 · remix -->
-              <div v-else class="rounded-[24px] border border-[#e2ded5] bg-white p-7 shadow-[0_24px_60px_-40px_rgba(45,40,32,.4)]">
-                <div class="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.16em] text-[#a09b91]">
+              <div v-else class="rounded-[24px] border border-[#e6e6e2] bg-white p-7 shadow-[0_24px_60px_-40px_rgba(45,40,32,.4)]">
+                <div class="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.16em] text-[#9b9b9f]">
                   <AppIcon name="sparkles" :size="14" /> {{ $t('landing.hero.yourVersionReel') }}
                 </div>
                 <div class="mt-5 space-y-4 text-[14px] leading-7">
-                  <p><span class="text-[#a07a2c]">{{ $t('landing.product.remixCard.hook') }}</span>: {{ $t('landing.product.remixCard.hookValue') }}</p>
-                  <p class="text-[#5f5c56]"><span class="text-[#a07a2c]">{{ $t('landing.product.remixCard.beat2') }}</span>: {{ $t('landing.product.remixCard.beat2Value') }}</p>
-                  <p class="text-[#5f5c56]"><span class="text-[#a07a2c]">{{ $t('landing.product.remixCard.beat3') }}</span>: {{ $t('landing.product.remixCard.beat3Value') }}</p>
-                  <p class="text-[#5f5c56]"><span class="text-[#a07a2c]">{{ $t('landing.product.remixCard.close') }}</span>: {{ $t('landing.product.remixCard.closeValue') }}</p>
+                  <p><span class="text-[#8a6413]">{{ $t('landing.product.remixCard.hook') }}</span>: {{ $t('landing.product.remixCard.hookValue') }}</p>
+                  <p class="text-[#4d4d51]"><span class="text-[#8a6413]">{{ $t('landing.product.remixCard.beat2') }}</span>: {{ $t('landing.product.remixCard.beat2Value') }}</p>
+                  <p class="text-[#4d4d51]"><span class="text-[#8a6413]">{{ $t('landing.product.remixCard.beat3') }}</span>: {{ $t('landing.product.remixCard.beat3Value') }}</p>
+                  <p class="text-[#4d4d51]"><span class="text-[#8a6413]">{{ $t('landing.product.remixCard.close') }}</span>: {{ $t('landing.product.remixCard.closeValue') }}</p>
                 </div>
-                <div class="mt-6 flex gap-2 border-t border-[#efece5] pt-5 text-[12px]">
-                  <span class="rounded-full bg-[#1d1d1b] px-4 py-2 font-medium text-white">{{ $t('landing.product.remixCard.useThis') }}</span>
-                  <span class="rounded-full border border-[#dedbd3] px-4 py-2 text-[#6f6c65]">{{ $t('landing.product.remixCard.tryCarousel') }}</span>
+                <div class="mt-6 flex gap-2 border-t border-[#f0f0ed] pt-5 text-[12px]">
+                  <span class="rounded-full bg-[#17171a] px-4 py-2 font-medium text-white">{{ $t('landing.product.remixCard.useThis') }}</span>
+                  <span class="rounded-full border border-[#e8e8e4] px-4 py-2 text-[#6e6e73]">{{ $t('landing.product.remixCard.tryCarousel') }}</span>
                 </div>
               </div>
             </div>
@@ -459,7 +459,7 @@ onUnmounted(() => {
     </section>
 
     <!-- STAT -->
-    <section class="border-y border-[#dedbd3] bg-[#22221f] px-6 py-24 text-white md:px-10 md:py-28">
+    <section class="border-y border-[#e8e8e4] bg-[#0d0c0a] px-6 py-24 text-white md:px-10 md:py-28">
       <div data-reveal class="reveal mx-auto max-w-[1160px] text-center">
         <p class="font-serif text-[64px] leading-none tracking-[-.05em] md:text-[110px]">{{ $t('landing.stat.value') }}</p>
         <p class="mx-auto mt-7 max-w-2xl text-[17px] leading-8 text-white/60 md:text-[19px]">
@@ -472,27 +472,27 @@ onUnmounted(() => {
     <section id="moments" class="scroll-mt-24 px-6 py-24 md:px-10 md:py-32">
       <div class="mx-auto max-w-[1160px]">
         <div data-reveal class="reveal mx-auto max-w-3xl text-center">
-          <p class="text-[12px] font-semibold uppercase tracking-[.18em] text-[#a09b91]">{{ $t('landing.moments.eyebrow') }}</p>
+          <p class="text-[12px] font-semibold uppercase tracking-[.18em] text-[#9b9b9f]">{{ $t('landing.moments.eyebrow') }}</p>
           <h2 class="mt-5 font-serif text-[38px] leading-[1.06] tracking-[-.04em] md:text-[54px]">
             {{ $t('landing.moments.title') }}
           </h2>
-          <p class="mx-auto mt-6 max-w-xl text-[16px] leading-8 text-[#6f6c65]">
+          <p class="mx-auto mt-6 max-w-xl text-[16px] leading-8 text-[#6e6e73]">
             {{ $t('landing.moments.subtitle') }}
           </p>
         </div>
 
         <div data-reveal class="reveal mt-16 grid gap-5 md:grid-cols-3">
-          <div class="rounded-[22px] border border-[#e2ded5] bg-white p-6">
-            <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[#a09b91]">{{ $t('landing.moments.youWrote') }}</p>
+          <div class="rounded-[22px] border border-[#e6e6e2] bg-white p-6">
+            <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[#9b9b9f]">{{ $t('landing.moments.youWrote') }}</p>
             <p class="mt-4 text-[15px] leading-7">{{ $t('landing.moments.youWroteQuote') }}</p>
-            <p class="mt-5 text-[12px] text-[#918d85]">{{ $t('landing.moments.youWroteMeta') }}</p>
+            <p class="mt-5 text-[12px] text-[#8f8f95]">{{ $t('landing.moments.youWroteMeta') }}</p>
           </div>
-          <div class="rounded-[22px] border border-[#e2ded5] bg-[#f2f0ea] p-6">
-            <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[#a09b91]">{{ $t('landing.moments.personalNoticed') }}</p>
+          <div class="rounded-[22px] border border-[#e6e6e2] bg-[#f2f2ef] p-6">
+            <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[#9b9b9f]">{{ $t('landing.moments.personalNoticed') }}</p>
             <p class="mt-4 text-[15px] leading-7">{{ $t('landing.moments.personalNoticedCopy') }}</p>
-            <p class="mt-5 text-[12px] text-[#918d85]">{{ $t('landing.moments.personalNoticedMeta') }}</p>
+            <p class="mt-5 text-[12px] text-[#8f8f95]">{{ $t('landing.moments.personalNoticedMeta') }}</p>
           </div>
-          <div class="rounded-[22px] bg-[#22221f] p-6 text-white">
+          <div class="rounded-[22px] bg-[#0d0c0a] p-6 text-white">
             <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-white/50">{{ $t('landing.moments.soItSays') }}</p>
             <p class="mt-4 text-[15px] leading-7">{{ $t('landing.moments.soItSaysQuote') }}</p>
             <p class="mt-5 text-[12px] text-white/45">{{ $t('landing.moments.soItSaysMeta') }}</p>
@@ -502,18 +502,18 @@ onUnmounted(() => {
     </section>
 
     <!-- HOW IT WORKS -->
-    <section id="how" class="scroll-mt-24 border-t border-[#dedbd3] bg-[#f2f0ea] px-6 py-24 md:px-10 md:py-32">
+    <section id="how" class="scroll-mt-24 border-t border-[#e8e8e4] bg-[#f2f2ef] px-6 py-24 md:px-10 md:py-32">
       <div class="mx-auto max-w-[1160px]">
         <div data-reveal class="reveal max-w-2xl">
-          <p class="text-[12px] font-semibold uppercase tracking-[.18em] text-[#a09b91]">{{ $t('landing.how.eyebrow') }}</p>
+          <p class="text-[12px] font-semibold uppercase tracking-[.18em] text-[#9b9b9f]">{{ $t('landing.how.eyebrow') }}</p>
           <h2 class="mt-5 font-serif text-[38px] leading-[1.06] tracking-[-.04em] md:text-[50px]">{{ $t('landing.how.title') }}</h2>
         </div>
 
-        <div data-reveal class="reveal mt-16 grid gap-px overflow-hidden rounded-[24px] border border-[#dedbd3] bg-[#dedbd3] md:grid-cols-3">
-          <div v-for="(step, index) in steps" :key="step.title" class="bg-[#f7f5f0] p-8 md:p-10">
-            <span class="grid h-10 w-10 place-items-center rounded-full border border-[#d8d4ca] text-[13px] font-medium tabular-nums text-[#77736c]">{{ index + 1 }}</span>
+        <div data-reveal class="reveal mt-16 grid gap-px overflow-hidden rounded-[24px] border border-[#e8e8e4] bg-[#e8e8e4] md:grid-cols-3">
+          <div v-for="(step, index) in steps" :key="step.title" class="bg-[#f7f7f6] p-8 md:p-10">
+            <span class="grid h-10 w-10 place-items-center rounded-full border border-[#e0e0dc] text-[13px] font-medium tabular-nums text-[#6e6e73]">{{ index + 1 }}</span>
             <h3 class="mt-6 text-[18px] font-medium tracking-[-.02em]">{{ step.title }}</h3>
-            <p class="mt-3 text-[15px] leading-7 text-[#6f6c65]">{{ step.body }}</p>
+            <p class="mt-3 text-[15px] leading-7 text-[#6e6e73]">{{ step.body }}</p>
           </div>
         </div>
       </div>
@@ -523,19 +523,19 @@ onUnmounted(() => {
     <section id="faq" class="scroll-mt-24 px-6 py-24 md:px-10 md:py-32">
       <div class="mx-auto grid max-w-[1160px] gap-12 md:grid-cols-[380px_1fr] md:gap-20">
         <div data-reveal class="reveal">
-          <p class="text-[12px] font-semibold uppercase tracking-[.18em] text-[#a09b91]">{{ $t('landing.faq.eyebrow') }}</p>
+          <p class="text-[12px] font-semibold uppercase tracking-[.18em] text-[#9b9b9f]">{{ $t('landing.faq.eyebrow') }}</p>
           <h2 class="mt-5 font-serif text-[38px] leading-[1.06] tracking-[-.04em] md:text-[46px]">{{ $t('landing.faq.title') }}</h2>
         </div>
 
-        <div data-reveal class="reveal divide-y divide-[#dedbd3] border-y border-[#dedbd3]">
+        <div data-reveal class="reveal divide-y divide-[#e8e8e4] border-y border-[#e8e8e4]">
           <details v-for="faq in faqs" :key="faq.q" class="faq group py-6">
             <summary class="flex cursor-pointer list-none items-start justify-between gap-6 text-[17px] leading-7 tracking-[-.015em]">
               {{ faq.q }}
-              <span class="mt-1 shrink-0 text-[#a09b91] transition-transform duration-300 group-open:rotate-45">
+              <span class="mt-1 shrink-0 text-[#9b9b9f] transition-transform duration-300 group-open:rotate-45">
                 <AppIcon name="plus" :size="18" />
               </span>
             </summary>
-            <p class="mt-4 max-w-2xl text-[15px] leading-8 text-[#6f6c65]">{{ faq.a }}</p>
+            <p class="mt-4 max-w-2xl text-[15px] leading-8 text-[#6e6e73]">{{ faq.a }}</p>
           </details>
         </div>
       </div>
@@ -543,15 +543,15 @@ onUnmounted(() => {
 
     <!-- FINAL CTA -->
     <section class="px-6 pb-24 md:px-10">
-      <div data-reveal class="reveal relative mx-auto max-w-[1160px] overflow-hidden rounded-[32px] bg-[#22221f] px-8 py-20 text-center text-white md:px-16 md:py-28">
-        <div class="pointer-events-none absolute -left-20 -top-24 h-72 w-72 rounded-full bg-[#c85234]/25 blur-[100px]" />
+      <div data-reveal class="reveal relative mx-auto max-w-[1160px] overflow-hidden rounded-[32px] bg-[#0d0c0a] px-8 py-20 text-center text-white md:px-16 md:py-28">
+        <div class="pointer-events-none absolute -left-20 -top-24 h-72 w-72 rounded-full bg-[#b6871f]/25 blur-[100px]" />
         <div class="pointer-events-none absolute -bottom-28 -right-10 h-72 w-72 rounded-full bg-[#3f6079]/25 blur-[100px]" />
         <div class="relative">
           <h2 class="mx-auto max-w-3xl font-serif text-[40px] leading-[1.05] tracking-[-.04em] md:text-[62px]">{{ $t('landing.cta.title') }}</h2>
           <p class="mx-auto mt-6 max-w-xl text-[16px] leading-8 text-white/60">
             {{ $t('landing.cta.copy') }}
           </p>
-          <NuxtLink to="/login" class="mt-10 inline-flex h-14 items-center gap-2 rounded-full bg-white px-8 text-[15px] font-medium text-[#22221f] transition hover:-translate-y-0.5">
+          <NuxtLink to="/login" class="mt-10 inline-flex h-14 items-center gap-2 rounded-full bg-white px-8 text-[15px] font-medium text-[#0d0c0a] transition hover:-translate-y-0.5">
             {{ $t('landing.cta.button') }} <AppIcon name="arrow" :size="17" />
           </NuxtLink>
         </div>
@@ -559,19 +559,19 @@ onUnmounted(() => {
     </section>
 
     <!-- FOOTER -->
-    <footer class="border-t border-[#dedbd3] px-6 py-12 md:px-10">
+    <footer class="border-t border-[#e8e8e4] px-6 py-12 md:px-10">
       <div class="mx-auto flex max-w-[1160px] flex-col gap-8 md:flex-row md:items-center md:justify-between">
         <div>
           <p class="text-[17px] font-semibold tracking-[-0.045em]">{{ $t('brand.name') }}</p>
-          <p class="mt-2 text-[14px] text-[#918d85]">{{ $t('brand.tagline') }}</p>
+          <p class="mt-2 text-[14px] text-[#8f8f95]">{{ $t('brand.tagline') }}</p>
         </div>
-        <div class="flex flex-wrap items-center gap-x-8 gap-y-3 text-[14px] text-[#6f6c65]">
-          <a href="#product" class="transition hover:text-[#1d1d1b]">{{ $t('landing.nav.product') }}</a>
-          <a href="#how" class="transition hover:text-[#1d1d1b]">{{ $t('landing.nav.how') }}</a>
-          <a href="#faq" class="transition hover:text-[#1d1d1b]">{{ $t('landing.nav.faq') }}</a>
-          <NuxtLink to="/login" class="transition hover:text-[#1d1d1b]">{{ $t('landing.nav.signIn') }}</NuxtLink>
+        <div class="flex flex-wrap items-center gap-x-8 gap-y-3 text-[14px] text-[#6e6e73]">
+          <a href="#product" class="transition hover:text-[#17171a]">{{ $t('landing.nav.product') }}</a>
+          <a href="#how" class="transition hover:text-[#17171a]">{{ $t('landing.nav.how') }}</a>
+          <a href="#faq" class="transition hover:text-[#17171a]">{{ $t('landing.nav.faq') }}</a>
+          <NuxtLink to="/login" class="transition hover:text-[#17171a]">{{ $t('landing.nav.signIn') }}</NuxtLink>
         </div>
-        <p class="text-[13px] text-[#a09b91]">{{ $t('landing.footer.copyright') }}</p>
+        <p class="text-[13px] text-[#9b9b9f]">{{ $t('landing.footer.copyright') }}</p>
       </div>
     </footer>
   </div>
@@ -592,12 +592,12 @@ onUnmounted(() => {
   align-items: center;
   gap: .5rem;
   border-radius: 9999px;
-  border: 1px solid #e6e2d9;
+  border: 1px solid #e9e9e5;
   background: #fff;
   padding: .55rem 1rem;
   font-size: 12px;
   font-weight: 500;
-  color: #3f3d38;
+  color: #3a3a3e;
   box-shadow: 0 14px 34px -18px rgba(45, 40, 32, .5);
   animation: float 6s ease-in-out infinite;
 }

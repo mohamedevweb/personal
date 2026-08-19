@@ -209,20 +209,29 @@ session. Do not add a second auth mechanism. `/api/development/session` only exi
 ## Tailwind / UI
 
 The design system is a small set of CSS variables in `app/assets/css/main.css`:
-`--ink #1d1d1b`, `--muted`, `--paper #f7f5f0`, `--line #dedbd3`, `--accent #c85234`, plus the
+`--ink #17171a`, `--muted #6e6e73`, `--faint #9b9b9f`, `--paper #f7f7f6` (app background),
+`--rail #fcfcfb` (sidebar), `--surface #ffffff` (cards), `--line #e8e8e4`, `--line-soft`,
+`--accent #b6871f` + `--accent-soft` (gold), `--ai #7c62f5`, `--positive`, `--night #0d0c0a`,
+`--display` (headline serif), plus the `hero-night` / `panel-night` utilities and the
 `animate-rise` / `animate-breathe` keyframes.
 
 - Use Tailwind utilities; do not add custom CSS unless it is a genuinely new primitive, in
   which case it belongs in `main.css`.
 - Reuse existing tokens and shapes: `bg-[var(--paper)]`, `border-[var(--line)]`,
-  cards `rounded-[24px] border border-[var(--line)] bg-[#fbfaf7]`, dark panels `bg-[#22221f]`,
-  primary buttons `rounded-full bg-[#1d1d1b] px-5 py-3 text-sm font-medium text-white`,
-  secondary buttons `rounded-full border border-[#d9d5cc]`, serif display headings
-  (`font-serif tracking-[-.04em]`), eyebrow labels
-  (`text-[11px] font-semibold uppercase tracking-[.17em] text-[#918d85]`).
+  cards `rounded-[20px] border border-[var(--line)] bg-[var(--surface)]` with
+  `shadow-[0_1px_2px_rgba(23,23,26,.04)]`, one dark hero per page
+  (`hero-night rounded-[26px]` with centred serif headline and a white pill CTA) and its
+  inner `panel-night rounded-[20px]` panels, icon tiles
+  `rounded-[13px] bg-[var(--accent-soft)] text-[#8a6413]`, primary buttons
+  `rounded-full bg-[var(--ink)] px-5 py-3 text-sm font-medium text-white`, secondary buttons
+  `rounded-full border border-[var(--line)] bg-[var(--surface)]`, serif display headings
+  (`font-serif tracking-[-.03em]`), eyebrow labels
+  (`text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--faint)]`).
 - Do not invent new colours, radii, shadows or type scales when an equivalent already exists.
-- Responsive: mobile-first, `md:` for the desktop sidebar layout (`md:ml-[236px]`), with the
-  mobile bottom nav and header in `layouts/default.vue`. Check both widths for UI changes.
+- Responsive: mobile-first, `md:` for the desktop sidebar layout (`md:ml-[264px]`), with the
+  mobile bottom nav and header in `layouts/default.vue`. The page title lives in the desktop
+  top bar (`pageTitle` in the layout), so pages start with their content, not an `<h1>`.
+  Check both widths for UI changes.
 - Accessibility: real `<button>`/`<NuxtLink>` elements, `alt` text on images (`aria-hidden`
   on decorative SVGs), `role="alert"` on error messages, visible hover/focus/disabled states,
   and a disabled or busy state for actions in flight (`drafting` in `pages/create.vue`).

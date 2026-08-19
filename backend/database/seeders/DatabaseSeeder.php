@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
     {
         $user = User::query()->updateOrCreate(
             ['email' => 'creator@personal.local'],
-            ['name' => 'Mohamed Chettah', 'password' => Hash::make('personal')],
+            ['name' => 'Mohamed Chettah', 'password' => Hash::make('personal'), 'email_verified_at' => now()],
         );
 
         CreatorProfile::query()->updateOrCreate(['user_id' => $user->id], [

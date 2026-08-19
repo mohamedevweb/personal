@@ -4,11 +4,20 @@
 
 :root {
   color-scheme: light;
-  --ink: #1d1d1b;
-  --muted: #76736d;
-  --paper: #f7f5f0;
-  --line: #dedbd3;
-  --accent: #c85234;
+  --ink: #17171a;
+  --muted: #6e6e73;
+  --faint: #9b9b9f;
+  --paper: #f7f7f6;
+  --rail: #fcfcfb;
+  --surface: #ffffff;
+  --line: #e8e8e4;
+  --line-soft: #f1f1ee;
+  --accent: #b6871f;
+  --accent-soft: #f7f0df;
+  --ai: #7c62f5;
+  --positive: #3f7a55;
+  --night: #0d0c0a;
+  --display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, ui-serif, serif;
 }
 
 html {
@@ -20,6 +29,22 @@ html {
 
 body { margin: 0; }
 button, a { -webkit-tap-highlight-color: transparent; }
+
+@layer utilities {
+  /* The display serif carries every headline; Tailwind's default serif stack is
+     too low-contrast for the large sizes used across the app. */
+  .font-serif { font-family: var(--display); }
+
+  /* Warm light falling into a near-black card — the signature surface for the
+     one hero moment on a page. */
+  .hero-night {
+    background:
+      radial-gradient(105% 72% at 50% -18%, rgba(230, 178, 66, .82) 0%, rgba(148, 103, 24, .45) 28%, rgba(44, 35, 20, .3) 56%, rgba(13, 12, 10, 0) 76%),
+      linear-gradient(180deg, #1b1813 0%, var(--night) 62%);
+  }
+
+  .panel-night { background: rgba(255, 255, 255, .045); border: 1px solid rgba(255, 255, 255, .085); }
+}
 
 @keyframes rise {
   from { opacity: 0; transform: translateY(10px); }

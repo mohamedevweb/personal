@@ -9,6 +9,11 @@ const error = ref<string | null>(null)
 const data = ref<{ greeting_name: string, opportunity_count: number, featured_opportunity: Opportunity | null, items: ContentPost[] } | null>(null)
 const dayLabel = computed(() => new Intl.DateTimeFormat(locale.value, { weekday: 'long' }).format(new Date()))
 
+// The hero chart reads the lift of the posts already on screen, so it always
+// describes today's feed rather than a separate metric.
+const lifts = computed(() => (data.value?.items || []).slice(0, 7).map(post => post.performance_ratio))
+const bestLift = computed(() => (lifts.value.length ? Math.max(...lifts.value) : 0))
+
 async function loadFeed() {
   try {
     data.value = await apiFetch('/api/feed')
@@ -63,42 +68,98 @@ onMounted(loadFeed)
 </script>
 
 <template>
-  <main class="mx-auto max-w-[1180px] px-5 py-10 md:px-10 md:py-14">
-    <header class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-      <div>
-        <p class="text-[11px] font-medium uppercase tracking-[.17em] text-[#908c83]">{{ $t('feed.dailyBrief', { day: dayLabel }) }}</p>
-        <h1 class="mt-4 font-serif text-[42px] leading-none tracking-[-.04em] md:text-[58px]">{{ data?.greeting_name ? $t('feed.greetingNamed', { name: data.greeting_name }) : $t('feed.greetingPlain') }}</h1>
-        <p v-if="data" class="mt-4 text-[16px] text-[#716e67]"><i18n-t keypath="feed.foundOpportunities" tag="span" scope="global"><template #highlight><span class="font-medium text-[#292824]">{{ $t('feed.opportunitiesHighlight', { count: data.opportunity_count }) }}</span></template></i18n-t></p>
-      </div>
-      <NuxtLink to="/create" class="inline-flex w-fit items-center gap-2 rounded-full bg-[#1d1d1b] px-5 py-3 text-sm font-medium text-white"><AppIcon name="plus" :size="17" />{{ $t('feed.createFromScratch') }}</NuxtLink>
-    </header>
-
-    <section v-if="data?.featured_opportunity" class="relative mt-10 overflow-hidden rounded-[26px] bg-[#22221f] p-6 text-white md:p-8">
-      <div class="absolute -right-16 -top-24 h-64 w-64 rounded-full bg-[#c85234]/25 blur-3xl" />
-      <div class="relative grid gap-7 md:grid-cols-[1fr_auto] md:items-end">
-        <div>
-          <p class="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.16em] text-[#d7a999]"><AppIcon name="sparkles" :size="15" />{{ $t('feed.strongMatch', { score: data.featured_opportunity.relevance_score }) }}</p>
-          <h2 class="mt-4 max-w-3xl font-serif text-2xl leading-tight tracking-[-.02em] md:text-[32px]">“{{ data.featured_opportunity.title }}”</h2>
-          <p class="mt-3 max-w-2xl text-sm leading-6 text-white/65">{{ data.featured_opportunity.explanation }}</p>
-          <div v-if="data.featured_opportunity.life_moment" class="mt-5 inline-flex rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-xs text-white/75">{{ $t('feed.yourMoment', { content: data.featured_opportunity.life_moment.content }) }}</div>
+  <main class="mx-auto max-w-[1180px] px-5 pb-16 pt-2 md:px-8">
+    <section class="hero-night relative overflow-hidden rounded-[26px] px-6 py-14 text-white md:px-12 md:py-16">
+      <div class="mx-auto max-w-2xl text-center">
+        <p class="inline-flex items-center gap-2.5 text-[10px] font-semibold uppercase tracking-[.22em] text-[#e3b862]">
+          <span class="grid h-6 w-6 place-items-center rounded-full border border-[#e3b862]/35"><AppIcon name="sparkles" :size="12" /></span>
+          {{ $t('feed.dailyBrief', { day: dayLabel }) }}
+        </p>
+        <h2 class="mt-7 font-serif text-[40px] leading-[1.03] tracking-[-.035em] md:text-[60px]">
+          {{ data?.greeting_name ? $t('feed.greetingNamed', { name: data.greeting_name }) : $t('feed.greetingPlain') }}
+        </h2>
+        <p v-if="data" class="mx-auto mt-5 max-w-lg text-[15px] leading-7 text-white/65">
+          <i18n-t keypath="feed.foundOpportunities" tag="span" scope="global">
+            <template #highlight><span class="text-white">{{ $t('feed.opportunitiesHighlight', { count: data.opportunity_count }) }}</span></template>
+          </i18n-t>
+        </p>
+        <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <NuxtLink
+            v-if="data?.featured_opportunity?.content_post_id"
+            :to="`/content/${data.featured_opportunity.content_post_id}`"
+            class="inline-flex h-12 items-center gap-2 rounded-full bg-white px-6 text-sm font-medium text-[var(--night)] transition hover:bg-white/90"
+          >
+            {{ $t('feed.seePattern') }} <AppIcon name="arrow" :size="15" />
+          </NuxtLink>
+          <NuxtLink to="/create" class="inline-flex h-12 items-center gap-2 rounded-full border border-white/20 px-6 text-sm font-medium text-white transition hover:bg-white/10">
+            <AppIcon name="plus" :size="16" />{{ $t('feed.createFromScratch') }}
+          </NuxtLink>
         </div>
-        <NuxtLink v-if="data.featured_opportunity.content_post_id" :to="`/content/${data.featured_opportunity.content_post_id}`" class="inline-flex h-11 items-center gap-2 rounded-full bg-white px-5 text-sm font-medium text-[#22221f]">{{ $t('feed.seePattern') }} <AppIcon name="arrow" :size="15" /></NuxtLink>
+        <p class="mt-6 text-[12px] text-white/40">{{ $t('feed.rankedForYou') }}</p>
+      </div>
+
+      <div v-if="data" class="relative mx-auto mt-12 grid max-w-4xl gap-4" :class="data.featured_opportunity ? 'md:grid-cols-2' : ''">
+        <div class="panel-night rounded-[20px] p-5">
+          <div class="flex items-start justify-between gap-4 border-b border-white/10 pb-4">
+            <div>
+              <p class="text-[11px] text-white/45">{{ $t('feed.opportunitiesToday') }}</p>
+              <p class="mt-1 text-[28px] leading-none tracking-[-.02em]">{{ data.opportunity_count }}</p>
+            </div>
+            <div class="text-right">
+              <p class="text-[11px] text-white/45">{{ $t('feed.bestLift') }}</p>
+              <p class="mt-1 text-[28px] leading-none tracking-[-.02em] text-[#e3b862]">{{ bestLift ? bestLift.toFixed(1) + '×' : '—' }}</p>
+            </div>
+          </div>
+          <div class="mt-5 flex h-24 items-end gap-2">
+            <span
+              v-for="(lift, index) in lifts"
+              :key="index"
+              class="flex-1 rounded-t-[4px] bg-gradient-to-t from-[#8a6a1e]/40 to-[#e3b862]"
+              :style="{ height: `${Math.max(12, (lift / (bestLift || 1)) * 100)}%` }"
+            />
+            <span v-if="!lifts.length" class="w-full rounded-[4px] border border-dashed border-white/10 py-8 text-center text-[11px] text-white/35">{{ $t('feed.emptyTitle') }}</span>
+          </div>
+        </div>
+
+        <div v-if="data.featured_opportunity" class="panel-night divide-y divide-white/10 rounded-[20px]">
+          <div class="flex gap-3.5 p-5">
+            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-[11px] bg-white/10 text-[#e3b862]"><AppIcon name="trend" :size="17" /></span>
+            <div class="min-w-0">
+              <p class="text-[11px] text-white/45">{{ $t('feed.strongMatch', { score: data.featured_opportunity.relevance_score }) }}</p>
+              <p class="mt-1 line-clamp-2 text-[14px] leading-6">{{ data.featured_opportunity.title }}</p>
+            </div>
+          </div>
+          <div class="flex gap-3.5 p-5">
+            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-[11px] bg-white/10 text-white/70"><AppIcon name="sparkles" :size="17" /></span>
+            <div class="min-w-0">
+              <p class="text-[11px] text-white/45">{{ $t('feed.whyFirst') }}</p>
+              <p class="mt-1 line-clamp-2 text-[14px] leading-6">{{ data.featured_opportunity.explanation }}</p>
+            </div>
+          </div>
+          <div v-if="data.featured_opportunity.life_moment" class="flex gap-3.5 p-5">
+            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-[11px] bg-white/10 text-white/70"><AppIcon name="moments" :size="17" /></span>
+            <div class="min-w-0">
+              <p class="text-[11px] text-white/45">{{ $t('nav.moments') }}</p>
+              <p class="mt-1 line-clamp-2 text-[14px] leading-6">{{ data.featured_opportunity.life_moment.content }}</p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
     <div class="mt-12 flex items-center justify-between border-b border-[var(--line)] pb-4">
       <h2 class="text-sm font-medium">{{ $t('feed.worthCreating') }}</h2>
-      <button class="text-xs text-[#918d85] underline underline-offset-2 transition hover:text-[#1c1c1a] disabled:no-underline disabled:opacity-60" :disabled="refreshing || loading" @click="refresh">
-        {{ refreshing ? $t('feed.refreshing') : $t('feed.rankedForYou') }}
+      <button class="inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3.5 py-2 text-xs text-[var(--muted)] transition hover:text-[var(--ink)] disabled:opacity-60" :disabled="refreshing || loading" @click="refresh">
+        <AppIcon name="sparkles" :size="14" />{{ refreshing ? $t('feed.refreshing') : $t('feed.refresh') }}
       </button>
     </div>
 
-    <p v-if="error" class="mt-8 rounded-2xl border border-[#ddb9ae] bg-[#f9ece8] p-4 text-sm text-[#8b402a]">{{ error }}</p>
-    <div v-if="loading" class="mt-7 grid gap-6 lg:grid-cols-2"><div v-for="i in 4" :key="i" class="h-[560px] animate-pulse rounded-[24px] bg-[#e9e5dc]" /></div>
-    <div v-else-if="data && data.items.length === 0" class="mt-7 rounded-[24px] border border-dashed border-[var(--line)] bg-[#fbfaf7] px-6 py-16 text-center">
+    <p v-if="error" role="alert" class="mt-8 rounded-[18px] border border-[#e6cfc7] bg-[#fbf1ee] p-4 text-sm text-[#8b402a]">{{ error }}</p>
+    <div v-if="loading" class="mt-7 grid gap-6 lg:grid-cols-2"><div v-for="i in 4" :key="i" class="h-[560px] animate-pulse rounded-[22px] bg-[#eeeeeb]" /></div>
+    <div v-else-if="data && data.items.length === 0" class="mt-7 rounded-[22px] border border-dashed border-[var(--line)] bg-[var(--surface)] px-6 py-16 text-center">
       <h3 class="font-serif text-2xl tracking-[-.02em]">{{ $t('feed.emptyTitle') }}</h3>
-      <p class="mx-auto mt-3 max-w-md text-sm leading-6 text-[#77736c]">{{ $t('feed.emptyBody') }}</p>
-      <button class="mt-6 inline-flex items-center gap-2 rounded-full bg-[#1d1d1b] px-5 py-3 text-sm font-medium text-white transition hover:bg-black disabled:cursor-wait disabled:opacity-60" :disabled="refreshing" @click="refresh">
+      <p class="mx-auto mt-3 max-w-md text-sm leading-6 text-[var(--muted)]">{{ $t('feed.emptyBody') }}</p>
+      <button class="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--ink)] px-5 py-3 text-sm font-medium text-white transition hover:bg-black disabled:cursor-wait disabled:opacity-60" :disabled="refreshing" @click="refresh">
         <AppIcon name="sparkles" :size="16" />{{ refreshing ? $t('feed.refreshing') : $t('feed.refresh') }}
       </button>
     </div>

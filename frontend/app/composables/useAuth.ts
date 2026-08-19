@@ -3,6 +3,7 @@ interface AuthUser {
   name: string
   email: string
   avatar_url: string | null
+  email_verified_at: string | null
 }
 
 interface AuthResponse {
@@ -47,5 +48,19 @@ export function useAuth() {
     return response.user
   }
 
-  return { user, token, register, login, logout, loadUser }
+  async function updateAccount(payload: { name?: string, email?: string }) {
+    const response = await apiFetch<{ user: AuthUser }>('/api/me/account', { method: 'PATCH', body: payload })
+    user.value = response.user
+    return response.user
+  }
+
+  async function updatePassword(payload: { current_password: string, password: string, password_confirmation: string }) {
+    await apiFetch('/api/me/password', { method: 'PUT', body: payload })
+  }
+
+  async function resendVerification() {
+    await apiFetch('/api/email/verification-notification', { method: 'POST' })
+  }
+
+  return { user, token, register, login, logout, loadUser, updateAccount, updatePassword, resendVerification }
 }
