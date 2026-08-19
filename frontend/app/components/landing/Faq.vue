@@ -1,0 +1,34 @@
+<script setup lang="ts">
+const KEYS = ['sound', 'different', 'post', 'learn', 'platforms', 'private', 'cost'] as const
+</script>
+
+<template>
+  <section id="faq" class="scroll-mt-24 px-6 py-24 md:px-10 md:py-36">
+    <div class="mx-auto grid max-w-[1200px] gap-12 md:grid-cols-[minmax(0,340px)_1fr] md:gap-20">
+      <div data-reveal class="md:sticky md:top-32 md:self-start">
+        <p class="b-eyebrow">{{ $t('landing.faq.eyebrow') }}</p>
+        <h2 class="mt-6 font-display text-[32px] leading-[1.08] tracking-[-.025em] md:text-[42px]">
+          {{ $t('landing.faq.title') }}
+        </h2>
+      </div>
+
+      <div data-reveal class="border-t border-[var(--b-line)]">
+        <details v-for="key in KEYS" :key="key" class="faq group border-b border-[var(--b-line)]">
+          <summary class="b-focus flex cursor-pointer list-none items-start justify-between gap-8 py-6 text-[17px] leading-[1.45] tracking-[-.01em] transition-colors hover:text-[var(--b-stone)] md:text-[18px]">
+            {{ $t(`landing.faq.items.${key}.q`) }}
+            <span class="mt-1 shrink-0 text-[var(--b-stone)] transition-transform duration-300 group-open:rotate-45" aria-hidden="true">
+              <AppIcon name="plus" :size="18" />
+            </span>
+          </summary>
+          <p class="max-w-2xl pb-7 text-[15.5px] leading-[1.7] text-[var(--b-stone)]">
+            {{ $t(`landing.faq.items.${key}.a`) }}
+          </p>
+        </details>
+      </div>
+    </div>
+  </section>
+</template>
+
+<style scoped>
+.faq summary::-webkit-details-marker { display: none; }
+</style>

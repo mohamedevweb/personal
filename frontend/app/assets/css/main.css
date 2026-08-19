@@ -58,3 +58,121 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 .animate-rise { animation: rise .55s cubic-bezier(.22, 1, .36, 1) both; }
 .animate-breathe { animation: breathe 1.8s ease-in-out infinite; }
+
+/* ---------------------------------------------------------------------------
+   Brand layer — from the Branding board in Figma.
+   The product surfaces keep the tokens above; the launch page is built on these,
+   so restyling the marketing site never moves the app underneath it.
+   --------------------------------------------------------------------------- */
+:root {
+  --b-ivory: #f7f5f0;
+  --b-surface: #fefdfb;
+  --b-black: #171715;
+  --b-stone: #77736d;
+  --b-signature: #e04f36;
+  --b-line: #e4dfd4;
+  --b-line-soft: #efebe2;
+  --b-display: "Instrument Serif", "Iowan Old Style", Palatino, Georgia, ui-serif, serif;
+}
+
+@layer utilities {
+  /* The brand display face. Optical sizing is manual: the serif needs tighter
+     tracking as it gets bigger, so every call site sets its own. */
+  .font-display {
+    font-family: var(--b-display);
+    font-weight: 400;
+    font-feature-settings: "liga" 1, "kern" 1;
+  }
+
+  /* The wordmark. Instrument Serif ships a single 400 weight, so the extra
+     presence the lockup needs comes from an optical stroke rather than a
+     heavier cut: it thickens the stems without distorting the letterforms. */
+  .b-wordmark {
+    font-family: var(--b-display);
+    font-weight: 400;
+    font-feature-settings: "liga" 1, "kern" 1;
+    letter-spacing: -.012em;
+    -webkit-text-stroke: .021em currentColor;
+    paint-order: stroke fill;
+  }
+
+  /* Eyebrows and metadata across the launch page share one voice. */
+  .b-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--b-stone);
+  }
+}
+
+/* Launch page primitives ---------------------------------------------------- */
+@layer components {
+  /* The one card surface the launch page uses. Warm white on ivory, hairline
+     border, no shadow unless a composition needs to lift something. */
+  .b-panel {
+    background: var(--b-surface);
+    border: 1px solid var(--b-line);
+    border-radius: 18px;
+  }
+
+  .b-lift { box-shadow: 0 30px 60px -46px rgba(23, 23, 21, .5); }
+}
+
+@layer utilities {
+  /* Editorial reveal, driven by useReveal(). */
+  .js-reveal [data-reveal] {
+    opacity: 0;
+    transform: translateY(16px);
+    transition:
+      opacity .8s cubic-bezier(.22, 1, .36, 1) var(--reveal-delay, 0ms),
+      transform .8s cubic-bezier(.22, 1, .36, 1) var(--reveal-delay, 0ms);
+  }
+  .js-reveal [data-reveal].is-revealed { opacity: 1; transform: none; }
+
+  /* Emphasis inside display headlines: the italic carries the turn in the
+     sentence, so it is a type decision rather than a colour one. */
+  .font-display em {
+    font-style: italic;
+    font-weight: inherit;
+  }
+
+  .b-focus:focus-visible {
+    outline: 2px solid var(--b-signature);
+    outline-offset: 3px;
+    border-radius: 999px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js-reveal [data-reveal] { opacity: 1; transform: none; transition: none; }
+}
+
+/* The join in the connection section: two hairlines that grow out towards the
+   mark as the section arrives. Global rather than scoped because the collapsed
+   state depends on .js-reveal, which lives on the page root. */
+@layer components {
+  .b-joint {
+    display: block;
+    flex: 1 1 auto;
+    width: 1px;
+    min-height: 28px;
+    background: var(--b-line);
+    transform-origin: center;
+    transition: transform .9s cubic-bezier(.22, 1, .36, 1) 260ms;
+  }
+}
+
+.js-reveal .b-connector:not(.is-revealed) .b-joint { transform: scaleY(0); }
+
+/* Once the two cards sit side by side, the join runs between them. */
+@media (min-width: 768px) {
+  .b-joint {
+    width: auto;
+    height: 1px;
+    min-height: 0;
+    min-width: 28px;
+  }
+
+  .js-reveal .b-connector:not(.is-revealed) .b-joint { transform: scaleX(0); }
+}

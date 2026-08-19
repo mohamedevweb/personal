@@ -36,6 +36,16 @@ export default defineNuxtConfig({
       title: 'Personal — Your content strategist',
       meta: [
         { name: 'description', content: 'Personal understands your work and helps you create what matters next.' }
+      ],
+      // Instrument Serif is the brand display face and Inter carries every other
+      // line; both are loaded here so the first paint already has them.
+      link: [
+        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
+        {
+          rel: 'stylesheet',
+          href: 'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap'
+        }
       ]
     }
   }

@@ -1,0 +1,30 @@
+<script setup lang="ts">
+const links = [
+  { hash: '#product', key: 'landing.nav.product' },
+  { hash: '#how', key: 'landing.nav.how' },
+  { hash: '#moments', key: 'landing.nav.moments' },
+  { hash: '#faq', key: 'landing.nav.faq' }
+]
+</script>
+
+<template>
+  <footer class="px-6 py-14 md:px-10">
+    <div class="mx-auto flex max-w-[1200px] flex-col gap-10 md:flex-row md:items-end md:justify-between">
+      <div>
+        <PersonalLogo :size="24" />
+        <p class="b-eyebrow mt-5">{{ $t('landing.footer.brandline') }}</p>
+      </div>
+
+      <div class="flex flex-col gap-6 md:items-end">
+        <nav class="flex flex-wrap items-center gap-x-7 gap-y-3 text-[14px] text-[var(--b-stone)]">
+          <a v-for="link in links" :key="link.hash" :href="link.hash" class="b-focus transition-colors hover:text-[var(--b-black)]">{{ $t(link.key) }}</a>
+          <NuxtLink to="/login" class="b-focus transition-colors hover:text-[var(--b-black)]">{{ $t('landing.nav.signIn') }}</NuxtLink>
+        </nav>
+        <div class="flex items-center gap-5">
+          <LanguageSwitcher />
+          <p class="text-[13px] text-[var(--b-stone)]">{{ $t('landing.footer.copyright') }}</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+</template>
