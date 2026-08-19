@@ -11,11 +11,11 @@ const initials = computed(() => (user.value?.name || '')
 onMounted(() => { if (!user.value) loadUser().catch(() => {}) })
 
 const nav = [
-  { label: 'For You', to: '/feed', icon: 'sparkles' },
-  { label: 'Create', to: '/create', icon: 'plus' },
-  { label: 'Moments', to: '/moments', icon: 'moments' },
-  { label: 'Personal', to: '/personal', icon: 'user' },
-  { label: 'Saved', to: '/saved', icon: 'bookmark' }
+  { label: 'nav.forYou', to: '/feed', icon: 'sparkles' },
+  { label: 'nav.create', to: '/create', icon: 'plus' },
+  { label: 'nav.moments', to: '/moments', icon: 'moments' },
+  { label: 'nav.personal', to: '/personal', icon: 'user' },
+  { label: 'nav.saved', to: '/saved', icon: 'bookmark' }
 ]
 </script>
 
@@ -26,31 +26,35 @@ const nav = [
       <nav class="mt-12 space-y-1">
         <NuxtLink v-for="item in nav" :key="item.to" :to="item.to" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] transition" :class="route.path === item.to ? 'bg-white text-[#1c1c1a] shadow-[0_1px_4px_rgba(45,40,32,.06)]' : 'text-[#77736c] hover:bg-white/60 hover:text-[#1c1c1a]'">
           <AppIcon :name="item.icon" :size="18" />
-          {{ item.label }}
+          {{ $t(item.label) }}
         </NuxtLink>
       </nav>
       <div class="mt-auto space-y-2">
-        <NuxtLink to="/settings" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[#77736c] hover:bg-white/60"><AppIcon name="settings" :size="18" />Settings</NuxtLink>
+        <NuxtLink to="/settings" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[#77736c] hover:bg-white/60"><AppIcon name="settings" :size="18" />{{ $t('nav.settings') }}</NuxtLink>
         <div class="flex items-center gap-3 border-t border-[var(--line)] px-3 pt-5">
           <div class="grid h-9 w-9 place-items-center rounded-full bg-[#20201e] text-xs font-medium text-white">{{ initials }}</div>
           <div class="min-w-0 flex-1">
-            <p class="truncate text-sm font-medium">{{ user?.name || 'Your workspace' }}</p>
-            <button class="text-[11px] text-[#97938a] underline underline-offset-2 hover:text-[#1c1c1a]" @click="logout">Sign out</button>
+            <p class="truncate text-sm font-medium">{{ user?.name || $t('common.yourWorkspace') }}</p>
+            <button class="text-[11px] text-[#97938a] underline underline-offset-2 hover:text-[#1c1c1a]" @click="logout">{{ $t('common.signOut') }}</button>
           </div>
+          <LanguageSwitcher />
         </div>
       </div>
     </aside>
 
     <header class="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-[var(--line)] bg-[var(--paper)]/95 px-5 backdrop-blur md:hidden">
       <NuxtLink to="/feed" class="font-semibold tracking-[-0.04em]">Personal</NuxtLink>
-      <NuxtLink to="/create" class="grid h-9 w-9 place-items-center rounded-full bg-[#1d1d1b] text-white"><AppIcon name="plus" /></NuxtLink>
+      <div class="flex items-center gap-3">
+        <LanguageSwitcher />
+        <NuxtLink to="/create" class="grid h-9 w-9 place-items-center rounded-full bg-[#1d1d1b] text-white"><AppIcon name="plus" /></NuxtLink>
+      </div>
     </header>
 
     <div class="pb-20 md:ml-[236px] md:pb-0"><slot /></div>
 
     <nav class="fixed inset-x-0 bottom-0 z-30 flex h-16 items-center justify-around border-t border-[var(--line)] bg-[#f7f5f0]/95 px-2 backdrop-blur md:hidden">
       <NuxtLink v-for="item in nav" :key="item.to" :to="item.to" class="flex min-w-12 flex-col items-center gap-1 text-[10px]" :class="route.path === item.to ? 'text-[#1d1d1b]' : 'text-[#918d85]'">
-        <AppIcon :name="item.icon" :size="18" />{{ item.label }}
+        <AppIcon :name="item.icon" :size="18" />{{ $t(item.label) }}
       </NuxtLink>
     </nav>
   </div>

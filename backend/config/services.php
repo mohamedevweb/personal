@@ -68,7 +68,7 @@ return [
         'graph_url' => env('INSTAGRAM_GRAPH_URL', 'https://graph.instagram.com'),
         'scopes' => array_values(array_filter(array_map(
             'trim',
-            explode(',', env('INSTAGRAM_SCOPES', 'instagram_business_basic,instagram_business_manage_insights'))
+            explode(',', env('INSTAGRAM_SCOPES', 'instagram_business_basic,instagram_business_content_publish,instagram_business_manage_insights'))
         ))),
         'media_limit' => (int) env('INSTAGRAM_MEDIA_LIMIT', 25),
     ],

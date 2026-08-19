@@ -1,0 +1,412 @@
+{
+  "brand": {
+    "name": "Personal",
+    "tagline": "Claude pour le personal branding.",
+    "privateIntelligence": "Votre intelligence de contenu privée"
+  },
+  "common": {
+    "language": "Langue",
+    "close": "Fermer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "signOut": "Se déconnecter",
+    "yourWorkspace": "Votre espace"
+  },
+  "nav": {
+    "forYou": "Pour vous",
+    "create": "Créer",
+    "moments": "Moments",
+    "personal": "Personal",
+    "saved": "Enregistrés",
+    "settings": "Réglages"
+  },
+  "landing": {
+    "head": {
+      "title": "Personal : Claude pour le personal branding",
+      "description": "Personal est une IA qui sait ce qui se passe dans votre vie et le transforme en marque personnelle. Sachez quoi publier ensuite."
+    },
+    "nav": {
+      "product": "Produit",
+      "how": "Comment ça marche",
+      "moments": "Moments",
+      "faq": "FAQ",
+      "signIn": "Se connecter",
+      "getAccess": "Accès anticipé"
+    },
+    "hero": {
+      "badge": "Claude pour le personal branding",
+      "title": "Vous êtes créateur.<br class=\"hidden sm:block\"> Pas une machine à contenu.",
+      "subtitle": "Personal est une IA qui sait ce qui se passe dans votre vie et le transforme en marque personnelle. Connectez votre compte et arrêtez de deviner quoi publier ensuite.",
+      "getAccess": "Accès anticipé",
+      "seeHow": "Voir comment ça marche",
+      "reassurance": "Gratuit pendant l’accès anticipé · Connexion Instagram · Personal ne publie jamais à votre place",
+      "pills": {
+        "profile": "Profil compris",
+        "outliers": "12 pépites trouvées",
+        "moment": "Moment relié",
+        "reel": "Reel rédigé · 40s"
+      },
+      "phases": {
+        "understand": { "tab": "Me comprendre", "eyebrow": "Lecture de vos 40 derniers posts" },
+        "find": { "tab": "Trouver ce qui marche", "eyebrow": "Analyse de votre niche" },
+        "remix": { "tab": "Remixer pour moi", "eyebrow": "Rédaction de votre version" }
+      },
+      "jumpTo": "Aller à {tab}",
+      "greeting": "Bonjour, Mohamed.",
+      "opportunities": "4 opportunités",
+      "understandsYou": "Personal vous comprend",
+      "outliersInNiche": "Pépites dans votre niche",
+      "stillClimbing": "encore en hausse",
+      "views": "{count} vues",
+      "yourVersionReel": "Votre version · Reel",
+      "remixHookText": "J’ai passé quatre mois à étudier des créateurs. Puis j’ai supprimé le produit.",
+      "remixBeat": "Temps 2 : ce que la recherche m’a dit, et pourquoi je l’ai ignoré. Temps 3 : la phrase qui m’a fait tout recommencer.",
+      "confidence": "Confiance",
+      "confidenceCopy": "Niche, audience et ton établis à partir de vos 40 derniers posts.",
+      "whyRankFirst": "Pourquoi ces posts sortent en tête",
+      "whyRankFirstCopy": "Échec → prise de conscience → leçon surperforme dans votre niche cette semaine, et ça colle à votre voix.",
+      "whyRecommends": "Pourquoi Personal le recommande",
+      "whyRecommendsCopy": "Construit à partir de la pépite ci-dessus et du moment que vous avez partagé.",
+      "yourMoment": "Votre moment",
+      "yourMomentQuote": "J’ai pivoté mon produit après quatre mois de recherche.",
+      "remixForMe": "Remixer pour moi"
+    },
+    "profileFields": {
+      "niche": "Niche",
+      "nicheValue": "Création de produits indie",
+      "audience": "Audience",
+      "audienceValue": "Fondateurs solo, 22–34 ans",
+      "tone": "Ton",
+      "toneValue": "Direct · honnête · pince-sans-rire",
+      "positioning": "Positionnement",
+      "positioningValue": "Construit en public, montre les coulisses"
+    },
+    "outliers": {
+      "one": "L’erreur de tarification qui m’a coûté 8 mois",
+      "two": "Personne ne vous dit ça sur vos 1000 premiers",
+      "three": "J’ai refait tout mon onboarding en un week-end"
+    },
+    "loopStrip": {
+      "understand": "Me comprendre",
+      "find": "Trouver ce qui marche",
+      "remix": "Remixer pour moi",
+      "caption": "tout le produit, en trois mouvements"
+    },
+    "product": {
+      "eyebrow": "Le produit",
+      "title": "Une IA qui gère la stratégie, pour que vous gériez l’histoire.",
+      "blocks": {
+        "understand": {
+          "label": "Me comprendre",
+          "title": "Elle apprend qui vous êtes avant d’ouvrir la bouche.",
+          "body": "Connectez Instagram une fois. Personal lit vos posts, votre audience et votre positionnement, puis vous dit ce qu’elle a compris : votre niche, vos sujets, votre ton. Si elle se trompe, vous corrigez en une phrase."
+        },
+        "find": {
+          "label": "Trouver ce qui marche",
+          "title": "Elle trouve le post que vous n’auriez jamais déniché seul.",
+          "body": "Personal observe les créateurs de votre niche à votre taille et fait remonter les pépites : les posts à 8× la moyenne de leur auteur, alors qu’ils grimpent encore. Pas un rapport de tendances. Quatre choses à faire aujourd’hui."
+        },
+        "remix": {
+          "label": "Remixer pour moi",
+          "title": "Elle réécrit le gagnant en quelque chose que vous seul pourriez publier.",
+          "body": "Personal explique pourquoi le post marche (accroche, structure, timing), puis le reconstruit autour de votre vie. Votre pivot, vos quatre derniers mois, votre vraie opinion. Un Reel ou un carrousel que vous pourriez publier dans les dix minutes."
+        }
+      },
+      "profileCard": {
+        "notRight": "Pas juste ? Corrigez en une phrase et Personal met à jour."
+      },
+      "outlierCaption": "{views} vues · votre niche · encore en hausse",
+      "outlierRanked": "Classés selon ce qui s’applique vraiment à vous, pas selon le nombre d’abonnés.",
+      "remixCard": {
+        "hook": "Accroche",
+        "hookValue": "« J’ai passé quatre mois à étudier des créateurs. Puis j’ai supprimé le produit. »",
+        "beat2": "Temps 2",
+        "beat2Value": "Ce que la recherche m’a vraiment dit, et pourquoi je l’ai ignoré si longtemps.",
+        "beat3": "Temps 3",
+        "beat3Value": "La seule phrase d’un créateur qui m’a fait tout recommencer.",
+        "close": "Chute",
+        "closeValue": "Ce que je construis à la place, en sept jours.",
+        "useThis": "Utiliser ceci",
+        "tryCarousel": "Essayer un carrousel"
+      }
+    },
+    "stat": {
+      "value": "8,4×",
+      "copy": "Le genre de post que Personal place sous vos yeux, surperformant la moyenne de son propre créateur, dans votre niche, alors qu’il grimpe encore. Vous le voyez avant qu’il devienne une tendance que tout le monde copie."
+    },
+    "moments": {
+      "eyebrow": "Moments",
+      "title": "Plus Personal apprend, moins vous avez à expliquer.",
+      "subtitle": "Notez ce qui se passe vraiment : un pivot, un lancement, une mauvaise semaine. Personal le garde et attend le format qui colle.",
+      "youWrote": "Vous avez écrit",
+      "youWroteQuote": "« J’ai pivoté mon produit après quatre mois passés à étudier des créateurs. »",
+      "youWroteMeta": "Ajouté mardi · Tournant",
+      "personalNoticed": "Personal a remarqué",
+      "personalNoticedCopy": "Les posts échec → prise de conscience → leçon surperforment dans votre niche en ce moment.",
+      "personalNoticedMeta": "3 pépites cette semaine · même format",
+      "soItSays": "Alors elle dit",
+      "soItSaysQuote": "« Vous avez l’histoire parfaite pour ce format. Je vous la rédige en Reel ? »",
+      "soItSaysMeta": "C’est tout l’intérêt de Personal."
+    },
+    "how": {
+      "eyebrow": "Comment ça marche",
+      "title": "Trois minutes pour tout mettre en place. Ensuite, c’est là chaque matin.",
+      "steps": {
+        "connect": {
+          "title": "Connecter Instagram",
+          "body": "Un seul écran OAuth. Pas de mot de passe, pas de scraping, aucune publication à votre place."
+        },
+        "reads": {
+          "title": "Personal vous lit",
+          "body": "Niche, sujets, audience, ton et positionnement : présentés en langage clair."
+        },
+        "create": {
+          "title": "Créer la suite",
+          "body": "Un brief quotidien d’opportunités de contenu, chacune remixable dans votre propre voix."
+        }
+      }
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "Les questions que les créateurs nous posent en premier.",
+      "items": {
+        "what": {
+          "q": "Que fait Personal concrètement ?",
+          "a": "Elle répond à une question chaque jour : que devrais-je publier ensuite ? Elle comprend votre profil, trouve les posts qui surperforment dans votre niche en ce moment, explique pourquoi ils marchent, et les réécrit autour de ce qui se passe dans votre vie."
+        },
+        "different": {
+          "q": "En quoi est-ce différent d’un outil de tendances ?",
+          "a": "Les outils de tendances vous montrent ce qui est populaire. Personal vous montre ce qui marche pour des créateurs comme vous, à votre taille, puis fait le plus dur : en tirer un contenu qui vous ressemble et puise dans votre propre histoire."
+        },
+        "need": {
+          "q": "De quoi avez-vous besoin de ma part pour commencer ?",
+          "a": "Votre compte Instagram, connecté via la connexion officielle Instagram. Tout le reste (niche, ton, audience, positionnement), Personal le déduit seule et vous le présente pour validation."
+        },
+        "moment": {
+          "q": "Qu’est-ce qu’un Moment ?",
+          "a": "Une courte note sur quelque chose de réel dans votre vie : un pivot, un lancement, un échec, une leçon. Personal les garde et les relie aux opportunités, si bien que quand un format commence à marcher, elle sait déjà laquelle de vos histoires lui convient."
+        },
+        "post": {
+          "q": "Va-t-elle publier à ma place ?",
+          "a": "Non. Personal rédige, vous décidez. Rien n’est publié sans vous, et rien n’est programmé dans votre dos."
+        },
+        "who": {
+          "q": "Pour qui est-ce ?",
+          "a": "Les créateurs qui construisent une marque personnelle sur Instagram, publient régulièrement et en ont assez de fixer une légende vide. C’est plus utile encore si vous connaissez déjà votre niche et voulez arrêter de deviner le format."
+        },
+        "cost": {
+          "q": "Combien ça coûte ?",
+          "a": "Rien pendant l’accès anticipé. Nous accueillons un petit groupe de créateurs à la main et construisons la prochaine version autour de leurs retours."
+        }
+      }
+    },
+    "cta": {
+      "title": "Sachez quoi publier ensuite.",
+      "copy": "Nous accueillons un petit groupe de créateurs à la main cette semaine. Si vous publiez sur Instagram et en avez assez de la légende vide, entrez tôt.",
+      "button": "Accès anticipé"
+    },
+    "footer": {
+      "copyright": "© 2026 Personal"
+    }
+  },
+  "login": {
+    "headingLogin": "Content de vous revoir.",
+    "headingRegister": "Créez votre espace.",
+    "subLogin": "Connectez-vous pour reprendre là où votre audience s’est arrêtée.",
+    "subRegister": "Un espace réunit votre signal Instagram, vos moments et vos brouillons.",
+    "name": "Nom",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "submitLogin": "Se connecter",
+    "submitRegister": "Créer un compte",
+    "loading": "Un instant…",
+    "toggleToRegister": "Pas encore de compte ? Créez-en un",
+    "toggleToLogin": "Vous avez déjà un compte ? Connectez-vous",
+    "genericError": "Nous n’avons pas pu vous connecter. Veuillez réessayer."
+  },
+  "onboarding": {
+    "eyebrow": "D’abord, apprenons à vous connaître",
+    "connectTitle": "Connectez votre<br>Instagram.",
+    "connectCopy": "Personal utilise votre compte Instagram pour comprendre votre contenu, votre niche et ce qui marche déjà pour vous.",
+    "preparing": "Préparation d’Instagram…",
+    "continueWithInstagram": "Continuer avec Instagram",
+    "tokenNote": "Votre jeton d’accès reste chiffré sur le serveur de Personal.",
+    "connectedSuffix": "connecté",
+    "readyTitle": "Vous êtes prêt.",
+    "understandingTitle": "Compréhension de votre marque…",
+    "importedCopy": "Nous avons importé {count} posts récents et construit la première version de votre profil Personal.",
+    "importingCopy": "Nous lisons les vrais signaux de votre profil et de votre contenu récent. Vous pouvez laisser cet écran ouvert le temps que l’import se termine.",
+    "startPersonal": "Démarrer Personal",
+    "reconnect": "Reconnecter Instagram",
+    "cancelledError": "L’autorisation Instagram a été annulée.",
+    "profileLive": "Profil Personal · en direct",
+    "stages": {
+      "connecting": "Connexion d’Instagram",
+      "importing_content": "Import de votre contenu",
+      "understanding_niche": "Compréhension de votre niche",
+      "learning_style": "Apprentissage de votre style",
+      "finding_patterns": "Recherche de schémas"
+    },
+    "placeholderQuote": "Votre contenu devient du contexte — pas un tableau de bord."
+  },
+  "feed": {
+    "dailyBrief": "{day} · Votre brief du jour",
+    "greeting": "Bonjour",
+    "greetingNamed": "Bonjour, {name}.",
+    "greetingPlain": "Bonjour.",
+    "foundOpportunities": "J’ai trouvé {highlight} pour vous aujourd’hui.",
+    "opportunitiesHighlight": "{count} opportunités de contenu",
+    "createFromScratch": "Créer de zéro",
+    "strongMatch": "Un bon match aujourd’hui · {score}%",
+    "yourMoment": "Votre moment : {content}",
+    "seePattern": "Voir le schéma",
+    "worthCreating": "À créer aujourd’hui",
+    "rankedForYou": "Classé pour vous",
+    "loadError": "Personal n’a pas pu charger les opportunités du jour.",
+    "remixError": "Personal n’a pas pu rédiger ceci pour l’instant. Veuillez réessayer."
+  },
+  "create": {
+    "eyebrow": "Créer",
+    "title": "Partez de quelque chose de réel.",
+    "subtitle": "La meilleure idée est souvent un schéma qui marche, relié à une histoire que vous seul pouvez raconter.",
+    "drafting": "Rédaction à partir de votre matière…",
+    "draftError": "Personal n’a pas pu rédiger ceci pour l’instant. Veuillez réessayer.",
+    "personalsPick": "Le choix de Personal",
+    "pickTitleFallback": "Racontez l’histoire derrière votre dernière décision produit.",
+    "pickCopyFallback": "Une décision concrète crée de la tension, de l’insight et un enseignement utile.",
+    "createThis": "Créer ceci →",
+    "cards": {
+      "story": { "title": "Raconter une histoire", "copy": "Transformez un moment de vie en récit dont on se souvient." },
+      "teach": { "title": "Enseigner", "copy": "Façonnez une leçon en un carrousel utile." },
+      "opinion": { "title": "Donner un avis", "copy": "Construisez un reel face caméra clair et crédible." }
+    },
+    "begin": "Commencer",
+    "bestMaterial": "Votre meilleure matière brute",
+    "viewAllMoments": "Voir tous les moments →",
+    "turnIntoContent": "Transformer en contenu →"
+  },
+  "moments": {
+    "eyebrow": "Contexte personnel",
+    "title": "Votre vie est votre meilleure<br>source de contenu.",
+    "subtitle": "Enregistrez ce qui se passe dans votre vie et Personal transformera les meilleurs moments en opportunités de contenu.",
+    "addMoment": "Ajouter un moment",
+    "storyPotential": "Potentiel narratif",
+    "turnIntoContent": "Transformer en contenu",
+    "delete": "Supprimer",
+    "modalTitle": "Ajouter un moment",
+    "modalPrompt": "Que s’est-il passé ? Écrivez-le comme à un ami.",
+    "modalPlaceholder": "J’ai décidé de pivoter mon produit après…",
+    "category": "Catégorie",
+    "date": "Date",
+    "finding": "Recherche de l’histoire…",
+    "saveMoment": "Enregistrer le moment",
+    "categories": {
+      "Win": "Victoire",
+      "Failure": "Échec",
+      "Lesson": "Leçon",
+      "Launch": "Lancement",
+      "Idea": "Idée",
+      "Meeting": "Réunion",
+      "Milestone": "Étape clé",
+      "Opinion": "Opinion",
+      "Upcoming event": "Événement à venir",
+      "Other": "Autre"
+    }
+  },
+  "personal": {
+    "eyebrow": "Mémoire de Personal",
+    "title": "Ce que Personal sait de vous",
+    "subtitle": "Ce contexte façonne chaque recommandation et chaque remix. Rendez-le résolument à votre image.",
+    "editMemory": "Modifier la mémoire",
+    "liveContext": "Contexte Instagram en direct · {count} posts",
+    "connected": "Connecté ✓",
+    "positioning": "Positionnement",
+    "audience": "Audience",
+    "yourNiche": "Votre niche",
+    "cancel": "Annuler",
+    "saving": "Enregistrement…",
+    "saveMemory": "Enregistrer la mémoire",
+    "sections": {
+      "topics": "Sujets",
+      "tone": "Ton",
+      "current_projects": "Projets en cours",
+      "goals": "Objectifs",
+      "content_strengths": "Points forts de contenu"
+    }
+  },
+  "saved": {
+    "eyebrow": "Votre bibliothèque",
+    "title": "Enregistré pour plus tard.",
+    "subtitle": "Les schémas et les histoires sur lesquels vous voulez revenir.",
+    "emptyTitle": "Rien d’enregistré pour l’instant.",
+    "emptyCopy": "Enregistrez un schéma solide quand il vous paraît utile — pas seulement intéressant.",
+    "exploreFeed": "Explorer votre feed"
+  },
+  "settings": {
+    "eyebrow": "Réglages",
+    "title": "Votre espace.",
+    "instagram": "Instagram",
+    "instagramCopy": "Les données de votre propre compte sont la vraie fondation de Personal.",
+    "postsImported": "{count} posts importés · {status}",
+    "disconnect": "Déconnecter",
+    "continueWithInstagram": "Continuer avec Instagram",
+    "privacy": "Confidentialité",
+    "privacyCopy": "Les jetons d’accès Instagram restent chiffrés sur le serveur. Personal ne les expose jamais au navigateur et supprime les médias importés lorsque vous vous déconnectez."
+  },
+  "content": {
+    "backToFeed": "← Retour à votre feed",
+    "analysis": "Analyse Personal",
+    "usualPerformance": "performance habituelle",
+    "hook": "Accroche",
+    "structure": "Structure",
+    "whyOutperforming": "Pourquoi il surperforme",
+    "whyOutperformingSuffix": "Le créateur atteint normalement {average} vues ; ce post en a atteint {views}.",
+    "whyFitsYou": "Pourquoi il vous correspond",
+    "whyFitsYouCopy": "Vous parlez souvent de création de produits, d’insight client et de leçons honnêtes de fondateur.",
+    "makeItYours": "Rendez-le vôtre",
+    "makeItYoursCopy": "Choisissez la forme. Personal adaptera le schéma à votre contexte — sans le copier.",
+    "captionOption": "Légende / Post",
+    "groundInMoment": "Ancrez-le dans un moment de vie",
+    "letPersonalChoose": "Laisser Personal choisir",
+    "creating": "Création de votre version…",
+    "remixForMe": "Remixer pour moi",
+    "followers": "{count} abonnés",
+    "views": "{count} vues"
+  },
+  "remix": {
+    "backToAnalysis": "← Retour à l’analyse",
+    "saved": "Enregistré ✓",
+    "saving": "Enregistrement…",
+    "saveDraft": "Enregistrer le brouillon",
+    "markReady": "Marquer comme prêt",
+    "originalPattern": "Schéma original",
+    "whyItWorks": "Pourquoi ça marche",
+    "yourContext": "Votre contexte",
+    "yourVersion": "Votre version",
+    "madeFromStory": "Fait à partir de votre histoire.",
+    "madeFromStoryCopy": "Le schéma est emprunté. L’expérience, le point de vue et le langage sont les vôtres.",
+    "captionOption": "Légende / Post",
+    "hook": "Accroche",
+    "script": "Script",
+    "shotIdea": "Idée de plan / visuel",
+    "cta": "CTA",
+    "captionPost": "Légende / post",
+    "moveUp": "Monter",
+    "moveDown": "Descendre",
+    "regenerate": "Régénérer",
+    "delete": "Supprimer",
+    "regenerateAppend": ". C’est là que la direction est devenue évidente."
+  },
+  "contentCard": {
+    "average": "{ratio}× la moyenne",
+    "followers": "{count} abonnés",
+    "views": "{count} vues",
+    "likes": "{count} j’aime",
+    "whyRecommends": "Pourquoi Personal le recommande",
+    "saved": "Enregistré ✓",
+    "save": "Enregistrer",
+    "notForMe": "Pas pour moi",
+    "remixForMe": "Remixer pour moi"
+  }
+}

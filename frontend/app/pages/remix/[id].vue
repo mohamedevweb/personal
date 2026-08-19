@@ -3,6 +3,7 @@ import type { Remix } from '~/types/product'
 
 const route = useRoute()
 const { apiFetch } = usePersonalApi()
+const { t } = useI18n()
 const remix = ref<Remix | null>(null)
 const saving = ref(false)
 const saved = ref(false)
@@ -15,7 +16,7 @@ function moveSlide(index: number, direction: -1 | 1) {
 function deleteSlide(index: number) { remix.value?.generated_content.slides?.splice(index, 1) }
 function regenerateSlide(index: number) {
   const slide = remix.value?.generated_content.slides?.[index]
-  if (slide) slide.text = `${slide.text.replace(/[.!]$/, '')}. That was the moment the direction became obvious.`
+  if (slide) slide.text = `${slide.text.replace(/[.!]$/, '')}${t('remix.regenerateAppend')}`
 }
 async function saveDraft() {
   if (!remix.value) return
@@ -34,23 +35,23 @@ onMounted(async () => { const response = await apiFetch<{ remix: Remix }>(`/api/
 
 <template>
   <main v-if="remix" class="mx-auto max-w-[1180px] px-5 py-8 md:px-10 md:py-12">
-    <header class="flex flex-wrap items-center gap-4"><NuxtLink :to="`/content/${remix.source_content?.id}`" class="text-sm text-[#77736c]">← Back to analysis</NuxtLink><div class="ml-auto flex items-center gap-3"><span v-if="saved" class="text-xs text-[#4e785e]">Saved ✓</span><button class="rounded-full border border-[#d5d1c8] px-4 py-2.5 text-xs" :disabled="saving" @click="saveDraft">{{ saving ? 'Saving…' : 'Save draft' }}</button><button class="rounded-full bg-[#1d1d1b] px-4 py-2.5 text-xs text-white">Mark ready</button></div></header>
+    <header class="flex flex-wrap items-center gap-4"><NuxtLink :to="`/content/${remix.source_content?.id}`" class="text-sm text-[#77736c]">{{ $t('remix.backToAnalysis') }}</NuxtLink><div class="ml-auto flex items-center gap-3"><span v-if="saved" class="text-xs text-[#4e785e]">{{ $t('remix.saved') }}</span><button class="rounded-full border border-[#d5d1c8] px-4 py-2.5 text-xs" :disabled="saving" @click="saveDraft">{{ saving ? $t('remix.saving') : $t('remix.saveDraft') }}</button><button class="rounded-full bg-[#1d1d1b] px-4 py-2.5 text-xs text-white">{{ $t('remix.markReady') }}</button></div></header>
     <div class="mt-9 grid gap-8 lg:grid-cols-[.75fr_1.25fr]">
       <aside class="space-y-4 lg:sticky lg:top-8 lg:self-start">
-        <section class="rounded-[22px] border border-[var(--line)] bg-[#fbfaf7] p-5"><p class="remix-label">Original pattern</p><p class="mt-3 font-serif text-[22px] leading-7">“{{ remix.generated_content.original_pattern }}”</p></section>
-        <section class="rounded-[22px] border border-[var(--line)] bg-[#fbfaf7] p-5"><p class="remix-label">Why it works</p><ul class="mt-3 space-y-2"><li v-for="reason in remix.generated_content.why_it_works" :key="reason" class="flex gap-2 text-sm leading-5 text-[#66635d]"><span class="text-[#a44f36]">•</span>{{ reason }}</li></ul></section>
-        <section class="rounded-[22px] border border-[#d9cfc1] bg-[#efe9df] p-5"><p class="remix-label">Your context</p><p class="mt-3 text-sm leading-6 text-[#57544e]">{{ remix.generated_content.your_context }}</p></section>
+        <section class="rounded-[22px] border border-[var(--line)] bg-[#fbfaf7] p-5"><p class="remix-label">{{ $t('remix.originalPattern') }}</p><p class="mt-3 font-serif text-[22px] leading-7">“{{ remix.generated_content.original_pattern }}”</p></section>
+        <section class="rounded-[22px] border border-[var(--line)] bg-[#fbfaf7] p-5"><p class="remix-label">{{ $t('remix.whyItWorks') }}</p><ul class="mt-3 space-y-2"><li v-for="reason in remix.generated_content.why_it_works" :key="reason" class="flex gap-2 text-sm leading-5 text-[#66635d]"><span class="text-[#a44f36]">•</span>{{ reason }}</li></ul></section>
+        <section class="rounded-[22px] border border-[#d9cfc1] bg-[#efe9df] p-5"><p class="remix-label">{{ $t('remix.yourContext') }}</p><p class="mt-3 text-sm leading-6 text-[#57544e]">{{ remix.generated_content.your_context }}</p></section>
       </aside>
 
       <section>
-        <p class="text-[11px] font-semibold uppercase tracking-[.17em] text-[#918d85]">Your version</p><h1 class="mt-3 font-serif text-4xl tracking-[-.04em]">Made from your story.</h1><p class="mt-3 text-sm leading-6 text-[#77736c]">The pattern is borrowed. The experience, point of view and language are yours.</p>
-        <div class="mt-7 inline-flex rounded-full border border-[#d5d1c8] bg-[#efede7] p-1"><button v-for="item in ['reel','carousel','caption'] as const" :key="item" class="rounded-full px-4 py-2 text-xs capitalize" :class="remix.format === item ? 'bg-white text-[#222] shadow-sm' : 'text-[#77736c]'" @click="switchFormat(item)">{{ item === 'caption' ? 'Caption / Post' : item }}</button></div>
+        <p class="text-[11px] font-semibold uppercase tracking-[.17em] text-[#918d85]">{{ $t('remix.yourVersion') }}</p><h1 class="mt-3 font-serif text-4xl tracking-[-.04em]">{{ $t('remix.madeFromStory') }}</h1><p class="mt-3 text-sm leading-6 text-[#77736c]">{{ $t('remix.madeFromStoryCopy') }}</p>
+        <div class="mt-7 inline-flex rounded-full border border-[#d5d1c8] bg-[#efede7] p-1"><button v-for="item in ['reel','carousel','caption'] as const" :key="item" class="rounded-full px-4 py-2 text-xs capitalize" :class="remix.format === item ? 'bg-white text-[#222] shadow-sm' : 'text-[#77736c]'" @click="switchFormat(item)">{{ item === 'caption' ? $t('remix.captionOption') : item }}</button></div>
 
         <div v-if="remix.format === 'carousel'" class="mt-7 space-y-3">
-          <article v-for="(slide, index) in remix.generated_content.slides" :key="slide.id" class="group grid grid-cols-[50px_1fr_auto] items-start gap-3 rounded-[20px] border border-[var(--line)] bg-[#fbfaf7] p-4"><div class="grid aspect-square place-items-center rounded-xl bg-[#22221f] font-serif text-lg text-white">{{ index + 1 }}</div><textarea v-model="slide.text" rows="3" class="w-full resize-none bg-transparent p-1 text-[17px] leading-6 outline-none"/><div class="flex flex-col gap-1 opacity-50 transition group-hover:opacity-100"><button class="editor-control" title="Move up" @click="moveSlide(index, -1)">↑</button><button class="editor-control" title="Move down" @click="moveSlide(index, 1)">↓</button><button class="editor-control" title="Regenerate" @click="regenerateSlide(index)">↻</button><button class="editor-control text-[#a44f36]" title="Delete" @click="deleteSlide(index)">×</button></div></article>
+          <article v-for="(slide, index) in remix.generated_content.slides" :key="slide.id" class="group grid grid-cols-[50px_1fr_auto] items-start gap-3 rounded-[20px] border border-[var(--line)] bg-[#fbfaf7] p-4"><div class="grid aspect-square place-items-center rounded-xl bg-[#22221f] font-serif text-lg text-white">{{ index + 1 }}</div><textarea v-model="slide.text" rows="3" class="w-full resize-none bg-transparent p-1 text-[17px] leading-6 outline-none"/><div class="flex flex-col gap-1 opacity-50 transition group-hover:opacity-100"><button class="editor-control" :title="$t('remix.moveUp')" @click="moveSlide(index, -1)">↑</button><button class="editor-control" :title="$t('remix.moveDown')" @click="moveSlide(index, 1)">↓</button><button class="editor-control" :title="$t('remix.regenerate')" @click="regenerateSlide(index)">↻</button><button class="editor-control text-[#a44f36]" :title="$t('remix.delete')" @click="deleteSlide(index)">×</button></div></article>
         </div>
-        <div v-else-if="remix.format === 'reel'" class="mt-7 space-y-4"><label class="editor-block"><span class="remix-label">Hook</span><textarea v-model="remix.generated_content.hook" rows="2" class="editor-textarea text-xl"/></label><label class="editor-block"><span class="remix-label">Script</span><textarea v-model="remix.generated_content.script" rows="8" class="editor-textarea"/></label><label class="editor-block"><span class="remix-label">Shot / visual idea</span><textarea v-model="remix.generated_content.visual" rows="3" class="editor-textarea"/></label><label class="editor-block"><span class="remix-label">CTA</span><textarea v-model="remix.generated_content.cta" rows="2" class="editor-textarea"/></label></div>
-        <div v-else class="mt-7"><label class="editor-block"><span class="remix-label">Caption / post</span><textarea v-model="remix.generated_content.caption" rows="18" class="editor-textarea text-[16px] leading-7"/></label></div>
+        <div v-else-if="remix.format === 'reel'" class="mt-7 space-y-4"><label class="editor-block"><span class="remix-label">{{ $t('remix.hook') }}</span><textarea v-model="remix.generated_content.hook" rows="2" class="editor-textarea text-xl"/></label><label class="editor-block"><span class="remix-label">{{ $t('remix.script') }}</span><textarea v-model="remix.generated_content.script" rows="8" class="editor-textarea"/></label><label class="editor-block"><span class="remix-label">{{ $t('remix.shotIdea') }}</span><textarea v-model="remix.generated_content.visual" rows="3" class="editor-textarea"/></label><label class="editor-block"><span class="remix-label">{{ $t('remix.cta') }}</span><textarea v-model="remix.generated_content.cta" rows="2" class="editor-textarea"/></label></div>
+        <div v-else class="mt-7"><label class="editor-block"><span class="remix-label">{{ $t('remix.captionPost') }}</span><textarea v-model="remix.generated_content.caption" rows="18" class="editor-textarea text-[16px] leading-7"/></label></div>
       </section>
     </div>
   </main>
