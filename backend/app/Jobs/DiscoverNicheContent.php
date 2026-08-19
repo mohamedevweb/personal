@@ -3,8 +3,8 @@
 namespace App\Jobs;
 
 use App\Exceptions\ContentDiscoveryException;
-use App\Models\Creator;
 use App\Models\ContentPost;
+use App\Models\Creator;
 use App\Models\DiscoveredHashtag;
 use App\Models\User;
 use App\Services\Discovery\ContentDiscoveryService;
@@ -151,7 +151,7 @@ class DiscoverNicheContent implements ShouldQueue
 
     private function whyItWorks(DiscoveredPost $post): string
     {
-        return "Outperforming its niche with ".number_format($post->likes).' likes and '
+        return 'Outperforming its niche with '.number_format($post->likes).' likes and '
             .number_format($post->comments).' comments.';
     }
 }

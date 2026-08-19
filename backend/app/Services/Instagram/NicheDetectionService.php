@@ -153,7 +153,6 @@ class NicheDetectionService
     }
 
     /**
-     * @param  mixed  $values
      * @return list<string>
      */
     private function stringList(mixed $values, int $limit): array
