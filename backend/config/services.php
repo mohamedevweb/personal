@@ -46,6 +46,9 @@ return [
         'apify' => [
             'token' => env('APIFY_TOKEN'),
             'actor' => env('APIFY_INSTAGRAM_ACTOR', 'apify~instagram-scraper'),
+            // Scrapes whole accounts (real follower count + recent posts) so the
+            // engagement rate can be measured per account.
+            'profile_actor' => env('APIFY_PROFILE_ACTOR', 'apify~instagram-profile-scraper'),
             // Cost knob: Apify bills per result written to the dataset.
             'results_limit' => (int) env('APIFY_RESULTS_LIMIT', 30),
             // Re-scrape post URLs to recover likes/views (hashtag pages hide them).
@@ -53,6 +56,14 @@ return [
             'enrich_metrics' => (bool) env('APIFY_ENRICH_METRICS', true),
             'timeout' => (int) env('APIFY_TIMEOUT', 120),
         ],
+        // Recent posts pulled per account to average the engagement rate over.
+        'profile_posts' => (int) env('DISCOVERY_PROFILE_POSTS', 12),
+        // A creator re-measured within this window is skipped, so profile-scrape
+        // cost scales with the number of tracked accounts, not syncs.
+        'measure_cooldown_days' => (int) env('DISCOVERY_MEASURE_COOLDOWN_DAYS', 3),
+        // Cap on accounts measured per job run, so a large niche can't blow the
+        // Apify budget in one pass.
+        'measure_batch' => (int) env('DISCOVERY_MEASURE_BATCH', 30),
         // How many hashtags an expansion produces and how long the cache holds.
         'hashtag_limit' => (int) env('DISCOVERY_HASHTAG_LIMIT', 10),
         'cache_days' => (int) env('DISCOVERY_CACHE_DAYS', 7),

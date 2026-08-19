@@ -79,6 +79,11 @@ class DiscoverNicheContent implements ShouldQueue
         foreach ($posts as $post) {
             $this->store($post, $niche, $median);
         }
+
+        // Hashtag discovery only seeds the creator list. Measuring their real
+        // follower counts and engagement rate — what ranks "the hottest accounts"
+        // — happens per account in a follow-up job.
+        MeasureAccountEngagement::dispatch($niche);
     }
 
     /**

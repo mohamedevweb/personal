@@ -7,8 +7,11 @@ use Anthropic\RequestOptions;
 use App\Services\ClaudeContentGenerationService;
 use App\Services\ContentGenerationService;
 use App\Services\Discovery\ApifyInstagramDiscoveryService;
+use App\Services\Discovery\ApifyProfileScraperService;
 use App\Services\Discovery\ContentDiscoveryService;
 use App\Services\Discovery\MockInstagramDiscoveryService;
+use App\Services\Discovery\MockProfileScraperService;
+use App\Services\Discovery\ProfileDiscoveryService;
 use App\Services\MockContentGenerationService;
 use App\Services\OpenAiContentGenerationService;
 use GuzzleHttp\Client as GuzzleClient;
@@ -50,6 +53,17 @@ class AppServiceProvider extends ServiceProvider
                     && (bool) config('services.discovery.apify.token') => $this->app->make(ApifyInstagramDiscoveryService::class),
 
                 default => $this->app->make(MockInstagramDiscoveryService::class),
+            };
+        });
+
+        $this->app->bind(ProfileDiscoveryService::class, function (): ProfileDiscoveryService {
+            // Same degrade-to-mock rule as the discovery driver: no token means
+            // the deterministic mock, so account measurement still runs in dev.
+            return match (true) {
+                config('services.discovery.driver') === 'apify'
+                    && (bool) config('services.discovery.apify.token') => $this->app->make(ApifyProfileScraperService::class),
+
+                default => $this->app->make(MockProfileScraperService::class),
             };
         });
     }
