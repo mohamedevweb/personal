@@ -31,6 +31,15 @@ watch(() => status.value.account?.sync_status, (syncStatus) => {
   if (status.value.connected && syncStatus === 'completed') onboarded.value = true
 })
 
+// Let the user into the app without connecting Instagram. The cookie makes the
+// choice survive reloads so the auth gate stops sending them back here.
+const skipped = useCookie<boolean>('personal-onboarding-skipped', { maxAge: 60 * 60 * 24 * 365 })
+function skipConnection() {
+  skipped.value = true
+  onboarded.value = true
+  navigateTo('/feed')
+}
+
 onMounted(async () => {
   await loadStatus()
   if (route.query.instagram === 'connected' || (status.value.connected && status.value.account?.sync_status !== 'completed')) {
@@ -80,6 +89,14 @@ onMounted(async () => {
             <svg viewBox="0 0 20 20" class="h-4 w-4 fill-none stroke-current" stroke-width="1.5"><rect x="4" y="8" width="12" height="9" rx="2"/><path d="M7 8V6a3 3 0 016 0v2"/></svg>
             {{ $t('onboarding.tokenNote') }}
           </p>
+
+          <button
+            type="button"
+            class="mt-8 text-sm text-[#8a877f] underline decoration-[#c9c5bb] underline-offset-4 transition hover:text-[#282724]"
+            @click="skipConnection"
+          >
+            {{ $t('onboarding.skip') }} →
+          </button>
         </template>
 
         <template v-else>

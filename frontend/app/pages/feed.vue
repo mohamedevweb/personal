@@ -24,9 +24,13 @@ async function refresh() {
   refreshing.value = true
   try {
     await apiFetch('/api/feed/refresh', { method: 'POST' })
-    // Discovery runs in the background; give it a moment, then reload.
-    await new Promise(resolve => setTimeout(resolve, 4000))
-    await loadFeed()
+    // Discovery scrapes in the background and a real Apify run can take up to a
+    // minute, so poll rather than reload once — stop as soon as posts appear.
+    for (let attempt = 0; attempt < 12; attempt++) {
+      await new Promise(resolve => setTimeout(resolve, 5000))
+      await loadFeed()
+      if (data.value && data.value.items.length > 0) break
+    }
   } catch (exception: any) {
     error.value = exception?.data?.message || t('feed.loadError')
   } finally {

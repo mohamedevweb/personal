@@ -17,6 +17,12 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // app stays out of reach. Once done we cache it so we stop re-checking.
   const onboarded = useState('personal-onboarded', () => false)
 
+  // The user can choose to skip connecting Instagram; that choice (persisted in
+  // a cookie) is enough to let them past the gate.
+  if (useCookie<boolean>('personal-onboarding-skipped').value) {
+    onboarded.value = true
+  }
+
   if (!onboarded.value) {
     try {
       const status = await apiFetch<InstagramStatusResponse>('/api/integrations/instagram/status')

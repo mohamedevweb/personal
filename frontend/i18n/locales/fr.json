@@ -257,7 +257,8 @@
       "learning_style": "Apprentissage de votre style",
       "finding_patterns": "Recherche de schémas"
     },
-    "placeholderQuote": "Votre contenu devient du contexte — pas un tableau de bord."
+    "placeholderQuote": "Votre contenu devient du contexte — pas un tableau de bord.",
+    "skip": "Continuer sans connecter Instagram"
   },
   "feed": {
     "dailyBrief": "{day} · Votre brief du jour",

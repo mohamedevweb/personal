@@ -257,7 +257,8 @@
       "learning_style": "Learning your style",
       "finding_patterns": "Finding patterns"
     },
-    "placeholderQuote": "Your content becomes context—not a dashboard."
+    "placeholderQuote": "Your content becomes context—not a dashboard.",
+    "skip": "Continue without connecting"
   },
   "feed": {
     "dailyBrief": "{day} · Your daily brief",
