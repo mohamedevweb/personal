@@ -5,13 +5,6 @@ use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Laravel\Sanctum\Http\Middleware\AuthenticateSession;
 use Laravel\Sanctum\Sanctum;
 
-$frontendUrl = (string) env('FRONTEND_URL', 'http://localhost:3000');
-$frontendHost = parse_url($frontendUrl, PHP_URL_HOST);
-$frontendPort = parse_url($frontendUrl, PHP_URL_PORT);
-$frontendDomain = env('APP_ENV') !== 'local' && $frontendHost
-    ? $frontendHost.($frontendPort ? ':'.$frontendPort : '')
-    : null;
-
 return [
 
     /*
@@ -25,10 +18,14 @@ return [
     |
     */
 
-    'stateful' => array_values(array_unique(array_filter(array_merge(
+    // The frontend authenticates with Bearer tokens only — it never performs
+    // Sanctum's cookie/CSRF ("stateful SPA") handshake. The frontend domain must
+    // therefore stay OUT of this list: adding it (as production did) makes Sanctum
+    // treat the SPA's requests as stateful and require a CSRF token, which breaks
+    // login/register with "CSRF token mismatch". Only opt domains in explicitly.
+    'stateful' => array_values(array_unique(array_filter(
         explode(',', env('SANCTUM_STATEFUL_DOMAINS', 'localhost,127.0.0.1,127.0.0.1:8000,::1')),
-        [$frontendDomain, Sanctum::currentApplicationUrlWithPort()],
-    )))),
+    ))),
 
     /*
     |--------------------------------------------------------------------------
