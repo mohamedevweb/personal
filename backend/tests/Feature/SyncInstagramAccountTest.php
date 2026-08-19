@@ -7,6 +7,7 @@ use App\Models\InstagramAccount;
 use App\Models\User;
 use App\Services\Instagram\InstagramApiService;
 use App\Services\Instagram\InstagramAuthService;
+use App\Services\Instagram\NicheDetectionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
@@ -69,7 +70,7 @@ class SyncInstagramAccountTest extends TestCase
         });
 
         $job = new SyncInstagramAccount($account->id);
-        $job->handle(app(InstagramAuthService::class), app(InstagramApiService::class));
+        $job->handle(app(InstagramAuthService::class), app(InstagramApiService::class), app(NicheDetectionService::class));
 
         $account->refresh();
         $this->assertSame('completed', $account->sync_status);
@@ -123,7 +124,7 @@ class SyncInstagramAccountTest extends TestCase
         });
 
         (new SyncInstagramAccount($account->id))
-            ->handle(app(InstagramAuthService::class), app(InstagramApiService::class));
+            ->handle(app(InstagramAuthService::class), app(InstagramApiService::class), app(NicheDetectionService::class));
 
         // One batched attempt plus a single narrowed retry — never one call per metric.
         $this->assertSame(2, $insightsRequests);
