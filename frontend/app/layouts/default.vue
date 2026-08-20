@@ -50,9 +50,8 @@ const pageTitle = computed(() => {
 <template>
   <div class="min-h-screen bg-[var(--paper)] text-[var(--ink)]">
     <aside class="fixed inset-y-0 left-0 z-30 hidden w-[264px] flex-col border-r border-[var(--line)] bg-[var(--rail)] px-3 pb-[74px] pt-5 md:flex">
-      <NuxtLink to="/feed" class="flex items-center gap-2.5 px-2">
-        <span class="grid h-8 w-8 place-items-center rounded-[10px] bg-[var(--ink)] font-serif text-[15px] leading-none text-white">P</span>
-        <span class="text-[16px] font-semibold tracking-[-0.03em]">{{ $t('brand.name') }}</span>
+      <NuxtLink to="/feed" class="b-focus block w-fit px-2 py-1">
+        <PersonalLogo :size="22" />
       </NuxtLink>
 
       <nav class="mt-9 space-y-7">
@@ -64,7 +63,7 @@ const pageTitle = computed(() => {
               :key="item.to"
               :to="item.to"
               class="flex items-center gap-3 rounded-[10px] px-3 py-2 text-[13.5px] transition"
-              :class="route.path === item.to ? 'bg-[#efefeb] font-medium text-[var(--ink)]' : 'text-[var(--muted)] hover:bg-[#f2f2ee] hover:text-[var(--ink)]'"
+              :class="route.path === item.to ? 'bg-[var(--line-soft)] font-medium text-[var(--ink)]' : 'text-[var(--muted)] hover:bg-[var(--sand-soft)] hover:text-[var(--ink)]'"
             >
               <AppIcon :name="item.icon" :size="17" />
               {{ $t(item.label) }}
@@ -75,8 +74,8 @@ const pageTitle = computed(() => {
 
       <div class="mt-auto">
         <div class="flex items-center gap-3 rounded-[14px] px-2 py-2">
-          <img v-if="user?.avatar_url" :src="user.avatar_url" alt="" class="h-9 w-9 rounded-full bg-[#ececeb] object-cover">
-          <div v-else class="grid h-9 w-9 place-items-center rounded-full bg-[var(--ink)] text-xs font-medium text-white">{{ initials }}</div>
+          <img v-if="user?.avatar_url" :src="user.avatar_url" alt="" class="h-9 w-9 rounded-full bg-[var(--sand)] object-cover">
+          <div v-else class="grid h-9 w-9 place-items-center rounded-full bg-[var(--ink)] text-xs font-medium text-[var(--paper)]">{{ initials }}</div>
           <div class="min-w-0 flex-1">
             <p class="truncate text-[13px] font-medium">{{ user?.name || $t('common.yourWorkspace') }}</p>
             <button class="text-[11px] text-[var(--faint)] transition hover:text-[var(--ink)]" @click="logout">{{ $t('common.signOut') }}</button>
@@ -88,7 +87,7 @@ const pageTitle = computed(() => {
 
     <div class="md:ml-[264px]">
       <header class="sticky top-0 z-20 hidden h-[74px] items-center justify-between bg-[var(--paper)] px-8 md:flex">
-        <h1 class="text-[26px] tracking-[-0.025em]">{{ $t(pageTitle) }}</h1>
+        <h1 class="font-serif text-[30px] leading-none tracking-[-.02em]">{{ $t(pageTitle) }}</h1>
         <div class="flex items-center gap-2">
           <NuxtLink to="/settings" class="grid h-10 w-10 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--muted)] transition hover:text-[var(--ink)]" :aria-label="$t('nav.settings')">
             <AppIcon name="settings" :size="17" />
@@ -97,20 +96,20 @@ const pageTitle = computed(() => {
             <img v-if="user?.avatar_url" :src="user.avatar_url" alt="" class="h-full w-full object-cover">
             <AppIcon v-else name="user" :size="17" />
           </NuxtLink>
-          <NuxtLink to="/create" class="grid h-10 w-10 place-items-center rounded-full bg-[var(--ink)] text-white transition hover:bg-black" :aria-label="$t('nav.create')">
+          <NuxtLink to="/create" class="grid h-10 w-10 place-items-center rounded-full bg-[var(--ink)] text-[var(--paper)] transition hover:bg-black" :aria-label="$t('nav.create')">
             <AppIcon name="plus" :size="18" />
           </NuxtLink>
         </div>
       </header>
 
       <header class="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-[var(--line)] bg-[var(--paper)]/95 px-5 backdrop-blur md:hidden">
-        <NuxtLink to="/feed" class="flex items-center gap-2">
-          <span class="grid h-7 w-7 place-items-center rounded-[9px] bg-[var(--ink)] font-serif text-[13px] leading-none text-white">P</span>
-          <span class="font-semibold tracking-[-0.03em]">{{ $t(pageTitle) }}</span>
+        <NuxtLink to="/feed" class="b-focus flex items-center gap-2.5">
+          <PersonalMark :size="19" />
+          <span class="font-serif text-[19px] tracking-[-.02em]">{{ $t(pageTitle) }}</span>
         </NuxtLink>
         <div class="flex items-center gap-3">
           <LanguageSwitcher />
-          <NuxtLink to="/create" class="grid h-9 w-9 place-items-center rounded-full bg-[var(--ink)] text-white" :aria-label="$t('nav.create')"><AppIcon name="plus" /></NuxtLink>
+          <NuxtLink to="/create" class="grid h-9 w-9 place-items-center rounded-full bg-[var(--ink)] text-[var(--paper)]" :aria-label="$t('nav.create')"><AppIcon name="plus" /></NuxtLink>
         </div>
       </header>
 

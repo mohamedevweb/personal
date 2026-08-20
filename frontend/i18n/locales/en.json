@@ -343,7 +343,32 @@
     "loading": "One moment…",
     "toggleToRegister": "No account yet? Create one",
     "toggleToLogin": "Already have an account? Sign in",
-    "genericError": "We could not sign you in. Please try again."
+    "genericError": "We could not sign you in. Please try again.",
+    "google": "Continue with Google",
+    "dividerLogin": "Or sign in with email",
+    "dividerRegister": "Or sign up with email",
+    "emailPlaceholder": "Email",
+    "passwordPlaceholder": "Password",
+    "namePlaceholder": "Full name",
+    "confirmPasswordPlaceholder": "Confirm password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "noAccount": "Don’t have an account yet?",
+    "haveAccount": "Already have an account?",
+    "goToRegister": "Sign up",
+    "goToLogin": "Sign in",
+    "home": "Back to personal.app",
+    "aside": {
+      "titleLineOne": "Live an interesting life.",
+      "titleLineTwo": "Personal is paying attention.",
+      "proof": "Early access · 180+ creators",
+      "card": {
+        "eyebrow": "Engagement this month",
+        "metric": "8.4×",
+        "period": "May",
+        "label": "Your engagement curve since Personal started watching your niche."
+      }
+    }
   },
   "onboarding": {
     "eyebrow": "First, let’s understand you",

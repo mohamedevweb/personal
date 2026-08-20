@@ -20,12 +20,12 @@ const visibleCaption = computed(() => (expanded.value || !isLongCaption.value ? 
 </script>
 
 <template>
-  <article class="group overflow-hidden rounded-[20px] border border-[var(--line)] bg-[var(--surface)] shadow-[0_1px_2px_rgba(23,23,26,.04)] transition duration-300 hover:shadow-[0_12px_34px_rgba(23,23,26,.08)]">
+  <article class="group overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)] shadow-[0_1px_2px_rgba(23,23,26,.04)] transition duration-300 hover:shadow-[0_12px_34px_rgba(23,23,26,.08)]">
     <!-- The post is shown the way it looks on Instagram: same header, square
          media, action bar, like count and caption ordering. -->
     <header class="flex items-center gap-3 px-3.5 py-3">
       <span class="rounded-full bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] p-[2px]">
-        <img :src="post.creator.avatar_url || ''" alt="" class="block h-8 w-8 rounded-full border-2 border-[var(--surface)] bg-[#ececeb] object-cover">
+        <img :src="post.creator.avatar_url || ''" alt="" class="block h-8 w-8 rounded-full border-2 border-[var(--surface)] bg-[var(--sand)] object-cover">
       </span>
       <div class="min-w-0 flex-1 leading-tight">
         <p class="truncate text-[13px] font-semibold">
@@ -36,7 +36,7 @@ const visibleCaption = computed(() => (expanded.value || !isLongCaption.value ? 
       <AppIcon name="dots" :size="18" class="shrink-0 text-[var(--muted)]" />
     </header>
 
-    <NuxtLink :to="`/content/${post.id}`" class="relative block aspect-square overflow-hidden bg-[#e6e6e2]">
+    <NuxtLink :to="`/content/${post.id}`" class="relative block aspect-square overflow-hidden bg-[var(--sand)]">
       <img v-if="post.thumbnail_url" :src="post.thumbnail_url" :alt="post.hook" class="h-full w-full object-cover">
       <AppIcon v-if="mediaKind !== 'image'" :name="mediaKind" :size="22" :stroke-width="1.9" class="absolute right-3 top-3 text-white drop-shadow-[0_1px_3px_rgba(0,0,0,.55)]" />
       <span v-if="mediaKind === 'carousel'" class="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
@@ -69,7 +69,7 @@ const visibleCaption = computed(() => (expanded.value || !isLongCaption.value ? 
     <!-- Everything Personal adds on top of the post lives below the fold line. -->
     <div class="border-t border-[var(--line)] bg-[var(--paper)] p-4 md:p-5">
       <div class="flex flex-wrap items-center gap-1.5">
-        <span class="inline-flex items-center gap-1.5 rounded-full bg-[var(--accent-soft)] px-2.5 py-1 text-[11px] font-semibold text-[#8a6413]">
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-[var(--accent-soft)] px-2.5 py-1 text-[11px] font-semibold text-[var(--accent-ink)]">
           <AppIcon name="trend" :size="13" />{{ $t('contentCard.average', { ratio: post.performance_ratio.toFixed(1) }) }}
         </span>
         <span class="rounded-full border border-[var(--line)] px-2.5 py-1 text-[11px] text-[var(--muted)]">{{ $t('contentCard.views', { count: compactNumber(post.views) }) }}</span>
@@ -78,13 +78,13 @@ const visibleCaption = computed(() => (expanded.value || !isLongCaption.value ? 
 
       <div class="mt-4 rounded-[14px] bg-[var(--surface)] p-4">
         <p class="text-[10px] font-semibold uppercase tracking-[.14em] text-[var(--faint)]">{{ $t('contentCard.whyRecommends') }}</p>
-        <p class="mt-1.5 text-[13px] leading-5 text-[#4d4d51]">{{ post.why_recommended || post.why_it_works }}</p>
+        <p class="mt-1.5 text-[13px] leading-5 text-[var(--copy)]">{{ post.why_recommended || post.why_it_works }}</p>
       </div>
 
       <div class="mt-5 flex items-center gap-2">
         <button class="rounded-full border border-[var(--line)] bg-[var(--surface)] px-3.5 py-2 text-xs transition hover:bg-[var(--line-soft)]" @click="$emit('save', post)">{{ post.is_saved ? $t('contentCard.saved') : $t('contentCard.save') }}</button>
         <button class="rounded-full px-3 py-2 text-xs text-[var(--faint)] transition hover:text-[var(--ink)]" @click="$emit('dismiss', post)">{{ $t('contentCard.notForMe') }}</button>
-        <button class="ml-auto inline-flex items-center gap-2 rounded-full bg-[var(--ink)] px-4 py-2.5 text-xs font-medium text-white transition hover:bg-black" @click="$emit('remix', post)">{{ $t('contentCard.remixForMe') }} <AppIcon name="arrow" :size="14" /></button>
+        <button class="ml-auto inline-flex h-9 items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-4 text-[12.5px] font-medium text-[var(--paper)] transition hover:bg-black" @click="$emit('remix', post)">{{ $t('contentCard.remixForMe') }} <AppIcon name="arrow" :size="14" /></button>
       </div>
     </div>
   </article>

@@ -343,7 +343,32 @@
     "loading": "Un instant…",
     "toggleToRegister": "Pas encore de compte ? Créez-en un",
     "toggleToLogin": "Vous avez déjà un compte ? Connectez-vous",
-    "genericError": "Nous n’avons pas pu vous connecter. Veuillez réessayer."
+    "genericError": "Nous n’avons pas pu vous connecter. Veuillez réessayer.",
+    "google": "Continuer avec Google",
+    "dividerLogin": "Ou connectez-vous par e-mail",
+    "dividerRegister": "Ou inscrivez-vous par e-mail",
+    "emailPlaceholder": "E-mail",
+    "passwordPlaceholder": "Mot de passe",
+    "namePlaceholder": "Nom complet",
+    "confirmPasswordPlaceholder": "Confirmer le mot de passe",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
+    "noAccount": "Pas encore de compte ?",
+    "haveAccount": "Vous avez déjà un compte ?",
+    "goToRegister": "Créer un compte",
+    "goToLogin": "Se connecter",
+    "home": "Retour à personal.app",
+    "aside": {
+      "titleLineOne": "Vivez une vie intéressante.",
+      "titleLineTwo": "Personal y prête attention.",
+      "proof": "Accès anticipé · 180+ créateurs",
+      "card": {
+        "eyebrow": "Engagement ce mois-ci",
+        "metric": "8,4×",
+        "period": "Mai",
+        "label": "Votre courbe d’engagement depuis que Personal observe votre niche."
+      }
+    }
   },
   "onboarding": {
     "eyebrow": "D’abord, apprenons à vous connaître",

@@ -22,6 +22,8 @@ defineProps<{ name: string, size?: number, filled?: boolean, strokeWidth?: numbe
     <template v-else-if="name === 'paper-plane'"><path d="M22 2 11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7Z"/></template>
     <template v-else-if="name === 'carousel'"><rect x="8.5" y="2.5" width="13" height="13" rx="2.6"/><path d="M15.5 18.6a2.9 2.9 0 0 1-2.9 2.9H5.4a2.9 2.9 0 0 1-2.9-2.9v-7.2a2.9 2.9 0 0 1 2.9-2.9"/></template>
     <template v-else-if="name === 'reel'"><rect x="2.5" y="2.5" width="19" height="19" rx="4.5"/><path d="M2.6 8.2h18.8M8.6 2.6 11.6 8.2m3.8-5.6 3 5.6"/><path d="m10.4 12.1 4.3 2.5-4.3 2.5v-5Z"/></template>
+    <template v-else-if="name === 'eye'"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3.1"/></template>
+    <template v-else-if="name === 'eye-off'"><path d="M4 4l16 16"/><path d="M9.6 5.9A8.9 8.9 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a17 17 0 0 1-3.4 4.1M6.4 7.9A17 17 0 0 0 2.5 12S6 18.5 12 18.5c1 0 1.9-.2 2.7-.5"/><path d="M10 10a3.1 3.1 0 0 0 4.2 4.2"/></template>
     <template v-else><circle cx="12" cy="12" r="9"/><path d="m9.5 12 1.7 1.7 3.8-4"/></template>
   </svg>
 </template>

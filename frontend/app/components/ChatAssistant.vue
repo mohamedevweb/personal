@@ -87,7 +87,7 @@ onUnmounted(() => { if (import.meta.client) window.removeEventListener('keydown'
     <!-- Launcher: floats above the mobile bottom nav, and sits at the foot of
          the desktop rail where the assistant belongs. -->
     <button
-      class="fixed bottom-20 right-5 z-40 grid h-14 w-14 place-items-center rounded-full bg-[var(--ink)] text-white shadow-[0_8px_24px_rgba(23,23,26,.24)] transition hover:scale-105 md:hidden"
+      class="fixed bottom-20 right-5 z-40 grid h-14 w-14 place-items-center rounded-full bg-[var(--ink)] text-[var(--paper)] shadow-[0_8px_24px_rgba(23,23,26,.24)] transition hover:scale-105 md:hidden"
       :aria-label="open ? $t('chat.close') : $t('chat.open')"
       @click="toggle"
     >
@@ -95,7 +95,7 @@ onUnmounted(() => { if (import.meta.client) window.removeEventListener('keydown'
     </button>
 
     <button
-      class="fixed bottom-5 left-3 z-40 hidden w-[240px] items-center gap-2.5 rounded-[14px] border border-[var(--line)] bg-[var(--surface)] px-3.5 py-3 text-[13px] shadow-[0_2px_10px_rgba(23,23,26,.05)] transition hover:shadow-[0_4px_16px_rgba(23,23,26,.09)] md:flex"
+      class="fixed bottom-5 left-3 z-40 hidden w-[240px] items-center gap-2.5 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3.5 py-3 text-[13px] shadow-[0_2px_10px_rgba(23,23,26,.05)] transition hover:shadow-[0_4px_16px_rgba(23,23,26,.09)] md:flex"
       :aria-label="open ? $t('chat.close') : $t('chat.open')"
       @click="toggle"
     >
@@ -129,7 +129,7 @@ onUnmounted(() => { if (import.meta.client) window.removeEventListener('keydown'
         </header>
 
         <div ref="scrollEl" class="flex-1 space-y-3 overflow-y-auto px-4 py-4">
-          <div class="max-w-[85%] rounded-2xl rounded-tl-md bg-[var(--paper)] px-4 py-2.5 text-[13px] leading-6 text-[#3a3a3e]">
+          <div class="max-w-[85%] rounded-2xl rounded-tl-md bg-[var(--paper)] px-4 py-2.5 text-[13px] leading-6 text-[var(--copy)]">
             {{ greeting }}
           </div>
           <div
@@ -141,18 +141,18 @@ onUnmounted(() => { if (import.meta.client) window.removeEventListener('keydown'
             <div
               class="max-w-[85%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-[13px] leading-6"
               :class="message.role === 'user'
-                ? 'rounded-tr-md bg-[var(--ink)] text-white'
-                : 'rounded-tl-md bg-[var(--paper)] text-[#3a3a3e]'"
+                ? 'rounded-tr-md bg-[var(--ink)] text-[var(--paper)]'
+                : 'rounded-tl-md bg-[var(--paper)] text-[var(--copy)]'"
             >{{ message.content }}</div>
           </div>
           <div v-if="sending" class="flex justify-start">
             <div class="rounded-2xl rounded-tl-md bg-[var(--paper)] px-4 py-2.5 text-[13px] text-[var(--faint)]">{{ $t('chat.thinking') }}</div>
           </div>
-          <p v-if="error" role="alert" class="rounded-[12px] border border-[#e6cfc7] bg-[#fbf1ee] px-3 py-2 text-[12px] text-[#8b402a]">{{ error }}</p>
+          <p v-if="error" role="alert" class="rounded-[12px] border border-[var(--danger-line)] bg-[var(--danger-soft)] px-3 py-2 text-[12px] text-[var(--danger)]">{{ error }}</p>
         </div>
 
         <div class="border-t border-[var(--line)] bg-[var(--surface)] p-3">
-          <div class="flex items-end gap-2 rounded-[16px] border border-[var(--line)] bg-[var(--paper)] px-3 py-2">
+          <div class="flex items-end gap-2 rounded-[14px] border border-[var(--line)] bg-[var(--paper)] px-3 py-2">
             <textarea
               ref="inputEl"
               v-model="draft"
@@ -162,7 +162,7 @@ onUnmounted(() => { if (import.meta.client) window.removeEventListener('keydown'
               @keydown="onKeydown"
             />
             <button
-              class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--ink)] text-white transition disabled:opacity-40"
+              class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--ink)] text-[var(--paper)] transition disabled:opacity-40"
               :disabled="!draft.trim() || sending"
               :aria-label="$t('chat.send')"
               @click="send"

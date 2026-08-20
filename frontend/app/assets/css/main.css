@@ -2,22 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
+/* The product tokens are the brand palette. The app and the launch page are the
+   same object seen from two sides, so the surfaces, the hairlines and the type
+   are defined once here and every screen inherits them. */
 :root {
   color-scheme: light;
-  --ink: #17171a;
-  --muted: #6e6e73;
-  --faint: #9b9b9f;
-  --paper: #f7f7f6;
-  --rail: #fcfcfb;
-  --surface: #ffffff;
-  --line: #e8e8e4;
-  --line-soft: #f1f1ee;
-  --accent: #b6871f;
-  --accent-soft: #f7f0df;
-  --ai: #7c62f5;
+  --ink: #171715;
+  --muted: #77736d;
+  --faint: #8f8a80;
+  --paper: #f7f5f0;
+  --rail: #fbfaf6;
+  --surface: #fefdfb;
+  --line: #e4dfd4;
+  --line-soft: #efebe2;
+  --accent: #e04f36;
+  --accent-soft: #fbeee9;
+  /* Text that sits on --accent-soft: the signature darkened until it carries
+     body-copy contrast. */
+  --accent-ink: #a8402a;
+  --ai: #e04f36;
   --positive: #3f7a55;
+  --positive-soft: #eff4ee;
+  --positive-line: #d7e2d5;
+  /* Errors are a deeper, browner red than the signature so a failed save never
+     reads as an accent. */
+  --danger: #9a3a24;
+  --danger-soft: #fbefea;
+  --danger-line: #ecd8ce;
+  /* The warm caution tone, borrowed from the light in the night surfaces. */
+  --gold: #e3b862;
+  --warn-soft: #f7f0dd;
+  --warn-line: #e9dcba;
+  --warn-ink: #7d6428;
+  --accent-line: #f3dcd3;
   --night: #0d0c0a;
-  --display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, ui-serif, serif;
+  --copy: #3a3833;
+  --sand: #e9e5db;
+  --sand-soft: #f1eee6;
+  --display: "Instrument Serif", "Iowan Old Style", Palatino, Georgia, ui-serif, serif;
 }
 
 html {
@@ -33,7 +55,11 @@ button, a { -webkit-tap-highlight-color: transparent; }
 @layer utilities {
   /* The display serif carries every headline; Tailwind's default serif stack is
      too low-contrast for the large sizes used across the app. */
-  .font-serif { font-family: var(--display); }
+  .font-serif {
+    font-family: var(--display);
+    font-weight: 400;
+    font-feature-settings: "liga" 1, "kern" 1;
+  }
 
   /* Warm light falling into a near-black card — the signature surface for the
      one hero moment on a page. */
@@ -60,19 +86,19 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .animate-breathe { animation: breathe 1.8s ease-in-out infinite; }
 
 /* ---------------------------------------------------------------------------
-   Brand layer — from the Branding board in Figma.
-   The product surfaces keep the tokens above; the launch page is built on these,
-   so restyling the marketing site never moves the app underneath it.
+   Brand layer — the names used by the Branding board in Figma and by the launch
+   page. They alias the product tokens above rather than holding their own
+   values, so the marketing site and the app can only ever move together.
    --------------------------------------------------------------------------- */
 :root {
-  --b-ivory: #f7f5f0;
-  --b-surface: #fefdfb;
-  --b-black: #171715;
-  --b-stone: #77736d;
-  --b-signature: #e04f36;
-  --b-line: #e4dfd4;
-  --b-line-soft: #efebe2;
-  --b-display: "Instrument Serif", "Iowan Old Style", Palatino, Georgia, ui-serif, serif;
+  --b-ivory: var(--paper);
+  --b-surface: var(--surface);
+  --b-black: var(--ink);
+  --b-stone: var(--muted);
+  --b-signature: var(--accent);
+  --b-line: var(--line);
+  --b-line-soft: var(--line-soft);
+  --b-display: var(--display);
 }
 
 @layer utilities {

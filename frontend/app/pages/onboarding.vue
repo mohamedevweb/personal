@@ -51,9 +51,8 @@ onMounted(async () => {
 <template>
   <main class="min-h-screen overflow-hidden bg-[var(--paper)] text-[var(--ink)]">
     <header class="flex h-20 items-center justify-between px-6 md:px-10">
-      <NuxtLink to="/feed" class="flex items-center gap-2.5">
-        <span class="grid h-8 w-8 place-items-center rounded-[10px] bg-[var(--ink)] font-serif text-[15px] leading-none text-white">P</span>
-        <span class="text-[16px] font-semibold tracking-[-0.03em]">{{ $t('brand.name') }}</span>
+      <NuxtLink to="/feed" class="b-focus w-fit">
+        <PersonalLogo :size="22" />
       </NuxtLink>
       <div class="flex items-center gap-4">
         <span class="hidden text-xs tracking-wide text-[var(--faint)] sm:inline">{{ $t('brand.privateIntelligence') }}</span>
@@ -75,7 +74,7 @@ onMounted(async () => {
           </p>
 
           <button
-            class="mt-10 inline-flex h-14 items-center gap-3 rounded-full bg-[var(--ink)] px-7 text-sm font-medium text-white transition hover:-translate-y-0.5 hover:bg-black disabled:cursor-wait disabled:opacity-60"
+            class="mt-10 inline-flex h-[54px] items-center gap-3 rounded-full bg-[var(--ink)] px-7 text-[15px] font-medium text-[var(--paper)] transition hover:-translate-y-0.5 hover:bg-black disabled:cursor-wait disabled:opacity-60"
             :disabled="loading"
             @click="connect"
           >
@@ -125,7 +124,7 @@ onMounted(async () => {
           <NuxtLink
             v-if="status.account?.sync_status === 'completed'"
             to="/feed"
-            class="mt-10 inline-flex h-14 items-center rounded-full bg-[var(--ink)] px-7 text-sm font-medium text-white transition hover:-translate-y-0.5 hover:bg-black"
+            class="mt-10 inline-flex h-[54px] items-center rounded-full bg-[var(--ink)] px-7 text-[15px] font-medium text-[var(--paper)] transition hover:-translate-y-0.5 hover:bg-black"
           >
             {{ $t('onboarding.startPersonal') }}&nbsp; →
           </NuxtLink>
@@ -140,17 +139,17 @@ onMounted(async () => {
           </button>
         </template>
 
-        <p v-if="callbackError || error || status.account?.sync_error" role="alert" class="mt-7 max-w-lg rounded-[16px] border border-[#e6cfc7] bg-[#fbf1ee] px-4 py-3 text-sm leading-6 text-[#8a3d2a]">
+        <p v-if="callbackError || error || status.account?.sync_error" role="alert" class="mt-7 max-w-lg rounded-[14px] border border-[var(--danger-line)] bg-[var(--danger-soft)] px-4 py-3 text-sm leading-6 text-[var(--danger)]">
           {{ callbackError || status.account?.sync_error || error }}
         </p>
       </div>
 
-      <aside class="hero-night relative min-h-[430px] overflow-hidden rounded-[26px] p-7 text-white md:p-10">
+      <aside class="hero-night relative min-h-[430px] overflow-hidden rounded-[24px] p-7 text-white md:p-10">
         <div class="absolute right-8 top-8 flex gap-1.5">
           <span v-for="i in 3" :key="i" class="h-1.5 w-1.5 rounded-full bg-white/25" />
         </div>
 
-        <p class="text-[10px] font-semibold uppercase tracking-[.22em] text-[#e3b862]">{{ $t('onboarding.profileLive') }}</p>
+        <p class="text-[10px] font-semibold uppercase tracking-[.22em] text-[var(--gold)]">{{ $t('onboarding.profileLive') }}</p>
         <div v-if="status.connected" class="mt-12 space-y-1">
           <div
             v-for="(stage, index) in stages"
@@ -159,7 +158,7 @@ onMounted(async () => {
             :class="index === activeStage ? 'panel-night' : ''"
           >
             <span class="grid h-7 w-7 place-items-center rounded-full border text-xs transition-all"
-              :class="index < activeStage ? 'border-[#e3b862] bg-[#e3b862] text-[var(--night)]' : index === activeStage ? 'animate-breathe border-[#e3b862] bg-[#e3b862] text-[var(--night)]' : 'border-white/20 text-white/40'">
+              :class="index < activeStage ? 'border-[var(--gold)] bg-[var(--gold)] text-[var(--night)]' : index === activeStage ? 'animate-breathe border-[var(--gold)] bg-[var(--gold)] text-[var(--night)]' : 'border-white/20 text-white/40'">
               {{ index < activeStage ? '✓' : index + 1 }}
             </span>
             <span class="text-sm" :class="index <= activeStage ? 'text-white' : 'text-white/40'">{{ stage.label }}</span>
@@ -173,7 +172,7 @@ onMounted(async () => {
             <div class="h-10 w-3/5 rounded-xl bg-white/10" />
           </div>
           <div class="grid grid-cols-3 gap-3 pt-4">
-            <div v-for="i in 3" :key="i" class="h-24 rounded-[16px] border border-white/10 bg-white/5" />
+            <div v-for="i in 3" :key="i" class="h-24 rounded-[14px] border border-white/10 bg-white/5" />
           </div>
           <p class="pt-3 font-serif text-xl leading-7 text-white/45">{{ $t('onboarding.placeholderQuote') }}</p>
         </div>

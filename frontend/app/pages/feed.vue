@@ -69,10 +69,10 @@ onMounted(loadFeed)
 
 <template>
   <main class="mx-auto max-w-[1180px] px-5 pb-16 pt-2 md:px-8">
-    <section class="hero-night relative overflow-hidden rounded-[26px] px-6 py-14 text-white md:px-12 md:py-16">
+    <section class="hero-night relative overflow-hidden rounded-[24px] px-6 py-14 text-white md:px-12 md:py-16">
       <div class="mx-auto max-w-2xl text-center">
-        <p class="inline-flex items-center gap-2.5 text-[10px] font-semibold uppercase tracking-[.22em] text-[#e3b862]">
-          <span class="grid h-6 w-6 place-items-center rounded-full border border-[#e3b862]/35"><AppIcon name="sparkles" :size="12" /></span>
+        <p class="inline-flex items-center gap-2.5 text-[10px] font-semibold uppercase tracking-[.22em] text-[var(--gold)]">
+          <span class="grid h-6 w-6 place-items-center rounded-full border border-[var(--gold)]/35"><AppIcon name="sparkles" :size="12" /></span>
           {{ $t('feed.dailyBrief', { day: dayLabel }) }}
         </p>
         <h2 class="mt-7 font-serif text-[40px] leading-[1.03] tracking-[-.035em] md:text-[60px]">
@@ -99,7 +99,7 @@ onMounted(loadFeed)
       </div>
 
       <div v-if="data" class="relative mx-auto mt-12 grid max-w-4xl gap-4" :class="data.featured_opportunity ? 'md:grid-cols-2' : ''">
-        <div class="panel-night rounded-[20px] p-5">
+        <div class="panel-night rounded-[18px] p-5">
           <div class="flex items-start justify-between gap-4 border-b border-white/10 pb-4">
             <div>
               <p class="text-[11px] text-white/45">{{ $t('feed.opportunitiesToday') }}</p>
@@ -107,37 +107,37 @@ onMounted(loadFeed)
             </div>
             <div class="text-right">
               <p class="text-[11px] text-white/45">{{ $t('feed.bestLift') }}</p>
-              <p class="mt-1 text-[28px] leading-none tracking-[-.02em] text-[#e3b862]">{{ bestLift ? bestLift.toFixed(1) + '×' : '—' }}</p>
+              <p class="mt-1 text-[28px] leading-none tracking-[-.02em] text-[var(--gold)]">{{ bestLift ? bestLift.toFixed(1) + '×' : '—' }}</p>
             </div>
           </div>
           <div class="mt-5 flex h-24 items-end gap-2">
             <span
               v-for="(lift, index) in lifts"
               :key="index"
-              class="flex-1 rounded-t-[4px] bg-gradient-to-t from-[#8a6a1e]/40 to-[#e3b862]"
+              class="flex-1 rounded-t-[4px] bg-gradient-to-t from-[#8a6a1e]/40 to-[var(--gold)]"
               :style="{ height: `${Math.max(12, (lift / (bestLift || 1)) * 100)}%` }"
             />
             <span v-if="!lifts.length" class="w-full rounded-[4px] border border-dashed border-white/10 py-8 text-center text-[11px] text-white/35">{{ $t('feed.emptyTitle') }}</span>
           </div>
         </div>
 
-        <div v-if="data.featured_opportunity" class="panel-night divide-y divide-white/10 rounded-[20px]">
+        <div v-if="data.featured_opportunity" class="panel-night divide-y divide-white/10 rounded-[18px]">
           <div class="flex gap-3.5 p-5">
-            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-[11px] bg-white/10 text-[#e3b862]"><AppIcon name="trend" :size="17" /></span>
+            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-[12px] bg-white/10 text-[var(--gold)]"><AppIcon name="trend" :size="17" /></span>
             <div class="min-w-0">
               <p class="text-[11px] text-white/45">{{ $t('feed.strongMatch', { score: data.featured_opportunity.relevance_score }) }}</p>
               <p class="mt-1 line-clamp-2 text-[14px] leading-6">{{ data.featured_opportunity.title }}</p>
             </div>
           </div>
           <div class="flex gap-3.5 p-5">
-            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-[11px] bg-white/10 text-white/70"><AppIcon name="sparkles" :size="17" /></span>
+            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-[12px] bg-white/10 text-white/70"><AppIcon name="sparkles" :size="17" /></span>
             <div class="min-w-0">
               <p class="text-[11px] text-white/45">{{ $t('feed.whyFirst') }}</p>
               <p class="mt-1 line-clamp-2 text-[14px] leading-6">{{ data.featured_opportunity.explanation }}</p>
             </div>
           </div>
           <div v-if="data.featured_opportunity.life_moment" class="flex gap-3.5 p-5">
-            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-[11px] bg-white/10 text-white/70"><AppIcon name="moments" :size="17" /></span>
+            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-[12px] bg-white/10 text-white/70"><AppIcon name="moments" :size="17" /></span>
             <div class="min-w-0">
               <p class="text-[11px] text-white/45">{{ $t('nav.moments') }}</p>
               <p class="mt-1 line-clamp-2 text-[14px] leading-6">{{ data.featured_opportunity.life_moment.content }}</p>
@@ -148,18 +148,18 @@ onMounted(loadFeed)
     </section>
 
     <div class="mt-12 flex items-center justify-between border-b border-[var(--line)] pb-4">
-      <h2 class="text-sm font-medium">{{ $t('feed.worthCreating') }}</h2>
+      <h2 class="text-[11px] font-semibold uppercase tracking-[.18em] text-[var(--muted)]">{{ $t('feed.worthCreating') }}</h2>
       <button class="inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3.5 py-2 text-xs text-[var(--muted)] transition hover:text-[var(--ink)] disabled:opacity-60" :disabled="refreshing || loading" @click="refresh">
         <AppIcon name="sparkles" :size="14" />{{ refreshing ? $t('feed.refreshing') : $t('feed.refresh') }}
       </button>
     </div>
 
-    <p v-if="error" role="alert" class="mt-8 rounded-[18px] border border-[#e6cfc7] bg-[#fbf1ee] p-4 text-sm text-[#8b402a]">{{ error }}</p>
-    <div v-if="loading" class="mt-7 grid gap-6 lg:grid-cols-2"><div v-for="i in 4" :key="i" class="h-[560px] animate-pulse rounded-[22px] bg-[#eeeeeb]" /></div>
-    <div v-else-if="data && data.items.length === 0" class="mt-7 rounded-[22px] border border-dashed border-[var(--line)] bg-[var(--surface)] px-6 py-16 text-center">
+    <p v-if="error" role="alert" class="mt-8 rounded-[18px] border border-[var(--danger-line)] bg-[var(--danger-soft)] p-4 text-sm text-[var(--danger)]">{{ error }}</p>
+    <div v-if="loading" class="mt-7 grid gap-6 lg:grid-cols-2"><div v-for="i in 4" :key="i" class="h-[560px] animate-pulse rounded-[18px] bg-[var(--sand-soft)]" /></div>
+    <div v-else-if="data && data.items.length === 0" class="mt-7 rounded-[18px] border border-dashed border-[var(--line)] bg-[var(--surface)] px-6 py-16 text-center">
       <h3 class="font-serif text-2xl tracking-[-.02em]">{{ $t('feed.emptyTitle') }}</h3>
       <p class="mx-auto mt-3 max-w-md text-sm leading-6 text-[var(--muted)]">{{ $t('feed.emptyBody') }}</p>
-      <button class="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--ink)] px-5 py-3 text-sm font-medium text-white transition hover:bg-black disabled:cursor-wait disabled:opacity-60" :disabled="refreshing" @click="refresh">
+      <button class="mt-6 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-5 text-[14px] font-medium text-[var(--paper)] transition hover:bg-black disabled:cursor-wait disabled:opacity-60" :disabled="refreshing" @click="refresh">
         <AppIcon name="sparkles" :size="16" />{{ refreshing ? $t('feed.refreshing') : $t('feed.refresh') }}
       </button>
     </div>

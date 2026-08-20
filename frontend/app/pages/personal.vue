@@ -34,9 +34,9 @@ onMounted(async () => {
 
 <template>
   <main class="mx-auto max-w-[1000px] px-5 pb-16 pt-2 md:px-8">
-    <header class="flex flex-col gap-4 rounded-[22px] border border-[var(--line)] bg-[var(--surface)] p-6 md:flex-row md:items-center md:justify-between">
+    <header class="flex flex-col gap-4 rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-6 md:flex-row md:items-center md:justify-between">
       <div class="flex items-start gap-4">
-        <span class="grid h-11 w-11 shrink-0 place-items-center rounded-[13px] bg-[var(--accent-soft)] text-[#8a6413]"><AppIcon name="user" :size="19" /></span>
+        <span class="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-[var(--accent-soft)] text-[var(--accent-ink)]"><AppIcon name="user" :size="19" /></span>
         <div>
           <p class="text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--faint)]">{{ $t('personal.eyebrow') }}</p>
           <p class="mt-2 max-w-xl text-[15px] leading-6 text-[var(--muted)]">{{ $t('personal.subtitle') }}</p>
@@ -45,7 +45,7 @@ onMounted(async () => {
       <button v-if="profile && !editing" class="w-fit shrink-0 rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 py-2.5 text-sm transition hover:bg-[var(--paper)]" @click="beginEdit">{{ $t('personal.editMemory') }}</button>
     </header>
 
-    <div v-if="profile" class="mt-5 overflow-hidden rounded-[22px] border border-[var(--line)] bg-[var(--surface)]">
+    <div v-if="profile" class="mt-5 overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">
       <div v-if="instagram" class="flex items-center gap-3 border-b border-[var(--line)] px-6 py-5">
         <img v-if="instagram.profile_picture_url" :src="instagram.profile_picture_url" alt="" class="h-10 w-10 rounded-full object-cover">
         <div v-else class="grid h-10 w-10 place-items-center rounded-full bg-[var(--paper)] text-xs">IG</div>
@@ -68,7 +68,7 @@ onMounted(async () => {
       </div>
       <div v-if="editing" class="flex justify-end gap-3 p-5">
         <button class="rounded-full px-5 py-2.5 text-sm text-[var(--muted)] transition hover:text-[var(--ink)]" @click="editing = false">{{ $t('personal.cancel') }}</button>
-        <button class="rounded-full bg-[var(--ink)] px-5 py-2.5 text-sm text-white transition hover:bg-black disabled:opacity-60" :disabled="saving" @click="saveProfile">{{ saving ? $t('personal.saving') : $t('personal.saveMemory') }}</button>
+        <button class="inline-flex h-11 items-center justify-center rounded-full bg-[var(--ink)] px-5 text-[14px] font-medium text-[var(--paper)] transition hover:bg-black disabled:opacity-60" :disabled="saving" @click="saveProfile">{{ saving ? $t('personal.saving') : $t('personal.saveMemory') }}</button>
       </div>
     </div>
   </main>
@@ -76,6 +76,6 @@ onMounted(async () => {
 
 <style scoped>
 .memory-label { @apply text-[10px] font-semibold uppercase tracking-[.16em] text-[var(--faint)]; }
-.memory-copy { @apply mt-3 text-[17px] leading-7 text-[#3a3a3e]; }
+.memory-copy { @apply mt-3 text-[17px] leading-7 text-[var(--copy)]; }
 .memory-input { @apply mt-3 w-full rounded-[12px] border border-[var(--line)] bg-[var(--paper)] px-3 py-2.5 text-[15px] outline-none transition focus:border-[var(--muted)]; }
 </style>
