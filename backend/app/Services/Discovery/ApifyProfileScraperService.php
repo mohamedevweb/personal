@@ -83,7 +83,7 @@ class ApifyProfileScraperService implements ProfileDiscoveryService
         $avatarUrl = $item['profilePicUrl'] ?? null;
 
         $posts = collect((array) ($item['latestPosts'] ?? []))
-            ->filter('is_array')
+            ->filter(fn (mixed $post): bool => is_array($post))
             ->map(fn (array $post): ?DiscoveredPost => $this->normalizePost($post, $username, $displayName, $avatarUrl, $followers))
             ->filter()
             ->take($postsPerProfile)
@@ -96,6 +96,13 @@ class ApifyProfileScraperService implements ProfileDiscoveryService
             followers: $followers,
             posts: $posts,
             bio: is_string($item['biography'] ?? null) ? $item['biography'] : null,
+            externalId: isset($item['id']) ? (string) $item['id'] : null,
+            isPrivate: (bool) ($item['private'] ?? false),
+            metadata: array_filter([
+                'verified' => $item['verified'] ?? null,
+                'business_category' => $item['businessCategoryName'] ?? null,
+                'external_url' => $item['externalUrl'] ?? null,
+            ], fn (mixed $value): bool => $value !== null),
         );
     }
 
@@ -123,6 +130,12 @@ class ApifyProfileScraperService implements ProfileDiscoveryService
             publishedAt: $this->publishedAt($post['timestamp'] ?? null),
             format: $this->format((string) ($post['type'] ?? 'Image')),
             hashtags: array_values(array_filter((array) ($post['hashtags'] ?? []), 'is_string')),
+            externalId: isset($post['id']) ? (string) $post['id'] : null,
+            shares: max(0, (int) ($post['sharesCount'] ?? 0)),
+            metadata: array_filter([
+                'short_code' => $post['shortCode'] ?? null,
+                'duration' => $post['videoDuration'] ?? null,
+            ], fn (mixed $value): bool => $value !== null),
         );
     }
 

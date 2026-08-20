@@ -61,10 +61,13 @@ class SyncInstagramAccount implements ShouldQueue
                     'instagram_username' => $account->username,
                     'display_name' => $account->display_name,
                     'bio' => $account->bio,
-                    'niche' => $signals['niche'],
+                    'niche' => $signals['primary_niche'],
                     'positioning' => $account->bio,
                     'topics' => $signals['topics'],
                     'tone' => $signals['tone'],
+                    'audience_description' => implode(', ', $signals['audience']),
+                    'creator_dna' => $signals,
+                    'dna_analyzed_at' => now(),
                 ],
             );
 

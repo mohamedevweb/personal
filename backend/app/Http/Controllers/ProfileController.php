@@ -39,10 +39,32 @@ class ProfileController extends Controller
             'content_strengths.*' => ['string', 'max:120'],
         ]);
 
-        $profile = CreatorProfile::query()->updateOrCreate(
-            ['user_id' => $request->user()->id],
-            $data,
-        );
+        $profile = CreatorProfile::query()->firstOrNew(['user_id' => $request->user()->id]);
+        $profile->fill($data);
+
+        if (array_intersect(array_keys($data), ['niche', 'topics', 'audience_description', 'positioning', 'tone'])) {
+            $dna = array_merge([
+                'primary_niche' => null,
+                'sub_niches' => [],
+                'topics' => [],
+                'audience' => [],
+                'language' => 'und',
+                'content_pillars' => [],
+                'tone' => $profile->tone ?? [],
+            ], $profile->creator_dna ?? []);
+            $dna['primary_niche'] = $profile->niche;
+            $dna['topics'] = $profile->topics ?? [];
+            $dna['audience'] = array_values(array_filter([$profile->audience_description]));
+            $dna['tone'] = $profile->tone ?? [];
+            $profile->forceFill([
+                'creator_dna' => $dna,
+                'discovery_queries' => null,
+                'discovery_hashtags' => null,
+                'discovery_refreshed_at' => null,
+            ]);
+        }
+
+        $profile->save();
 
         return response()->json(['profile' => $profile]);
     }

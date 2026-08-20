@@ -130,7 +130,7 @@ class CreatorNicheService
     private function stringList(mixed $values, int $limit): array
     {
         return collect(is_array($values) ? $values : [])
-            ->filter('is_string')
+            ->filter(fn (mixed $value): bool => is_string($value))
             ->map(fn (string $value): string => Str::lower(trim($value)))
             ->filter()
             ->unique()

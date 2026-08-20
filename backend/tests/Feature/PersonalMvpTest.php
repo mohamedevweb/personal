@@ -123,6 +123,13 @@ class PersonalMvpTest extends TestCase
 
     public function test_personal_memory_is_editable(): void
     {
+        $this->user->creatorProfile->update([
+            'creator_dna' => ['primary_niche' => 'old niche', 'topics' => ['old topic']],
+            'discovery_queries' => ['old niche creator'],
+            'discovery_hashtags' => ['oldniche'],
+            'discovery_refreshed_at' => now(),
+        ]);
+
         $this->actingAs($this->user)->patchJson('/api/me/profile', [
             'positioning' => 'I build calm tools for independent creators.',
             'topics' => ['Creator tools', 'Founder stories'],
@@ -132,5 +139,10 @@ class PersonalMvpTest extends TestCase
             'user_id' => $this->user->id,
             'positioning' => 'I build calm tools for independent creators.',
         ]);
+
+        $profile = $this->user->creatorProfile()->firstOrFail();
+        $this->assertSame(['Creator tools', 'Founder stories'], $profile->creator_dna['topics']);
+        $this->assertNull($profile->discovery_queries);
+        $this->assertNull($profile->discovery_refreshed_at);
     }
 }

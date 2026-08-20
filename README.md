@@ -1,6 +1,6 @@
 # Personal
 
-Personal is a Nuxt 3 + Laravel 12 MVP foundation. The authenticated creator's Instagram connection is real, content generation runs on OpenAI, and the For You feed is ranked from real Instagram accounts scraped through Apify. Every scraping driver degrades to a deterministic mock when its key is absent, so the product runs unconfigured.
+Personal is a Nuxt 3 + Laravel 12 MVP foundation. The authenticated creator's Instagram connection is real, content generation runs on OpenAI, and the For You feed is ranked from public Instagram data fetched through HikerAPI or Apify. Every discovery driver degrades to a deterministic mock when its key is absent, so the product runs unconfigured.
 
 PostgreSQL is the configured application database. PHPUnit uses an isolated in-memory SQLite database for fast integration tests.
 
@@ -57,21 +57,21 @@ Cost and depth are tunable with `OPENAI_MODEL`, `OPENAI_MAX_OUTPUT_TOKENS`, and 
 
 ## How the For You feed ranks
 
-A post earns its place by beating the account that published it — not by coming from a large one. Discovery runs in two stages, and only the second one is allowed to score anything.
+A post earns its place by beating the account that published it, not by coming from a large one. The connected account still comes from Meta's official Instagram API. Public discovery goes through `InstagramDataProvider`, with HikerAPI as the primary driver, Apify as a fallback, and a deterministic mock for tests and unconfigured development.
 
-**Stage 1 — `DiscoverNicheContent`.** The creator's niche is expanded into hashtags, those pages are scraped, and the accounts and posts behind them are recorded. The actor returns no follower count on post-level results, so a hashtag row genuinely cannot be judged: nothing here is scored, rows land with `measured_at` null, and stage 1 is best understood as harvesting *accounts* rather than posts.
+**Creator DNA.** `SyncInstagramAccount` reads the connected profile and recent media, then stores a structured `creator_dna` with primary niche, sub-niches, topics, audience, language, content pillars and tone. The model-backed analysis has a deterministic fallback, so Instagram sync does not depend on an LLM being available.
 
-Hashtag quality decides everything downstream. Reach-bait tags (`viralreels`, `explorepage`, `fyp`, `instagood`…) are not niches — they are what accounts with no audience post under in order to be seen — so scraping them returns spam by construction. `config('services.discovery.blocked_hashtags')` strips them from every expansion, enforced in code rather than trusted to the prompt.
+**Stage 1, `DiscoverNicheContent`.** The Creator DNA becomes precise account-search phrases. HikerAPI finds seed creators, then Instagram suggested accounts expand each seed into a reusable creator graph. Creators are upserted by Instagram ID when available, relationships are refreshed rather than duplicated, and global query cooldowns avoid paying twice for a niche Personal already knows.
 
-**Stage 2 — `MeasureAccountEngagement`.** Each account found is scraped as a whole profile, which yields three things a hashtag page never exposes: the real follower count, what the account is actually about, and the median engagement of its recent posts. That median is the baseline, and *every* post the account has in the feed is scored against it — including ones picked up earlier through a hashtag.
+**Stage 2, `MeasureAccountEngagement`.** Each discovered account is fetched with its recent posts. Its own bio and captions classify its niche, normalized niches are attached in `creator_niches`, and its recent performance establishes the baseline used to score every post from that account.
 
 Three numbers come out of it:
 
 | Column | Meaning |
 | --- | --- |
-| `creators.baseline_engagement` | The account's normal post, as the median of its recent likes + comments. |
-| `content_posts.outlier_score` | Engagement over that baseline. `1.0` is an ordinary post for the account, `3.0` is a genuine breakout. |
-| `content_posts.engagement_rate` | Engagement as a share of the audience, so a 20k and a 2M account are comparable. |
+| `creators.performance_baselines` | Median views and median available engagement for the account's recent posts. |
+| `content_posts.outlier_score` | Weighted lift over those available baselines. `1.0` is ordinary for the account, `3.0` is a genuine breakout. |
+| `content_posts.engagement_rate` | Available engagement as a share of the audience, so a 20k and a 2M account are comparable. |
 
 `performance_ratio` is kept in step with `outlier_score` for the clients still reading it.
 
@@ -81,11 +81,11 @@ A lift is a ratio, and a ratio has no sense of scale: an account whose median po
 
 There is deliberately **no fallback**. An unmeasured post carries no evidence, so when measurement has not run yet — or has failed in the queue — the feed shows its empty state rather than degrading to raw scrape output. A page of two-like posts is worth less than an honest empty one.
 
-`RecommendationService` then weighs outlier score (0.35), creator similarity (0.20), topic similarity (0.15), reach (0.15) and freshness (0.15). Both similarity terms match the creator's own vocabulary as substrings, because hashtags arrive glued together — `vegan` has to find `veganmealprep`.
+`FeedRanker` then combines outlier score, creator relevance, niche similarity, reach and freshness. Every weight and ceiling lives under `services.discovery.ranking`, so the formula can be tuned without being duplicated across jobs or controllers.
 
 Niche is read from the account itself. `CreatorNicheService` classifies a discovered creator from their bio, their recurring hashtags and a sample of captions, and the result is cached on the creator so the model is not re-run on every measurement. Discovery previously stamped every account with the niche of whichever user found them, which described the searcher rather than the creator.
 
-Scraping cost is capped on every axis: hashtags have a cooldown (`DISCOVERY_COOLDOWN_DAYS`), accounts have their own (`DISCOVERY_MEASURE_COOLDOWN_DAYS`), and a single run measures at most `DISCOVERY_MEASURE_BATCH` accounts. A daily scheduled pass re-measures the stalest tracked accounts within those same limits, which is also how the feed learns about new posts between hashtag runs.
+Discovery cost is capped on every axis: search queries have a cooldown (`DISCOVERY_COOLDOWN_DAYS`), accounts have their own (`DISCOVERY_MEASURE_COOLDOWN_DAYS`), and one run measures at most `DISCOVERY_MEASURE_BATCH` accounts. A daily scheduled pass re-measures the stalest tracked accounts within those same limits, which is also how the feed learns about new posts.
 
 ## Instagram app setup
 

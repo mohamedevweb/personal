@@ -18,6 +18,10 @@ class ContentPost extends Model
             'engagement_rate' => 'float',
             'outlier_score' => 'float',
             'measured_at' => 'datetime',
+            'shares' => 'integer',
+            'metadata' => 'array',
+            'last_fetched_at' => 'datetime',
+            'metrics_updated_at' => 'datetime',
         ];
     }
 

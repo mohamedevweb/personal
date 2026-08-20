@@ -40,6 +40,7 @@ class MockProfileScraperService implements ProfileDiscoveryService
             followers: $followers,
             posts: $posts,
             bio: 'Sample bio for '.$username,
+            externalId: $username,
         );
     }
 
@@ -64,6 +65,7 @@ class MockProfileScraperService implements ProfileDiscoveryService
             publishedAt: CarbonImmutable::now()->subHours(($postSeed % 240) + 2),
             format: self::FORMATS[$postSeed % count(self::FORMATS)],
             hashtags: [],
+            externalId: "mock-{$username}-{$index}",
         );
     }
 }
