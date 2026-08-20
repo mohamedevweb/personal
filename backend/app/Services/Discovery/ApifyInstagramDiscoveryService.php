@@ -145,6 +145,8 @@ class ApifyInstagramDiscoveryService implements ContentDiscoveryService
             publishedAt: $this->publishedAt($item['timestamp'] ?? null),
             format: $this->format((string) ($item['type'] ?? 'Image')),
             hashtags: array_values(array_filter((array) ($item['hashtags'] ?? []), 'is_string')),
+            externalId: isset($item['id']) ? (string) $item['id'] : null,
+            shares: max(0, (int) ($item['sharesCount'] ?? 0)),
         );
     }
 

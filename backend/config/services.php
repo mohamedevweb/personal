@@ -40,9 +40,16 @@ return [
     ],
 
     'discovery' => [
-        // "apify" scrapes real niche content; "mock" returns deterministic sample
-        // posts so the feed is testable without a paid Apify run.
-        'driver' => env('DISCOVERY_DRIVER', 'mock'),
+        // HikerAPI is the primary public-data provider. Apify remains available as
+        // a gradual fallback, while mock keeps local development deterministic.
+        'driver' => env('DISCOVERY_DRIVER', 'hiker'),
+        'hiker' => [
+            'api_key' => env('HIKER_API_KEY'),
+            'base_url' => env('HIKER_BASE_URL', 'https://api.hikerapi.com'),
+            'timeout' => (int) env('HIKER_TIMEOUT', 30),
+            'retries' => (int) env('HIKER_RETRIES', 3),
+            'retry_delay_ms' => (int) env('HIKER_RETRY_DELAY_MS', 500),
+        ],
         'apify' => [
             'token' => env('APIFY_TOKEN'),
             'actor' => env('APIFY_INSTAGRAM_ACTOR', 'apify~instagram-scraper'),
@@ -58,6 +65,10 @@ return [
         ],
         // Recent posts pulled per account to average the engagement rate over.
         'profile_posts' => (int) env('DISCOVERY_PROFILE_POSTS', 12),
+        'search_query_limit' => (int) env('DISCOVERY_SEARCH_QUERY_LIMIT', 6),
+        'search_results_per_query' => (int) env('DISCOVERY_SEARCH_RESULTS_PER_QUERY', 8),
+        'seed_limit' => (int) env('DISCOVERY_SEED_LIMIT', 8),
+        'related_per_seed' => (int) env('DISCOVERY_RELATED_PER_SEED', 6),
         // A creator re-measured within this window is skipped, so profile-scrape
         // cost scales with the number of tracked accounts, not syncs.
         'measure_cooldown_days' => (int) env('DISCOVERY_MEASURE_COOLDOWN_DAYS', 3),
@@ -85,6 +96,17 @@ return [
         // Nothing under these thresholds is evidence of anything.
         'min_followers' => (int) env('DISCOVERY_MIN_FOLLOWERS', 5000),
         'min_post_engagement' => (int) env('DISCOVERY_MIN_POST_ENGAGEMENT', 500),
+        'ranking' => [
+            'weights' => [
+                'outlier' => (float) env('FEED_WEIGHT_OUTLIER', 0.35),
+                'creator_relevance' => (float) env('FEED_WEIGHT_CREATOR_RELEVANCE', 0.20),
+                'niche_similarity' => (float) env('FEED_WEIGHT_NICHE_SIMILARITY', 0.15),
+                'reach' => (float) env('FEED_WEIGHT_REACH', 0.15),
+                'recency' => (float) env('FEED_WEIGHT_RECENCY', 0.15),
+            ],
+            'outlier_ceiling' => (float) env('FEED_OUTLIER_CEILING', 3.0),
+            'reach_ceiling' => (float) env('FEED_REACH_CEILING', 6.0),
+        ],
         // Reach-bait tags. These are not niches — they are what accounts with no
         // audience post under in order to be seen, so scraping them returns spam by
         // construction. Stripped from every hashtag expansion.

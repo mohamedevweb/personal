@@ -3,26 +3,22 @@
 namespace App\Jobs;
 
 use App\Exceptions\ContentDiscoveryException;
-use App\Models\ContentPost;
 use App\Models\Creator;
-use App\Models\DiscoveredHashtag;
+use App\Models\CreatorRelationship;
+use App\Models\DiscoveryQuery;
 use App\Models\User;
-use App\Services\Discovery\ContentDiscoveryService;
-use App\Services\Discovery\DiscoveredPost;
+use App\Services\Discovery\DiscoveredProfile;
+use App\Services\Discovery\InstagramDataProvider;
 use App\Services\Discovery\NicheExpansionService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
 /**
- * Stage one of discovery: expand the creator's niche into hashtags, scrape those
- * pages, and record the accounts and posts behind them.
- *
- * A hashtag page tells you a post exists, not whether it did well — the page has
- * no follower count and no sense of what that account normally gets. So nothing
- * here is scored. Rows land unmeasured, MeasureAccountEngagement scrapes the
- * accounts themselves, and the score is written there against a real baseline.
+ * Finds seed creators from Creator DNA search terms, expands them through
+ * Instagram's suggested accounts graph, then queues the existing measurement
+ * pipeline to fetch posts and calculate creator-relative outliers.
  */
 class DiscoverNicheContent implements ShouldQueue
 {
@@ -30,134 +26,163 @@ class DiscoverNicheContent implements ShouldQueue
 
     public int $tries = 2;
 
-    public int $timeout = 180;
+    public int $timeout = 300;
 
     public function __construct(public readonly int $userId) {}
 
-    public function handle(NicheExpansionService $expansion, ContentDiscoveryService $discovery): void
+    public function handle(NicheExpansionService $expansion, InstagramDataProvider $provider): void
     {
-        $user = User::query()->find($this->userId);
+        $user = User::query()->with('creatorProfile')->find($this->userId);
 
         if (! $user) {
             return;
         }
 
-        $hashtags = $expansion->hashtagsFor($user);
+        $queries = $this->dueQueries($expansion->queriesFor($user));
+        $fallbackNiche = $user->creatorProfile?->niche ?: 'Unclassified';
+        $seeds = collect();
 
-        if ($hashtags === []) {
-            return;
+        foreach ($queries as $query) {
+            try {
+                $found = $provider->searchAccounts($query, (int) config('services.discovery.search_results_per_query'));
+                $this->markSearched($query);
+                $seeds->push(...$found);
+            } catch (ContentDiscoveryException $exception) {
+                Log::warning('Creator search skipped.', ['query' => $query, 'exception' => $exception]);
+            }
         }
 
-        // Only scrape hashtags whose cooldown has lapsed. The feed reads a shared
-        // pool, so a niche another user already refreshed needs no second scrape.
-        $due = $this->dueHashtags($hashtags);
+        $seeds = $seeds
+            ->filter(fn (DiscoveredProfile $profile): bool => ! $profile->isPrivate)
+            ->unique(fn (DiscoveredProfile $profile): string => $profile->externalId ?: $profile->username)
+            ->take((int) config('services.discovery.seed_limit'))
+            ->values();
 
-        if ($due === []) {
-            return;
+        // A previous discovery may have stored creators before its measurement
+        // job failed. Search cooldowns must not prevent a later refresh from
+        // resuming those accounts, otherwise the feed stays empty for days.
+        $usernames = collect($this->recoverableHandles($fallbackNiche));
+
+        foreach ($seeds as $seedProfile) {
+            $seed = $this->storeCreator($seedProfile, $fallbackNiche);
+            $usernames->push($seed->username);
+
+            if (! $seedProfile->externalId) {
+                continue;
+            }
+
+            try {
+                $related = $provider->getRelatedAccounts(
+                    $seedProfile->externalId,
+                    (int) config('services.discovery.related_per_seed'),
+                );
+            } catch (ContentDiscoveryException $exception) {
+                Log::warning('Related creator expansion skipped.', ['creator' => $seed->username, 'exception' => $exception]);
+
+                continue;
+            }
+
+            $this->storeRelated($seed, $related, $fallbackNiche, $usernames);
         }
 
-        try {
-            $posts = $discovery->discover($due, (int) config('services.discovery.apify.results_limit'));
-        } catch (ContentDiscoveryException $exception) {
-            // Discovery is best-effort: log and leave the existing feed untouched
-            // rather than failing the queue and blocking the sync pipeline.
-            Log::warning('Niche discovery skipped.', ['user' => $user->id, 'exception' => $exception]);
+        $handles = $usernames->filter()->unique()->values()->all();
 
-            return;
+        if ($handles !== []) {
+            MeasureAccountEngagement::dispatch($handles);
         }
+    }
 
-        // The scrape ran (even if it returned nothing), so start the cooldown to
-        // avoid paying to re-scrape the same hashtags on the next sync.
-        $this->markScraped($due);
+    /** @return list<string> */
+    private function recoverableHandles(string $niche): array
+    {
+        $measurementCutoff = now()->subDays((int) config('services.discovery.measure_cooldown_days'));
 
-        if ($posts->isEmpty()) {
-            return;
-        }
+        return Creator::query()
+            ->where('niche', $niche)
+            ->where(function ($query) use ($measurementCutoff): void {
+                $query->whereNull('last_measured_at')
+                    ->orWhere('last_measured_at', '<=', $measurementCutoff);
+            })
+            ->orderByRaw('CASE WHEN last_measured_at IS NULL THEN 0 ELSE 1 END')
+            ->orderBy('last_measured_at')
+            ->limit((int) config('services.discovery.measure_batch'))
+            ->pluck('username')
+            ->filter()
+            ->values()
+            ->all();
+    }
 
-        $niche = $user->creatorProfile?->niche ?: Str::headline($hashtags[0]);
+    /** @param list<string> $queries @return list<string> */
+    private function dueQueries(array $queries): array
+    {
+        $recent = DiscoveryQuery::query()
+            ->whereIn('query', $queries)
+            ->where('last_searched_at', '>', now()->subDays((int) config('services.discovery.cooldown_days')))
+            ->pluck('query')
+            ->all();
 
-        foreach ($posts as $post) {
-            $this->store($post, $niche);
-        }
+        return array_values(array_diff($queries, $recent));
+    }
 
-        // Measuring the accounts is what makes these posts rankable at all, so it
-        // is dispatched with the exact handles just found rather than a niche
-        // label — which the profile scrape is about to overwrite anyway.
-        MeasureAccountEngagement::dispatch(
-            $posts->map(fn (DiscoveredPost $post): string => $post->username)->unique()->values()->all(),
-        );
+    private function markSearched(string $query): void
+    {
+        DiscoveryQuery::query()->updateOrCreate(['query' => $query], ['last_searched_at' => now()]);
+    }
+
+    private function storeCreator(DiscoveredProfile $profile, string $fallbackNiche): Creator
+    {
+        $creator = Creator::query()
+            ->when($profile->externalId, fn ($query) => $query->where('instagram_user_id', $profile->externalId))
+            ->orWhere('username', $profile->username)
+            ->first() ?: new Creator;
+
+        $creator->fill(array_filter([
+            'instagram_user_id' => $profile->externalId,
+            'username' => $profile->username,
+            'display_name' => $profile->displayName ?: $profile->username,
+            'avatar_url' => $profile->avatarUrl,
+            'bio' => $profile->bio,
+            'metadata' => array_merge($creator->metadata ?? [], $profile->metadata),
+            'followers' => $profile->followers > 0 ? $profile->followers : ($creator->followers ?: 0),
+            'niche' => $creator->exists ? $creator->niche : $fallbackNiche,
+            'average_views' => $creator->average_views ?: 0,
+            'average_likes' => $creator->average_likes ?: 0,
+            'discovered_at' => $creator->discovered_at ?: now(),
+        ], fn (mixed $value): bool => $value !== null))->save();
+
+        return $creator;
     }
 
     /**
-     * @param  list<string>  $hashtags
-     * @return list<string>
+     * @param  Collection<int, DiscoveredProfile>  $related
+     * @param  Collection<int, string>  $usernames
      */
-    private function dueHashtags(array $hashtags): array
+    private function storeRelated(Creator $seed, Collection $related, string $fallbackNiche, Collection $usernames): void
     {
-        $recent = DiscoveredHashtag::query()
-            ->whereIn('tag', $hashtags)
-            ->where('last_scraped_at', '>', now()->subDays((int) config('services.discovery.cooldown_days')))
-            ->pluck('tag')
-            ->all();
+        $count = max(1, $related->count());
 
-        return array_values(array_diff($hashtags, $recent));
-    }
+        foreach ($related as $index => $profile) {
+            if ($profile->isPrivate) {
+                continue;
+            }
 
-    /** @param list<string> $hashtags */
-    private function markScraped(array $hashtags): void
-    {
-        foreach ($hashtags as $tag) {
-            DiscoveredHashtag::query()->updateOrCreate(['tag' => $tag], ['last_scraped_at' => now()]);
+            $creator = $this->storeCreator($profile, $fallbackNiche);
+            $usernames->push($creator->username);
+
+            if ($creator->is($seed)) {
+                continue;
+            }
+
+            $relationship = CreatorRelationship::query()->firstOrNew([
+                'source_creator_id' => $seed->id,
+                'related_creator_id' => $creator->id,
+                'relationship_type' => 'instagram_suggested',
+            ]);
+            $relationship->fill([
+                'relevance_score' => max(0.2, 1 - ($index / $count)),
+                'discovered_at' => $relationship->discovered_at ?: now(),
+                'last_seen_at' => now(),
+            ])->save();
         }
-    }
-
-    private function store(DiscoveredPost $post, string $niche): void
-    {
-        // firstOrCreate, not updateOrCreate: an account already measured has a niche
-        // read from its own bio and captions, and a follower count from its profile.
-        // A hashtag result knows neither and must not overwrite either.
-        $creator = Creator::query()->firstOrCreate(
-            ['username' => $post->username],
-            [
-                'display_name' => $post->displayName ?: $post->username,
-                'avatar_url' => $post->avatarUrl,
-                // A placeholder borrowed from the user who found the account. It
-                // holds only until the profile scrape classifies the account itself.
-                'niche' => $niche,
-                'followers' => $post->followers,
-                'average_views' => $post->views,
-                'average_likes' => $post->likes,
-            ],
-        );
-
-        ContentPost::query()->updateOrCreate(
-            ['source_url' => $post->sourceUrl],
-            [
-                'creator_id' => $creator->id,
-                'platform' => 'instagram',
-                'format' => $post->format,
-                'hook' => $this->hook($post, $niche),
-                'caption' => $post->caption,
-                'thumbnail_url' => $post->thumbnailUrl,
-                'views' => $post->views,
-                'likes' => $post->likes,
-                'comments' => $post->comments,
-                'published_at' => $post->publishedAt,
-                'tags' => $post->hashtags,
-                // performance_ratio, outlier_score and engagement_rate are absent on
-                // purpose. Nothing here can say whether this beat the creator's own
-                // average, and a guess is exactly what put flat posts in the feed.
-                // why_it_works and the analysis fields are left to their defaults.
-                // Writing them here would blank the breakdown of a post already
-                // measured or already opened by a creator.
-            ],
-        );
-    }
-
-    private function hook(DiscoveredPost $post, string $niche): string
-    {
-        $firstLine = trim((string) Str::of($post->caption)->before("\n"));
-
-        return Str::limit($firstLine !== '' ? $firstLine : "New {$niche} post", 120);
     }
 }

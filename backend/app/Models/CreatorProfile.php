@@ -17,6 +17,9 @@ class CreatorProfile extends Model
             'goals' => 'array',
             'content_strengths' => 'array',
             'discovery_hashtags' => 'array',
+            'creator_dna' => 'array',
+            'discovery_queries' => 'array',
+            'dna_analyzed_at' => 'datetime',
             'discovery_refreshed_at' => 'datetime',
         ];
     }

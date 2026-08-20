@@ -5,11 +5,12 @@ namespace App\Jobs;
 use App\Exceptions\ContentDiscoveryException;
 use App\Models\ContentPost;
 use App\Models\Creator;
+use App\Services\Discovery\CreatorNicheCatalog;
 use App\Services\Discovery\CreatorNicheService;
 use App\Services\Discovery\DiscoveredPost;
 use App\Services\Discovery\DiscoveredProfile;
-use App\Services\Discovery\PostPerformance;
-use App\Services\Discovery\ProfileDiscoveryService;
+use App\Services\Discovery\InstagramDataProvider;
+use App\Services\Discovery\OutlierScore;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
@@ -37,33 +38,46 @@ class MeasureAccountEngagement implements ShouldQueue
     /** @param list<string> $usernames Accounts to measure, bare handles. */
     public function __construct(public readonly array $usernames) {}
 
-    public function handle(ProfileDiscoveryService $profiles, CreatorNicheService $niches, PostPerformance $performance): void
-    {
+    public function handle(
+        InstagramDataProvider $provider,
+        CreatorNicheService $niches,
+        CreatorNicheCatalog $catalog,
+        OutlierScore $performance,
+    ): void {
         $due = $this->dueUsernames();
 
         if ($due === []) {
             return;
         }
 
-        // Scraped in chunks rather than one call. A synchronous Apify run is capped
-        // at five minutes, and a full batch of accounts with their recent posts does
-        // not reliably finish inside it — so one oversized request loses the whole
-        // batch. Chunking also contains the damage: a chunk that fails costs only
-        // its own accounts, and the rest are still measured.
-        foreach (array_chunk($due, max(1, (int) config('services.discovery.measure_chunk'))) as $chunk) {
+        foreach ($due as $username) {
             try {
-                $scraped = $profiles->profiles($chunk, (int) config('services.discovery.profile_posts'));
+                $profile = $provider->getProfile($username);
+
+                if (! $profile) {
+                    continue;
+                }
+
+                $posts = $profile->posts->isNotEmpty()
+                    ? $profile->posts->take((int) config('services.discovery.profile_posts'))->values()
+                    : $provider->getPosts($profile->username, (int) config('services.discovery.profile_posts'), $profile->externalId);
             } catch (ContentDiscoveryException $exception) {
-                // Measurement is best-effort: log and leave existing rankings intact
-                // rather than failing the queue.
-                Log::warning('Account engagement measurement skipped.', ['accounts' => $chunk, 'exception' => $exception]);
+                Log::warning('Account engagement measurement skipped.', ['account' => $username, 'exception' => $exception]);
 
                 continue;
             }
 
-            foreach ($scraped as $profile) {
-                $this->measure($profile, $niches, $performance);
-            }
+            $this->measure(new DiscoveredProfile(
+                username: $profile->username,
+                displayName: $profile->displayName,
+                avatarUrl: $profile->avatarUrl,
+                followers: $profile->followers,
+                posts: $posts,
+                bio: $profile->bio,
+                externalId: $profile->externalId,
+                isPrivate: $profile->isPrivate,
+                metadata: $profile->metadata,
+            ), $niches, $catalog, $performance);
         }
     }
 
@@ -95,25 +109,41 @@ class MeasureAccountEngagement implements ShouldQueue
         );
     }
 
-    private function measure(DiscoveredProfile $profile, CreatorNicheService $niches, PostPerformance $performance): void
-    {
+    private function measure(
+        DiscoveredProfile $profile,
+        CreatorNicheService $niches,
+        CreatorNicheCatalog $catalog,
+        OutlierScore $performance,
+    ): void {
         if ($profile->posts->isEmpty()) {
             return;
         }
 
-        $baseline = $performance->baseline($profile->posts);
-        $existing = Creator::query()->where('username', $profile->username)->first();
+        $baselines = $performance->baselines($profile->posts);
+        $baseline = max(0, (int) round($baselines['engagement'] ?? 0));
+        $existing = Creator::query()
+            ->when($profile->externalId, fn ($query) => $query->where('instagram_user_id', $profile->externalId))
+            ->orWhere('username', $profile->username)
+            ->first();
         $qualified = $profile->followers >= (int) config('services.discovery.min_followers');
 
         $attributes = [
             'display_name' => $profile->displayName ?: $profile->username,
             'avatar_url' => $profile->avatarUrl,
+            'instagram_user_id' => $profile->externalId ?: $existing?->instagram_user_id,
+            'username' => $profile->username,
+            'bio' => $profile->bio,
+            'metadata' => $profile->metadata,
             'followers' => $profile->followers,
             'average_views' => (int) $profile->posts->map(fn (DiscoveredPost $p): int => $p->views)->avg(),
             'average_likes' => (int) $profile->posts->map(fn (DiscoveredPost $p): int => $p->likes)->avg(),
             'baseline_engagement' => $baseline,
+            'performance_baselines' => $baselines,
             'avg_engagement_rate' => $profile->engagementRate(),
             'last_measured_at' => now(),
+            'last_fetched_at' => now(),
+            'metrics_updated_at' => now(),
+            'discovered_at' => $existing?->discovered_at ?: now(),
         ];
 
         if ($qualified) {
@@ -124,7 +154,12 @@ class MeasureAccountEngagement implements ShouldQueue
             $attributes['niche'] = $profile->username;
         }
 
-        $creator = Creator::query()->updateOrCreate(['username' => $profile->username], $attributes);
+        $creator = $existing ?: new Creator;
+        $creator->fill($attributes)->save();
+
+        if ($qualified && is_array($creator->niche_topics)) {
+            $catalog->sync($creator, $creator->niche, $creator->niche_topics);
+        }
 
         foreach ($profile->posts as $post) {
             $this->storePost($creator, $post);
@@ -135,7 +170,7 @@ class MeasureAccountEngagement implements ShouldQueue
         // is what keeps them out of every feed. A ratio over a two-like median is
         // arithmetic, not evidence, and that is what was reaching creators.
         $qualified
-            ? $this->score($creator, $baseline, $performance)
+            ? $this->score($creator, $baselines, $performance)
             : $this->disqualify($creator);
     }
 
@@ -173,25 +208,36 @@ class MeasureAccountEngagement implements ShouldQueue
 
     private function storePost(Creator $creator, DiscoveredPost $post): void
     {
-        ContentPost::query()->updateOrCreate(
-            ['source_url' => $post->sourceUrl],
-            [
-                'creator_id' => $creator->id,
-                'platform' => 'instagram',
-                'format' => $post->format,
-                'hook' => $this->hook($post, $creator->niche),
-                'caption' => $post->caption,
-                'thumbnail_url' => $post->thumbnailUrl,
-                'views' => $post->views,
-                'likes' => $post->likes,
-                'comments' => $post->comments,
-                'published_at' => $post->publishedAt,
-                'tags' => $post->hashtags,
-                // why_it_works is written by score() once the baseline is known;
-                // the hook and structure breakdown is generated lazily the first
-                // time a creator opens the post.
-            ],
-        );
+        $existing = ContentPost::query()
+            ->when($post->externalId, fn ($query) => $query->where('instagram_media_id', $post->externalId))
+            ->orWhere('source_url', $post->sourceUrl)
+            ->first();
+
+        $attributes = [
+            'creator_id' => $creator->id,
+            'instagram_media_id' => $post->externalId ?: $existing?->instagram_media_id,
+            'source_url' => $post->sourceUrl,
+            'platform' => 'instagram',
+            'format' => $post->format,
+            'hook' => $this->hook($post, $creator->niche),
+            'caption' => $post->caption,
+            'thumbnail_url' => $post->thumbnailUrl,
+            'views' => $post->views,
+            'likes' => $post->likes,
+            'comments' => $post->comments,
+            'shares' => $post->shares,
+            'published_at' => $post->publishedAt,
+            'tags' => $post->hashtags,
+            'metadata' => $post->metadata,
+            'last_fetched_at' => now(),
+            'metrics_updated_at' => now(),
+            // why_it_works is written by score() once the baseline is known;
+            // the hook and structure breakdown is generated lazily the first
+            // time a creator opens the post.
+        ];
+
+        $content = $existing ?: new ContentPost;
+        $content->fill($attributes)->save();
     }
 
     /**
@@ -200,12 +246,13 @@ class MeasureAccountEngagement implements ShouldQueue
      * a hashtag were stored unscored, and posts scored against an older baseline
      * would no longer be comparable to the ones written a moment ago.
      */
-    private function score(Creator $creator, int $baseline, PostPerformance $performance): void
+    /** @param array{views: ?float, engagement: ?float} $baselines */
+    private function score(Creator $creator, array $baselines, OutlierScore $performance): void
     {
-        $creator->posts()->chunkById(200, function ($posts) use ($creator, $baseline, $performance): void {
+        $creator->posts()->chunkById(200, function ($posts) use ($creator, $baselines, $performance): void {
             foreach ($posts as $post) {
-                $engagement = $post->likes + $post->comments;
-                $outlier = $performance->outlierScore($engagement, $baseline);
+                $engagement = $post->likes + $post->comments + $post->shares;
+                $outlier = $performance->score($post, $baselines);
 
                 $post->forceFill([
                     'outlier_score' => $outlier,

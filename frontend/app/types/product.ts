@@ -17,6 +17,7 @@ export interface ContentPost {
   views: number
   likes: number
   comments: number
+  shares: number
   published_at: string
   performance_ratio: number
   /** Engagement over this creator's own median post. 1.0 is an average post for them. */
@@ -70,6 +71,15 @@ export interface PersonalProfile {
   current_projects: string[] | null
   goals: string[] | null
   content_strengths: string[] | null
+  creator_dna?: {
+    primary_niche: string | null
+    sub_niches: string[]
+    topics: string[]
+    audience: string[]
+    language: string
+    content_pillars: string[]
+    tone: string[]
+  } | null
 }
 
 export interface Remix {

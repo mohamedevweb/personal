@@ -25,6 +25,8 @@ class InstagramConnectionController extends Controller
             return response()->json(['connected' => false]);
         }
 
+        $profile = $request->user()->creatorProfile()->first();
+
         return response()->json([
             'connected' => true,
             'account' => [
@@ -40,7 +42,13 @@ class InstagramConnectionController extends Controller
                 'connected_at' => $account->connected_at,
                 'last_synced_at' => $account->last_synced_at,
             ],
-            'profile' => $request->user()->creatorProfile()->first(),
+            'profile' => $profile ? [
+                'niche' => $profile->niche,
+                'topics' => $profile->topics,
+                'tone' => $profile->tone,
+                'creator_dna' => $profile->creator_dna,
+                'dna_analyzed_at' => $profile->dna_analyzed_at,
+            ] : null,
         ]);
     }
 
