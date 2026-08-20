@@ -155,7 +155,7 @@ onMounted(loadFeed)
     </div>
 
     <p v-if="error" role="alert" class="mt-8 rounded-[18px] border border-[var(--danger-line)] bg-[var(--danger-soft)] p-4 text-sm text-[var(--danger)]">{{ error }}</p>
-    <div v-if="loading" class="mt-7 grid gap-6 lg:grid-cols-2"><div v-for="i in 4" :key="i" class="h-[560px] animate-pulse rounded-[18px] bg-[var(--sand-soft)]" /></div>
+    <div v-if="loading" class="mt-7 grid gap-5 sm:grid-cols-2 xl:grid-cols-3"><div v-for="i in 6" :key="i" class="h-[380px] animate-pulse rounded-[18px] bg-[var(--sand-soft)]" /></div>
     <div v-else-if="data && data.items.length === 0" class="mt-7 rounded-[18px] border border-dashed border-[var(--line)] bg-[var(--surface)] px-6 py-16 text-center">
       <h3 class="font-serif text-2xl tracking-[-.02em]">{{ $t('feed.emptyTitle') }}</h3>
       <p class="mx-auto mt-3 max-w-md text-sm leading-6 text-[var(--muted)]">{{ $t('feed.emptyBody') }}</p>
@@ -163,7 +163,7 @@ onMounted(loadFeed)
         <AppIcon name="sparkles" :size="16" />{{ refreshing ? $t('feed.refreshing') : $t('feed.refresh') }}
       </button>
     </div>
-    <div v-else class="mt-7 grid items-start gap-6 lg:grid-cols-2">
+    <div v-else class="mt-7 grid items-start gap-5 sm:grid-cols-2 xl:grid-cols-3">
       <ContentCard v-for="post in data?.items" :key="post.id" :post="post" @save="save" @dismiss="dismiss" @remix="remix" />
     </div>
   </main>

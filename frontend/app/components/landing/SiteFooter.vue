@@ -19,6 +19,7 @@ const links = [
         <nav class="flex flex-wrap items-center gap-x-7 gap-y-3 text-[14px] text-[var(--b-stone)]">
           <a v-for="link in links" :key="link.hash" :href="link.hash" class="b-focus transition-colors hover:text-[var(--b-black)]">{{ $t(link.key) }}</a>
           <NuxtLink to="/login" class="b-focus transition-colors hover:text-[var(--b-black)]">{{ $t('landing.nav.signIn') }}</NuxtLink>
+          <NuxtLink to="/privacy" class="b-focus transition-colors hover:text-[var(--b-black)]">{{ $t('landing.nav.privacy') }}</NuxtLink>
         </nav>
         <div class="flex items-center gap-5">
           <LanguageSwitcher />

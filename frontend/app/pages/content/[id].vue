@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ContentPost, LifeMoment } from '~/types/product'
-import { compactNumber, relativeDate } from '~/types/product'
+import { compactNumber, creatorProfileUrl, relativeDate } from '~/types/product'
 
 const route = useRoute()
 const { apiFetch } = usePersonalApi()
@@ -38,7 +38,7 @@ onMounted(async () => {
     <div class="mt-6 grid gap-10 lg:grid-cols-[.88fr_1.12fr]">
       <section class="lg:sticky lg:top-8 lg:self-start">
         <div class="relative aspect-[4/5] overflow-hidden rounded-[18px] bg-[var(--sand)]"><img :src="post.thumbnail_url || ''" :alt="post.hook" class="h-full w-full object-cover"><div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/5 to-transparent"/><div class="absolute inset-x-6 bottom-6"><span class="rounded-full bg-white/15 px-3 py-1.5 text-[11px] text-white backdrop-blur">{{ post.format }}</span><h1 class="mt-4 text-[28px] font-medium leading-[1.12] tracking-[-.03em] text-white">{{ post.hook }}</h1></div></div>
-        <div class="mt-4 flex items-center gap-3"><img :src="post.creator.avatar_url || ''" class="h-9 w-9 rounded-full"><div class="flex-1"><p class="text-sm font-medium">@{{ post.creator.username }}</p><p class="text-xs text-[var(--faint)]">{{ $t('content.followers', { count: compactNumber(post.creator.followers) }) }} · {{ relativeDate(post.published_at) }}</p></div><p class="text-xs text-[var(--muted)]">{{ $t('content.views', { count: compactNumber(post.views) }) }}</p></div>
+        <div class="mt-4 flex items-center gap-3"><a :href="creatorProfileUrl(post.creator.username)" target="_blank" rel="noopener noreferrer" class="flex flex-1 items-center gap-3"><img :src="post.creator.avatar_url || ''" class="h-9 w-9 rounded-full"><div class="flex-1"><p class="text-sm font-medium hover:underline">@{{ post.creator.username }}</p><p class="text-xs text-[var(--faint)]">{{ $t('content.followers', { count: compactNumber(post.creator.followers) }) }} · {{ relativeDate(post.published_at) }}</p></div></a><p class="text-xs text-[var(--muted)]">{{ $t('content.views', { count: compactNumber(post.views) }) }}</p></div>
       </section>
 
       <section>
@@ -51,13 +51,85 @@ onMounted(async () => {
           <div class="py-6"><p class="text-xs font-semibold uppercase tracking-widest text-[var(--faint)]">{{ $t('content.whyFitsYou') }}</p><p class="mt-2 text-[17px] leading-7">{{ $t('content.whyFitsYouCopy') }}</p></div>
         </div>
 
-        <div class="mt-8 rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-6">
-          <h2 class="font-serif text-2xl">{{ $t('content.makeItYours') }}</h2><p class="mt-2 text-sm text-[var(--muted)]">{{ $t('content.makeItYoursCopy') }}</p>
-          <div class="mt-5 flex flex-wrap gap-2"><button v-for="item in ['reel','carousel','caption']" :key="item" class="inline-flex h-9 items-center rounded-full border px-4 text-[12.5px] capitalize transition" :class="format === item ? 'border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]' : 'border-[var(--line)]'" @click="format = item as any">{{ item === 'caption' ? $t('content.captionOption') : item }}</button></div>
-          <label v-if="moments.length" class="mt-5 block text-xs text-[var(--muted)]">{{ $t('content.groundInMoment') }}<select v-model="selectedMoment" class="mt-2 w-full rounded-[14px] border border-[var(--line)] bg-[var(--surface)] px-3 py-3 text-sm"><option :value="null">{{ $t('content.letPersonalChoose') }}</option><option v-for="moment in moments" :key="moment.id" :value="moment.id">{{ moment.content }}</option></select></label>
-          <button class="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--ink)] text-[15px] font-medium text-[var(--paper)] disabled:opacity-60" :disabled="generating" @click="createRemix">{{ generating ? $t('content.creating') : $t('content.remixForMe') }} <AppIcon name="sparkles" :size="16" /></button>
+        <div class="mt-8 overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">
+          <div class="border-b border-[var(--line-soft)] px-6 py-5">
+            <h2 class="font-serif text-[26px] tracking-[-.02em]">{{ $t('content.makeItYours') }}</h2>
+            <p class="mt-1.5 text-[13.5px] leading-6 text-[var(--muted)]">{{ $t('content.makeItYoursCopy') }}</p>
+          </div>
+
+          <!-- The three shapes, each saying what you actually get, so the choice
+               is made on the outcome rather than on a word. -->
+          <div class="grid gap-px bg-[var(--line-soft)] sm:grid-cols-3">
+            <button
+              v-for="item in (['reel', 'carousel', 'caption'] as const)"
+              :key="item"
+              class="group flex items-start gap-3 px-5 py-4 text-left transition sm:block"
+              :class="format === item ? 'bg-[var(--accent-soft)]' : 'bg-[var(--surface)] hover:bg-[var(--paper)]'"
+              :aria-pressed="format === item"
+              @click="format = item"
+            >
+              <span
+                class="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] transition"
+                :class="format === item ? 'bg-[var(--ink)] text-[var(--paper)]' : 'bg-[var(--sand-soft)] text-[var(--muted)]'"
+              >
+                <AppIcon :name="item === 'caption' ? 'text' : item" :size="17" />
+              </span>
+              <span class="block sm:mt-3">
+                <span class="block text-[13.5px] font-medium">{{ $t(`remix.formats.${item}`) }}</span>
+                <span class="mt-1 block text-[12.5px] leading-5 text-[var(--muted)]">{{ $t(`content.formatBlurb.${item}`) }}</span>
+              </span>
+            </button>
+          </div>
+
+          <!-- Grounding is what keeps the draft yours, so the moments are shown
+               rather than hidden behind a dropdown. -->
+          <div v-if="moments.length" class="border-t border-[var(--line-soft)] px-6 py-5">
+            <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[var(--faint)]">{{ $t('content.groundInMoment') }}</p>
+            <div class="mt-3 max-h-52 space-y-1.5 overflow-y-auto pr-1">
+              <button
+                class="moment-row"
+                :class="selectedMoment === null ? 'moment-row-on' : 'moment-row-off'"
+                @click="selectedMoment = null"
+              >
+                <span class="grid h-8 w-8 shrink-0 place-items-center rounded-[9px] bg-[var(--sand-soft)] text-[var(--muted)]"><AppIcon name="sparkles" :size="14" /></span>
+                <span class="flex-1 text-[13.5px]">{{ $t('content.letPersonalChoose') }}</span>
+              </button>
+              <button
+                v-for="moment in moments"
+                :key="moment.id"
+                class="moment-row"
+                :class="selectedMoment === moment.id ? 'moment-row-on' : 'moment-row-off'"
+                @click="selectedMoment = moment.id"
+              >
+                <span
+                  class="grid h-8 w-8 shrink-0 place-items-center rounded-[9px] font-serif text-[15px]"
+                  :class="selectedMoment === moment.id ? 'bg-[var(--ink)] text-[var(--paper)]' : 'bg-[var(--accent-soft)] text-[var(--accent-ink)]'"
+                  :title="$t('content.storyScore')"
+                >{{ moment.story_score }}</span>
+                <span class="flex-1 truncate text-[13.5px]">{{ moment.content }}</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="border-t border-[var(--line-soft)] px-6 py-5">
+            <button
+              class="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--ink)] text-[15px] font-medium text-[var(--paper)] transition hover:bg-black disabled:cursor-wait disabled:opacity-60"
+              :disabled="generating"
+              @click="createRemix"
+            >
+              {{ generating ? $t('content.creating') : $t('content.remixForMe') }}
+              <AppIcon name="sparkles" :size="16" :class="generating && 'animate-breathe'" />
+            </button>
+            <p class="mt-3 text-center text-[12px] text-[var(--faint)]">{{ generating ? $t('content.creatingCopy') : $t('content.remixFooter') }}</p>
+          </div>
         </div>
       </section>
     </div>
   </main>
 </template>
+
+<style scoped>
+.moment-row { @apply flex w-full items-center gap-3 rounded-[12px] border px-3 py-2 text-left transition; }
+.moment-row-on { @apply border-[var(--ink)] bg-[var(--paper)]; }
+.moment-row-off { @apply border-[var(--line)] hover:border-[var(--muted)]; }
+</style>

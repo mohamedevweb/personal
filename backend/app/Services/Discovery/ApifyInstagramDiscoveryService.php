@@ -82,6 +82,9 @@ class ApifyInstagramDiscoveryService implements ContentDiscoveryService
             'resultsType' => 'posts',
             'resultsLimit' => $limit,
             'addParentData' => false,
+            // Filtered by the actor rather than by us: a post older than the feed
+            // window can never be shown, so paying Apify to return it is waste.
+            'onlyPostsNewerThan' => config('services.discovery.feed_window_days').' days',
         ];
     }
 
@@ -129,7 +132,10 @@ class ApifyInstagramDiscoveryService implements ContentDiscoveryService
             username: $username,
             displayName: $item['ownerFullName'] ?? null,
             avatarUrl: null,
-            followers: (int) ($item['ownerFollowersCount'] ?? 0),
+            // Always zero: the actor documents no follower count on post-level
+            // results, only on profile ones. Which is the whole reason a hashtag
+            // result cannot be judged and has to be re-scraped as a profile.
+            followers: 0,
             caption: (string) ($item['caption'] ?? ''),
             thumbnailUrl: $item['displayUrl'] ?? null,
             // Apify returns -1 when Instagram hides the count; treat that as unknown.

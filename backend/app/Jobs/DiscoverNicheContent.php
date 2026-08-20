@@ -16,10 +16,13 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
- * Fills the feed with real niche content: expand the creator's niche into
- * hashtags, scrape recent posts, then upsert creators and posts. Posts are stored
- * with lightweight, heuristic analysis; the full LLM breakdown is generated on
- * demand when the creator opens a post.
+ * Stage one of discovery: expand the creator's niche into hashtags, scrape those
+ * pages, and record the accounts and posts behind them.
+ *
+ * A hashtag page tells you a post exists, not whether it did well — the page has
+ * no follower count and no sense of what that account normally gets. So nothing
+ * here is scored. Rows land unmeasured, MeasureAccountEngagement scrapes the
+ * accounts themselves, and the score is written there against a real baseline.
  */
 class DiscoverNicheContent implements ShouldQueue
 {
@@ -71,19 +74,18 @@ class DiscoverNicheContent implements ShouldQueue
             return;
         }
 
-        // Performance is relative: a post is "outperforming" versus the median
-        // engagement of the batch it was discovered in.
-        $median = max(1, (int) $posts->map(fn (DiscoveredPost $p): int => $p->engagement())->median());
         $niche = $user->creatorProfile?->niche ?: Str::headline($hashtags[0]);
 
         foreach ($posts as $post) {
-            $this->store($post, $niche, $median);
+            $this->store($post, $niche);
         }
 
-        // Hashtag discovery only seeds the creator list. Measuring their real
-        // follower counts and engagement rate — what ranks "the hottest accounts"
-        // — happens per account in a follow-up job.
-        MeasureAccountEngagement::dispatch($niche);
+        // Measuring the accounts is what makes these posts rankable at all, so it
+        // is dispatched with the exact handles just found rather than a niche
+        // label — which the profile scrape is about to overwrite anyway.
+        MeasureAccountEngagement::dispatch(
+            $posts->map(fn (DiscoveredPost $post): string => $post->username)->unique()->values()->all(),
+        );
     }
 
     /**
@@ -109,13 +111,18 @@ class DiscoverNicheContent implements ShouldQueue
         }
     }
 
-    private function store(DiscoveredPost $post, string $niche, int $median): void
+    private function store(DiscoveredPost $post, string $niche): void
     {
-        $creator = Creator::query()->updateOrCreate(
+        // firstOrCreate, not updateOrCreate: an account already measured has a niche
+        // read from its own bio and captions, and a follower count from its profile.
+        // A hashtag result knows neither and must not overwrite either.
+        $creator = Creator::query()->firstOrCreate(
             ['username' => $post->username],
             [
                 'display_name' => $post->displayName ?: $post->username,
                 'avatar_url' => $post->avatarUrl,
+                // A placeholder borrowed from the user who found the account. It
+                // holds only until the profile scrape classifies the account itself.
                 'niche' => $niche,
                 'followers' => $post->followers,
                 'average_views' => $post->views,
@@ -136,15 +143,13 @@ class DiscoverNicheContent implements ShouldQueue
                 'likes' => $post->likes,
                 'comments' => $post->comments,
                 'published_at' => $post->publishedAt,
-                // Clamp to the column's decimal(6,2) ceiling: a viral post against a
-                // low median can exceed 9999.99 and would otherwise overflow the insert.
-                'performance_ratio' => min(9999.99, round($post->engagement() / $median, 2)),
                 'tags' => $post->hashtags,
-                'why_it_works' => $this->whyItWorks($post),
-                // Left empty on purpose: the full breakdown is generated lazily the
-                // first time a creator opens the post.
-                'hook_analysis' => '',
-                'structure_analysis' => '',
+                // performance_ratio, outlier_score and engagement_rate are absent on
+                // purpose. Nothing here can say whether this beat the creator's own
+                // average, and a guess is exactly what put flat posts in the feed.
+                // why_it_works and the analysis fields are left to their defaults.
+                // Writing them here would blank the breakdown of a post already
+                // measured or already opened by a creator.
             ],
         );
     }
@@ -154,11 +159,5 @@ class DiscoverNicheContent implements ShouldQueue
         $firstLine = trim((string) Str::of($post->caption)->before("\n"));
 
         return Str::limit($firstLine !== '' ? $firstLine : "New {$niche} post", 120);
-    }
-
-    private function whyItWorks(DiscoveredPost $post): string
-    {
-        return 'Outperforming its niche with '.number_format($post->likes).' likes and '
-            .number_format($post->comments).' comments.';
     }
 }

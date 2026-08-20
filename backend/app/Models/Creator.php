@@ -16,6 +16,8 @@ class Creator extends Model
             'average_views' => 'integer',
             'average_likes' => 'integer',
             'avg_engagement_rate' => 'float',
+            'baseline_engagement' => 'integer',
+            'niche_topics' => 'array',
             'last_measured_at' => 'datetime',
         ];
     }

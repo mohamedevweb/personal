@@ -206,6 +206,14 @@ session. Do not add a second auth mechanism. `/api/development/session` only exi
   success, and error. Error copy is product-voiced and read from the API when available:
   `error.value = exception?.data?.message || 'Personal could not load today’s opportunities.'`
 
+### Copy and tone
+
+- **Avoid dashes (`—`, `–`, ` - `) in user-facing copy.** Prefer a comma, a full stop, or two
+  sentences. This applies to i18n strings, error messages and any product-voiced text.
+- All user-facing text lives in i18n (`frontend/i18n/locales/en.json` + `fr.json`). Never
+  hardcode a visible string in a component; add the key to **both** locales in the same change.
+- French copy uses **tutoiement** (informal "tu", not "vous") and matches the product voice.
+
 ## Tailwind / UI
 
 The design system is a small set of CSS variables in `app/assets/css/main.css`:

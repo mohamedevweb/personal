@@ -3,6 +3,7 @@ export interface Creator {
   display_name: string
   avatar_url: string | null
   niche: string
+  niche_topics: string[]
   followers: number
   average_views: number
 }
@@ -18,6 +19,10 @@ export interface ContentPost {
   comments: number
   published_at: string
   performance_ratio: number
+  /** Engagement over this creator's own median post. 1.0 is an average post for them. */
+  outlier_score: number
+  /** Engagement as a percentage of the creator's followers. */
+  engagement_rate: number
   tags: string[]
   why_it_works: string
   hook_analysis: string
@@ -94,4 +99,10 @@ export function compactNumber(value: number): string {
 export function relativeDate(value: string): string {
   const hours = Math.max(1, Math.round((Date.now() - new Date(value).getTime()) / 3_600_000))
   return hours < 24 ? `${hours}h ago` : `${Math.round(hours / 24)}d ago`
+}
+
+// Creators come from Instagram, so their handle is all we need to point back at
+// the account the post was found on.
+export function creatorProfileUrl(username: string): string {
+  return `https://www.instagram.com/${username.replace(/^@/, '')}/`
 }

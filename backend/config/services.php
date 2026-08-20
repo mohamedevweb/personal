@@ -64,12 +64,37 @@ return [
         // Cap on accounts measured per job run, so a large niche can't blow the
         // Apify budget in one pass.
         'measure_batch' => (int) env('DISCOVERY_MEASURE_BATCH', 30),
+        // Accounts per Apify call. A synchronous run is capped at five minutes and a
+        // whole batch does not reliably fit, so the batch is scraped in chunks.
+        'measure_chunk' => (int) env('DISCOVERY_MEASURE_CHUNK', 10),
         // How many hashtags an expansion produces and how long the cache holds.
         'hashtag_limit' => (int) env('DISCOVERY_HASHTAG_LIMIT', 10),
         'cache_days' => (int) env('DISCOVERY_CACHE_DAYS', 7),
         // A hashtag scraped within this window is skipped, so cost scales with the
         // number of distinct niches rather than the number of users.
         'cooldown_days' => (int) env('DISCOVERY_COOLDOWN_DAYS', 7),
+        // The feed only ranks posts published inside this window. An older post
+        // describes a niche that has already moved on, however well it did.
+        'feed_window_days' => (int) env('DISCOVERY_FEED_WINDOW_DAYS', 30),
+        // Minimum outlier score to reach the feed: a post has to beat the account
+        // that published it, not merely come from a large one.
+        'min_outlier_score' => (float) env('DISCOVERY_MIN_OUTLIER_SCORE', 1.2),
+        // Absolute floors, because the outlier score is a ratio and a ratio has no
+        // sense of scale. An account whose median post gets 2 likes turns a 3-like
+        // post into a 1.5x "outlier" — arithmetically true, worthless as a benchmark.
+        // Nothing under these thresholds is evidence of anything.
+        'min_followers' => (int) env('DISCOVERY_MIN_FOLLOWERS', 5000),
+        'min_post_engagement' => (int) env('DISCOVERY_MIN_POST_ENGAGEMENT', 500),
+        // Reach-bait tags. These are not niches — they are what accounts with no
+        // audience post under in order to be seen, so scraping them returns spam by
+        // construction. Stripped from every hashtag expansion.
+        'blocked_hashtags' => [
+            'explore', 'explorepage', 'explorer', 'f4f', 'follow', 'followforfollow',
+            'followme', 'foryou', 'foryoupage', 'fyp', 'instadaily', 'instagood',
+            'instagram', 'like4like', 'likeforlike', 'l4l', 'million', 'millionviews',
+            'reel', 'reels', 'reelsinstagram', 'reelsvideo', 'trending', 'trendingreels',
+            'viral', 'viralpost', 'viralreel', 'viralreels', 'viralvideo',
+        ],
     ],
 
     'openai' => [

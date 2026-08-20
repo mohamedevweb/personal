@@ -18,6 +18,7 @@ class DiscoveredProfile
         public readonly ?string $avatarUrl,
         public readonly int $followers,
         public readonly Collection $posts,
+        public readonly ?string $bio = null,
     ) {}
 
     /**

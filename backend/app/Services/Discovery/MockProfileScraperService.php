@@ -39,6 +39,7 @@ class MockProfileScraperService implements ProfileDiscoveryService
             avatarUrl: "https://i.pravatar.cc/150?u={$username}",
             followers: $followers,
             posts: $posts,
+            bio: 'Sample bio for '.$username,
         );
     }
 

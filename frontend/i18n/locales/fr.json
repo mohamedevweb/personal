@@ -30,14 +30,21 @@
     "open": "Ouvrir l'assistant",
     "close": "Fermer l'assistant",
     "title": "Assistant",
-    "subtitle": "Imaginez votre prochain post",
-    "greeting": "Bonjour {name} — je suis votre assistant créatif. Quel moment ou quelle idée voulez-vous transformer en contenu ?",
-    "placeholder": "Demandez des accroches, des angles, des légendes…",
+    "subtitle": "Imagine ton prochain post",
+    "greeting": "Salut {name}, je suis ton assistant créatif. Quel moment ou quelle idée veux-tu transformer en contenu ?",
+    "placeholder": "Demande des accroches, des angles, des légendes…",
     "send": "Envoyer",
     "thinking": "Réflexion…",
-    "error": "Une erreur est survenue. Veuillez réessayer.",
+    "error": "Une erreur est survenue. Réessaie.",
     "clear": "Effacer la conversation",
-    "ask": "Posez une question"
+    "ask": "Pose une question",
+    "emptyTitle": "On crée quoi, {name} ?",
+    "emptyCopy": "Je suis dispo à tout moment. Demande-moi ce que tu veux sur ton prochain post.",
+    "starters": {
+      "hooks": "Donne-moi 3 idées d'accroche",
+      "repurpose": "Transforme mon dernier moment en Reel",
+      "caption": "Écris une légende dans mon ton"
+    }
   },
   "landing": {
     "head": {
@@ -52,6 +59,7 @@
       "signIn": "Se connecter",
       "getAccess": "Accès anticipé",
       "skip": "Aller au contenu",
+      "privacy": "Confidentialité",
       "home": "Personal, retour en haut"
     },
     "hero": {
@@ -357,6 +365,8 @@
     "haveAccount": "Vous avez déjà un compte ?",
     "goToRegister": "Créer un compte",
     "goToLogin": "Se connecter",
+    "legal": "En continuant, vous acceptez notre",
+    "legalLink": "politique de confidentialité",
     "home": "Retour à personal.app",
     "aside": {
       "titleLineOne": "Vivez une vie intéressante.",
@@ -541,7 +551,8 @@
     "disconnect": "Déconnecter",
     "continueWithInstagram": "Continuer avec Instagram",
     "privacy": "Confidentialité",
-    "privacyCopy": "Les jetons d’accès Instagram restent chiffrés sur le serveur. Personal ne les expose jamais au navigateur et supprime les médias importés lorsque vous vous déconnectez."
+    "privacyCopy": "Les jetons d’accès Instagram restent chiffrés sur le serveur. Personal ne les expose jamais au navigateur et supprime les médias importés lorsque vous vous déconnectez.",
+    "privacyLink": "Lire la politique de confidentialité"
   },
   "verifyEmail": {
     "verifiedTitle": "Email confirmé.",
@@ -559,7 +570,7 @@
   "content": {
     "backToFeed": "← Retour à votre feed",
     "analysis": "Analyse Personal",
-    "usualPerformance": "performance habituelle",
+    "usualPerformance": "la performance habituelle de ce créateur",
     "hook": "Accroche",
     "structure": "Structure",
     "whyOutperforming": "Pourquoi il surperforme",
@@ -568,40 +579,86 @@
     "whyFitsYouCopy": "Vous parlez souvent de création de produits, d’insight client et de leçons honnêtes de fondateur.",
     "makeItYours": "Rendez-le vôtre",
     "makeItYoursCopy": "Choisissez la forme. Personal adaptera le schéma à votre contexte — sans le copier.",
-    "captionOption": "Légende / Post",
     "groundInMoment": "Ancrez-le dans un moment de vie",
     "letPersonalChoose": "Laisser Personal choisir",
     "creating": "Création de votre version…",
     "remixForMe": "Remixer pour moi",
     "followers": "{count} abonnés",
-    "views": "{count} vues"
+    "views": "{count} vues",
+    "formatBlurb": {
+      "reel": "Une accroche, un script parlé et le plan à filmer.",
+      "carousel": "Une couverture qui arrête le scroll, puis les slides.",
+      "caption": "Un post écrit, dans votre voix."
+    },
+    "storyScore": "Score d’histoire",
+    "creatingCopy": "Personal lit le schéma et votre moment.",
+    "remixFooter": "Vous pourrez changer de format et modifier chaque mot ensuite."
   },
   "remix": {
-    "backToAnalysis": "← Retour à l’analyse",
-    "saved": "Enregistré ✓",
+    "backToAnalysis": "Retour au schéma",
+    "statusDraft": "Brouillon",
+    "statusReady": "Prêt",
+    "unsaved": "Modifications non enregistrées",
+    "allSaved": "Tout est enregistré",
     "saving": "Enregistrement…",
-    "saveDraft": "Enregistrer le brouillon",
+    "saveDraft": "Enregistrer",
+    "saveError": "Personal n’a pas pu enregistrer ce brouillon. Réessayez.",
+    "loadError": "Ce brouillon n’a pas pu être ouvert.",
+    "copy": "Copier",
+    "copied": "Copié",
+    "copyError": "Votre navigateur a bloqué la copie. Sélectionnez le texte et copiez-le à la main.",
     "markReady": "Marquer comme prêt",
-    "originalPattern": "Schéma original",
-    "whyItWorks": "Pourquoi ça marche",
-    "yourContext": "Votre contexte",
-    "yourVersion": "Votre version",
+    "backToDraft": "Repasser en brouillon",
     "madeFromStory": "Fait à partir de votre histoire.",
-    "madeFromStoryCopy": "Le schéma est emprunté. L’expérience, le point de vue et le langage sont les vôtres.",
-    "captionOption": "Légende / Post",
+    "madeFromStoryCopy": "Le schéma est emprunté. L’expérience, le point de vue et les mots sont les vôtres.",
+    "formatLabel": "Format",
+    "formats": {
+      "reel": "Reel",
+      "carousel": "Carrousel",
+      "caption": "Légende"
+    },
+    "switchNote": "Changer de format réécrit le brouillon. Vos modifications sont enregistrées avant.",
+    "switching": "Réécriture en {format}…",
+    "switchError": "Personal n’a pas pu réécrire dans ce format. Réessayez.",
+    "slideDeck": "Slides",
+    "slideCount": "{count} slides",
+    "slideOf": "Slide {index} sur {total}",
+    "cover": "Couverture",
+    "coverPlaceholder": "La phrase qui fait s’arrêter.",
+    "slidePlaceholder": "Le temps suivant.",
+    "addSlide": "Ajouter une slide",
+    "slideLimit": "{max} slides, c’est le maximum d’Instagram.",
+    "estimated": "estimé",
     "hook": "Accroche",
+    "body": "Corps",
     "script": "Script",
-    "shotIdea": "Idée de plan / visuel",
-    "cta": "CTA",
-    "captionPost": "Légende / post",
-    "moveUp": "Monter",
-    "moveDown": "Descendre",
-    "regenerate": "Régénérer",
-    "delete": "Supprimer",
-    "regenerateAppend": ". C’est là que la direction est devenue évidente."
+    "onScreen": "À l’image",
+    "shotIdea": "Plan",
+    "cta": "Chute",
+    "hookPlaceholder": "Les trois premières secondes.",
+    "scriptPlaceholder": "Ce que vous dites, dans l’ordre où vous le dites.",
+    "visualPlaceholder": "Ce que la caméra montre pendant que vous parlez.",
+    "ctaPlaceholder": "Ce que vous demandez à la fin.",
+    "beforeMore": "Ce qui s’affiche avant « plus »",
+    "beforeMoreEmpty": "Les 125 premiers caractères arrivent ici.",
+    "more": "plus",
+    "captionPost": "Légende",
+    "captionPlaceholder": "Écrivez le post.",
+    "borrowedFrom": "Emprunté à",
+    "originalPattern": "Le schéma",
+    "whyItWorks": "Pourquoi ça marche",
+    "yourContext": "Votre moment",
+    "editMoments": "Modifier vos moments",
+    "moveUp": "Déplacer avant",
+    "moveDown": "Déplacer après",
+    "regenerate": "Réécrire cette slide",
+    "delete": "Supprimer la slide",
+    "regenerateAppend": ". C’est là que la direction est devenue évidente.",
+    "loadErrorCopy": "Il a peut-être été supprimé, ou il appartient à un autre compte.",
+    "startAnother": "Commencer un brouillon"
   },
   "contentCard": {
-    "average": "{ratio}× la moyenne",
+    "average": "{ratio}× la moyenne du créateur",
     "followers": "{count} abonnés",
     "views": "{count} vues",
     "likes": "{count} j’aime",
@@ -611,6 +668,387 @@
     "notForMe": "Pas pour moi",
     "remixForMe": "Remixer pour moi",
     "more": "plus",
-    "viewComments": "Voir les {count} commentaires"
+    "viewComments": "Voir les {count} commentaires",
+    "openProfile": "Voir le compte de {'@'}{username} sur Instagram"
+  },
+  "legal": {
+    "privacy": {
+      "head": {
+        "title": "Politique de confidentialité — Personal",
+        "description": "Ce que Personal collecte, pourquoi, avec qui ces données sont partagées, combien de temps elles sont conservées et comment tout effacer."
+      },
+      "hero": {
+        "eyebrow": "Confidentialité",
+        "title": "Politique de confidentialité",
+        "lede": "Personal ne fonctionne qu’avec ce que vous lui confiez : votre compte Instagram professionnel, votre positionnement et les moments de votre vie que vous notez. Cette page dit exactement ce que nous collectons, pourquoi, avec qui c’est partagé, combien de temps c’est conservé et comment tout effacer.",
+        "updated": "Dernière mise à jour : 20 août 2026",
+        "back": "Retour à l’accueil"
+      },
+      "toc": {
+        "label": "Sommaire"
+      },
+      "s": {
+        "summary": {
+          "title": "L’essentiel en cinq points",
+          "items": {
+            "noSale": {
+              "term": "Nous ne vendons rien",
+              "detail": "Vos données ne sont ni vendues, ni louées, ni cédées à des courtiers en données, et ne servent à aucune publicité ciblée."
+            },
+            "noPost": {
+              "term": "Personal ne publie jamais à votre place",
+              "detail": "Aucun contenu n’est publié, programmé ni envoyé sur votre compte Instagram sans que vous appuyiez vous-même sur le bouton."
+            },
+            "noTraining": {
+              "term": "Vos contenus n’entraînent aucun modèle",
+              "detail": "Les textes transmis à nos prestataires d’IA passent par leurs API professionnelles, dont les conditions excluent l’entraînement de leurs modèles sur nos requêtes."
+            },
+            "private": {
+              "term": "Vos données restent les vôtres",
+              "detail": "Vos Moments, votre profil créateur et vos brouillons ne sont montrés à aucun autre créateur, sous aucune forme."
+            },
+            "delete": {
+              "term": "Tout est effaçable",
+              "detail": "Déconnecter Instagram supprime immédiatement le jeton d’accès et les médias importés. La suppression du compte efface l’ensemble."
+            }
+          }
+        },
+        "controller": {
+          "title": "Qui est responsable du traitement",
+          "p": {
+            "who": "Le responsable du traitement, au sens du Règlement général sur la protection des données (RGPD), est l’éditeur du service Personal, accessible à l’adresse usepersonal.app : [RAISON SOCIALE — forme juridique, adresse du siège, numéro SIREN/RCS].",
+            "contact": "Pour toute question sur cette politique ou pour exercer vos droits, écrivez à privacy{'@'}usepersonal.app. Nous répondons dans un délai maximum d’un mois.",
+            "dpo": "Compte tenu de la taille du service et de la nature des traitements, aucun délégué à la protection des données n’est désigné : les demandes sont traitées directement par l’éditeur."
+          }
+        },
+        "data": {
+          "title": "Les données que nous traitons",
+          "p": {
+            "intro": "Personal ne collecte que ce dont le produit a besoin pour fonctionner. Voici l’ensemble des catégories, telles qu’elles existent réellement dans notre base de données."
+          },
+          "items": {
+            "account": {
+              "term": "Compte",
+              "detail": "Votre nom, votre adresse e-mail, votre mot de passe (stocké uniquement sous forme de condensat bcrypt, jamais en clair), la date de vérification de votre adresse et les jetons de session de votre navigateur."
+            },
+            "instagram": {
+              "term": "Connexion Instagram",
+              "detail": "Les informations publiques de votre compte professionnel et vos publications récentes, détaillées dans la section suivante."
+            },
+            "profile": {
+              "term": "Profil créateur",
+              "detail": "Votre niche, la description de votre audience, votre positionnement, votre ton, vos sujets, vos projets en cours, vos objectifs et vos points forts — que vous les saisissiez vous-même ou qu’ils soient déduits de vos publications puis soumis à votre validation."
+            },
+            "moments": {
+              "term": "Moments de vie",
+              "detail": "Les textes libres que vous enregistrez pour nourrir vos contenus, leur catégorie et leurs dates. Ce sont les données les plus personnelles du service : n’y consignez que ce que vous accepteriez de raconter à votre audience, et évitez d’y écrire des données sensibles (santé, opinions politiques ou religieuses, orientation sexuelle) ou des informations concernant des tiers identifiables."
+            },
+            "creations": {
+              "term": "Contenus produits",
+              "detail": "Les brouillons de Reels, carrousels et légendes générés pour vous, leurs versions que vous modifiez, ainsi que les publications que vous enregistrez ou écartez dans le fil."
+            },
+            "chat": {
+              "term": "Conversations avec l’assistant",
+              "detail": "Les messages échangés avec l’assistant créatif, transmis à notre prestataire d’IA avec le contexte de votre profil le temps de produire une réponse. Ils ne sont pas enregistrés sur nos serveurs."
+            },
+            "technical": {
+              "term": "Données techniques",
+              "detail": "Adresse IP, type de navigateur, horodatage des requêtes et messages d’erreur, écrits dans les journaux du serveur à des fins de sécurité et de diagnostic."
+            }
+          },
+          "note": "Nous ne collectons aucune donnée bancaire (le service est gratuit pendant l’accès anticipé), aucune donnée de localisation précise et aucun identifiant publicitaire."
+        },
+        "instagram": {
+          "title": "Ce que nous recevons d’Instagram (Meta)",
+          "p": {
+            "how": "La connexion passe par Instagram Login, le mécanisme officiel de Meta pour les comptes professionnels. Vous vous authentifiez chez Instagram, jamais chez nous : nous ne voyons pas votre mot de passe Instagram. Meta nous renvoie un jeton d’accès, que nous chiffrons avant de l’écrire en base et que nous n’exposons jamais au navigateur.",
+            "scopes": "Les autorisations demandées sont instagram_business_basic (profil et publications), instagram_business_manage_insights (statistiques de vos publications) et instagram_business_content_publish (publication de contenu, réservée à une action que vous déclenchez vous-même)."
+          },
+          "items": {
+            "profileFields": {
+              "term": "Profil",
+              "detail": "Identifiant Instagram, nom d’utilisateur, nom affiché, type de compte, biographie, site web, photo de profil, nombre d’abonnés, nombre d’abonnements et nombre de publications."
+            },
+            "mediaFields": {
+              "term": "Publications récentes",
+              "detail": "Vos 25 dernières publications au maximum : légende, type de média (image, vidéo, Reel, carrousel), lien permanent, URL du média et de sa miniature, date de publication, nombre de j’aime et de commentaires."
+            },
+            "insights": {
+              "term": "Statistiques de publication",
+              "detail": "Lorsque Meta les fournit : vues, portée, j’aime, commentaires, partages, enregistrements et interactions totales, publication par publication."
+            },
+            "never": {
+              "term": "Ce que nous ne recevons jamais",
+              "detail": "Vos messages privés, la liste ou l’identité de vos abonnés, les commentaires laissés par vos abonnés, vos informations de paiement Meta et les données des comptes que vous suivez."
+            }
+          },
+          "outro": {
+            "publish": "L’autorisation de publication existe pour une seule chose : publier un contenu que vous avez validé, au moment où vous le demandez. Personal ne publie, ne programme et ne supprime jamais quoi que ce soit de sa propre initiative.",
+            "revoke": "Vous pouvez retirer cet accès à tout moment, depuis les Réglages de Personal ou depuis Instagram. La section « Supprimer vos données » décrit les deux chemins.",
+            "meta": "L’usage que nous faisons des informations reçues de Meta respecte les Conditions de la plateforme Meta et les Politiques du développeur Meta. Nous ne transférons ces informations à aucun tiers en dehors des sous-traitants listés plus bas, et nous ne les utilisons à aucune fin publicitaire."
+          }
+        },
+        "purposes": {
+          "title": "Finalités et bases légales",
+          "p": {
+            "intro": "Chaque traitement répond à une finalité précise et à une base légale prévue par le RGPD."
+          },
+          "items": {
+            "service": {
+              "term": "Fournir le service — exécution du contrat",
+              "detail": "Créer et sécuriser votre compte, importer vos publications, construire votre fil « For You », générer des brouillons, conserver vos Moments et vos contenus enregistrés."
+            },
+            "personalisation": {
+              "term": "Personnaliser les recommandations — exécution du contrat",
+              "detail": "Confronter les formats qui fonctionnent réellement dans votre niche à votre positionnement et à vos moments de vie, pour ne proposer que ce qui vous ressemble."
+            },
+            "connection": {
+              "term": "Connecter Instagram — consentement",
+              "detail": "L’accès à votre compte repose sur l’autorisation que vous accordez chez Meta. Vous pouvez la retirer à tout moment, sans que cela remette en cause la licéité des traitements effectués auparavant."
+            },
+            "emails": {
+              "term": "Envoyer les e-mails de service — exécution du contrat",
+              "detail": "Vérification d’adresse, réinitialisation de mot de passe et messages indispensables à la vie du compte. Aucune prospection commerciale sans votre accord préalable."
+            },
+            "security": {
+              "term": "Sécuriser le service — intérêt légitime",
+              "detail": "Limitation du nombre de requêtes, détection des abus, journaux techniques et sauvegardes. Notre intérêt est de protéger les comptes, et il ne prévaut jamais sur vos droits et libertés fondamentaux."
+            },
+            "improve": {
+              "term": "Améliorer le produit — intérêt légitime",
+              "detail": "Comprendre les erreurs et les usages pour corriger et faire évoluer le service. Nous travaillons sur des données agrégées ou anonymisées chaque fois que c’est possible."
+            }
+          }
+        },
+        "ai": {
+          "title": "Le rôle de l’intelligence artificielle",
+          "p": {
+            "what": "La rédaction des brouillons et les réponses de l’assistant sont produites par des modèles de langage exploités par OpenAI et, selon la configuration du service, Anthropic. Nous ne leur transmettons que ce qui est nécessaire à la demande en cours : la publication analysée, le moment de vie sélectionné, votre profil créateur et votre message.",
+            "training": "Ces appels passent par leurs API professionnelles. Dans ce cadre, les données envoyées ne servent pas à entraîner leurs modèles ; elles peuvent être conservées de façon limitée par le prestataire à des fins de détection d’abus, puis supprimées.",
+            "decisions": "Aucune décision produisant des effets juridiques ou vous affectant de manière significative n’est prise de façon automatisée. Un modèle propose un texte ; vous décidez de tout le reste.",
+            "quality": "Un modèle peut se tromper. Relisez toujours un brouillon avant de le publier : vous restez l’auteur et le responsable de ce que vous publiez."
+          }
+        },
+        "discovery": {
+          "title": "Les publications d’autres créateurs",
+          "p": {
+            "what": "Le fil « For You » s’appuie sur des publications publiques d’autres comptes Instagram de votre niche. Nous les collectons via notre prestataire Apify, à partir de pages de hashtags et de profils publics.",
+            "fields": "Nous conservons ce qui rend une publication comparable : nom d’utilisateur public, nom affiché, photo de profil, biographie, nombre d’abonnés et engagement moyen du compte, et pour chaque publication son accroche, sa légende, sa miniature, sa date et ses compteurs publics.",
+            "basis": "La base légale est notre intérêt légitime à produire une analyse de tendances à partir d’informations rendues publiques par leurs auteurs. Nous n’accédons à aucun compte privé, à aucun message et à aucune donnée qui ne soit pas déjà visible de tous. Ces informations servent uniquement à l’analyse de performance : elles ne servent jamais à contacter ces créateurs, ni à republier leurs contenus.",
+            "rights": "Si vous êtes créateur et ne souhaitez pas que vos publications soient analysées par Personal, écrivez à privacy{'@'}usepersonal.app : nous supprimons votre compte et vos publications de notre base et empêchons leur réapparition."
+          }
+        },
+        "sharing": {
+          "title": "Avec qui vos données sont partagées",
+          "p": {
+            "intro": "Nous ne vendons ni ne louons aucune donnée. Nous faisons appel à un petit nombre de sous-traitants, chacun pour une tâche précise, tous liés par un contrat conforme à l’article 28 du RGPD."
+          },
+          "items": {
+            "meta": {
+              "term": "Meta Platforms (Instagram)",
+              "detail": "Source des données de votre compte professionnel, via Instagram Login. Irlande et États-Unis."
+            },
+            "openai": {
+              "term": "OpenAI",
+              "detail": "Génération des brouillons et réponses de l’assistant créatif. États-Unis."
+            },
+            "anthropic": {
+              "term": "Anthropic",
+              "detail": "Génération de contenu lorsque ce moteur est sélectionné. États-Unis."
+            },
+            "apify": {
+              "term": "Apify",
+              "detail": "Collecte des publications publiques utilisées pour l’analyse de tendances. République tchèque, Union européenne."
+            },
+            "resend": {
+              "term": "Resend",
+              "detail": "Acheminement des e-mails de service (vérification d’adresse, sécurité du compte). États-Unis."
+            },
+            "hosting": {
+              "term": "Hébergement et domaine",
+              "detail": "Serveur applicatif et base de données PostgreSQL hébergés chez [HÉBERGEUR], dans l’Union européenne. Nom de domaine et zone DNS gérés par OVH (France)."
+            }
+          },
+          "note": "Nous pouvons également communiquer des données à une autorité judiciaire ou administrative lorsque la loi nous y oblige, ainsi qu’à nos conseils juridiques ou comptables lorsque c’est nécessaire."
+        },
+        "transfers": {
+          "title": "Transferts hors de l’Union européenne",
+          "p": {
+            "text": "Certains de nos sous-traitants sont établis aux États-Unis. Ces transferts sont encadrés par les clauses contractuelles types de la Commission européenne et, lorsque le prestataire y est certifié, par le cadre de protection des données UE–États-Unis (EU–US Data Privacy Framework). Vous pouvez nous demander une copie des garanties applicables à privacy{'@'}usepersonal.app."
+          }
+        },
+        "retention": {
+          "title": "Combien de temps nous conservons les données",
+          "items": {
+            "account": {
+              "term": "Compte et profil créateur",
+              "detail": "Tant que votre compte existe, puis effacés dans les 30 jours suivant votre demande de suppression."
+            },
+            "instagram": {
+              "term": "Jeton d’accès et médias Instagram importés",
+              "detail": "Supprimés immédiatement lorsque vous déconnectez Instagram ou supprimez votre compte. Le jeton cesse par ailleurs d’être valide de lui-même s’il n’est pas rafraîchi."
+            },
+            "moments": {
+              "term": "Moments et contenus produits",
+              "detail": "Tant que vous les conservez. Une suppression depuis l’application efface l’enregistrement de la base."
+            },
+            "chat": {
+              "term": "Conversations avec l’assistant",
+              "detail": "Non stockées sur nos serveurs : l’échange vit dans votre navigateur et disparaît lorsque vous l’effacez ou rechargez la page."
+            },
+            "discovery": {
+              "term": "Publications publiques analysées",
+              "detail": "Rafraîchies régulièrement ; une publication sort du fil au-delà de la fenêtre d’analyse (30 jours par défaut) et les mesures obsolètes sont écrasées."
+            },
+            "logs": {
+              "term": "Journaux techniques",
+              "detail": "12 mois au maximum, conformément aux pratiques recommandées en matière de traçabilité."
+            },
+            "backups": {
+              "term": "Sauvegardes",
+              "detail": "Une donnée supprimée peut subsister au maximum 30 jours dans une sauvegarde chiffrée avant d’en disparaître définitivement."
+            }
+          }
+        },
+        "security": {
+          "title": "Comment nous protégeons vos données",
+          "items": {
+            "transport": {
+              "term": "Chiffrement en transit",
+              "detail": "Tout le trafic entre votre navigateur, notre API et nos prestataires passe par HTTPS/TLS."
+            },
+            "tokens": {
+              "term": "Jetons Instagram chiffrés",
+              "detail": "Le jeton d’accès Meta est chiffré au repos avec la clé applicative et n’est jamais transmis au navigateur."
+            },
+            "passwords": {
+              "term": "Mots de passe",
+              "detail": "Stockés sous forme de condensats bcrypt à 12 tours. Personne, nous compris, ne peut les lire."
+            },
+            "access": {
+              "term": "Accès à l’API",
+              "detail": "Chaque appel authentifié exige un jeton personnel révocable ; la déconnexion le révoque immédiatement."
+            },
+            "ratelimit": {
+              "term": "Limitation des abus",
+              "detail": "Les points d’entrée sensibles — connexion, inscription, génération de contenu — sont plafonnés en nombre de requêtes."
+            },
+            "breach": {
+              "term": "Violation de données",
+              "detail": "En cas d’incident présentant un risque pour vos droits, nous notifions la CNIL dans les 72 heures et vous informons directement lorsque le risque est élevé."
+            }
+          }
+        },
+        "rights": {
+          "title": "Vos droits",
+          "p": {
+            "intro": "Le RGPD vous reconnaît les droits suivants. Ils s’exercent à tout moment en écrivant à privacy{'@'}usepersonal.app depuis l’adresse e-mail de votre compte."
+          },
+          "items": {
+            "access": {
+              "term": "Accès",
+              "detail": "Obtenir la confirmation que nous traitons des données vous concernant et en recevoir une copie."
+            },
+            "rectification": {
+              "term": "Rectification",
+              "detail": "Corriger une donnée inexacte ou incomplète. La plupart des champs se modifient directement dans Réglages et Personal."
+            },
+            "erasure": {
+              "term": "Effacement",
+              "detail": "Demander la suppression de vos données, dans les conditions décrites à la section suivante."
+            },
+            "portability": {
+              "term": "Portabilité",
+              "detail": "Recevoir vos données dans un format structuré et lisible par machine, ou demander leur transmission à un autre responsable de traitement."
+            },
+            "opposition": {
+              "term": "Opposition",
+              "detail": "Vous opposer, pour des raisons tenant à votre situation particulière, aux traitements fondés sur notre intérêt légitime."
+            },
+            "limitation": {
+              "term": "Limitation",
+              "detail": "Demander le gel d’un traitement le temps qu’une contestation soit examinée."
+            },
+            "withdraw": {
+              "term": "Retrait du consentement",
+              "detail": "Retirer l’accès Instagram à tout moment, sans justification et sans conséquence sur le reste de votre compte."
+            },
+            "postmortem": {
+              "term": "Directives post-mortem",
+              "detail": "Définir le sort de vos données après votre décès, conformément à la loi Informatique et Libertés."
+            },
+            "complaint": {
+              "term": "Réclamation",
+              "detail": "Introduire une réclamation auprès de la CNIL — 3 place de Fontenoy, TSA 80715, 75334 Paris Cedex 07, cnil.fr — si vous estimez que vos droits ne sont pas respectés."
+            }
+          },
+          "note": "Nous répondons dans un délai d’un mois, prolongeable de deux mois pour les demandes complexes ; nous vous en informons alors. Nous pouvons demander une vérification d’identité lorsqu’un doute raisonnable existe sur l’auteur de la demande."
+        },
+        "deletion": {
+          "title": "Supprimer vos données",
+          "p": {
+            "intro": "Il y a quatre chemins, du plus ciblé au plus radical. Aucun ne demande de justification."
+          },
+          "items": {
+            "disconnect": {
+              "term": "1. Déconnecter Instagram",
+              "detail": "Dans Personal : Réglages → Instagram → Déconnecter. Le jeton d’accès et l’ensemble des médias importés sont supprimés immédiatement de notre base."
+            },
+            "revoke": {
+              "term": "2. Retirer l’accès depuis Instagram",
+              "detail": "Dans l’application Instagram : Réglages → Sites web et applications → Personal → Supprimer. L’accès cesse aussitôt côté Meta, et le jeton devient inutilisable."
+            },
+            "content": {
+              "term": "3. Supprimer un contenu précis",
+              "detail": "Chaque Moment, brouillon et publication enregistrée se supprime depuis l’écran où il apparaît, sans passer par nous."
+            },
+            "account": {
+              "term": "4. Supprimer tout le compte",
+              "detail": "Écrivez à privacy{'@'}usepersonal.app depuis l’adresse e-mail de votre compte, avec pour objet « Suppression de compte ». Nous effaçons le compte, le profil créateur, les Moments, les brouillons, les médias importés et le jeton Instagram, et nous vous le confirmons par e-mail sous 30 jours."
+            }
+          },
+          "note": "Seules subsistent, le cas échéant, les données que la loi nous impose de conserver, et les publications publiques d’autres créateurs, qui ne vous concernent pas."
+        },
+        "cookies": {
+          "title": "Cookies et stockage local",
+          "p": {
+            "intro": "Personal n’utilise aucun cookie publicitaire, aucun outil de mesure d’audience tiers et aucun traceur de réseau social. Aucune bannière de consentement n’est donc nécessaire : les seuls cookies déposés sont strictement nécessaires au fonctionnement du service."
+          },
+          "items": {
+            "token": {
+              "term": "personal_token",
+              "detail": "Conserve votre session authentifiée. Supprimé à la déconnexion."
+            },
+            "lang": {
+              "term": "personal_lang",
+              "detail": "Mémorise la langue d’affichage que vous avez choisie."
+            },
+            "onboarding": {
+              "term": "personal-onboarding-skipped",
+              "detail": "Retient que vous avez choisi de passer l’étape de connexion Instagram. Durée : un an."
+            }
+          }
+        },
+        "minors": {
+          "title": "Mineurs",
+          "p": {
+            "text": "Personal s’adresse à des créateurs disposant d’un compte Instagram professionnel et n’est pas destiné aux personnes de moins de 16 ans. Si vous constatez qu’un mineur de moins de 16 ans a créé un compte, écrivez-nous : nous supprimerons les données concernées sans délai."
+          }
+        },
+        "changes": {
+          "title": "Modifications de cette politique",
+          "p": {
+            "text": "Cette politique évolue avec le produit. La date de dernière mise à jour figure en haut de page. Toute évolution substantielle — nouvelle finalité, nouveau sous-traitant recevant vos données personnelles, changement de durée de conservation — vous est notifiée par e-mail ou dans l’application avant son entrée en vigueur."
+          }
+        },
+        "contact": {
+          "title": "Nous contacter",
+          "p": {
+            "mail": "Écrivez à privacy{'@'}usepersonal.app pour toute question, demande d’exercice de droits ou signalement lié à cette politique.",
+            "post": "Par courrier : [ADRESSE POSTALE DE L’ÉDITEUR]."
+          }
+        }
+      }
+    }
   }
 }

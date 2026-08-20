@@ -21,7 +21,7 @@ onMounted(async () => { const response = await apiFetch<{ items: ContentPost[] }
     </header>
 
     <div v-if="loading" class="mt-5 h-96 animate-pulse rounded-[18px] bg-[var(--sand-soft)]" />
-    <div v-else-if="items.length" class="mt-5 grid gap-6 lg:grid-cols-2">
+    <div v-else-if="items.length" class="mt-5 grid items-start gap-5 sm:grid-cols-2 xl:grid-cols-3">
       <ContentCard v-for="post in items" :key="post.id" :post="post" @save="unsave" @dismiss="unsave" @remix="remix" />
     </div>
     <div v-else class="mt-5 rounded-[18px] border border-dashed border-[var(--line)] bg-[var(--surface)] px-6 py-16 text-center">

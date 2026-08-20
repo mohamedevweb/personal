@@ -95,6 +95,7 @@ class ApifyProfileScraperService implements ProfileDiscoveryService
             avatarUrl: is_string($avatarUrl) ? $avatarUrl : null,
             followers: $followers,
             posts: $posts,
+            bio: is_string($item['biography'] ?? null) ? $item['biography'] : null,
         );
     }
 

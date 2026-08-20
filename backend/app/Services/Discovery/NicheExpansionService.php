@@ -63,7 +63,11 @@ class NicheExpansionService
 
         $result = $this->llm->object(
             "You are an Instagram growth strategist. Given a creator's niche, return the {$limit} most relevant, "
-            .'active Instagram hashtags to find high-performing posts in that niche. Bare tags, no # symbol, no spaces.',
+            .'active Instagram hashtags to find high-performing posts in that niche. Bare tags, no # symbol, no spaces. '
+            .'Return tags that describe the subject matter, the craft or the audience of this niche specifically. '
+            .'Never return generic reach tags (viral, reels, explorepage, fyp, trending, instagood, follow4follow '
+            .'and the like): established accounts in a niche do not use them, so they only surface accounts with no '
+            .'audience trying to be seen.',
             "Creator niche and topics: {$context}",
             [
                 'type' => 'object',
@@ -98,9 +102,15 @@ class NicheExpansionService
      */
     private function clean(array $terms): array
     {
+        $blocked = (array) config('services.discovery.blocked_hashtags');
+
         return collect($terms)
             ->map(fn (string $term): string => Str::of($term)->lower()->replaceMatches('/[^a-z0-9]/', '')->value())
             ->filter(fn (string $term): bool => strlen($term) > 2)
+            // A model asked for "hashtags to find high-performing posts" reaches for
+            // reach-bait however the prompt is worded, so the list is enforced here
+            // rather than trusted to the instructions.
+            ->reject(fn (string $term): bool => in_array($term, $blocked, true))
             ->unique()
             ->take((int) config('services.discovery.hashtag_limit'))
             ->values()

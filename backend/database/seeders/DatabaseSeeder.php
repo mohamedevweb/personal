@@ -56,9 +56,14 @@ class DatabaseSeeder extends Seeder
                 'display_name' => $item[1],
                 'avatar_url' => 'https://i.pravatar.cc/160?img='.(12 + $index),
                 'niche' => $item[2],
+                // The benchmark layer stands in for measured accounts, so it carries
+                // the same signals a profile scrape would have written.
+                'niche_topics' => array_map('strtolower', explode(' ', $item[2])),
                 'followers' => $item[3],
                 'average_views' => $item[4],
                 'average_likes' => $item[5],
+                'baseline_engagement' => (int) round($item[5] * 1.1),
+                'avg_engagement_rate' => round($item[5] / $item[3] * 100, 2),
             ]);
         });
 
@@ -120,6 +125,8 @@ class DatabaseSeeder extends Seeder
             $creator = $creators[$index % $creators->count()];
             $ratio = $ratios[$index % count($ratios)];
             $views = (int) round($creator->average_views * $ratio);
+            $likes = (int) round($views * (0.045 + (($index % 4) * 0.008)));
+            $comments = 80 + (($index * 47) % 730);
             ContentPost::query()->updateOrCreate(
                 ['hook' => $hook],
                 [
@@ -129,10 +136,13 @@ class DatabaseSeeder extends Seeder
                     'caption' => $hook."\n\nThe useful part was not the outcome. It was the decision that changed what happened next. Here is the honest breakdown and the lesson I would carry into the next build.",
                     'thumbnail_url' => $images[$index % count($images)],
                     'views' => $views,
-                    'likes' => (int) round($views * (0.045 + (($index % 4) * 0.008))),
-                    'comments' => 80 + (($index * 47) % 730),
+                    'likes' => $likes,
+                    'comments' => $comments,
                     'published_at' => now()->subHours(6 + ($index * 7)),
                     'performance_ratio' => $ratio,
+                    'outlier_score' => $ratio,
+                    'engagement_rate' => round(($likes + $comments) / $creator->followers * 100, 3),
+                    'measured_at' => now(),
                     'tags' => array_values(array_unique([$creator->niche, $index % 2 ? 'Founder story' : 'SaaS', $index % 3 ? 'Lesson' : 'Building in public'])),
                     'why_it_works' => 'It starts with a specific tension, earns attention through lived experience, and closes with a practical shift the audience can apply.',
                     'hook_analysis' => 'A first-person admission creates curiosity and credibility without giving away the resolution.',

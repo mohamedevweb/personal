@@ -108,7 +108,7 @@ watch(user, syncAccountForm)
         </button>
       </div>
 
-      <form class="mt-6 space-y-4" @submit.prevent="saveAccount">
+      <form class="mt-6 max-w-[520px] space-y-4" @submit.prevent="saveAccount">
         <label class="block">
           <span class="text-xs font-medium uppercase tracking-[.14em] text-[var(--faint)]">{{ $t('settings.account.name') }}</span>
           <input v-model="account.name" type="text" autocomplete="name" required class="settings-input">
@@ -132,7 +132,7 @@ watch(user, syncAccountForm)
       <h2 class="font-serif text-[26px] tracking-[-.02em]">{{ $t('settings.password.title') }}</h2>
       <p class="mt-1 text-sm leading-6 text-[var(--muted)]">{{ $t('settings.password.copy') }}</p>
 
-      <form class="mt-6 space-y-4" @submit.prevent="savePassword">
+      <form class="mt-6 max-w-[520px] space-y-4" @submit.prevent="savePassword">
         <label class="block">
           <span class="text-xs font-medium uppercase tracking-[.14em] text-[var(--faint)]">{{ $t('settings.password.current') }}</span>
           <input v-model="password.current_password" type="password" autocomplete="current-password" required class="settings-input">
@@ -183,6 +183,7 @@ watch(user, syncAccountForm)
         <div>
           <h2 class="font-serif text-[26px] tracking-[-.02em]">{{ $t('settings.privacy') }}</h2>
           <p class="mt-2 text-sm leading-6 text-[var(--muted)]">{{ $t('settings.privacyCopy') }}</p>
+          <NuxtLink to="/privacy" class="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-[var(--ink)] underline underline-offset-4 transition hover:text-[var(--accent)]">{{ $t('settings.privacyLink') }}</NuxtLink>
         </div>
       </div>
     </section>

@@ -142,6 +142,11 @@ function toggleMode() {
               {{ isLogin ? $t('login.goToRegister') : $t('login.goToLogin') }}
             </button>
           </p>
+
+          <p class="mt-5 text-center text-[12.5px] leading-[1.6] text-[#8b8375]">
+            {{ $t('login.legal') }}
+            <NuxtLink to="/privacy" class="b-focus underline underline-offset-4 transition-colors hover:text-[var(--b-black)]">{{ $t('login.legalLink') }}</NuxtLink>
+          </p>
         </div>
       </section>
 

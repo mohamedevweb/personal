@@ -1,6 +1,6 @@
 # Personal
 
-Personal is a Nuxt 3 + Laravel 12 MVP foundation. The authenticated creator's Instagram connection is real, and content generation runs on OpenAI. Recommendation, trend and competitor intelligence remain replaceable mocks for the MVP.
+Personal is a Nuxt 3 + Laravel 12 MVP foundation. The authenticated creator's Instagram connection is real, content generation runs on OpenAI, and the For You feed is ranked from real Instagram accounts scraped through Apify. Every scraping driver degrades to a deterministic mock when its key is absent, so the product runs unconfigured.
 
 PostgreSQL is the configured application database. PHPUnit uses an isolated in-memory SQLite database for fast integration tests.
 
@@ -17,7 +17,7 @@ PostgreSQL is the configured application database. PHPUnit uses an isolated in-m
 - Editable Personal memory, Saved content, Create, and Settings
 - 15 benchmark creators and 40 realistic seeded posts
 
-Recommendation scoring intentionally uses deterministic MVP logic. The authenticated user's Instagram profile and media are real data fetched from Meta, and drafts are written by a language model from that data.
+Recommendation scoring is deterministic and explainable — see [How the For You feed ranks](#how-the-for-you-feed-ranks). The authenticated user's Instagram profile and media are real data fetched from Meta, and drafts are written by a language model from that data.
 
 ## Structure
 
@@ -54,6 +54,38 @@ Only the transport differs between drivers. The prompt, the JSON schema and the 
 The model writes only the creative half of a draft. The source hook, the selected life moment and the creator profile are attached from our own records, so the response cannot invent them, and prompts instruct the model to borrow structure and never subject matter. Refusals, truncated answers and API errors all surface to the creator as a `503` with a readable message instead of a stack trace.
 
 Cost and depth are tunable with `OPENAI_MODEL`, `OPENAI_MAX_OUTPUT_TOKENS`, and `OPENAI_REASONING_EFFORT` — the last one applies to reasoning models only and must stay empty for the others.
+
+## How the For You feed ranks
+
+A post earns its place by beating the account that published it — not by coming from a large one. Discovery runs in two stages, and only the second one is allowed to score anything.
+
+**Stage 1 — `DiscoverNicheContent`.** The creator's niche is expanded into hashtags, those pages are scraped, and the accounts and posts behind them are recorded. The actor returns no follower count on post-level results, so a hashtag row genuinely cannot be judged: nothing here is scored, rows land with `measured_at` null, and stage 1 is best understood as harvesting *accounts* rather than posts.
+
+Hashtag quality decides everything downstream. Reach-bait tags (`viralreels`, `explorepage`, `fyp`, `instagood`…) are not niches — they are what accounts with no audience post under in order to be seen — so scraping them returns spam by construction. `config('services.discovery.blocked_hashtags')` strips them from every expansion, enforced in code rather than trusted to the prompt.
+
+**Stage 2 — `MeasureAccountEngagement`.** Each account found is scraped as a whole profile, which yields three things a hashtag page never exposes: the real follower count, what the account is actually about, and the median engagement of its recent posts. That median is the baseline, and *every* post the account has in the feed is scored against it — including ones picked up earlier through a hashtag.
+
+Three numbers come out of it:
+
+| Column | Meaning |
+| --- | --- |
+| `creators.baseline_engagement` | The account's normal post, as the median of its recent likes + comments. |
+| `content_posts.outlier_score` | Engagement over that baseline. `1.0` is an ordinary post for the account, `3.0` is a genuine breakout. |
+| `content_posts.engagement_rate` | Engagement as a share of the audience, so a 20k and a 2M account are comparable. |
+
+`performance_ratio` is kept in step with `outlier_score` for the clients still reading it.
+
+Because the baseline is the account's own median, roughly half of any scrape lands below `1.0` by construction — that is the point. `DISCOVERY_MIN_OUTLIER_SCORE` (default `1.2`) is the floor to reach the feed, and `DISCOVERY_FEED_WINDOW_DAYS` (default `30`) drops posts describing a niche that has already moved on.
+
+A lift is a ratio, and a ratio has no sense of scale: an account whose median post gets two likes turns a three-like post into a `1.5×` "outlier". So two absolute floors sit underneath it — `DISCOVERY_MIN_FOLLOWERS` (default `5000`) and `DISCOVERY_MIN_POST_ENGAGEMENT` (default `500`). An account below the follower floor is measured, so its cooldown applies and we stop paying to re-scrape it, but it is never scored and never classified.
+
+There is deliberately **no fallback**. An unmeasured post carries no evidence, so when measurement has not run yet — or has failed in the queue — the feed shows its empty state rather than degrading to raw scrape output. A page of two-like posts is worth less than an honest empty one.
+
+`RecommendationService` then weighs outlier score (0.35), creator similarity (0.20), topic similarity (0.15), reach (0.15) and freshness (0.15). Both similarity terms match the creator's own vocabulary as substrings, because hashtags arrive glued together — `vegan` has to find `veganmealprep`.
+
+Niche is read from the account itself. `CreatorNicheService` classifies a discovered creator from their bio, their recurring hashtags and a sample of captions, and the result is cached on the creator so the model is not re-run on every measurement. Discovery previously stamped every account with the niche of whichever user found them, which described the searcher rather than the creator.
+
+Scraping cost is capped on every axis: hashtags have a cooldown (`DISCOVERY_COOLDOWN_DAYS`), accounts have their own (`DISCOVERY_MEASURE_COOLDOWN_DAYS`), and a single run measures at most `DISCOVERY_MEASURE_BATCH` accounts. A daily scheduled pass re-measures the stalest tracked accounts within those same limits, which is also how the feed learns about new posts between hashtag runs.
 
 ## Instagram app setup
 

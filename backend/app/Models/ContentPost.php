@@ -15,6 +15,9 @@ class ContentPost extends Model
             'tags' => 'array',
             'published_at' => 'datetime',
             'performance_ratio' => 'float',
+            'engagement_rate' => 'float',
+            'outlier_score' => 'float',
+            'measured_at' => 'datetime',
         ];
     }
 
