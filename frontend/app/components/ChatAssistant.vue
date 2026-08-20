@@ -118,8 +118,8 @@ onUnmounted(() => { if (import.meta.client) window.removeEventListener('keydown'
       >
         <header class="flex items-center justify-between border-b border-[var(--line)] bg-[var(--paper)] px-5 py-4">
           <div>
-            <p class="text-[14px] font-semibold tracking-[-0.02em]">{{ $t('chat.title') }}</p>
-            <p class="text-[11px] text-[var(--faint)]">{{ $t('chat.subtitle') }}</p>
+            <p class="font-serif text-[19px] leading-none tracking-[-.02em]">{{ $t('chat.title') }}</p>
+            <p class="mt-1.5 text-[11px] text-[var(--faint)]">{{ $t('chat.subtitle') }}</p>
           </div>
           <button
             v-if="messages.length"

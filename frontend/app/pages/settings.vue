@@ -87,7 +87,7 @@ watch(user, syncAccountForm)
 </script>
 
 <template>
-  <main class="mx-auto max-w-[820px] px-5 pb-16 pt-2 md:px-8">
+  <main class="page-shell pb-16 pt-2">
     <!-- Account -->
     <section class="rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-6 md:p-8">
       <div class="flex items-start justify-between gap-4">

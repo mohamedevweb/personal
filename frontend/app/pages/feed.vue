@@ -68,7 +68,7 @@ onMounted(loadFeed)
 </script>
 
 <template>
-  <main class="mx-auto max-w-[1180px] px-5 pb-16 pt-2 md:px-8">
+  <main class="page-shell pb-16 pt-2">
     <section class="hero-night relative overflow-hidden rounded-[24px] px-6 py-14 text-white md:px-12 md:py-16">
       <div class="mx-auto max-w-2xl text-center">
         <p class="inline-flex items-center gap-2.5 text-[10px] font-semibold uppercase tracking-[.22em] text-[var(--gold)]">
@@ -87,11 +87,11 @@ onMounted(loadFeed)
           <NuxtLink
             v-if="data?.featured_opportunity?.content_post_id"
             :to="`/content/${data.featured_opportunity.content_post_id}`"
-            class="inline-flex h-12 items-center gap-2 rounded-full bg-white px-6 text-sm font-medium text-[var(--night)] transition hover:bg-white/90"
+            class="inline-flex h-12 items-center gap-2 rounded-full bg-[var(--paper)] px-6 text-[14px] font-medium text-[var(--night)] transition hover:bg-white"
           >
             {{ $t('feed.seePattern') }} <AppIcon name="arrow" :size="15" />
           </NuxtLink>
-          <NuxtLink to="/create" class="inline-flex h-12 items-center gap-2 rounded-full border border-white/20 px-6 text-sm font-medium text-white transition hover:bg-white/10">
+          <NuxtLink to="/create" class="inline-flex h-12 items-center gap-2 rounded-full border border-white/20 px-6 text-[14px] font-medium text-white transition hover:bg-white/10">
             <AppIcon name="plus" :size="16" />{{ $t('feed.createFromScratch') }}
           </NuxtLink>
         </div>
@@ -149,7 +149,7 @@ onMounted(loadFeed)
 
     <div class="mt-12 flex items-center justify-between border-b border-[var(--line)] pb-4">
       <h2 class="text-[11px] font-semibold uppercase tracking-[.18em] text-[var(--muted)]">{{ $t('feed.worthCreating') }}</h2>
-      <button class="inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3.5 py-2 text-xs text-[var(--muted)] transition hover:text-[var(--ink)] disabled:opacity-60" :disabled="refreshing || loading" @click="refresh">
+      <button class="inline-flex h-9 items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 text-[12.5px] text-[var(--muted)] transition hover:text-[var(--ink)] disabled:opacity-60" :disabled="refreshing || loading" @click="refresh">
         <AppIcon name="sparkles" :size="14" />{{ refreshing ? $t('feed.refreshing') : $t('feed.refresh') }}
       </button>
     </div>

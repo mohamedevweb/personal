@@ -131,7 +131,7 @@ onMounted(async () => {
 
           <button
             v-if="status.account?.sync_status === 'failed'"
-            class="mt-8 inline-flex h-12 items-center rounded-full border border-[var(--line)] bg-[var(--surface)] px-6 text-sm font-medium transition hover:bg-[var(--paper)]"
+            class="mt-8 inline-flex h-11 items-center rounded-full border border-[var(--line)] bg-[var(--surface)] px-6 text-[14px] font-medium transition hover:bg-[var(--paper)]"
             :disabled="loading"
             @click="connect"
           >

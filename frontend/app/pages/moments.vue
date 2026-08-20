@@ -31,7 +31,7 @@ onMounted(load)
 </script>
 
 <template>
-  <main class="mx-auto max-w-[1000px] px-5 pb-16 pt-2 md:px-8">
+  <main class="page-shell pb-16 pt-2">
     <header class="flex flex-col gap-4 rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-6 md:flex-row md:items-center md:justify-between">
       <div class="flex items-start gap-4">
         <span class="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-[var(--accent-soft)] text-[var(--accent-ink)]"><AppIcon name="moments" :size="19" /></span>

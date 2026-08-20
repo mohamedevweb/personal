@@ -70,6 +70,21 @@ button, a { -webkit-tap-highlight-color: transparent; }
   }
 
   .panel-night { background: rgba(255, 255, 255, .045); border: 1px solid rgba(255, 255, 255, .085); }
+
+  /* Every screen sits in a single column: the sticky header and the page body
+     both read --shell, so the page title always lands on the same left edge as
+     the sections underneath it. Routes that want a narrower column set --shell
+     in the layout. */
+  .page-shell {
+    width: 100%;
+    max-width: var(--shell, 1180px);
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .page-shell { padding-inline: 2rem; }
+  }
 }
 
 @keyframes rise {

@@ -11,7 +11,7 @@ onMounted(async () => { const response = await apiFetch<{ items: ContentPost[] }
 </script>
 
 <template>
-  <main class="mx-auto max-w-[1120px] px-5 pb-16 pt-2 md:px-8">
+  <main class="page-shell pb-16 pt-2">
     <header class="flex items-start gap-4 rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-6">
       <span class="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-[var(--accent-soft)] text-[var(--accent-ink)]"><AppIcon name="bookmark" :size="19" /></span>
       <div>

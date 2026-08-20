@@ -33,7 +33,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main class="mx-auto max-w-[1000px] px-5 pb-16 pt-2 md:px-8">
+  <main class="page-shell pb-16 pt-2">
     <header class="flex flex-col gap-4 rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-6 md:flex-row md:items-center md:justify-between">
       <div class="flex items-start gap-4">
         <span class="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-[var(--accent-soft)] text-[var(--accent-ink)]"><AppIcon name="user" :size="19" /></span>
@@ -42,7 +42,7 @@ onMounted(async () => {
           <p class="mt-2 max-w-xl text-[15px] leading-6 text-[var(--muted)]">{{ $t('personal.subtitle') }}</p>
         </div>
       </div>
-      <button v-if="profile && !editing" class="w-fit shrink-0 rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 py-2.5 text-sm transition hover:bg-[var(--paper)]" @click="beginEdit">{{ $t('personal.editMemory') }}</button>
+      <button v-if="profile && !editing" class="inline-flex h-11 w-fit shrink-0 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-[14px] transition hover:border-[#d8d2c6] hover:bg-[var(--paper)]" @click="beginEdit">{{ $t('personal.editMemory') }}</button>
     </header>
 
     <div v-if="profile" class="mt-5 overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">

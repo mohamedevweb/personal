@@ -33,7 +33,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main v-if="post" class="mx-auto max-w-[1180px] px-5 pb-16 pt-2 md:px-8">
+  <main v-if="post" class="page-shell pb-16 pt-2">
     <NuxtLink to="/feed" class="text-sm text-[var(--muted)]">{{ $t('content.backToFeed') }}</NuxtLink>
     <div class="mt-6 grid gap-10 lg:grid-cols-[.88fr_1.12fr]">
       <section class="lg:sticky lg:top-8 lg:self-start">
@@ -53,9 +53,9 @@ onMounted(async () => {
 
         <div class="mt-8 rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-6">
           <h2 class="font-serif text-2xl">{{ $t('content.makeItYours') }}</h2><p class="mt-2 text-sm text-[var(--muted)]">{{ $t('content.makeItYoursCopy') }}</p>
-          <div class="mt-5 flex flex-wrap gap-2"><button v-for="item in ['reel','carousel','caption']" :key="item" class="rounded-full border px-4 py-2 text-xs capitalize" :class="format === item ? 'border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]' : 'border-[var(--line)]'" @click="format = item as any">{{ item === 'caption' ? $t('content.captionOption') : item }}</button></div>
-          <label v-if="moments.length" class="mt-5 block text-xs text-[var(--muted)]">{{ $t('content.groundInMoment') }}<select v-model="selectedMoment" class="mt-2 w-full rounded-xl border border-[var(--line)] bg-white px-3 py-3 text-sm"><option :value="null">{{ $t('content.letPersonalChoose') }}</option><option v-for="moment in moments" :key="moment.id" :value="moment.id">{{ moment.content }}</option></select></label>
-          <button class="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--ink)] text-sm font-medium text-[var(--paper)] disabled:opacity-60" :disabled="generating" @click="createRemix">{{ generating ? $t('content.creating') : $t('content.remixForMe') }} <AppIcon name="sparkles" :size="16" /></button>
+          <div class="mt-5 flex flex-wrap gap-2"><button v-for="item in ['reel','carousel','caption']" :key="item" class="inline-flex h-9 items-center rounded-full border px-4 text-[12.5px] capitalize transition" :class="format === item ? 'border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]' : 'border-[var(--line)]'" @click="format = item as any">{{ item === 'caption' ? $t('content.captionOption') : item }}</button></div>
+          <label v-if="moments.length" class="mt-5 block text-xs text-[var(--muted)]">{{ $t('content.groundInMoment') }}<select v-model="selectedMoment" class="mt-2 w-full rounded-[14px] border border-[var(--line)] bg-[var(--surface)] px-3 py-3 text-sm"><option :value="null">{{ $t('content.letPersonalChoose') }}</option><option v-for="moment in moments" :key="moment.id" :value="moment.id">{{ moment.content }}</option></select></label>
+          <button class="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--ink)] text-[15px] font-medium text-[var(--paper)] disabled:opacity-60" :disabled="generating" @click="createRemix">{{ generating ? $t('content.creating') : $t('content.remixForMe') }} <AppIcon name="sparkles" :size="16" /></button>
         </div>
       </section>
     </div>

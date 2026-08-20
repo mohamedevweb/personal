@@ -23,7 +23,7 @@ function select(code: string) {
       type="button"
       class="rounded-full px-2.5 py-1 uppercase tracking-[.06em] transition"
       :class="locale === option.code
-        ? (variant === 'dark' ? 'bg-white text-[var(--ink)]' : 'bg-[var(--ink)] text-white')
+        ? (variant === 'dark' ? 'bg-white text-[var(--ink)]' : 'bg-[var(--ink)] text-[var(--paper)]')
         : (variant === 'dark' ? 'text-white/55 hover:text-white' : 'text-[var(--muted)] hover:text-[var(--ink)]')"
       :aria-pressed="locale === option.code"
       @click="select(option.code)"

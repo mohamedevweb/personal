@@ -40,6 +40,18 @@ const titles: Record<string, string> = {
   '/settings': 'nav.settings'
 }
 
+// Each route declares the width of its column so the sticky header can sit in
+// the same one — the page title and the sections below it share a left edge.
+const shells: Record<string, string> = {
+  '/settings': '820px',
+  '/moments': '1000px',
+  '/personal': '1000px',
+  '/create': '1100px',
+  '/saved': '1120px'
+}
+
+const shellWidth = computed(() => shells[route.path] || '1180px')
+
 const pageTitle = computed(() => {
   if (route.path.startsWith('/content/')) return 'nav.pattern'
   if (route.path.startsWith('/remix/')) return 'nav.remix'
@@ -85,20 +97,22 @@ const pageTitle = computed(() => {
       </div>
     </aside>
 
-    <div class="md:ml-[264px]">
-      <header class="sticky top-0 z-20 hidden h-[74px] items-center justify-between bg-[var(--paper)] px-8 md:flex">
-        <h1 class="font-serif text-[30px] leading-none tracking-[-.02em]">{{ $t(pageTitle) }}</h1>
-        <div class="flex items-center gap-2">
-          <NuxtLink to="/settings" class="grid h-10 w-10 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--muted)] transition hover:text-[var(--ink)]" :aria-label="$t('nav.settings')">
-            <AppIcon name="settings" :size="17" />
-          </NuxtLink>
-          <NuxtLink to="/personal" class="grid h-10 w-10 place-items-center overflow-hidden rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--muted)] transition hover:text-[var(--ink)]" :aria-label="$t('nav.personal')">
-            <img v-if="user?.avatar_url" :src="user.avatar_url" alt="" class="h-full w-full object-cover">
-            <AppIcon v-else name="user" :size="17" />
-          </NuxtLink>
-          <NuxtLink to="/create" class="grid h-10 w-10 place-items-center rounded-full bg-[var(--ink)] text-[var(--paper)] transition hover:bg-black" :aria-label="$t('nav.create')">
-            <AppIcon name="plus" :size="18" />
-          </NuxtLink>
+    <div class="md:ml-[264px]" :style="{ '--shell': shellWidth }">
+      <header class="sticky top-0 z-20 hidden h-[74px] bg-[var(--paper)] md:block">
+        <div class="page-shell flex h-full items-center justify-between">
+          <h1 class="font-serif text-[30px] leading-none tracking-[-.02em]">{{ $t(pageTitle) }}</h1>
+          <div class="flex items-center gap-2">
+            <NuxtLink to="/settings" class="grid h-10 w-10 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--muted)] transition hover:text-[var(--ink)]" :aria-label="$t('nav.settings')">
+              <AppIcon name="settings" :size="17" />
+            </NuxtLink>
+            <NuxtLink to="/personal" class="grid h-10 w-10 place-items-center overflow-hidden rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--muted)] transition hover:text-[var(--ink)]" :aria-label="$t('nav.personal')">
+              <img v-if="user?.avatar_url" :src="user.avatar_url" alt="" class="h-full w-full object-cover">
+              <AppIcon v-else name="user" :size="17" />
+            </NuxtLink>
+            <NuxtLink to="/create" class="grid h-10 w-10 place-items-center rounded-full bg-[var(--ink)] text-[var(--paper)] transition hover:bg-black" :aria-label="$t('nav.create')">
+              <AppIcon name="plus" :size="18" />
+            </NuxtLink>
+          </div>
         </div>
       </header>
 

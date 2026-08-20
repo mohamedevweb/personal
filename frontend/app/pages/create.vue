@@ -35,7 +35,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main class="mx-auto max-w-[1100px] px-5 pb-16 pt-2 md:px-8">
+  <main class="page-shell pb-16 pt-2">
     <p v-if="error" role="alert" class="mb-5 rounded-[18px] border border-[var(--danger-line)] bg-[var(--danger-soft)] p-4 text-sm text-[var(--danger)]">{{ error }}</p>
     <p v-else-if="drafting" class="mb-5 text-sm text-[var(--muted)]">{{ $t('create.drafting') }}</p>
 
@@ -48,7 +48,7 @@ onMounted(async () => {
       <p class="mx-auto mt-5 max-w-xl text-[15px] leading-7 text-white/65">{{ opportunities[0]?.explanation || $t('create.pickCopyFallback') }}</p>
       <button
         v-if="opportunities[0]?.life_moment"
-        class="mt-9 inline-flex h-12 items-center rounded-full bg-white px-6 text-sm font-medium text-[var(--night)] transition hover:bg-white/90 disabled:cursor-wait disabled:opacity-70"
+        class="mt-9 inline-flex h-12 items-center rounded-full bg-[var(--paper)] px-6 text-[14px] font-medium text-[var(--night)] transition hover:bg-white disabled:cursor-wait disabled:opacity-70"
         :disabled="drafting"
         @click="createFromMoment(opportunities[0].life_moment!)"
       >

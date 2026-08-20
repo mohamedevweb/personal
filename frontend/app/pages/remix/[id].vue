@@ -34,7 +34,7 @@ onMounted(async () => { const response = await apiFetch<{ remix: Remix }>(`/api/
 </script>
 
 <template>
-  <main v-if="remix" class="mx-auto max-w-[1180px] px-5 pb-16 pt-2 md:px-8">
+  <main v-if="remix" class="page-shell pb-16 pt-2">
     <header class="flex flex-wrap items-center gap-4"><NuxtLink :to="`/content/${remix.source_content?.id}`" class="text-sm text-[var(--muted)]">{{ $t('remix.backToAnalysis') }}</NuxtLink><div class="ml-auto flex items-center gap-3"><span v-if="saved" class="text-xs text-[var(--positive)]">{{ $t('remix.saved') }}</span><button class="rounded-full border border-[var(--line)] px-4 py-2.5 text-xs" :disabled="saving" @click="saveDraft">{{ saving ? $t('remix.saving') : $t('remix.saveDraft') }}</button><button class="inline-flex h-9 items-center justify-center rounded-full bg-[var(--ink)] px-4 text-[12.5px] font-medium text-[var(--paper)]">{{ $t('remix.markReady') }}</button></div></header>
     <div class="mt-9 grid gap-8 lg:grid-cols-[.75fr_1.25fr]">
       <aside class="space-y-4 lg:sticky lg:top-8 lg:self-start">

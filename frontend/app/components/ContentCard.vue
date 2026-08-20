@@ -82,7 +82,7 @@ const visibleCaption = computed(() => (expanded.value || !isLongCaption.value ? 
       </div>
 
       <div class="mt-5 flex items-center gap-2">
-        <button class="rounded-full border border-[var(--line)] bg-[var(--surface)] px-3.5 py-2 text-xs transition hover:bg-[var(--line-soft)]" @click="$emit('save', post)">{{ post.is_saved ? $t('contentCard.saved') : $t('contentCard.save') }}</button>
+        <button class="inline-flex h-9 items-center rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 text-[12.5px] transition hover:bg-[var(--line-soft)]" @click="$emit('save', post)">{{ post.is_saved ? $t('contentCard.saved') : $t('contentCard.save') }}</button>
         <button class="rounded-full px-3 py-2 text-xs text-[var(--faint)] transition hover:text-[var(--ink)]" @click="$emit('dismiss', post)">{{ $t('contentCard.notForMe') }}</button>
         <button class="ml-auto inline-flex h-9 items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-4 text-[12.5px] font-medium text-[var(--paper)] transition hover:bg-black" @click="$emit('remix', post)">{{ $t('contentCard.remixForMe') }} <AppIcon name="arrow" :size="14" /></button>
       </div>
