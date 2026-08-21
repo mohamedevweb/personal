@@ -40,8 +40,9 @@ return [
     ],
 
     'discovery' => [
-        // HikerAPI is the primary public-data provider. Apify remains available as
-        // a gradual fallback, while mock keeps local development deterministic.
+        // HikerAPI is the default public-data provider. ScrapeCreators can feed
+        // the same normalized pipeline, Apify remains available as a fallback,
+        // and mock keeps local development deterministic.
         'driver' => env('DISCOVERY_DRIVER', 'hiker'),
         'hiker' => [
             'api_key' => env('HIKER_API_KEY'),
@@ -49,6 +50,16 @@ return [
             'timeout' => (int) env('HIKER_TIMEOUT', 30),
             'retries' => (int) env('HIKER_RETRIES', 3),
             'retry_delay_ms' => (int) env('HIKER_RETRY_DELAY_MS', 500),
+        ],
+        'scrapecreators' => [
+            'api_key' => env('SCRAPECREATORS_API_KEY'),
+            'base_url' => env('SCRAPECREATORS_BASE_URL', 'https://api.scrapecreators.com'),
+            'timeout' => (int) env('SCRAPECREATORS_TIMEOUT', 30),
+            'retries' => (int) env('SCRAPECREATORS_RETRIES', 3),
+            'retry_delay_ms' => (int) env('SCRAPECREATORS_RETRY_DELAY_MS', 500),
+            // The profile endpoint supports provider-side caching. Three days
+            // matches the account measurement cooldown and avoids duplicate cost.
+            'cache_max_age' => env('SCRAPECREATORS_CACHE_MAX_AGE', '3d'),
         ],
         'apify' => [
             'token' => env('APIFY_TOKEN'),

@@ -17,7 +17,7 @@
     "create": "Create",
     "moments": "Moments",
     "personal": "Personal",
-    "saved": "Saved",
+    "saved": "Bookmark",
     "settings": "Settings",
     "groups": {
       "discover": "Discover",
@@ -542,6 +542,10 @@
       "resend": "Resend link",
       "sending": "Sending…",
       "resent": "Verification link sent. Check your inbox."
+    },
+    "language": {
+      "title": "Language",
+      "copy": "Choose the language used throughout Personal."
     },
     "password": {
       "title": "Password",

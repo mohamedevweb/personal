@@ -7,13 +7,11 @@ use Anthropic\RequestOptions;
 use App\Exceptions\ContentDiscoveryException;
 use App\Services\ClaudeContentGenerationService;
 use App\Services\ContentGenerationService;
-use App\Services\Discovery\ApifyInstagramDataProvider;
 use App\Services\Discovery\ApifyInstagramDiscoveryService;
 use App\Services\Discovery\ApifyProfileScraperService;
 use App\Services\Discovery\ContentDiscoveryService;
-use App\Services\Discovery\HikerInstagramProvider;
 use App\Services\Discovery\InstagramDataProvider;
-use App\Services\Discovery\MockInstagramDataProvider;
+use App\Services\Discovery\InstagramDataProviderManager;
 use App\Services\Discovery\MockInstagramDiscoveryService;
 use App\Services\Discovery\MockProfileScraperService;
 use App\Services\Discovery\ProfileDiscoveryService;
@@ -75,18 +73,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(InstagramDataProvider::class, function (): InstagramDataProvider {
-            return match (true) {
-                config('services.discovery.driver') === 'hiker'
-                    && (bool) config('services.discovery.hiker.api_key') => $this->app->make(HikerInstagramProvider::class),
-
-                config('services.discovery.driver') === 'apify'
-                    && (bool) config('services.discovery.apify.token') => $this->app->make(ApifyInstagramDataProvider::class),
-
-                config('services.discovery.driver') === 'mock'
-                    && ! $this->app->environment('production') => $this->app->make(MockInstagramDataProvider::class),
-
-                default => throw new ContentDiscoveryException('Instagram discovery is not configured for the selected provider.'),
-            };
+            return $this->app->make(InstagramDataProviderManager::class)->provider();
         });
     }
 

@@ -7,6 +7,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\Response;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Throwable;
@@ -49,7 +50,7 @@ class HikerInstagramProvider implements InstagramDataProvider
         );
     }
 
-    public function getRelatedAccounts(string $externalId, int $limit): Collection
+    public function getRelatedAccounts(string $externalId, int $limit, ?string $username = null): Collection
     {
         return $this->profilesFromPayload(
             $this->get('/v2/user/suggested/profiles', [
@@ -164,6 +165,16 @@ class HikerInstagramProvider implements InstagramDataProvider
                 'is_verified' => $user['is_verified'] ?? null,
                 'media_count' => $user['media_count'] ?? null,
                 'following_count' => $user['following_count'] ?? null,
+                'providers' => [
+                    'hiker' => [
+                        'raw_data' => Arr::only($user, [
+                            'pk', 'pk_id', 'id', 'username', 'full_name', 'biography',
+                            'follower_count', 'following_count', 'media_count', 'is_private',
+                            'is_verified', 'category_name', 'business_category_name',
+                            'profile_pic_url', 'profile_pic_url_hd',
+                        ]),
+                    ],
+                ],
             ], fn (mixed $value): bool => $value !== null),
         );
     }
@@ -204,6 +215,15 @@ class HikerInstagramProvider implements InstagramDataProvider
                 'product_type' => $row['product_type'] ?? null,
                 'video_duration' => $row['video_duration'] ?? null,
                 'is_paid_partnership' => $row['is_paid_partnership'] ?? null,
+                'providers' => [
+                    'hiker' => [
+                        'raw_data' => Arr::only($row, [
+                            'pk', 'id', 'code', 'media_type', 'product_type', 'taken_at',
+                            'taken_at_ts', 'like_count', 'comment_count', 'play_count',
+                            'view_count', 'video_duration', 'is_paid_partnership',
+                        ]),
+                    ],
+                ],
             ], fn (mixed $value): bool => $value !== null),
         );
     }

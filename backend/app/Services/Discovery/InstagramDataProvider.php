@@ -15,5 +15,5 @@ interface InstagramDataProvider
     public function searchAccounts(string $query, int $limit): Collection;
 
     /** @return Collection<int, DiscoveredProfile> */
-    public function getRelatedAccounts(string $externalId, int $limit): Collection;
+    public function getRelatedAccounts(string $externalId, int $limit, ?string $username = null): Collection;
 }

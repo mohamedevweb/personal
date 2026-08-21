@@ -38,7 +38,7 @@ class ApifyInstagramDataProvider implements InstagramDataProvider
             ->values();
     }
 
-    public function getRelatedAccounts(string $externalId, int $limit): Collection
+    public function getRelatedAccounts(string $externalId, int $limit, ?string $username = null): Collection
     {
         return collect();
     }

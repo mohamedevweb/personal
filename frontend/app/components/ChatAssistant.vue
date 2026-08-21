@@ -136,11 +136,10 @@ onUnmounted(() => {
       >
         <div
           v-if="open"
-          class="fixed inset-0 z-50 flex items-start justify-center px-4 pb-4 pt-[12vh] md:pt-[14vh]"
+          class="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-5"
           @click.self="closeChat"
         >
-          <!-- Transparent, blurred scrim over the whole app -->
-          <div class="absolute inset-0 bg-[var(--ink)]/20 backdrop-blur-[6px]" @click="closeChat" />
+          <div class="absolute inset-0 bg-black/40 backdrop-blur-[4px]" @click="closeChat" />
 
           <Transition
             enter-active-class="transition duration-200 ease-[cubic-bezier(.22,1,.36,1)]"
@@ -151,24 +150,26 @@ onUnmounted(() => {
           >
             <section
               v-if="open"
-              class="relative flex max-h-[76vh] w-full max-w-[600px] flex-col overflow-hidden rounded-[26px] border border-white/60 bg-[var(--surface)]/80 shadow-[0_40px_120px_-24px_rgba(23,23,26,.5)] backdrop-blur-2xl"
+              class="relative flex max-h-[calc(100dvh-1rem)] w-full flex-col overflow-hidden rounded-t-[26px] border border-[var(--line)] bg-[var(--surface)] text-[var(--ink)] shadow-[0_32px_100px_-24px_rgba(23,23,26,.55)] sm:max-h-[min(720px,82vh)] sm:max-w-[620px] sm:rounded-[26px]"
               role="dialog"
               aria-modal="true"
               :aria-label="$t('chat.title')"
             >
+              <div class="mx-auto mt-2 h-1 w-10 rounded-full bg-[var(--line)] sm:hidden" aria-hidden="true" />
+
               <button
-                class="absolute right-4 top-4 z-10 grid h-8 w-8 place-items-center rounded-full text-[var(--faint)] transition hover:bg-[var(--paper)] hover:text-[var(--ink)]"
+                class="absolute right-3 top-3 z-10 grid h-9 w-9 place-items-center rounded-full text-[var(--faint)] transition hover:bg-[var(--line-soft)] hover:text-[var(--ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2"
                 :aria-label="$t('chat.close')"
                 @click="closeChat"
               >
                 <AppIcon name="close" :size="18" />
               </button>
 
-              <div ref="scrollEl" class="flex-1 overflow-y-auto px-5 py-6 md:px-7">
+              <div ref="scrollEl" class="flex-1 overflow-y-auto px-5 py-6 sm:px-8 sm:py-8">
                 <!-- Empty state: centered greeting, in the command-bar spirit -->
-                <div v-if="!messages.length" class="flex flex-col items-center px-2 py-6 text-center md:py-10">
+                <div v-if="!messages.length" class="flex min-h-[250px] flex-col items-center justify-center px-2 py-6 text-center sm:min-h-[290px]">
                   <div class="grid h-12 w-12 place-items-center rounded-2xl bg-[var(--ink)] text-[var(--paper)] shadow-[0_8px_24px_rgba(23,23,26,.22)]">
-                    <AppIcon name="sparkles" :size="24" />
+                    <PersonalMark :size="27" />
                   </div>
                   <h2 class="mt-5 font-serif text-[30px] leading-tight tracking-[-.02em] md:text-[36px]">{{ emptyTitle }}</h2>
                   <p class="mt-2 max-w-sm text-[13px] leading-6 text-[var(--faint)]">{{ $t('chat.emptyCopy') }}</p>
@@ -200,13 +201,14 @@ onUnmounted(() => {
                 <p v-if="error" role="alert" class="mt-3 rounded-[12px] border border-[var(--danger-line)] bg-[var(--danger-soft)] px-3 py-2 text-[12px] text-[var(--danger)]">{{ error }}</p>
               </div>
 
-              <div class="px-4 pb-4 md:px-5">
-                <div class="flex items-end gap-2 rounded-[16px] border border-[var(--line)] bg-[var(--surface)] px-3.5 py-2.5 shadow-[0_1px_3px_rgba(23,23,26,.04)] focus-within:border-[var(--ink)]/30">
+              <div class="border-t border-[var(--line-soft)] bg-[var(--surface)] px-4 pb-4 pt-4 sm:px-5 sm:pb-5">
+                <div class="flex items-end gap-2 rounded-[16px] border border-[var(--line)] bg-[var(--paper)] px-3.5 py-2.5 shadow-[0_1px_3px_rgba(23,23,26,.04)] transition focus-within:border-[var(--muted)] focus-within:ring-2 focus-within:ring-[var(--line-soft)]">
                   <textarea
                     ref="inputEl"
                     v-model="draft"
                     rows="1"
                     :placeholder="$t('chat.placeholder')"
+                    :aria-label="$t('chat.placeholder')"
                     class="max-h-32 flex-1 resize-none bg-transparent py-1 text-[14px] leading-6 text-[var(--ink)] outline-none placeholder:text-[var(--faint)]"
                     @keydown="onKeydown"
                   />
@@ -217,7 +219,7 @@ onUnmounted(() => {
                       @click="clearConversation"
                     >{{ $t('chat.clear') }}</button>
                     <button
-                      class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[var(--ink)] text-[var(--paper)] transition disabled:opacity-40"
+                      class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[var(--ink)] text-[var(--paper)] transition hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
                       :disabled="!draft.trim() || sending"
                       :aria-label="$t('chat.send')"
                       @click="send()"
@@ -232,7 +234,7 @@ onUnmounted(() => {
                   <button
                     v-for="starter in starters"
                     :key="starter"
-                    class="rounded-full border border-[var(--line)] bg-[var(--surface)] px-3.5 py-2 text-[12px] text-[var(--muted)] transition hover:border-[var(--ink)]/25 hover:text-[var(--ink)]"
+                    class="rounded-full border border-[var(--line)] bg-[var(--surface)] px-3.5 py-2 text-[12px] text-[var(--muted)] transition hover:border-[var(--muted)] hover:text-[var(--ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2"
                     @click="send(starter)"
                   >{{ starter }}</button>
                 </div>

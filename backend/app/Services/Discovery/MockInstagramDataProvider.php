@@ -36,7 +36,7 @@ class MockInstagramDataProvider implements InstagramDataProvider
             ->values();
     }
 
-    public function getRelatedAccounts(string $externalId, int $limit): Collection
+    public function getRelatedAccounts(string $externalId, int $limit, ?string $username = null): Collection
     {
         $usernames = collect(range(1, max(1, $limit)))
             ->map(fn (int $index): string => $externalId.'.related'.$index)

@@ -133,7 +133,7 @@ class MeasureAccountEngagement implements ShouldQueue
             'instagram_user_id' => $profile->externalId ?: $existing?->instagram_user_id,
             'username' => $profile->username,
             'bio' => $profile->bio,
-            'metadata' => $profile->metadata,
+            'metadata' => array_replace_recursive($existing?->metadata ?? [], $profile->metadata),
             'followers' => $profile->followers,
             'average_views' => (int) $profile->posts->map(fn (DiscoveredPost $p): int => $p->views)->avg(),
             'average_likes' => (int) $profile->posts->map(fn (DiscoveredPost $p): int => $p->likes)->avg(),
@@ -228,7 +228,7 @@ class MeasureAccountEngagement implements ShouldQueue
             'shares' => $post->shares,
             'published_at' => $post->publishedAt,
             'tags' => $post->hashtags,
-            'metadata' => $post->metadata,
+            'metadata' => array_replace_recursive($existing?->metadata ?? [], $post->metadata),
             'last_fetched_at' => now(),
             'metrics_updated_at' => now(),
             // why_it_works is written by score() once the baseline is known;

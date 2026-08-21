@@ -127,6 +127,17 @@ watch(user, syncAccountForm)
       </form>
     </section>
 
+    <!-- Language -->
+    <section class="mt-5 rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-6 md:p-8">
+      <div class="flex flex-col items-start justify-between gap-5 sm:flex-row sm:items-center">
+        <div>
+          <h2 class="font-serif text-[26px] tracking-[-.02em]">{{ $t('settings.language.title') }}</h2>
+          <p class="mt-1 text-sm leading-6 text-[var(--muted)]">{{ $t('settings.language.copy') }}</p>
+        </div>
+        <LanguageSwitcher />
+      </div>
+    </section>
+
     <!-- Password -->
     <section class="mt-5 rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-6 md:p-8">
       <h2 class="font-serif text-[26px] tracking-[-.02em]">{{ $t('settings.password.title') }}</h2>

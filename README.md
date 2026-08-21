@@ -1,6 +1,6 @@
 # Personal
 
-Personal is a Nuxt 3 + Laravel 12 MVP foundation. The authenticated creator's Instagram connection is real, content generation runs on OpenAI, and the For You feed is ranked from public Instagram data fetched through HikerAPI or Apify. Every discovery driver degrades to a deterministic mock when its key is absent, so the product runs unconfigured.
+Personal is a Nuxt 3 + Laravel 12 MVP foundation. The authenticated creator's Instagram connection is real, content generation runs on OpenAI, and the For You feed is ranked from public Instagram data fetched through HikerAPI, ScrapeCreators, or Apify. A deterministic mock discovery driver is available for tests and unconfigured development.
 
 PostgreSQL is the configured application database. PHPUnit uses an isolated in-memory SQLite database for fast integration tests.
 
@@ -57,7 +57,18 @@ Cost and depth are tunable with `OPENAI_MODEL`, `OPENAI_MAX_OUTPUT_TOKENS`, and 
 
 ## How the For You feed ranks
 
-A post earns its place by beating the account that published it, not by coming from a large one. The connected account still comes from Meta's official Instagram API. Public discovery goes through `InstagramDataProvider`, with HikerAPI as the primary driver, Apify as a fallback, and a deterministic mock for tests and unconfigured development.
+A post earns its place by beating the account that published it, not by coming from a large one. The connected account still comes from Meta's official Instagram API. Public discovery goes through `InstagramDataProvider`, with HikerAPI as the default driver, ScrapeCreators as a second real-data driver, Apify as a fallback, and a deterministic mock for tests and unconfigured development.
+
+Set `DISCOVERY_DRIVER=scrapecreators` and `SCRAPECREATORS_API_KEY` to run the normal creator discovery and account measurement jobs through ScrapeCreators. Profile responses use ScrapeCreators' provider-side cache for the same three-day window as account measurement by default. Change `SCRAPECREATORS_CACHE_MAX_AGE` when testing freshness versus cost.
+
+To compare HikerAPI and ScrapeCreators on the same niche without writing to the database, run:
+
+```bash
+cd backend
+php artisan personal:compare-instagram-providers "fitness coach"
+```
+
+The command reports creator and Reel counts, metric coverage, failures, execution time, and samples of the returned profiles and content. Run only one provider with `--provider=hiker` or `--provider=scrapecreators`; use `--creators` and `--posts` to control the size and cost of the benchmark.
 
 **Creator DNA.** `SyncInstagramAccount` reads the connected profile and recent media, then stores a structured `creator_dna` with primary niche, sub-niches, topics, audience, language, content pillars and tone. The model-backed analysis has a deterministic fallback, so Instagram sync does not depend on an LLM being available.
 

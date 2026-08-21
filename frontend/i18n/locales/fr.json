@@ -17,7 +17,7 @@
     "create": "Créer",
     "moments": "Moments",
     "personal": "Personal",
-    "saved": "Enregistrés",
+    "saved": "Favoris",
     "settings": "Réglages",
     "groups": {
       "discover": "Découvrir",
@@ -542,6 +542,10 @@
       "resend": "Renvoyer le lien",
       "sending": "Envoi…",
       "resent": "Lien de vérification envoyé. Vérifiez votre boîte de réception."
+    },
+    "language": {
+      "title": "Langue",
+      "copy": "Choisis la langue utilisée dans Personal."
     },
     "password": {
       "title": "Mot de passe",

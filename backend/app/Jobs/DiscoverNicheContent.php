@@ -75,6 +75,7 @@ class DiscoverNicheContent implements ShouldQueue
                 $related = $provider->getRelatedAccounts(
                     $seedProfile->externalId,
                     (int) config('services.discovery.related_per_seed'),
+                    $seedProfile->username,
                 );
             } catch (ContentDiscoveryException $exception) {
                 Log::warning('Related creator expansion skipped.', ['creator' => $seed->username, 'exception' => $exception]);
@@ -142,7 +143,7 @@ class DiscoverNicheContent implements ShouldQueue
             'display_name' => $profile->displayName ?: $profile->username,
             'avatar_url' => $profile->avatarUrl,
             'bio' => $profile->bio,
-            'metadata' => array_merge($creator->metadata ?? [], $profile->metadata),
+            'metadata' => array_replace_recursive($creator->metadata ?? [], $profile->metadata),
             'followers' => $profile->followers > 0 ? $profile->followers : ($creator->followers ?: 0),
             'niche' => $creator->exists ? $creator->niche : $fallbackNiche,
             'average_views' => $creator->average_views ?: 0,

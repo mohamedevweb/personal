@@ -80,7 +80,6 @@ const pageTitle = computed(() => {
             <p class="truncate text-[13px] font-medium">{{ user?.name || $t('common.yourWorkspace') }}</p>
             <button class="text-[11px] text-[var(--faint)] transition hover:text-[var(--ink)]" @click="logout">{{ $t('common.signOut') }}</button>
           </div>
-          <LanguageSwitcher />
         </div>
       </div>
     </aside>
@@ -109,10 +108,7 @@ const pageTitle = computed(() => {
           <PersonalMark :size="19" />
           <span class="font-serif text-[19px] tracking-[-.02em]">{{ $t(pageTitle) }}</span>
         </NuxtLink>
-        <div class="flex items-center gap-3">
-          <LanguageSwitcher />
-          <NuxtLink to="/create" class="grid h-9 w-9 place-items-center rounded-full bg-[var(--ink)] text-[var(--paper)]" :aria-label="$t('nav.create')"><AppIcon name="plus" /></NuxtLink>
-        </div>
+        <NuxtLink to="/create" class="grid h-9 w-9 place-items-center rounded-full bg-[var(--ink)] text-[var(--paper)]" :aria-label="$t('nav.create')"><AppIcon name="plus" /></NuxtLink>
       </header>
 
       <div class="pb-20 md:pb-0"><slot /></div>

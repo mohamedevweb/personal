@@ -5,7 +5,9 @@ namespace Tests\Feature;
 use App\Exceptions\ContentDiscoveryException;
 use App\Services\Discovery\HikerInstagramProvider;
 use App\Services\Discovery\InstagramDataProvider;
+use App\Services\Discovery\InstagramDataProviderManager;
 use App\Services\Discovery\MockInstagramDataProvider;
+use App\Services\Discovery\ScrapeCreatorsInstagramProvider;
 use Tests\TestCase;
 
 class InstagramDataProviderBindingTest extends TestCase
@@ -37,5 +39,29 @@ class InstagramDataProviderBindingTest extends TestCase
         config(['services.discovery.driver' => 'mock']);
 
         $this->assertInstanceOf(MockInstagramDataProvider::class, app(InstagramDataProvider::class));
+    }
+
+    public function test_scrapecreators_driver_resolves_the_real_provider_when_configured(): void
+    {
+        config([
+            'services.discovery.driver' => 'scrapecreators',
+            'services.discovery.scrapecreators.api_key' => 'test-key',
+        ]);
+
+        $this->assertInstanceOf(ScrapeCreatorsInstagramProvider::class, app(InstagramDataProvider::class));
+    }
+
+    public function test_a_provider_can_be_selected_explicitly_without_changing_the_default(): void
+    {
+        config([
+            'services.discovery.driver' => 'hiker',
+            'services.discovery.hiker.api_key' => 'hiker-key',
+            'services.discovery.scrapecreators.api_key' => 'scrapecreators-key',
+        ]);
+
+        $providers = app(InstagramDataProviderManager::class);
+
+        $this->assertInstanceOf(HikerInstagramProvider::class, $providers->provider());
+        $this->assertInstanceOf(ScrapeCreatorsInstagramProvider::class, $providers->provider('scrapecreators'));
     }
 }
