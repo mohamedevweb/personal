@@ -13,22 +13,26 @@ const selectedMoment = ref<number | null>(null)
 const generating = ref(false)
 const loading = ref(true)
 let analysisTimer: ReturnType<typeof setTimeout> | undefined
+let analysisAttempts = 0
 
 async function pollAnalysis() {
   try {
     const response = await apiFetch<{ content: ContentPost }>(`/api/content/${route.params.id}`)
     post.value = response.content
-    if (response.content.analysis_status === 'pending') {
+    analysisAttempts++
+    if (response.content.analysis_status === 'pending' && analysisAttempts < 90) {
       analysisTimer = setTimeout(pollAnalysis, 2000)
     }
   } catch {
-    analysisTimer = setTimeout(pollAnalysis, 4000)
+    analysisAttempts++
+    if (analysisAttempts < 45) analysisTimer = setTimeout(pollAnalysis, 4000)
   }
 }
 
 async function requestAnalysis() {
   try {
     await apiFetch(`/api/content/${route.params.id}/analysis`, { method: 'POST' })
+    analysisAttempts = 0
     analysisTimer = setTimeout(pollAnalysis, 1200)
   } catch {
     // The immediate heuristic remains useful when background analysis is unavailable.

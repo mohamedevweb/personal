@@ -78,12 +78,12 @@ const visibleCaption = computed(() => (expanded.value || !isLongCaption.value ? 
 
     <!-- Everything Personal adds on top of the post lives below the fold line. -->
     <div class="flex flex-1 flex-col border-t border-[var(--line)] bg-[var(--paper)] p-3.5">
-      <div class="flex flex-wrap items-center gap-1.5">
-        <span class="inline-flex items-center gap-1.5 rounded-full bg-[var(--accent-soft)] px-2.5 py-1 text-[11px] font-semibold text-[var(--accent-ink)]">
+      <div class="flex flex-nowrap items-center gap-0.5">
+        <span class="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-[var(--accent-soft)] px-1.5 py-1 text-[10px] font-semibold text-[var(--accent-ink)]">
           <AppIcon name="trend" :size="13" />{{ $t('contentCard.average', { ratio: post.performance_ratio.toFixed(1) }) }}
         </span>
-        <span class="rounded-full border border-[var(--line)] px-2.5 py-1 text-[11px] text-[var(--muted)]">{{ $t('contentCard.views', { count: compactNumber(post.views) }) }}</span>
-        <span v-for="signal in post.signals?.slice(0, 2)" :key="signal" class="rounded-full border border-[var(--line)] px-2.5 py-1 text-[10px] text-[var(--muted)]">{{ signal }}</span>
+        <span class="shrink-0 whitespace-nowrap rounded-full border border-[var(--line)] px-1.5 py-1 text-[10px] text-[var(--muted)]">{{ $t('contentCard.views', { count: compactNumber(post.views) }) }}</span>
+        <span v-for="signal in post.signals?.slice(-1)" :key="signal" class="hidden shrink-0 whitespace-nowrap rounded-full border border-[var(--line)] px-1.5 py-1 text-[10px] text-[var(--muted)] min-[360px]:inline">{{ signal }}</span>
       </div>
 
       <div class="mt-auto grid gap-2 pt-3">

@@ -35,8 +35,10 @@ const slideInputs = ref<HTMLTextAreaElement[]>([])
 const slides = computed(() => remix.value?.generated_content.slides ?? [])
 const caption = computed(() => remix.value?.generated_content.caption ?? '')
 const isReady = computed(() => remix.value?.status === 'ready')
-const dirty = computed(() =>
-  !!remix.value && JSON.stringify(remix.value.generated_content) !== pristine.value)
+const dirty = computed(() => {
+  if (!remix.value || !['draft', 'ready'].includes(remix.value.status)) return false
+  return JSON.stringify(remix.value.generated_content) !== pristine.value
+})
 
 /* --- Reel: the draft measured as time ------------------------------------ */
 
@@ -237,6 +239,15 @@ async function retryGeneration() {
 
 onMounted(async () => {
   window.addEventListener('beforeunload', guardUnload)
+  await loadRemix()
+})
+
+watch(() => route.params.id, async (id, previousId) => {
+  if (id === previousId) return
+  clearTimeout(remixTimer)
+  loading.value = true
+  remix.value = null
+  switching.value = null
   await loadRemix()
 })
 

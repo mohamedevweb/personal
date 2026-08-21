@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Exceptions\ContentGenerationException;
 use App\Jobs\AnalyzeContentPost;
 use App\Jobs\GenerateRemix;
 use App\Models\ContentPost;
@@ -228,6 +229,40 @@ class PersonalMvpTest extends TestCase
         $this->assertCount(6, $remix->generated_content['slides']);
         $this->assertSame($post->hook, $remix->generated_content['original_pattern']);
         $this->assertSame($moment->content, $remix->generated_content['your_context']);
+    }
+
+    public function test_a_failed_remix_can_be_retried_without_losing_its_selection(): void
+    {
+        Queue::fake();
+        $post = ContentPost::query()->firstOrFail();
+        $moment = $this->user->moments()->firstOrFail();
+        $remix = Remix::query()->create([
+            'user_id' => $this->user->id,
+            'source_content_id' => $post->id,
+            'life_moment_id' => $moment->id,
+            'format' => 'reel',
+            'generated_content' => [],
+            'status' => 'failed',
+        ]);
+
+        $this->actingAs($this->user)
+            ->withHeader('Accept-Language', 'fr')
+            ->postJson("/api/remixes/{$remix->id}/retry")
+            ->assertAccepted()
+            ->assertJsonPath('remix.status', 'generating')
+            ->assertJsonPath('remix.format', 'reel')
+            ->assertJsonPath('remix.life_moment_id', $moment->id);
+
+        Queue::assertPushed(GenerateRemix::class, fn (GenerateRemix $job): bool => $job->remixId === $remix->id
+            && $job->locale === 'fr');
+
+        $generator = \Mockery::mock(ContentGenerationService::class);
+        $generator->shouldReceive('generate')
+            ->once()
+            ->andThrow(new ContentGenerationException('Provider unavailable.'));
+        (new GenerateRemix($remix->id, 'fr'))->handle($generator, app(PostInsightService::class));
+
+        $this->assertDatabaseHas('remixes', ['id' => $remix->id, 'status' => 'failed']);
     }
 
     public function test_personal_memory_is_editable(): void

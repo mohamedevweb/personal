@@ -302,7 +302,7 @@
       "titleTurn": "We'll take the notes.",
       "copy": "Personal watches your niche, remembers your week, and has a draft waiting when you are.",
       "button": "Get early access",
-      "secondary": "See how it works",
+      "bookDemo": "Book a demo",
       "reassurance": "Free during early access · Personal never posts for you"
     },
     "footer": {
@@ -701,7 +701,7 @@
     "startAnother": "Start a new draft"
   },
   "contentCard": {
-    "average": "{ratio}× this creator's average",
+    "average": "{ratio}× creator average",
     "followers": "{count} followers",
     "views": "{count} views",
     "likes": "{count} likes",

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 /** The page ends on the creator, not on the product. */
+const config = useRuntimeConfig()
 </script>
 
 <template>
@@ -29,8 +30,8 @@
           {{ $t('landing.cta.button') }}
           <AppIcon name="arrow" :size="17" class="transition-transform duration-300 group-hover:translate-x-1" />
         </LandingButtonLink>
-        <LandingButtonLink to="#how" variant="light" size="lg" class="w-full sm:w-auto">
-          {{ $t('landing.cta.secondary') }}
+        <LandingButtonLink :to="config.public.demoBookingUrl" variant="light" size="lg" class="w-full sm:w-auto">
+          {{ $t('landing.cta.bookDemo') }}
         </LandingButtonLink>
       </div>
 

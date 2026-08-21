@@ -112,6 +112,7 @@ services:
       # Read by the browser as well as by SSR, so it has to be the URL the
       # browser can reach — not the compose service name.
       NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-http://localhost:8000}
+      NUXT_PUBLIC_DEMO_BOOKING_URL: ${NUXT_PUBLIC_DEMO_BOOKING_URL:-https://cal.com/mc-studio/demo-personal-app}
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     depends_on:

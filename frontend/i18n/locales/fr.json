@@ -302,7 +302,7 @@
       "titleTurn": "On prend les notes.",
       "copy": "Personal surveille votre niche, se souvient de votre semaine, et garde un brouillon prêt pour quand vous l'êtes.",
       "button": "Accès anticipé",
-      "secondary": "Voir comment ça marche",
+      "bookDemo": "Réserver une démo",
       "reassurance": "Gratuit en accès anticipé · Personal ne publie jamais à votre place"
     },
     "footer": {
@@ -618,22 +618,22 @@
   "remix": {
     "backToAnalysis": "Retour au schéma",
     "generatingEyebrow": "Brouillon en préparation",
-    "generatingTitle": "Votre page est prête. Personal écrit maintenant.",
-    "generatingCopy": "Le schéma, votre moment et votre voix sont réunis en arrière-plan.",
-    "generatingLeave": "Vous pouvez quitter cette page. Le brouillon continuera à se préparer.",
+    "generatingTitle": "Ta page est prête. Personal écrit maintenant.",
+    "generatingCopy": "Le schéma, ton moment et ta voix sont réunis en arrière-plan.",
+    "generatingLeave": "Tu peux quitter cette page. Le brouillon continuera à se préparer.",
     "generatingSteps": {
       "1": {
         "title": "Lecture du schéma"
       },
       "2": {
-        "title": "Lien avec votre histoire"
+        "title": "Lien avec ton histoire"
       },
       "3": {
-        "title": "Écriture dans votre voix"
+        "title": "Écriture dans ta voix"
       }
     },
     "generationFailed": "Le brouillon a besoin d’un nouvel essai.",
-    "generationFailedCopy": "Le service d’écriture n’a pas répondu correctement. Votre sélection est conservée.",
+    "generationFailedCopy": "Le service d’écriture n’a pas répondu correctement. Ton choix est conservé.",
     "retry": "Relancer la rédaction",
     "retrying": "Relance en cours…",
     "retryError": "Personal n’a pas pu relancer ce brouillon. Réessaie.",
@@ -701,7 +701,7 @@
     "startAnother": "Commencer un brouillon"
   },
   "contentCard": {
-    "average": "{ratio}× la moyenne du créateur",
+    "average": "{ratio}× sa moyenne",
     "followers": "{count} abonnés",
     "views": "{count} vues",
     "likes": "{count} j’aime",

@@ -28,7 +28,8 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiBase: 'http://localhost:8000'
+      apiBase: 'http://localhost:8000',
+      demoBookingUrl: 'https://cal.com/mc-studio/demo-personal-app'
     }
   },
   app: {
