@@ -21,6 +21,7 @@ class CreatorProfile extends Model
             'discovery_queries' => 'array',
             'dna_analyzed_at' => 'datetime',
             'discovery_refreshed_at' => 'datetime',
+            'market_confidence' => 'float',
         ];
     }
 }

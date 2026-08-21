@@ -158,7 +158,7 @@ class MeasureAccountEngagement implements ShouldQueue
         $creator->fill($attributes)->save();
 
         if ($qualified && is_array($creator->niche_topics)) {
-            $catalog->sync($creator, $creator->niche, $creator->niche_topics);
+            $catalog->sync($creator, $creator->niche, $creator->niche_topics, $creator->is_catalog_seed ? 'catalog' : 'analysis');
         }
 
         foreach ($profile->posts as $post) {

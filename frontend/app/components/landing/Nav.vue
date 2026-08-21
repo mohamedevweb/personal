@@ -1,6 +1,5 @@
 <script setup lang="ts">
 const links = [
-  { hash: '#product', key: 'landing.nav.product' },
   { hash: '#how', key: 'landing.nav.how' },
   { hash: '#moments', key: 'landing.nav.moments' },
   { hash: '#faq', key: 'landing.nav.faq' }
@@ -32,7 +31,7 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
         <PersonalLogo :size="26" />
       </NuxtLink>
 
-      <nav class="hidden items-center gap-9 md:flex" :aria-label="$t('landing.nav.product')">
+      <nav class="hidden items-center gap-9 md:flex" :aria-label="$t('landing.nav.label')">
         <a
           v-for="link in links"
           :key="link.hash"

@@ -32,6 +32,10 @@ class DiscoverNicheContent implements ShouldQueue
 
     public function handle(NicheExpansionService $expansion, InstagramDataProvider $provider): void
     {
+        if (config('creator_catalog.curated_only')) {
+            return;
+        }
+
         $user = User::query()->with('creatorProfile')->find($this->userId);
 
         if (! $user) {

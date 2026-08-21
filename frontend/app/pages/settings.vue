@@ -3,18 +3,24 @@ const { status, loading, error, connect, loadStatus } = useInstagram()
 const { apiFetch } = usePersonalApi()
 const { user, loadUser, updateAccount, updatePassword, resendVerification } = useAuth()
 const { t } = useI18n()
+const toast = useToast()
 
-async function disconnect() { await apiFetch('/api/integrations/instagram', { method: 'DELETE' }); await loadStatus() }
+async function disconnect() {
+  try {
+    await apiFetch('/api/integrations/instagram', { method: 'DELETE' })
+    await loadStatus()
+    if (error.value) return
+    toast.success(t('settings.disconnected'))
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('settings.disconnectError')))
+  }
+}
 
 const account = reactive({ name: '', email: '' })
 const accountSaving = ref(false)
-const accountMessage = ref<string | null>(null)
-const accountError = ref<string | null>(null)
 
 const password = reactive({ current_password: '', password: '', password_confirmation: '' })
 const passwordSaving = ref(false)
-const passwordMessage = ref<string | null>(null)
-const passwordError = ref<string | null>(null)
 
 const resending = ref(false)
 const resent = ref(false)
@@ -26,15 +32,8 @@ function syncAccountForm() {
   account.email = user.value?.email ?? ''
 }
 
-function firstError(exception: any, fallback: string): string {
-  const errors = exception?.data?.errors as Record<string, string[]> | undefined
-  return errors ? Object.values(errors).flat()[0]! : (exception?.data?.message || fallback)
-}
-
 async function saveAccount() {
   accountSaving.value = true
-  accountMessage.value = null
-  accountError.value = null
   try {
     const payload: { name?: string, email?: string } = {}
     if (account.name !== user.value?.name) payload.name = account.name
@@ -42,9 +41,9 @@ async function saveAccount() {
     if (!Object.keys(payload).length) { accountSaving.value = false; return }
     const emailChanged = 'email' in payload
     await updateAccount(payload)
-    accountMessage.value = emailChanged ? t('settings.account.emailChanged') : t('settings.account.saved')
-  } catch (exception: any) {
-    accountError.value = firstError(exception, t('settings.account.error'))
+    toast.success(emailChanged ? t('settings.account.emailChanged') : t('settings.account.saved'))
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('settings.account.error')))
   } finally {
     accountSaving.value = false
   }
@@ -52,16 +51,14 @@ async function saveAccount() {
 
 async function savePassword() {
   passwordSaving.value = true
-  passwordMessage.value = null
-  passwordError.value = null
   try {
     await updatePassword({ ...password })
-    passwordMessage.value = t('settings.password.saved')
+    toast.success(t('settings.password.saved'))
     password.current_password = ''
     password.password = ''
     password.password_confirmation = ''
-  } catch (exception: any) {
-    passwordError.value = firstError(exception, t('settings.password.error'))
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('settings.password.error')))
   } finally {
     passwordSaving.value = false
   }
@@ -72,6 +69,9 @@ async function resend() {
   try {
     await resendVerification()
     resent.value = true
+    toast.success(t('settings.account.resent'))
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('verifyEmail.error')))
   } finally {
     resending.value = false
   }
@@ -84,6 +84,9 @@ onMounted(async () => {
 })
 
 watch(user, syncAccountForm)
+watch(error, (message) => {
+  if (message) toast.error(message)
+})
 </script>
 
 <template>
@@ -117,9 +120,6 @@ watch(user, syncAccountForm)
           <span class="text-xs font-medium uppercase tracking-[.14em] text-[var(--faint)]">{{ $t('settings.account.email') }}</span>
           <input v-model="account.email" type="email" autocomplete="email" required class="settings-input">
         </label>
-
-        <p v-if="accountMessage" role="status" class="rounded-[14px] border border-[var(--positive-line)] bg-[var(--positive-soft)] px-4 py-3 text-sm leading-6 text-[var(--positive)]">{{ accountMessage }}</p>
-        <p v-if="accountError" role="alert" class="rounded-[14px] border border-[var(--danger-line)] bg-[var(--danger-soft)] px-4 py-3 text-sm leading-6 text-[var(--danger)]">{{ accountError }}</p>
 
         <button type="submit" class="inline-flex h-11 items-center justify-center rounded-full bg-[var(--ink)] px-5 text-[14px] font-medium text-[var(--paper)] transition hover:bg-black disabled:cursor-wait disabled:opacity-60" :disabled="accountSaving">
           {{ accountSaving ? $t('settings.saving') : $t('settings.account.save') }}
@@ -157,9 +157,6 @@ watch(user, syncAccountForm)
           <input v-model="password.password_confirmation" type="password" autocomplete="new-password" required class="settings-input">
         </label>
 
-        <p v-if="passwordMessage" role="status" class="rounded-[14px] border border-[var(--positive-line)] bg-[var(--positive-soft)] px-4 py-3 text-sm leading-6 text-[var(--positive)]">{{ passwordMessage }}</p>
-        <p v-if="passwordError" role="alert" class="rounded-[14px] border border-[var(--danger-line)] bg-[var(--danger-soft)] px-4 py-3 text-sm leading-6 text-[var(--danger)]">{{ passwordError }}</p>
-
         <button type="submit" class="inline-flex h-11 items-center justify-center rounded-full bg-[var(--ink)] px-5 text-[14px] font-medium text-[var(--paper)] transition hover:bg-black disabled:cursor-wait disabled:opacity-60" :disabled="passwordSaving">
           {{ passwordSaving ? $t('settings.saving') : $t('settings.password.save') }}
         </button>
@@ -184,7 +181,6 @@ watch(user, syncAccountForm)
         <button class="ml-auto text-xs text-[var(--faint)] transition hover:text-[var(--danger)]" @click="disconnect">{{ $t('settings.disconnect') }}</button>
       </div>
       <button v-else class="mt-7 inline-flex h-11 items-center justify-center rounded-full bg-[var(--ink)] px-5 text-[14px] font-medium text-[var(--paper)] transition hover:bg-black disabled:opacity-60" :disabled="loading" @click="connect">{{ $t('settings.continueWithInstagram') }}</button>
-      <p v-if="error" role="alert" class="mt-4 text-sm text-[var(--danger)]">{{ error }}</p>
     </section>
 
     <!-- Privacy -->

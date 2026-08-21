@@ -2,6 +2,7 @@ import type { InstagramStatusResponse } from '~/types/instagram'
 
 export function useInstagram() {
   const { apiFetch } = usePersonalApi()
+  const { t } = useI18n()
   const status = ref<InstagramStatusResponse>({ connected: false })
   const loading = ref(true)
   const error = ref<string | null>(null)
@@ -11,8 +12,8 @@ export function useInstagram() {
     try {
       status.value = await apiFetch<InstagramStatusResponse>('/api/integrations/instagram/status')
       error.value = null
-    } catch (exception: any) {
-      error.value = exception?.data?.message || 'We could not check your Instagram connection.'
+    } catch (exception: unknown) {
+      error.value = apiErrorMessage(exception, t('instagram.statusError'))
     } finally {
       loading.value = false
     }
@@ -25,8 +26,8 @@ export function useInstagram() {
     try {
       const response = await apiFetch<{ authorization_url: string }>('/api/integrations/instagram/authorize')
       window.location.assign(response.authorization_url)
-    } catch (exception: any) {
-      error.value = exception?.data?.message || 'Instagram could not be started. Please try again.'
+    } catch (exception: unknown) {
+      error.value = apiErrorMessage(exception, t('instagram.connectError'))
       loading.value = false
     }
   }

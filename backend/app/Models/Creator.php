@@ -21,6 +21,7 @@ class Creator extends Model
             'niche_topics' => 'array',
             'metadata' => 'array',
             'performance_baselines' => 'array',
+            'is_catalog_seed' => 'boolean',
             'discovered_at' => 'datetime',
             'last_fetched_at' => 'datetime',
             'metrics_updated_at' => 'datetime',

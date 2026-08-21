@@ -137,8 +137,8 @@ class NicheDetectionService
      */
     private function heuristic(InstagramAccount $account, string $captions, array $media): array
     {
-        $source = Str::lower(trim(($account->bio ?? '').' '.$account->website.' '.$captions));
-        $stopWords = ['about', 'after', 'again', 'also', 'been', 'from', 'have', 'here', 'into', 'just', 'more', 'that', 'their', 'there', 'these', 'they', 'this', 'what', 'when', 'where', 'which', 'with', 'your', 'youre'];
+        $source = Str::lower(trim(($account->bio ?? '').' '.$captions));
+        $stopWords = ['about', 'after', 'again', 'also', 'been', 'from', 'have', 'here', 'http', 'https', 'into', 'just', 'more', 'that', 'their', 'there', 'these', 'they', 'this', 'what', 'when', 'where', 'which', 'with', 'your', 'youre'];
 
         preg_match_all('/[\pL\pN]{4,}/u', $source, $matches);
         $topics = collect($matches[0] ?? [])

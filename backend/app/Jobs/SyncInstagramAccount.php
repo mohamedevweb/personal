@@ -4,6 +4,8 @@ namespace App\Jobs;
 
 use App\Models\CreatorProfile;
 use App\Models\InstagramAccount;
+use App\Services\Discovery\CanonicalCreatorVerticals;
+use App\Services\Discovery\CreatorMarketDetector;
 use App\Services\Instagram\InstagramApiService;
 use App\Services\Instagram\InstagramAuthService;
 use App\Services\Instagram\NicheDetectionService;
@@ -30,8 +32,15 @@ class SyncInstagramAccount implements ShouldQueue
 
     public function __construct(public readonly int $instagramAccountId) {}
 
-    public function handle(InstagramAuthService $auth, InstagramApiService $api, NicheDetectionService $niche): void
-    {
+    public function handle(
+        InstagramAuthService $auth,
+        InstagramApiService $api,
+        NicheDetectionService $niche,
+        ?CreatorMarketDetector $markets = null,
+        ?CanonicalCreatorVerticals $verticals = null,
+    ): void {
+        $markets ??= app(CreatorMarketDetector::class);
+        $verticals ??= app(CanonicalCreatorVerticals::class);
         $account = InstagramAccount::query()->findOrFail($this->instagramAccountId);
 
         try {
@@ -54,6 +63,16 @@ class SyncInstagramAccount implements ShouldQueue
 
             $account->update(['sync_status' => 'learning_style']);
             $signals = $niche->detect($account, $media);
+            $market = $markets->detect(implode("\n", [
+                $account->display_name ?? '',
+                $account->bio ?? '',
+                collect($media)->pluck('caption')->filter()->take(30)->implode("\n"),
+            ]));
+            $primaryVertical = $verticals->fromSignals([
+                $signals['primary_niche'],
+                ...$signals['sub_niches'],
+                ...$signals['topics'],
+            ]);
 
             CreatorProfile::query()->updateOrCreate(
                 ['user_id' => $account->user_id],
@@ -67,6 +86,9 @@ class SyncInstagramAccount implements ShouldQueue
                     'tone' => $signals['tone'],
                     'audience_description' => implode(', ', $signals['audience']),
                     'creator_dna' => $signals,
+                    'market' => $market['market'],
+                    'market_confidence' => $market['confidence'],
+                    'primary_vertical' => $primaryVertical,
                     'dna_analyzed_at' => now(),
                 ],
             );

@@ -10,11 +10,11 @@ use Illuminate\Support\Str;
 class CreatorNicheCatalog
 {
     /** @param list<string> $topics */
-    public function sync(Creator $creator, string $primaryNiche, array $topics): void
+    public function sync(Creator $creator, string $primaryNiche, array $topics, string $source = 'analysis'): void
     {
-        DB::transaction(function () use ($creator, $primaryNiche, $topics): void {
+        DB::transaction(function () use ($creator, $primaryNiche, $topics, $source): void {
             $primary = $this->niche($primaryNiche);
-            $pivots = [$primary->id => ['relevance_score' => 1, 'source' => 'analysis']];
+            $pivots = [$primary->id => ['relevance_score' => 1, 'source' => $source]];
 
             foreach (collect($topics)->filter()->unique()->take(8) as $topic) {
                 $niche = $this->niche((string) $topic, $primary);
@@ -23,7 +23,7 @@ class CreatorNicheCatalog
                     continue;
                 }
 
-                $pivots[$niche->id] = ['relevance_score' => 0.75, 'source' => 'analysis'];
+                $pivots[$niche->id] = ['relevance_score' => 0.75, 'source' => $source];
             }
 
             $creator->niches()->sync($pivots);

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 const links = [
-  { hash: '#product', key: 'landing.nav.product' },
   { hash: '#how', key: 'landing.nav.how' },
   { hash: '#moments', key: 'landing.nav.moments' },
   { hash: '#faq', key: 'landing.nav.faq' }

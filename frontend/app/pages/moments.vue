@@ -2,7 +2,8 @@
 import type { LifeMoment } from '~/types/product'
 
 const { apiFetch } = usePersonalApi()
-const { locale } = useI18n()
+const { locale, t } = useI18n()
+const toast = useToast()
 const moments = ref<LifeMoment[]>([])
 const loading = ref(true)
 const modalOpen = ref(false)
@@ -14,18 +15,47 @@ function formatDate(value: string) {
   return new Date(value).toLocaleDateString(locale.value, { month: 'short', day: 'numeric' })
 }
 
-async function load() { const response = await apiFetch<{ moments: LifeMoment[] }>('/api/moments'); moments.value = response.moments; loading.value = false }
+async function load() {
+  try {
+    const response = await apiFetch<{ moments: LifeMoment[] }>('/api/moments')
+    moments.value = response.moments
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('moments.loadError')))
+  } finally {
+    loading.value = false
+  }
+}
+
 async function createMoment() {
   saving.value = true
   try {
     const response = await apiFetch<{ moment: LifeMoment }>('/api/moments', { method: 'POST', body: { ...form, upcoming_at: form.upcoming_at || null } })
-    moments.value.unshift(response.moment); modalOpen.value = false; form.content = ''
+    moments.value.unshift(response.moment)
+    modalOpen.value = false
+    form.content = ''
+    toast.success(t('moments.created'))
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('moments.createError')))
   } finally { saving.value = false }
 }
-async function removeMoment(moment: LifeMoment) { await apiFetch(`/api/moments/${moment.id}`, { method: 'DELETE' }); moments.value = moments.value.filter(item => item.id !== moment.id) }
+
+async function removeMoment(moment: LifeMoment) {
+  try {
+    await apiFetch(`/api/moments/${moment.id}`, { method: 'DELETE' })
+    moments.value = moments.value.filter(item => item.id !== moment.id)
+    toast.success(t('moments.deleted'))
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('moments.deleteError')))
+  }
+}
+
 async function turnIntoContent(moment: LifeMoment) {
-  const response = await apiFetch<{ remix: { id: number } }>(`/api/moments/${moment.id}/create-content`, { method: 'POST', body: { format: 'carousel' } })
-  await navigateTo(`/remix/${response.remix.id}`)
+  try {
+    const response = await apiFetch<{ remix: { id: number } }>(`/api/moments/${moment.id}/create-content`, { method: 'POST', body: { format: 'carousel' } })
+    await navigateTo(`/remix/${response.remix.id}`)
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('create.draftError')))
+  }
 }
 onMounted(load)
 </script>

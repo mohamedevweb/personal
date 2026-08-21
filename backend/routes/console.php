@@ -31,6 +31,7 @@ Schedule::call(function (): void {
 // itself, so this cannot outspend DISCOVERY_MEASURE_BATCH per day.
 Schedule::call(function (): void {
     $stale = Creator::query()
+        ->when(config('creator_catalog.curated_only'), fn ($query) => $query->where('curation_status', 'approved'))
         ->where(function ($query): void {
             $query->whereNull('last_measured_at')
                 ->orWhere('last_measured_at', '<', now()->subDays((int) config('services.discovery.measure_cooldown_days')));
@@ -44,3 +45,8 @@ Schedule::call(function (): void {
         MeasureAccountEngagement::dispatch($stale);
     }
 })->daily()->name('measure-tracked-accounts')->withoutOverlapping();
+
+Schedule::command('personal:prune-discovery-content')
+    ->daily()
+    ->name('prune-discovery-content')
+    ->withoutOverlapping();

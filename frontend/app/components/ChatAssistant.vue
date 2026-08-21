@@ -7,11 +7,11 @@ interface ChatMessage {
 const { t } = useI18n()
 const { user } = useAuth()
 const { apiFetch } = usePersonalApi()
+const toast = useToast()
 
 const open = ref(false)
 const draft = ref('')
 const sending = ref(false)
-const error = ref<string | null>(null)
 const messages = ref<ChatMessage[]>([])
 
 const inputEl = ref<HTMLTextAreaElement | null>(null)
@@ -44,7 +44,6 @@ function toggle() {
 
 function clearConversation() {
   messages.value = []
-  error.value = null
   nextTick(() => inputEl.value?.focus())
 }
 
@@ -54,7 +53,6 @@ async function send(text?: string) {
 
   messages.value.push({ role: 'user', content })
   draft.value = ''
-  error.value = null
   sending.value = true
   scrollToBottom()
 
@@ -64,8 +62,8 @@ async function send(text?: string) {
       body: { messages: messages.value }
     })
     messages.value.push({ role: 'assistant', content: response.reply })
-  } catch (exception: any) {
-    error.value = exception?.data?.message || t('chat.error')
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('chat.error')))
   } finally {
     sending.value = false
     scrollToBottom()
@@ -198,7 +196,6 @@ onUnmounted(() => {
                   </div>
                 </div>
 
-                <p v-if="error" role="alert" class="mt-3 rounded-[12px] border border-[var(--danger-line)] bg-[var(--danger-soft)] px-3 py-2 text-[12px] text-[var(--danger)]">{{ error }}</p>
               </div>
 
               <div class="border-t border-[var(--line-soft)] bg-[var(--surface)] px-4 pb-4 pt-4 sm:px-5 sm:pb-5">

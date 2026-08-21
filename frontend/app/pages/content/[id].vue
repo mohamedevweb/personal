@@ -4,6 +4,8 @@ import { compactNumber, creatorProfileUrl, relativeDate } from '~/types/product'
 
 const route = useRoute()
 const { apiFetch } = usePersonalApi()
+const { t } = useI18n()
+const toast = useToast()
 const post = ref<ContentPost | null>(null)
 const moments = ref<LifeMoment[]>([])
 const format = ref<'reel' | 'carousel' | 'caption'>('carousel')
@@ -18,17 +20,23 @@ async function createRemix() {
       method: 'POST', body: { format: format.value, life_moment_id: selectedMoment.value }
     })
     await navigateTo(`/remix/${response.remix.id}`)
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('feed.remixError')))
   } finally { generating.value = false }
 }
 
 onMounted(async () => {
-  const [contentResponse, momentsResponse] = await Promise.all([
-    apiFetch<{ content: ContentPost }>(`/api/content/${route.params.id}`),
-    apiFetch<{ moments: LifeMoment[] }>('/api/moments')
-  ])
-  post.value = contentResponse.content
-  moments.value = momentsResponse.moments
-  selectedMoment.value = moments.value[0]?.id || null
+  try {
+    const [contentResponse, momentsResponse] = await Promise.all([
+      apiFetch<{ content: ContentPost }>(`/api/content/${route.params.id}`),
+      apiFetch<{ moments: LifeMoment[] }>('/api/moments')
+    ])
+    post.value = contentResponse.content
+    moments.value = momentsResponse.moments
+    selectedMoment.value = moments.value[0]?.id || null
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('content.loadError')))
+  }
 })
 </script>
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ContentPost extends Model
 {
@@ -28,5 +29,15 @@ class ContentPost extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(Creator::class);
+    }
+
+    public function savedContent(): HasMany
+    {
+        return $this->hasMany(SavedContent::class);
+    }
+
+    public function remixes(): HasMany
+    {
+        return $this->hasMany(Remix::class, 'source_content_id');
     }
 }

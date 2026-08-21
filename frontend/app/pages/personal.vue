@@ -2,6 +2,8 @@
 import type { PersonalProfile } from '~/types/product'
 
 const { apiFetch } = usePersonalApi()
+const { t } = useI18n()
+const toast = useToast()
 const profile = ref<PersonalProfile | null>(null)
 const instagram = ref<any>(null)
 const editing = ref(false)
@@ -22,13 +24,20 @@ async function saveProfile() {
     const response = await apiFetch<{ profile: PersonalProfile }>('/api/me/profile', { method: 'PATCH', body: draft })
     profile.value = response.profile
     editing.value = false
+    toast.success(t('personal.saved'))
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('personal.saveError')))
   } finally { saving.value = false }
 }
 
 onMounted(async () => {
-  const response = await apiFetch<{ profile: PersonalProfile, instagram: any }>('/api/me/profile')
-  profile.value = response.profile
-  instagram.value = response.instagram
+  try {
+    const response = await apiFetch<{ profile: PersonalProfile, instagram: any }>('/api/me/profile')
+    profile.value = response.profile
+    instagram.value = response.instagram
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('personal.loadError')))
+  }
 })
 </script>
 

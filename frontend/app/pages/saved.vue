@@ -2,12 +2,40 @@
 import type { ContentPost } from '~/types/product'
 
 const { apiFetch } = usePersonalApi()
+const { t } = useI18n()
+const toast = useToast()
 const items = ref<ContentPost[]>([])
 const loading = ref(true)
 
-async function unsave(post: ContentPost) { await apiFetch(`/api/content/${post.id}/save`, { method: 'POST' }); items.value = items.value.filter(item => item.id !== post.id) }
-async function remix(post: ContentPost) { const response = await apiFetch<{ remix: { id: number } }>(`/api/content/${post.id}/remix`, { method: 'POST', body: { format: 'carousel' } }); await navigateTo(`/remix/${response.remix.id}`) }
-onMounted(async () => { const response = await apiFetch<{ items: ContentPost[] }>('/api/saved'); items.value = response.items; loading.value = false })
+async function unsave(post: ContentPost) {
+  try {
+    await apiFetch(`/api/content/${post.id}/save`, { method: 'POST' })
+    items.value = items.value.filter(item => item.id !== post.id)
+    toast.success(t('saved.removed'))
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('saved.removeError')))
+  }
+}
+
+async function remix(post: ContentPost) {
+  try {
+    const response = await apiFetch<{ remix: { id: number } }>(`/api/content/${post.id}/remix`, { method: 'POST', body: { format: 'carousel' } })
+    await navigateTo(`/remix/${response.remix.id}`)
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('feed.remixError')))
+  }
+}
+
+onMounted(async () => {
+  try {
+    const response = await apiFetch<{ items: ContentPost[] }>('/api/saved')
+    items.value = response.items
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('saved.loadError')))
+  } finally {
+    loading.value = false
+  }
+})
 </script>
 
 <template>

@@ -28,6 +28,7 @@ class RecommendationService
     public function __construct(
         private readonly ContentPostView $view,
         private readonly FeedRanker $ranker,
+        private readonly MarketFeedAllocator $markets,
     ) {}
 
     /** @return Collection<int, array<string, mixed>> */
@@ -35,9 +36,15 @@ class RecommendationService
     {
         $savedIds = $user->savedContent()->pluck('content_post_id')->flip();
 
-        return $this->candidates($user, $limit)
-            ->map(function (ContentPost $post) use ($user, $savedIds): array {
-                $ranking = $this->ranker->rank($post);
+        $ranked = $this->candidates($user, $limit)
+            ->map(fn (ContentPost $post): array => ['post' => $post, 'ranking' => $this->ranker->rank($post)])
+            ->sortByDesc('ranking.score')
+            ->values();
+
+        return $this->markets->allocate($ranked, $user->creatorProfile?->market, $limit)
+            ->map(function (array $item) use ($user, $savedIds): array {
+                $post = $item['post'];
+                $ranking = $item['ranking'];
 
                 return $this->view->make($post, $user, $ranking['score'], $savedIds->has($post->id)) + [
                     'why_recommended' => $this->reason($post),
@@ -49,8 +56,6 @@ class RecommendationService
                     ])),
                 ];
             })
-            ->sortByDesc('recommendation_score')
-            ->take($limit)
             ->values();
     }
 
@@ -68,10 +73,22 @@ class RecommendationService
      */
     private function candidates(User $user, int $limit): Collection
     {
-        return $this->pool($user)
+        $query = $this->pool($user)
             ->whereNotNull('measured_at')
-            ->where('outlier_score', '>=', (float) config('services.discovery.min_outlier_score'))
-            ->orderByDesc('outlier_score')
+            ->where('outlier_score', '>=', (float) config('services.discovery.min_outlier_score'));
+
+        if (config('creator_catalog.curated_only')) {
+            return collect(['FR', 'GB', 'US'])
+                ->flatMap(fn (string $market) => (clone $query)
+                    ->whereHas('creator', fn (Builder $creator): Builder => $creator->where('market', $market))
+                    ->orderByDesc('outlier_score')
+                    ->limit($limit * self::CANDIDATE_MULTIPLIER)
+                    ->get())
+                ->unique('id')
+                ->values();
+        }
+
+        return $query->orderByDesc('outlier_score')
             ->limit($limit * self::CANDIDATE_MULTIPLIER)
             ->get();
     }
@@ -87,9 +104,13 @@ class RecommendationService
             // The absolute floors. outlier_score is a ratio, so on its own it rates a
             // post going from two likes to three as a 1.5x breakout.
             ->whereRaw('likes + comments >= ?', [(int) config('services.discovery.min_post_engagement')])
-            ->whereHas('creator', fn (Builder $creator): Builder => $creator->where(
-                'followers', '>=', (int) config('services.discovery.min_followers'),
-            ));
+            ->whereHas('creator', function (Builder $creator): void {
+                $creator->where('followers', '>=', (int) config('services.discovery.min_followers'));
+
+                if (config('creator_catalog.curated_only')) {
+                    $creator->where('curation_status', 'approved');
+                }
+            });
     }
 
     private function reason(ContentPost $post): string

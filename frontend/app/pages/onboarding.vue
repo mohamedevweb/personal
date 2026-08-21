@@ -6,6 +6,7 @@ definePageMeta({ layout: false })
 const route = useRoute()
 const { t } = useI18n()
 const { status, loading, error, connect, loadStatus, startPolling } = useInstagram()
+const toast = useToast()
 
 const stages = computed<{ key: InstagramSyncStatus; label: string }[]>(() => [
   { key: 'connecting', label: t('onboarding.stages.connecting') },
@@ -23,6 +24,11 @@ const activeStage = computed(() => {
 const callbackError = computed(() => route.query.instagram === 'error'
   ? String(route.query.message || t('onboarding.cancelledError'))
   : null)
+
+const connectionError = computed(() => callbackError.value || status.value.account?.sync_error || error.value)
+watch(connectionError, (message) => {
+  if (message) toast.error(message)
+}, { immediate: true })
 
 // Keep the onboarding gate (auth.global) in sync the moment the import finishes,
 // so leaving for the feed is instant instead of being re-checked at the gate.
@@ -139,9 +145,6 @@ onMounted(async () => {
           </button>
         </template>
 
-        <p v-if="callbackError || error || status.account?.sync_error" role="alert" class="mt-7 max-w-lg rounded-[14px] border border-[var(--danger-line)] bg-[var(--danger-soft)] px-4 py-3 text-sm leading-6 text-[var(--danger)]">
-          {{ callbackError || status.account?.sync_error || error }}
-        </p>
       </div>
 
       <aside class="hero-night relative min-h-[430px] overflow-hidden rounded-[24px] p-7 text-white md:p-10">

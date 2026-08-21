@@ -18,13 +18,20 @@ const cards = computed(() => (['one', 'two', 'three', 'four', 'five'] as const).
 <template>
   <section id="moments" class="scroll-mt-24 px-6 py-24 md:px-10 md:py-36">
     <div class="mx-auto max-w-[1200px]">
-      <LandingStepHeading
-        data-reveal
-        align="center"
-        :eyebrow="$t('landing.moments.eyebrow')"
-        :title="$t('landing.moments.title')"
-        :lede="$t('landing.moments.lede')"
-      />
+      <div data-reveal class="mx-auto max-w-2xl text-center">
+        <p class="b-eyebrow">{{ $t('landing.moments.eyebrow') }}</p>
+
+        <!-- The italic emphasis lives in the translation, so each language puts
+             the turn of the sentence in the right place. -->
+        <h2
+          class="mt-7 font-display text-[34px] leading-[1.06] tracking-[-.025em] sm:text-[44px] md:text-[54px]"
+          v-html="$t('landing.moments.title')"
+        />
+
+        <p class="mx-auto mt-6 max-w-xl text-[16px] leading-[1.7] text-[var(--b-stone)] md:text-[17px]">
+          {{ $t('landing.moments.lede') }}
+        </p>
+      </div>
 
       <!-- A wall of notes rather than a grid of cards: Moments arrive messy and
            short, and the layout should not pretend otherwise. -->

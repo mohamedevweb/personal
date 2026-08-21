@@ -4,11 +4,11 @@ definePageMeta({ layout: false })
 const { login, register } = useAuth()
 const config = useRuntimeConfig()
 const { t } = useI18n()
+const toast = useToast()
 
 const mode = ref<'login' | 'register'>('login')
 const form = reactive({ name: '', email: '', password: '', password_confirmation: '' })
 const revealPassword = ref(false)
-const error = ref<string | null>(null)
 const loading = ref(false)
 
 const isLogin = computed(() => mode.value === 'login')
@@ -25,7 +25,6 @@ function signInWithGoogle() {
 
 async function submit() {
   loading.value = true
-  error.value = null
   try {
     if (isLogin.value) {
       await login({ email: form.email, password: form.password })
@@ -36,9 +35,8 @@ async function submit() {
       // A brand-new account always starts with Instagram onboarding.
       await navigateTo('/onboarding')
     }
-  } catch (exception: any) {
-    const errors = exception?.data?.errors as Record<string, string[]> | undefined
-    error.value = errors ? Object.values(errors).flat()[0]! : (exception?.data?.message || t('login.genericError'))
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('login.genericError')))
   } finally {
     loading.value = false
   }
@@ -46,7 +44,6 @@ async function submit() {
 
 function toggleMode() {
   mode.value = isLogin.value ? 'register' : 'login'
-  error.value = null
 }
 </script>
 
@@ -122,10 +119,6 @@ function toggleMode() {
               <span class="sr-only">{{ $t('login.confirmPassword') }}</span>
               <input v-model="form.password_confirmation" type="password" autocomplete="new-password" required class="auth-input" :placeholder="$t('login.confirmPasswordPlaceholder')">
             </label>
-
-            <p v-if="error" role="alert" class="rounded-[14px] border border-[#eccfc7] bg-[#fbf1ee] px-4 py-3 text-[13.5px] leading-[1.5] text-[#a2402a]">
-              {{ error }}
-            </p>
 
             <button
               type="submit"

@@ -16,6 +16,12 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        if (app()->environment('production')) {
+            $this->command?->warn('Demo data is disabled in production.');
+
+            return;
+        }
+
         $user = User::query()->updateOrCreate(
             ['email' => 'creator@personal.local'],
             ['name' => 'Mohamed Chettah', 'password' => Hash::make('personal'), 'email_verified_at' => now()],

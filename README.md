@@ -15,7 +15,7 @@ PostgreSQL is the configured application database. PHPUnit uses an isolated in-m
 - Life Moments with explainable story-potential scores
 - Combined trend + personal-moment opportunities
 - Editable Personal memory, Saved content, Create, and Settings
-- 15 benchmark creators and 40 realistic seeded posts
+- 15 benchmark creators and 40 realistic seeded posts in development and test only
 
 Recommendation scoring is deterministic and explainable — see [How the For You feed ranks](#how-the-for-you-feed-ranks). The authenticated user's Instagram profile and media are real data fetched from Meta, and drafts are written by a language model from that data.
 
@@ -97,6 +97,36 @@ There is deliberately **no fallback**. An unmeasured post carries no evidence, s
 Niche is read from the account itself. `CreatorNicheService` classifies a discovered creator from their bio, their recurring hashtags and a sample of captions, and the result is cached on the creator so the model is not re-run on every measurement. Discovery previously stamped every account with the niche of whichever user found them, which described the searcher rather than the creator.
 
 Discovery cost is capped on every axis: search queries have a cooldown (`DISCOVERY_COOLDOWN_DAYS`), accounts have their own (`DISCOVERY_MEASURE_COOLDOWN_DAYS`), and one run measures at most `DISCOVERY_MEASURE_BATCH` accounts. A daily scheduled pass re-measures the stalest tracked accounts within those same limits, which is also how the feed learns about new posts.
+
+## Curated creator catalog
+
+The production catalog is versioned in `backend/database/catalog/instagram_creators.php`. It contains 120 editorial candidates across six canonical verticals, with 10 French, 5 UK and 5 US accounts per vertical. Every entry starts as `pending`: its presence in the manifest never authorizes a database write.
+
+Run the read-only audit first. It fetches profiles and recent posts through ScrapeCreators, then writes JSON and CSV reports under `backend/storage/app/private/catalog-reports`:
+
+```bash
+docker compose exec app php artisan personal:audit-creator-catalog
+```
+
+Review the report and change only accepted manifest entries to `approved`. Import is idempotent, applies the manifest's market and canonical vertical, preserves provider provenance, synchronizes subtopics and queues measurement in batches of 10:
+
+```bash
+docker compose exec app php artisan personal:import-creator-catalog
+```
+
+After the queue has measured exactly 120 approved seeds and the production acceptance checks pass, set `DISCOVERY_CURATED_CATALOG_ONLY=true` and restart the app, queue and scheduler containers. The feed then excludes every non-approved creator, stops automatic search-based insertion, and allocates 12 results as 8 from the user's detected market plus 2 from each other market. An unknown market receives 4 results per market. Missing quota inventory is filled by the best remaining approved content.
+
+Related-account expansion is also review-only and never writes creators or posts:
+
+```bash
+docker compose exec app php artisan personal:discover-creator-candidates
+```
+
+Measured content is retained for 90 days. The scheduler runs the purge daily and always protects posts saved by a user or used in a remix. Preview it manually with:
+
+```bash
+docker compose exec app php artisan personal:prune-discovery-content --dry-run
+```
 
 ## Instagram app setup
 

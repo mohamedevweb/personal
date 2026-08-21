@@ -4,13 +4,12 @@ definePageMeta({ layout: false })
 const { user, loadUser, resendVerification, logout } = useAuth()
 const { t } = useI18n()
 const route = useRoute()
+const toast = useToast()
 
 const status = computed(() => route.query.status as string | undefined)
 const verified = computed(() => status.value === 'verified' || !!user.value?.email_verified_at)
 
 const sending = ref(false)
-const sent = ref(false)
-const error = ref<string | null>(null)
 
 onMounted(async () => {
   // A creator who lands here already verified has nothing to do — send them in.
@@ -20,12 +19,11 @@ onMounted(async () => {
 
 async function resend() {
   sending.value = true
-  error.value = null
   try {
     await resendVerification()
-    sent.value = true
-  } catch (exception: any) {
-    error.value = exception?.data?.message || t('verifyEmail.error')
+    toast.success(t('verifyEmail.sent'))
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('verifyEmail.error')))
   } finally {
     sending.value = false
   }
@@ -62,9 +60,6 @@ async function resend() {
           {{ status === 'invalid' ? $t('verifyEmail.invalidCopy') : $t('verifyEmail.pendingCopy') }}
           <span v-if="user?.email" class="font-medium text-[var(--ink)]"> {{ user.email }}</span>
         </p>
-
-        <p v-if="sent" role="status" class="mt-7 rounded-[14px] border border-[var(--positive-line)] bg-[var(--positive-soft)] px-4 py-3 text-sm leading-6 text-[var(--positive)]">{{ $t('verifyEmail.sent') }}</p>
-        <p v-if="error" role="alert" class="mt-7 rounded-[14px] border border-[var(--danger-line)] bg-[var(--danger-soft)] px-4 py-3 text-sm leading-6 text-[var(--danger)]">{{ error }}</p>
 
         <button
           type="button"

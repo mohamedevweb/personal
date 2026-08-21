@@ -12,6 +12,15 @@
     "signOut": "Sign out",
     "yourWorkspace": "Your workspace"
   },
+  "toast": {
+    "regionLabel": "Notifications",
+    "successTitle": "Done",
+    "errorTitle": "Something went wrong"
+  },
+  "instagram": {
+    "statusError": "Personal could not check your Instagram connection.",
+    "connectError": "Personal could not start Instagram. Please try again."
+  },
   "nav": {
     "forYou": "For You",
     "create": "Create",
@@ -48,11 +57,11 @@
   },
   "landing": {
     "head": {
-      "title": "Personal — Claude for personal branding",
-      "description": "Personal learns who you are, finds what is working in your niche, and turns what is happening in your life into content only you could post."
+      "title": "Personal — content only you could post",
+      "description": "Personal finds what's working in your niche, connects it to what actually happened to you, and writes it in your voice."
     },
     "nav": {
-      "product": "Product",
+      "label": "Page sections",
       "how": "How it works",
       "moments": "Moments",
       "faq": "FAQ",
@@ -63,16 +72,16 @@
       "home": "Personal, back to top"
     },
     "hero": {
-      "titleLineOne": "You’re a creator.",
+      "titleLineOne": "You're a creator.",
       "titleLineTwo": "Not a content machine.",
-      "subtitle": "Personal learns who you are, watches what is working in your niche, and turns what is happening in your life into content only you could post.",
+      "subtitle": "Personal finds what's working in your niche and rewrites it with your life.",
       "getAccess": "Get early access",
       "seeHow": "See how it works",
-      "reassurance": "Free during early access · Instagram login · Personal never posts for you",
+      "reassurance": "Free during early access · Personal never posts for you",
+      "mediaLabel": "Personal, one morning",
       "brief": {
-        "label": "A morning in Personal",
-        "eyebrow": "Scanning your niche",
-        "greeting": "Good morning, Mohamed.",
+        "eyebrow": "Your niche, this morning",
+        "greeting": "Morning, Mohamed.",
         "count": "4 opportunities",
         "tabs": {
           "understand": "Understand me",
@@ -81,126 +90,89 @@
         },
         "rows": {
           "one": {
-            "title": "8.4× higher engagement",
+            "title": "8.4× engagement",
             "body": "Failure → realization → lesson is outperforming in your niche this week."
           },
           "two": {
-            "title": "Moment detected",
-            "body": "Your pivot story fits the format that is working right now."
+            "title": "Moment matched",
+            "body": "Your pivot story fits the format that's working right now."
           },
           "three": {
             "title": "12 outliers found",
-            "body": "Posts beating their own creator’s average, at your size."
+            "body": "Posts beating their own creator's average, at your size."
           }
         }
       }
     },
-    "understand": {
-      "step": "01",
-      "eyebrow": "Understand me",
-      "title": "It learns who you are before it <em>opens its mouth</em>.",
-      "lede": "Connect Instagram once. Personal reads your posts, your audience and your positioning, then tells you what it understood. If it gets something wrong, you fix it in a sentence.",
-      "panelLabel": "What Personal understands about you",
-      "fields": {
+    "stat": {
+      "label": "Outlier",
+      "value": "8.4×",
+      "copy": "Above its own creator's average. In your niche. While it's still climbing."
+    },
+    "how": {
+      "eyebrow": "How it works",
+      "title": "We learn you <em>by heart</em>. Then we write.",
+      "mediaLabel": "Personal, step by step",
+      "steps": {
+        "understand": {
+          "title": "Understand",
+          "body": "Connect Instagram once. Personal reads your last 40 posts and tells you what it understood."
+        },
+        "discover": {
+          "title": "Discover",
+          "body": "Every morning, the posts beating their own creator's average — at your size."
+        },
+        "connect": {
+          "title": "Connect",
+          "body": "The format that's working, plus the story you already lived."
+        },
+        "write": {
+          "title": "Write",
+          "body": "Reel, carousel or caption. Your voice. Ten minutes."
+        }
+      },
+      "profile": {
+        "label": "What Personal understood",
         "niche": "Niche",
-        "nicheValue": "Indie product building",
+        "nicheValue": "Independent product building",
         "audience": "Audience",
         "audienceValue": "Solo founders, 22–34",
         "tone": "Tone",
-        "toneValue": "Direct · honest · dry",
+        "toneValue": "Direct · honest · deadpan",
         "positioning": "Positioning",
         "positioningValue": "Builds in public, shows the mess"
       },
-      "learnedLabel": "Learned this week",
-      "learned": {
-        "one": {
-          "text": "Builds in public",
-          "source": "from 12 captions"
-        },
-        "two": {
-          "text": "Never uses exclamation marks",
-          "source": "from your writing"
-        },
-        "three": {
-          "text": "Talks about pricing more than growth",
-          "source": "from your last 40 posts"
-        },
-        "four": {
-          "text": "Shipping something this month",
-          "source": "from a Moment you saved"
+      "outliers": {
+        "label": "Outliers in your niche",
+        "views": "{count} views",
+        "baseline": "creator average ~42K",
+        "items": {
+          "one": {
+            "hook": "The pricing mistake that cost me 8 months",
+            "views": "352K",
+            "ratio": "8.4"
+          },
+          "two": {
+            "hook": "Nobody tells you this about your first 1,000",
+            "views": "180K",
+            "ratio": "5.1"
+          },
+          "three": {
+            "hook": "I rebuilt my whole onboarding in a weekend",
+            "views": "121K",
+            "ratio": "3.7"
+          }
         }
       },
-      "correctionLabel": "Not right?",
-      "correction": "Actually I write for people who already have an audience.",
-      "correctionReply": "Updated. I’ll weight your audience younger and further along."
-    },
-    "outliers": {
-      "step": "02",
-      "eyebrow": "Find what works",
-      "title": "It finds the post you would <em>never</em> have found alone.",
-      "lede": "Personal watches creators in your niche, at your size, and surfaces the outliers: posts doing many times their own author’s average, while they are still climbing.",
-      "listLabel": "Outliers in your niche",
-      "items": {
-        "one": {
-          "hook": "The pricing mistake that cost me 8 months",
-          "views": "352K",
-          "ratio": "8.4"
-        },
-        "two": {
-          "hook": "Nobody tells you this about your first 1,000",
-          "views": "180K",
-          "ratio": "5.1"
-        },
-        "three": {
-          "hook": "I rebuilt my whole onboarding in a weekend",
-          "views": "121K",
-          "ratio": "3.7"
-        }
+      "connect": {
+        "patternLabel": "Pattern in your niche",
+        "patternQuote": "“The decision I almost didn't make…”",
+        "momentLabel": "Your moment · Tuesday",
+        "momentQuote": "“I almost turned down my first €10k client because I didn't feel ready.”",
+        "verdict": "This format is working right now, and something that happened to you this week fits it unusually well."
       },
-      "baseline": "creator average ~42K",
-      "still": "still climbing",
-      "anatomyLabel": "Why it works",
-      "anatomy": {
-        "one": "Founder story",
-        "two": "Vulnerability hook",
-        "three": "31-second Reel",
-        "four": "First-person open"
-      },
-      "ranked": "Ranked by what applies to you, not by follower count.",
-      "statLabel": "Outlier",
-      "statValue": "8.4×",
-      "statCopy": "The kind of post Personal puts in front of you: outperforming its own creator’s average, in your niche, while it is still climbing.",
-      "statFoot": "You see it before it becomes the trend everybody copies.",
-      "views": "{count} views"
-    },
-    "connection": {
-      "step": "03",
-      "eyebrow": "The connection",
-      "title": "Trends are useful. <em>Context</em> makes them yours.",
-      "lede": "This is the part no trend tool does. Personal holds both halves at once, and waits for them to fit.",
-      "patternLabel": "Pattern in your niche",
-      "patternQuote": "“The decision I almost didn’t make…”",
-      "patternMeta": "Failure → realization → lesson · 3 outliers this week",
-      "momentLabel": "Your moment · Tuesday",
-      "momentQuote": "“I nearly turned down my first €10k client because I didn’t feel ready.”",
-      "momentMeta": "Turning point · you saved this 6 days ago",
-      "connector": "Personal connects them",
-      "verdict": "This format is working right now, and something that happened to you this week fits it unusually well.",
-      "attribution": "Personal · Wednesday, 06:02"
-    },
-    "remix": {
-      "step": "04",
-      "eyebrow": "Remix for me",
-      "title": "It rewrites the winner as something only <em>you</em> could post.",
-      "lede": "Same structure that is working. Your story, your voice, your opinion. Ready in the next ten minutes.",
-      "formatLabel": "Choose a format",
-      "formats": {
-        "reel": "Reel",
-        "carousel": "Carousel",
-        "post": "Post"
-      },
-      "reel": {
-        "meta": "40 seconds · vertical",
+      "draft": {
+        "label": "Reel · 40 seconds",
         "beats": {
           "hook": {
             "label": "Hook",
@@ -208,140 +180,78 @@
           },
           "two": {
             "label": "Beat 2",
-            "value": "Why I thought I wasn’t ready, and what I was actually afraid of."
+            "value": "Why I didn't think I was ready, and what I was really afraid of."
           },
           "three": {
             "label": "Beat 3",
-            "value": "The thing my co-founder said that made me send the email anyway."
+            "value": "The one line from my co-founder that made me send the email anyway."
           },
           "close": {
             "label": "Close",
-            "value": "What that one project paid for, two years later."
+            "value": "What that single project paid for, two years later."
           }
         }
-      },
-      "carousel": {
-        "meta": "5 slides · 4:5",
-        "slides": {
-          "one": "I almost said no to €10k.",
-          "two": "I wasn’t ready. That was the whole problem.",
-          "three": "Ready is something you become on the job.",
-          "four": "I sent the email. Badly written. Sent anyway.",
-          "five": "It paid for the next two years."
-        }
-      },
-      "post": {
-        "meta": "Caption · 620 characters",
-        "body": "I nearly turned down my first €10k client.\n\nNot because I didn’t want it. Because I didn’t think I was ready, and I was sure they’d find out.\n\nI sent the email anyway. It wasn’t a good email.\n\nThat project paid for the next two years of my life, and I learned the thing nobody tells you: ready is not a state you arrive in. It’s something you become while the work is already happening."
-      },
-      "sourceLabel": "Built from",
-      "sourcePattern": "the outlier above",
-      "sourceMoment": "your moment from Tuesday",
-      "use": "Use this",
-      "another": "Try another angle",
-      "preview": {
-        "label": "Instagram preview",
-        "badge": "Preview",
-        "handle": "{'@'}mohamed",
-        "audio": "Original audio",
-        "more": "more",
-        "photo": "Your photo"
-      },
-      "never": "Personal drafts. You decide. Nothing is published without you."
+      }
     },
     "moments": {
       "eyebrow": "Moments",
-      "title": "Inspiration is better when it’s <em>yours</em>.",
-      "lede": "A Moment is anything real: a client call, a bad week, a realization at 1am. Drop it in and forget it. Personal remembers the things you forget.",
+      "title": "You live. Personal <em>takes notes</em>.",
+      "lede": "A client call, a bad week, a 1am realization. Write it down and forget it — Personal remembers it at the right moment.",
       "cards": {
         "one": {
-          "text": "Client asked why I charge more than agencies. I had a good answer for once.",
+          "text": "A client asked why I charge more than an agency. For once I had a good answer.",
           "meta": "Tuesday · Conversation"
         },
         "two": {
-          "text": "I nearly turned down my first €10k client because I didn’t feel ready.",
+          "text": "I almost turned down my first €10k client because I didn't feel ready.",
           "meta": "6 days ago · Turning point"
         },
         "three": {
-          "text": "Nobody warns you how quiet it gets after you launch.",
+          "text": "Nobody warns you about the silence right after a launch.",
           "meta": "Last week · Realization"
         },
         "four": {
-          "text": "Voice note, 40s, walking home",
+          "text": "Voice note, 40s, on the way home",
           "meta": "Sunday · Voice"
         },
         "five": {
-          "text": "Screenshot of the churn email that actually stung.",
+          "text": "Screenshot of the unsubscribe email that actually stung.",
           "meta": "Monday · Screenshot"
         }
       },
       "used": "Became a Reel on Nov 12",
-      "note": "You live. Personal pays attention. Nothing is content until you say so."
-    },
-    "loop": {
-      "eyebrow": "The whole thing",
-      "title": "Four moves, every morning.",
-      "steps": {
-        "understand": {
-          "title": "Understand",
-          "body": "Who you are, what you’re building, how you write."
-        },
-        "discover": {
-          "title": "Discover",
-          "body": "What is outperforming in your niche, right now."
-        },
-        "connect": {
-          "title": "Connect",
-          "body": "The format that works, meeting the story you already have."
-        },
-        "create": {
-          "title": "Create",
-          "body": "A Reel, a carousel or a post, in your voice."
-        }
-      }
+      "note": "Nothing is content until you say it is."
     },
     "faq": {
       "eyebrow": "FAQ",
-      "title": "Questions creators ask first.",
+      "title": "The questions creators ask first.",
       "items": {
         "sound": {
           "q": "Will it sound like me?",
-          "a": "That is the whole design. Personal learns your tone from your own captions and shows you what it understood before it writes a word. Every draft is built from your stories, and you can correct it in plain language."
+          "a": "That's the whole point. Personal learns your tone from your own captions and shows you what it understood before writing a line. Every draft starts from your stories, and you correct it in plain language."
         },
         "different": {
-          "q": "Is this another AI content generator?",
-          "a": "No. A generator invents content out of nothing. Personal starts from two things that already exist: what is genuinely working in your niche, and what actually happened in your life. It reveals the post you already had."
+          "q": "Another AI content generator?",
+          "a": "No. A generator invents from nothing. Personal starts from two things that already exist: what's working in your niche, and what actually happened to you."
         },
         "post": {
           "q": "Does Personal post for me?",
-          "a": "Never. Personal drafts, you decide. Nothing is published, scheduled or sent without you pressing the button yourself."
-        },
-        "learn": {
-          "q": "How does Personal learn about me?",
-          "a": "You connect Instagram through Instagram’s official login. Personal reads your posts, your audience and your positioning, then shows you its understanding for approval. Everything else it learns from the Moments you save."
-        },
-        "platforms": {
-          "q": "Which platforms does it understand?",
-          "a": "Instagram today: Reels, carousels and captions, which is where most personal brands are actually built. More platforms come as we learn what creators need next."
-        },
-        "private": {
-          "q": "Is my personal context private?",
-          "a": "Yes. Your Moments and your profile are yours. They are used to make your content better and nothing else, they are never shown to other creators, and you can delete any of them at any time."
+          "a": "Never. Personal drafts, you decide. Your Moments stay yours, are never shown to other creators, and you can delete them at any time."
         },
         "cost": {
-          "q": "How much does it cost?",
-          "a": "Nothing during early access. We are onboarding a small group of creators by hand and building the next version around what they tell us."
+          "q": "What does it cost?",
+          "a": "Nothing during early access. We're onboarding a small group of creators by hand and building the rest around what they tell us."
         }
       }
     },
     "cta": {
       "title": "Go live an interesting life.",
-      "copy": "Personal will be paying attention.",
+      "copy": "Personal will pay attention for you.",
       "button": "Get early access",
-      "reassurance": "Free during early access · Instagram login · Personal never posts for you"
+      "reassurance": "Free during early access · Personal never posts for you"
     },
     "footer": {
-      "brandline": "Human clarity. AI insight.",
+      "brandline": "Human clarity. Artificial intelligence.",
       "copyright": "© 2026 Personal"
     }
   },
@@ -418,6 +328,12 @@
     "worthCreating": "Worth creating today",
     "loadError": "Personal could not load today’s opportunities.",
     "remixError": "Personal could not draft this right now. Please try again.",
+    "refreshed": "Your feed is up to date.",
+    "saved": "Saved to your library.",
+    "unsaved": "Removed from your library.",
+    "saveError": "Personal could not update your library. Please try again.",
+    "dismissed": "This pattern will no longer appear in your feed.",
+    "dismissError": "Personal could not hide this pattern. Please try again.",
     "emptyTitle": "No content yet.",
     "emptyBody": "We’re finding standout content from creators across the platform. This can take a moment right after connecting Instagram.",
     "refresh": "Refresh my feed",
@@ -429,6 +345,7 @@
     "subtitle": "The strongest idea is usually a pattern that works, connected to a story only you can tell.",
     "drafting": "Drafting from your material…",
     "draftError": "Personal could not draft this right now. Please try again.",
+    "loadError": "Personal could not load your creative material.",
     "personalsPick": "Personal’s pick",
     "pickTitleFallback": "Tell the story behind your latest product decision.",
     "pickCopyFallback": "A concrete decision creates tension, insight and a useful takeaway.",
@@ -467,6 +384,11 @@
     "date": "Date",
     "finding": "Finding the story…",
     "saveMoment": "Save moment",
+    "created": "Your moment has been added.",
+    "deleted": "Your moment has been deleted.",
+    "loadError": "Personal could not load your moments.",
+    "createError": "Personal could not add this moment. Please try again.",
+    "deleteError": "Personal could not delete this moment. Please try again.",
     "categories": {
       "Win": "Win",
       "Failure": "Failure",
@@ -493,6 +415,9 @@
     "cancel": "Cancel",
     "saving": "Saving…",
     "saveMemory": "Save memory",
+    "saved": "Your Personal memory has been updated.",
+    "loadError": "Personal could not load your memory.",
+    "saveError": "Personal could not update your memory. Please try again.",
     "sections": {
       "topics": "Topics",
       "tone": "Tone",
@@ -507,7 +432,10 @@
     "subtitle": "The patterns and stories you want to return to.",
     "emptyTitle": "Nothing saved yet.",
     "emptyCopy": "Save a strong pattern when it feels useful—not just interesting.",
-    "exploreFeed": "Explore your feed"
+    "exploreFeed": "Explore your feed",
+    "removed": "Removed from your library.",
+    "loadError": "Personal could not load your library.",
+    "removeError": "Personal could not remove this post. Please try again."
   },
   "settings": {
     "eyebrow": "Settings",
@@ -547,6 +475,8 @@
     "instagramCopy": "Your own account data is the real foundation of Personal.",
     "postsImported": "{count} posts imported · {status}",
     "disconnect": "Disconnect",
+    "disconnected": "Your Instagram account has been disconnected.",
+    "disconnectError": "Personal could not disconnect Instagram. Please try again.",
     "continueWithInstagram": "Continue with Instagram",
     "privacy": "Privacy",
     "privacyCopy": "Instagram access tokens stay encrypted on the server. Personal never exposes them to the browser and deletes imported media when you disconnect.",
@@ -568,6 +498,7 @@
   "content": {
     "backToFeed": "← Back to your feed",
     "analysis": "Personal analysis",
+    "loadError": "Personal could not open this pattern.",
     "usualPerformance": "this creator's usual performance",
     "hook": "Hook",
     "structure": "Structure",
@@ -601,9 +532,11 @@
     "saving": "Saving…",
     "saveDraft": "Save",
     "saveError": "Personal could not save this draft. Try again.",
+    "savedToast": "Your draft has been saved.",
     "loadError": "This draft could not be opened.",
     "copy": "Copy",
     "copied": "Copied",
+    "copiedToast": "Your draft is ready to paste.",
     "copyError": "Your browser blocked the copy. Select the text and copy it manually.",
     "markReady": "Mark ready",
     "backToDraft": "Back to draft",

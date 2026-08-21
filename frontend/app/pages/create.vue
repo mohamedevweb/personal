@@ -3,9 +3,9 @@ import type { LifeMoment, Opportunity } from '~/types/product'
 
 const { apiFetch } = usePersonalApi()
 const { t } = useI18n()
+const toast = useToast()
 const opportunities = ref<Opportunity[]>([])
 const moments = ref<LifeMoment[]>([])
-const error = ref<string | null>(null)
 const drafting = ref(false)
 
 const quickCards = computed(() => [
@@ -17,27 +17,30 @@ const quickCards = computed(() => [
 async function createFromMoment(moment: LifeMoment, format: string = 'carousel') {
   if (drafting.value) return
   drafting.value = true
-  error.value = null
   try {
     const response = await apiFetch<{ remix: { id: number } }>(`/api/moments/${moment.id}/create-content`, { method: 'POST', body: { format } })
     await navigateTo(`/remix/${response.remix.id}`)
-  } catch (exception: any) {
-    error.value = exception?.data?.message || t('create.draftError')
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('create.draftError')))
   } finally {
     drafting.value = false
   }
 }
 
 onMounted(async () => {
-  const [ops, momentData] = await Promise.all([apiFetch<{ opportunities: Opportunity[] }>('/api/opportunities'), apiFetch<{ moments: LifeMoment[] }>('/api/moments')])
-  opportunities.value = ops.opportunities; moments.value = momentData.moments
+  try {
+    const [ops, momentData] = await Promise.all([apiFetch<{ opportunities: Opportunity[] }>('/api/opportunities'), apiFetch<{ moments: LifeMoment[] }>('/api/moments')])
+    opportunities.value = ops.opportunities
+    moments.value = momentData.moments
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('create.loadError')))
+  }
 })
 </script>
 
 <template>
   <main class="page-shell pb-16 pt-2">
-    <p v-if="error" role="alert" class="mb-5 rounded-[18px] border border-[var(--danger-line)] bg-[var(--danger-soft)] p-4 text-sm text-[var(--danger)]">{{ error }}</p>
-    <p v-else-if="drafting" class="mb-5 text-sm text-[var(--muted)]">{{ $t('create.drafting') }}</p>
+    <p v-if="drafting" class="mb-5 text-sm text-[var(--muted)]">{{ $t('create.drafting') }}</p>
 
     <section class="hero-night relative overflow-hidden rounded-[24px] px-6 py-14 text-center text-white md:px-12 md:py-16">
       <p class="inline-flex items-center gap-2.5 text-[10px] font-semibold uppercase tracking-[.22em] text-[var(--gold)]">

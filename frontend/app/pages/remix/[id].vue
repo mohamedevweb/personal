@@ -17,13 +17,13 @@ const WORDS_PER_SECOND = 2.6
 const route = useRoute()
 const { apiFetch } = usePersonalApi()
 const { t } = useI18n()
+const toast = useToast()
 
 const remix = ref<Remix | null>(null)
 const loading = ref(true)
 const saving = ref(false)
 const switching = ref<Format | null>(null)
 const copied = ref(false)
-const error = ref<string | null>(null)
 /** The last payload the server acknowledged, used to tell edited from saved. */
 const pristine = ref('')
 
@@ -92,10 +92,9 @@ async function addSlide() {
 
 /* --- Saving, copying, switching ------------------------------------------ */
 
-async function save(status: 'draft' | 'ready' = 'draft') {
-  if (!remix.value || saving.value) return
+async function save(status: 'draft' | 'ready' = 'draft', announce = true): Promise<boolean> {
+  if (!remix.value || saving.value) return false
   saving.value = true
-  error.value = null
   const payload = JSON.stringify(remix.value.generated_content)
   try {
     await apiFetch(`/api/remixes/${remix.value.id}`, {
@@ -104,8 +103,11 @@ async function save(status: 'draft' | 'ready' = 'draft') {
     })
     remix.value.status = status
     pristine.value = payload
-  } catch (exception: any) {
-    error.value = exception?.data?.message || t('remix.saveError')
+    if (announce) toast.success(t('remix.savedToast'))
+    return true
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('remix.saveError')))
+    return false
   } finally {
     saving.value = false
   }
@@ -129,9 +131,10 @@ async function copyDraft() {
   try {
     await navigator.clipboard.writeText(plainText())
     copied.value = true
+    toast.success(t('remix.copiedToast'))
     setTimeout(() => { copied.value = false }, 1800)
   } catch {
-    error.value = t('remix.copyError')
+    toast.error(t('remix.copyError'))
   }
 }
 
@@ -139,16 +142,21 @@ async function copyDraft() {
 async function switchFormat(format: Format) {
   if (!remix.value || remix.value.format === format || switching.value) return
   switching.value = format
-  error.value = null
   try {
-    if (dirty.value) await save(remix.value.status === 'ready' ? 'ready' : 'draft')
+    if (dirty.value) {
+      const saved = await save(remix.value.status === 'ready' ? 'ready' : 'draft', false)
+      if (!saved) {
+        switching.value = null
+        return
+      }
+    }
     const response = await apiFetch<{ remix: { id: number } }>(
       `/api/content/${remix.value.source_content?.id}/remix`,
       { method: 'POST', body: { format, life_moment_id: remix.value.life_moment?.id ?? null } }
     )
     await navigateTo(`/remix/${response.remix.id}`)
-  } catch (exception: any) {
-    error.value = exception?.data?.message || t('remix.switchError')
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('remix.switchError')))
     switching.value = null
   }
 }
@@ -192,8 +200,8 @@ onMounted(async () => {
     const response = await apiFetch<{ remix: Remix }>(`/api/remixes/${route.params.id}`)
     remix.value = response.remix
     pristine.value = JSON.stringify(response.remix.generated_content)
-  } catch (exception: any) {
-    error.value = exception?.data?.message || t('remix.loadError')
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('remix.loadError')))
   } finally {
     loading.value = false
   }
@@ -265,8 +273,6 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', guardUnload))
       </div>
 
       <div class="page-shell pt-8">
-        <p v-if="error" role="alert" class="mb-6 rounded-[14px] border border-[var(--danger-line)] bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger)]">{{ error }}</p>
-
         <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_312px] lg:gap-10">
           <!-- The draft comes first: on a phone you land on your own words, not
                on the post they were borrowed from. -->

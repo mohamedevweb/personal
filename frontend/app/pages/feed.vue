@@ -3,16 +3,18 @@ import type { ContentPost } from '~/types/product'
 
 const { apiFetch } = usePersonalApi()
 const { t } = useI18n()
+const toast = useToast()
 const loading = ref(true)
 const refreshing = ref(false)
-const error = ref<string | null>(null)
 const data = ref<{ items: ContentPost[] } | null>(null)
 
-async function loadFeed() {
+async function loadFeed(showError = true): Promise<boolean> {
   try {
     data.value = await apiFetch('/api/feed')
-  } catch (exception: any) {
-    error.value = exception?.data?.message || t('feed.loadError')
+    return true
+  } catch (exception: unknown) {
+    if (showError) toast.error(apiErrorMessage(exception, t('feed.loadError')))
+    return false
   } finally {
     loading.value = false
   }
@@ -27,24 +29,41 @@ async function refresh() {
     // minute, so poll rather than reload once — stop as soon as posts appear.
     for (let attempt = 0; attempt < 12; attempt++) {
       await new Promise(resolve => setTimeout(resolve, 5000))
-      await loadFeed()
-      if (data.value && data.value.items.length > 0) break
+      const loaded = await loadFeed(false)
+      if (!loaded) {
+        toast.error(t('feed.loadError'))
+        break
+      }
+      if (data.value && data.value.items.length > 0) {
+        toast.success(t('feed.refreshed'))
+        break
+      }
     }
-  } catch (exception: any) {
-    error.value = exception?.data?.message || t('feed.loadError')
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('feed.loadError')))
   } finally {
     refreshing.value = false
   }
 }
 
 async function save(post: ContentPost) {
-  const response = await apiFetch<{ saved: boolean }>(`/api/content/${post.id}/save`, { method: 'POST' })
-  post.is_saved = response.saved
+  try {
+    const response = await apiFetch<{ saved: boolean }>(`/api/content/${post.id}/save`, { method: 'POST' })
+    post.is_saved = response.saved
+    toast.success(t(response.saved ? 'feed.saved' : 'feed.unsaved'))
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('feed.saveError')))
+  }
 }
 
 async function dismiss(post: ContentPost) {
-  await apiFetch(`/api/content/${post.id}/dismiss`, { method: 'POST' })
-  if (data.value) data.value.items = data.value.items.filter(item => item.id !== post.id)
+  try {
+    await apiFetch(`/api/content/${post.id}/dismiss`, { method: 'POST' })
+    if (data.value) data.value.items = data.value.items.filter(item => item.id !== post.id)
+    toast.success(t('feed.dismissed'))
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('feed.dismissError')))
+  }
 }
 
 async function remix(post: ContentPost) {
@@ -53,8 +72,8 @@ async function remix(post: ContentPost) {
       method: 'POST', body: { format: 'carousel' }
     })
     await navigateTo(`/remix/${response.remix.id}`)
-  } catch (exception: any) {
-    error.value = exception?.data?.message || t('feed.remixError')
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('feed.remixError')))
   }
 }
 
@@ -70,7 +89,6 @@ onMounted(loadFeed)
       </button>
     </div>
 
-    <p v-if="error" role="alert" class="mt-8 rounded-[18px] border border-[var(--danger-line)] bg-[var(--danger-soft)] p-4 text-sm text-[var(--danger)]">{{ error }}</p>
     <div v-if="loading" class="mt-7 grid gap-5 sm:grid-cols-2 xl:grid-cols-3"><div v-for="i in 6" :key="i" class="h-[380px] animate-pulse rounded-[18px] bg-[var(--sand-soft)]" /></div>
     <div v-else-if="data && data.items.length === 0" class="mt-7 rounded-[18px] border border-dashed border-[var(--line)] bg-[var(--surface)] px-6 py-16 text-center">
       <h3 class="font-serif text-2xl tracking-[-.02em]">{{ $t('feed.emptyTitle') }}</h3>

@@ -189,32 +189,3 @@ button, a { -webkit-tap-highlight-color: transparent; }
 @media (prefers-reduced-motion: reduce) {
   .js-reveal [data-reveal] { opacity: 1; transform: none; transition: none; }
 }
-
-/* The join in the connection section: two hairlines that grow out towards the
-   mark as the section arrives. Global rather than scoped because the collapsed
-   state depends on .js-reveal, which lives on the page root. */
-@layer components {
-  .b-joint {
-    display: block;
-    flex: 1 1 auto;
-    width: 1px;
-    min-height: 28px;
-    background: var(--b-line);
-    transform-origin: center;
-    transition: transform .9s cubic-bezier(.22, 1, .36, 1) 260ms;
-  }
-}
-
-.js-reveal .b-connector:not(.is-revealed) .b-joint { transform: scaleY(0); }
-
-/* Once the two cards sit side by side, the join runs between them. */
-@media (min-width: 768px) {
-  .b-joint {
-    width: auto;
-    height: 1px;
-    min-height: 0;
-    min-width: 28px;
-  }
-
-  .js-reveal .b-connector:not(.is-revealed) .b-joint { transform: scaleX(0); }
-}
