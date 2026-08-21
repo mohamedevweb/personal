@@ -16,25 +16,63 @@ class PostInsightService
 {
     public function __construct(private readonly LlmJsonService $llm) {}
 
+    public function isAnalyzed(ContentPost $post): bool
+    {
+        $translations = $post->analysis_translations ?? [];
+
+        return $this->isComplete($translations[app()->getLocale()] ?? null);
+    }
+
+    /** @return array{why_it_works: string, hook_analysis: string, structure_analysis: string} */
+    public function preview(ContentPost $post): array
+    {
+        return $this->fallback($post, app()->getLocale());
+    }
+
+    public function present(ContentPost $post): bool
+    {
+        if ($this->isAnalyzed($post)) {
+            $translations = $post->analysis_translations ?? [];
+            $post->forceFill($translations[app()->getLocale()]);
+
+            return true;
+        }
+
+        $post->forceFill($this->preview($post));
+
+        return false;
+    }
+
     public function ensureAnalyzed(ContentPost $post): void
     {
-        if ($post->hook_analysis !== '' && $post->structure_analysis !== '') {
+        $locale = app()->getLocale();
+        $translations = $post->analysis_translations ?? [];
+
+        if ($this->isAnalyzed($post)) {
+            $post->forceFill($translations[$locale]);
+
             return;
         }
 
-        $analysis = $this->analyze($post) ?? $this->fallback($post);
+        $analysis = $this->analyze($post, $locale) ?? $this->fallback($post, $locale);
+        $translations[$locale] = $analysis;
 
-        $post->forceFill($analysis)->save();
+        $post->forceFill([
+            ...$analysis,
+            'analysis_locale' => $locale,
+            'analysis_translations' => $translations,
+        ])->save();
     }
 
     /** @return array{why_it_works: string, hook_analysis: string, structure_analysis: string}|null */
-    private function analyze(ContentPost $post): ?array
+    private function analyze(ContentPost $post, string $locale): ?array
     {
         $post->loadMissing('creator');
 
         $result = $this->llm->object(
             'You are a short-form content strategist. Analyze why an Instagram post performs, in plain, '
-            .'specific language a creator can act on. Two to three sentences per field.',
+            .'specific language a creator can act on. Two to three sentences per field. '
+            .'Write every field in '.$this->languageName($locale).'.',
             implode("\n", [
                 'Niche: '.($post->creator->niche ?? 'unknown'),
                 'Format: '.$post->format,
@@ -66,15 +104,39 @@ class PostInsightService
     }
 
     /** @return array{why_it_works: string, hook_analysis: string, structure_analysis: string} */
-    private function fallback(ContentPost $post): array
+    private function fallback(ContentPost $post, string $locale): array
     {
+        if ($locale === 'fr') {
+            return [
+                'why_it_works' => $post->why_it_works && $post->analysis_locale === 'fr'
+                    ? $post->why_it_works
+                    : 'Un engagement élevé par rapport à sa niche montre que le sujet et le moment de publication ont trouvé leur public.',
+                'hook_analysis' => "L'accroche « {$post->hook} » commence par une promesse claire. Elle capte l'attention et crée une attente à laquelle le post répond ensuite.",
+                'structure_analysis' => "Le format {$post->format} associe une accroche directe, une idée centrale et une conclusion utile à enregistrer. Cette structure favorise la portée dans cette niche.",
+            ];
+        }
+
         return [
-            'why_it_works' => $post->why_it_works
-                ?: 'Strong engagement relative to its niche suggests the topic and timing resonated.',
+            'why_it_works' => $post->why_it_works && $post->analysis_locale === 'en'
+                ? $post->why_it_works
+                : 'Strong engagement relative to its niche suggests the topic and timing resonated.',
             'hook_analysis' => "The hook \"{$post->hook}\" leads with a clear promise, which stops the scroll and "
                 .'sets an expectation the post then pays off.',
             'structure_analysis' => 'A '.$post->format.' format with a tight hook, a single idea, and an explicit '
                 .'save-worthy takeaway — the structure that reliably earns reach in this niche.',
         ];
+    }
+
+    private function languageName(string $locale): string
+    {
+        return $locale === 'fr' ? 'natural French' : 'English';
+    }
+
+    private function isComplete(mixed $analysis): bool
+    {
+        return is_array($analysis)
+            && filled($analysis['why_it_works'] ?? null)
+            && filled($analysis['hook_analysis'] ?? null)
+            && filled($analysis['structure_analysis'] ?? null);
     }
 }

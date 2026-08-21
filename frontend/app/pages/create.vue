@@ -8,6 +8,20 @@ const opportunities = ref<Opportunity[]>([])
 const moments = ref<LifeMoment[]>([])
 const drafting = ref(false)
 
+const opportunityKeys: Record<string, string> = {
+  'Tell the story of your pivot using a failure → realization → new direction format.': 'pivot',
+  'Turn one customer sentence into a sharp problem-awareness carousel.': 'customerSentence',
+  'Build anticipation around the incubator decision before the outcome is known.': 'incubator',
+  'Turn this moment into a story your audience can use': 'lifeMoment'
+}
+
+function opportunityCopy(type: 'title' | 'explanation'): string | undefined {
+  const opportunity = opportunities.value[0]
+  if (!opportunity) return undefined
+  const key = opportunityKeys[opportunity.title]
+  return key ? t(`create.opportunities.${key}.${type}`) : opportunity[type]
+}
+
 const quickCards = computed(() => [
   { title: t('create.cards.story.title'), copy: t('create.cards.story.copy'), format: 'carousel' },
   { title: t('create.cards.teach.title'), copy: t('create.cards.teach.copy'), format: 'carousel' },
@@ -47,8 +61,8 @@ onMounted(async () => {
         <span class="grid h-6 w-6 place-items-center rounded-full border border-[var(--gold)]/35"><AppIcon name="sparkles" :size="12" /></span>
         {{ $t('create.personalsPick') }}
       </p>
-      <h2 class="mx-auto mt-7 max-w-3xl font-serif text-[34px] leading-[1.08] tracking-[-.03em] md:text-[50px]">{{ opportunities[0]?.title || $t('create.pickTitleFallback') }}</h2>
-      <p class="mx-auto mt-5 max-w-xl text-[15px] leading-7 text-white/65">{{ opportunities[0]?.explanation || $t('create.pickCopyFallback') }}</p>
+      <h2 class="mx-auto mt-7 max-w-3xl font-serif text-[34px] leading-[1.08] tracking-[-.03em] md:text-[50px]">{{ opportunityCopy('title') || $t('create.pickTitleFallback') }}</h2>
+      <p class="mx-auto mt-5 max-w-xl text-[15px] leading-7 text-white/65">{{ opportunityCopy('explanation') || $t('create.pickCopyFallback') }}</p>
       <button
         v-if="opportunities[0]?.life_moment"
         class="mt-9 inline-flex h-12 items-center rounded-full bg-[var(--paper)] px-6 text-[14px] font-medium text-[var(--night)] transition hover:bg-white disabled:cursor-wait disabled:opacity-70"

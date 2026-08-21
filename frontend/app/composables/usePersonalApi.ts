@@ -2,6 +2,7 @@ let developmentBootstrap: Promise<string | null> | null = null
 
 export function usePersonalApi() {
   const config = useRuntimeConfig()
+  const { locale } = useI18n()
   const token = useCookie<string | null>('personal_token', {
     sameSite: 'lax',
     path: '/',
@@ -20,7 +21,7 @@ export function usePersonalApi() {
     if (!developmentBootstrap) {
       developmentBootstrap = $fetch<{ token: string }>('/api/development/session', {
         baseURL: config.public.apiBase,
-        headers: { Accept: 'application/json' }
+        headers: { Accept: 'application/json', 'Accept-Language': locale.value }
       }).then((response) => {
         token.value = response.token
         return response.token
@@ -35,6 +36,7 @@ export function usePersonalApi() {
   async function apiFetch<T>(path: string, options: any = {}, mayRetry = true): Promise<T> {
     const headers: Record<string, string> = {
       Accept: 'application/json',
+      'Accept-Language': locale.value,
       ...(options.headers || {})
     }
     if (token.value) headers.Authorization = `Bearer ${token.value}`

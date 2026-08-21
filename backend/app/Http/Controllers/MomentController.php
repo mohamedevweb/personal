@@ -5,9 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\ContentOpportunity;
 use App\Models\ContentPost;
 use App\Models\LifeMoment;
-use App\Models\Remix;
-use App\Services\ContentGenerationService;
 use App\Services\MomentIntelligenceService;
+use App\Services\RemixDraftService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -64,22 +63,18 @@ class MomentController extends Controller
         return response()->noContent();
     }
 
-    public function createContent(Request $request, LifeMoment $moment, ContentGenerationService $generator): JsonResponse
-    {
+    public function createContent(
+        Request $request,
+        LifeMoment $moment,
+        RemixDraftService $drafts,
+    ): JsonResponse {
         $this->ensureOwner($request, $moment);
         $data = $request->validate(['format' => ['nullable', 'in:reel,carousel,caption']]);
         $source = ContentPost::query()->orderByDesc('performance_ratio')->firstOrFail();
         $format = $data['format'] ?? 'carousel';
-        $remix = Remix::query()->create([
-            'user_id' => $request->user()->id,
-            'source_content_id' => $source->id,
-            'life_moment_id' => $moment->id,
-            'format' => $format,
-            'generated_content' => $generator->generate($source, $request->user(), $format, $moment),
-            'status' => 'draft',
-        ]);
+        $remix = $drafts->start($source, $request->user(), $format, $moment, app()->getLocale());
 
-        return response()->json(['remix' => $remix], 201);
+        return response()->json(['remix' => $remix], Response::HTTP_ACCEPTED);
     }
 
     /** @return array<string, mixed> */

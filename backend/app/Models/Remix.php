@@ -23,4 +23,9 @@ class Remix extends Model
     {
         return $this->belongsTo(LifeMoment::class);
     }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 }

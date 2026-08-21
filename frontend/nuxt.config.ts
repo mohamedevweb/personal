@@ -33,9 +33,7 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
-      title: 'Personal — Your content strategist',
       meta: [
-        { name: 'description', content: 'Personal understands your work and helps you create what matters next.' },
         { name: 'theme-color', content: '#e04f36' }
       ],
       // Instrument Serif is the brand display face and Inter carries every other

@@ -10,6 +10,30 @@ const modalOpen = ref(false)
 const saving = ref(false)
 const form = reactive({ content: '', category: 'Lesson', happened_at: new Date().toISOString().slice(0, 10), upcoming_at: '' })
 const categories = ['Win', 'Failure', 'Lesson', 'Launch', 'Idea', 'Meeting', 'Milestone', 'Opinion', 'Upcoming event', 'Other']
+const storyReasonKeys: Record<string, string> = {
+  'personal and specific': 'personalSpecific',
+  'personnel et précis': 'personalSpecific',
+  'contains a clear narrative event': 'narrativeEvent',
+  'contient un événement narratif clair': 'narrativeEvent',
+  'strong transformation': 'transformation',
+  'transformation forte': 'transformation',
+  'enough detail to make the story credible': 'credibleDetail',
+  'assez de détails pour rendre le récit crédible': 'credibleDetail',
+  personal: 'personal',
+  'relatable founder problem': 'founderProblem',
+  'creates authority': 'authority',
+  'future tension': 'futureTension',
+  'creates anticipation': 'anticipation',
+  'invites the audience into the journey': 'audienceJourney',
+  'real customer insight': 'customerInsight',
+  'specific pain point': 'painPoint',
+  'supports your positioning': 'positioning'
+}
+
+function storyReason(reason: string): string {
+  const key = storyReasonKeys[reason]
+  return key ? t(`moments.reasons.${key}`) : reason
+}
 
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString(locale.value, { month: 'short', day: 'numeric' })
@@ -92,7 +116,7 @@ onMounted(load)
           </div>
         </div>
         <div class="mt-5 flex flex-wrap gap-x-4 gap-y-1.5">
-          <span v-for="reason in moment.story_reasons" :key="reason" class="text-xs text-[var(--muted)]">✓ {{ reason }}</span>
+          <span v-for="reason in moment.story_reasons" :key="reason" class="text-xs text-[var(--muted)]">✓ {{ storyReason(reason) }}</span>
         </div>
         <div class="mt-6 flex items-center gap-3 border-t border-[var(--line-soft)] pt-4">
           <button class="inline-flex h-9 items-center justify-center rounded-full bg-[var(--ink)] px-4 text-[12.5px] font-medium text-[var(--paper)] transition hover:bg-black" @click="turnIntoContent(moment)">{{ $t('moments.turnIntoContent') }}</button>

@@ -11,6 +11,29 @@ const moments = ref<LifeMoment[]>([])
 const format = ref<'reel' | 'carousel' | 'caption'>('carousel')
 const selectedMoment = ref<number | null>(null)
 const generating = ref(false)
+const loading = ref(true)
+let analysisTimer: ReturnType<typeof setTimeout> | undefined
+
+async function pollAnalysis() {
+  try {
+    const response = await apiFetch<{ content: ContentPost }>(`/api/content/${route.params.id}`)
+    post.value = response.content
+    if (response.content.analysis_status === 'pending') {
+      analysisTimer = setTimeout(pollAnalysis, 2000)
+    }
+  } catch {
+    analysisTimer = setTimeout(pollAnalysis, 4000)
+  }
+}
+
+async function requestAnalysis() {
+  try {
+    await apiFetch(`/api/content/${route.params.id}/analysis`, { method: 'POST' })
+    analysisTimer = setTimeout(pollAnalysis, 1200)
+  } catch {
+    // The immediate heuristic remains useful when background analysis is unavailable.
+  }
+}
 
 async function createRemix() {
   if (!post.value) return
@@ -34,10 +57,15 @@ onMounted(async () => {
     post.value = contentResponse.content
     moments.value = momentsResponse.moments
     selectedMoment.value = moments.value[0]?.id || null
+    if (contentResponse.content.analysis_status === 'pending') requestAnalysis()
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('content.loadError')))
+  } finally {
+    loading.value = false
   }
 })
+
+onBeforeUnmount(() => clearTimeout(analysisTimer))
 </script>
 
 <template>
@@ -50,7 +78,13 @@ onMounted(async () => {
       </section>
 
       <section>
-        <p class="text-[11px] font-semibold uppercase tracking-[.16em] text-[var(--faint)]">{{ $t('content.analysis') }}</p>
+        <div class="flex items-center justify-between gap-4">
+          <p class="text-[11px] font-semibold uppercase tracking-[.16em] text-[var(--faint)]">{{ $t('content.analysis') }}</p>
+          <p v-if="post.analysis_status === 'pending'" class="inline-flex items-center gap-2 text-[11px] text-[var(--muted)]">
+            <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--ai)]" />
+            {{ $t('content.analysisImproving') }}
+          </p>
+        </div>
         <div class="mt-5 inline-flex items-baseline gap-2 rounded-2xl bg-[var(--accent-soft)] px-5 py-4 text-[var(--accent-ink)]"><span class="font-serif text-4xl">{{ post.performance_ratio.toFixed(1) }}×</span><span class="text-xs">{{ $t('content.usualPerformance') }}</span></div>
         <div class="mt-8 divide-y divide-[var(--line-soft)] border-y border-[var(--line)]">
           <div class="py-6"><p class="text-xs font-semibold uppercase tracking-widest text-[var(--faint)]">{{ $t('content.hook') }}</p><p class="mt-2 text-[17px] leading-7">{{ post.hook_analysis }}</p></div>
@@ -132,6 +166,17 @@ onMounted(async () => {
           </div>
         </div>
       </section>
+    </div>
+  </main>
+
+  <main v-else-if="loading" class="page-shell pb-16 pt-2">
+    <div class="h-5 w-32 animate-pulse rounded-full bg-[var(--sand-soft)]" />
+    <div class="mt-6 grid gap-10 lg:grid-cols-[.88fr_1.12fr]">
+      <div class="aspect-[4/5] animate-pulse rounded-[18px] bg-[var(--sand-soft)]" />
+      <div class="space-y-5">
+        <div class="h-20 animate-pulse rounded-[18px] bg-[var(--sand-soft)]" />
+        <div class="h-64 animate-pulse rounded-[18px] bg-[var(--sand-soft)]" />
+      </div>
     </div>
   </main>
 </template>

@@ -1,4 +1,8 @@
 {
+  "meta": {
+    "title": "Personal, votre stratège de contenu",
+    "description": "Personal comprend votre travail et vous aide à créer les contenus qui comptent."
+  },
   "brand": {
     "name": "Personal",
     "tagline": "Claude pour le personal branding.",
@@ -382,8 +386,6 @@
     "saved": "Ajouté à tes favoris.",
     "unsaved": "Retiré de tes favoris.",
     "saveError": "Personal n’a pas pu mettre à jour tes favoris. Réessaie.",
-    "dismissed": "Ce format ne s’affichera plus dans ton feed.",
-    "dismissError": "Personal n’a pas pu masquer ce format. Réessaie.",
     "emptyTitle": "Rien pour l’instant.",
     "emptyBody": "On cherche les contenus qui se démarquent parmi tous les créateurs. Ça peut prendre un moment juste après la connexion Instagram.",
     "refresh": "Rafraîchir mon feed",
@@ -400,6 +402,24 @@
     "pickTitleFallback": "Racontez l’histoire derrière votre dernière décision produit.",
     "pickCopyFallback": "Une décision concrète crée de la tension, de l’insight et un enseignement utile.",
     "createThis": "Créer ceci →",
+    "opportunities": {
+      "pivot": {
+        "title": "Raconte ton pivot avec une structure en trois temps : échec, prise de conscience, nouvelle direction.",
+        "explanation": "Ce format fonctionne en ce moment et ton histoire s’y prête parfaitement."
+      },
+      "customerSentence": {
+        "title": "Transforme une phrase de client en carrousel clair sur le problème qu’il rencontre.",
+        "explanation": "Cette citation rend le problème concret et montre naturellement pourquoi Personal doit exister."
+      },
+      "incubator": {
+        "title": "Crée de l’attente autour de ta décision pour l’incubateur avant de connaître le résultat.",
+        "explanation": "Partager ton cheminement maintenant donne à ton audience une raison de suivre le prochain chapitre."
+      },
+      "lifeMoment": {
+        "title": "Transforme ce moment en histoire utile pour ton audience.",
+        "explanation": "Ce moment contient une transformation personnelle et une leçon concrète, deux signaux forts pour un contenu authentique."
+      }
+    },
     "cards": {
       "story": {
         "title": "Raconter une histoire",
@@ -450,6 +470,21 @@
       "Opinion": "Opinion",
       "Upcoming event": "Événement à venir",
       "Other": "Autre"
+    },
+    "reasons": {
+      "personalSpecific": "personnel et précis",
+      "narrativeEvent": "contient un événement narratif clair",
+      "transformation": "transformation forte",
+      "credibleDetail": "assez de détails pour rendre le récit crédible",
+      "personal": "personnel",
+      "founderProblem": "un problème de fondateur auquel on peut s’identifier",
+      "authority": "renforce ta crédibilité",
+      "futureTension": "tension autour de la suite",
+      "anticipation": "crée de l’attente",
+      "audienceJourney": "invite ton audience à suivre l’aventure",
+      "customerInsight": "vrai enseignement client",
+      "painPoint": "problème précis",
+      "positioning": "renforce ton positionnement"
     }
   },
   "personal": {
@@ -649,10 +684,8 @@
     "followers": "{count} abonnés",
     "views": "{count} vues",
     "likes": "{count} j’aime",
-    "whyRecommends": "Pourquoi Personal le recommande",
     "saved": "Enregistré ✓",
     "save": "Enregistrer",
-    "notForMe": "Pas pour moi",
     "remixForMe": "Remixer pour moi",
     "more": "plus",
     "viewComments": "Voir les {count} commentaires",

@@ -92,6 +92,7 @@ class ChatService
     private function system(User $user): string
     {
         $name = trim((string) $user->name) ?: 'the creator';
+        $language = app()->getLocale() === 'fr' ? 'natural French using informal tu' : 'English';
 
         return <<<PROMPT
         You are Personal's in-app creative assistant, helping {$name} turn their real
@@ -99,11 +100,16 @@ class ChatService
         brief. Offer specific hooks, angles, captions and formats rather than generic
         advice, and ask a sharpening question when the request is vague. Keep replies
         to a few short paragraphs and never invent metrics or facts about the user.
+        Reply in {$language}.
         PROMPT;
     }
 
     private function fallback(): string
     {
+        if (app()->getLocale() === 'fr') {
+            return "Je ne suis pas encore relié à un modèle dans cet environnement, mais je peux t'aider à réfléchir. Raconte-moi le moment ou l'idée que tu veux transformer en contenu et je te proposerai quelques angles.";
+        }
+
         return "I'm not fully wired up to a model in this environment yet, but I'm happy to help you think out loud. Tell me the moment or idea you want to turn into content and I'll suggest some angles.";
     }
 }

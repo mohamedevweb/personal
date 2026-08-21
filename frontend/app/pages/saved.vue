@@ -50,7 +50,7 @@ onMounted(async () => {
 
     <div v-if="loading" class="mt-5 h-96 animate-pulse rounded-[18px] bg-[var(--sand-soft)]" />
     <div v-else-if="items.length" class="mt-5 grid auto-rows-fr gap-5 sm:grid-cols-2 xl:grid-cols-3">
-      <ContentCard v-for="post in items" :key="post.id" :post="post" @save="unsave" @dismiss="unsave" @remix="remix" />
+      <ContentCard v-for="post in items" :key="post.id" :post="post" @save="unsave" @remix="remix" />
     </div>
     <div v-else class="mt-5 rounded-[18px] border border-dashed border-[var(--line)] bg-[var(--surface)] px-6 py-16 text-center">
       <p class="font-serif text-[26px] tracking-[-.02em]">{{ $t('saved.emptyTitle') }}</p>

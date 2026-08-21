@@ -34,7 +34,9 @@ class ContentDraftBlueprint
 
     public function system(): string
     {
-        return self::SYSTEM;
+        $language = app()->getLocale() === 'fr' ? 'natural French' : 'English';
+
+        return self::SYSTEM."\n\nWrite every part of the draft in {$language}.";
     }
 
     public function brief(ContentPost $source, User $user, string $format, ?LifeMoment $moment): string

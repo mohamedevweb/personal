@@ -1,4 +1,8 @@
 {
+  "meta": {
+    "title": "Personal, your content strategist",
+    "description": "Personal understands your work and helps you create content that matters."
+  },
   "brand": {
     "name": "Personal",
     "tagline": "Claude for personal branding.",
@@ -382,8 +386,6 @@
     "saved": "Saved to your library.",
     "unsaved": "Removed from your library.",
     "saveError": "Personal could not update your library. Please try again.",
-    "dismissed": "This pattern will no longer appear in your feed.",
-    "dismissError": "Personal could not hide this pattern. Please try again.",
     "emptyTitle": "No content yet.",
     "emptyBody": "We’re finding standout content from creators across the platform. This can take a moment right after connecting Instagram.",
     "refresh": "Refresh my feed",
@@ -400,6 +402,24 @@
     "pickTitleFallback": "Tell the story behind your latest product decision.",
     "pickCopyFallback": "A concrete decision creates tension, insight and a useful takeaway.",
     "createThis": "Create this →",
+    "opportunities": {
+      "pivot": {
+        "title": "Tell the story of your pivot through failure, realization and a new direction.",
+        "explanation": "This format is working right now, and you have the perfect story for it."
+      },
+      "customerSentence": {
+        "title": "Turn one customer sentence into a sharp problem awareness carousel.",
+        "explanation": "The quote makes the pain concrete and naturally establishes why Personal should exist."
+      },
+      "incubator": {
+        "title": "Build anticipation around the incubator decision before the outcome is known.",
+        "explanation": "Sharing the decision process now gives your audience a reason to follow the next chapter."
+      },
+      "lifeMoment": {
+        "title": "Turn this moment into a story your audience can use.",
+        "explanation": "This moment has a personal transformation and a concrete lesson, two strong signals for authentic content."
+      }
+    },
     "cards": {
       "story": {
         "title": "Tell a story",
@@ -450,6 +470,21 @@
       "Opinion": "Opinion",
       "Upcoming event": "Upcoming event",
       "Other": "Other"
+    },
+    "reasons": {
+      "personalSpecific": "personal and specific",
+      "narrativeEvent": "contains a clear narrative event",
+      "transformation": "strong transformation",
+      "credibleDetail": "enough detail to make the story credible",
+      "personal": "personal",
+      "founderProblem": "relatable founder problem",
+      "authority": "creates authority",
+      "futureTension": "future tension",
+      "anticipation": "creates anticipation",
+      "audienceJourney": "invites the audience into the journey",
+      "customerInsight": "real customer insight",
+      "painPoint": "specific pain point",
+      "positioning": "supports your positioning"
     }
   },
   "personal": {
@@ -649,10 +684,8 @@
     "followers": "{count} followers",
     "views": "{count} views",
     "likes": "{count} likes",
-    "whyRecommends": "Why Personal recommends this",
     "saved": "Saved ✓",
     "save": "Save",
-    "notForMe": "Not for me",
     "remixForMe": "Remix for me",
     "more": "more",
     "viewComments": "View all {count} comments",

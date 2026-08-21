@@ -28,6 +28,7 @@ export interface ContentPost {
   why_it_works: string
   hook_analysis: string
   structure_analysis: string
+  analysis_status?: 'pending' | 'complete'
   recommendation_score?: number | null
   why_recommended?: string
   signals?: string[]
@@ -108,7 +109,7 @@ export interface Remix {
     cta?: string
     caption?: string
   }
-  status: string
+  status: 'generating' | 'failed' | 'draft' | 'ready' | 'archived'
   source_content?: any
   life_moment?: LifeMoment | null
 }

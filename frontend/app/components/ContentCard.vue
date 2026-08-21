@@ -3,7 +3,7 @@ import type { ContentPost } from '~/types/product'
 import { compactNumber, creatorProfileUrl, relativeDate } from '~/types/product'
 
 const props = defineProps<{ post: ContentPost }>()
-defineEmits<{ save: [post: ContentPost], dismiss: [post: ContentPost], remix: [post: ContentPost] }>()
+defineEmits<{ save: [post: ContentPost], remix: [post: ContentPost] }>()
 
 const expanded = ref(false)
 const mediaKind = computed(() => {
@@ -86,17 +86,7 @@ const visibleCaption = computed(() => (expanded.value || !isLongCaption.value ? 
         <span v-for="signal in post.signals?.slice(0, 2)" :key="signal" class="rounded-full border border-[var(--line)] px-2.5 py-1 text-[10px] text-[var(--muted)]">{{ signal }}</span>
       </div>
 
-      <div class="mt-3 rounded-[14px] border border-[var(--line-soft)] bg-[var(--surface)] p-3">
-        <div class="flex items-center gap-2">
-          <span class="grid h-7 w-7 shrink-0 place-items-center rounded-[9px] bg-[var(--accent-soft)] text-[var(--accent-ink)]">
-            <AppIcon name="sparkles" :size="13" />
-          </span>
-          <p class="text-[10px] font-semibold uppercase tracking-[.14em] text-[var(--muted)]">{{ $t('contentCard.whyRecommends') }}</p>
-        </div>
-        <p class="mt-2 line-clamp-3 text-[12px] leading-[18px] text-[var(--copy)]">{{ post.why_recommended || post.why_it_works }}</p>
-      </div>
-
-      <div class="mt-auto grid grid-cols-2 gap-2 pt-3">
+      <div class="mt-auto grid gap-2 pt-3">
         <button
           type="button"
           class="inline-flex h-9 min-w-0 items-center justify-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3 text-[12px] transition hover:bg-[var(--line-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
@@ -107,15 +97,7 @@ const visibleCaption = computed(() => (expanded.value || !isLongCaption.value ? 
         </button>
         <button
           type="button"
-          class="inline-flex h-9 min-w-0 items-center justify-center gap-1.5 rounded-full border border-transparent px-3 text-[12px] text-[var(--muted)] transition hover:border-[var(--line)] hover:bg-[var(--surface)] hover:text-[var(--ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
-          @click="$emit('dismiss', post)"
-        >
-          <AppIcon name="close" :size="13" />
-          <span class="truncate">{{ $t('contentCard.notForMe') }}</span>
-        </button>
-        <button
-          type="button"
-          class="col-span-2 inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-4 text-[12.5px] font-medium text-[var(--paper)] transition hover:bg-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+          class="inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-4 text-[12.5px] font-medium text-[var(--paper)] transition hover:bg-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
           @click="$emit('remix', post)"
         >
           {{ $t('contentCard.remixForMe') }}

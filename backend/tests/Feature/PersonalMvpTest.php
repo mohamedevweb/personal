@@ -87,6 +87,68 @@ class PersonalMvpTest extends TestCase
         $this->assertDatabaseHas('dismissed_content', ['user_id' => $this->user->id, 'content_post_id' => $post->id]);
     }
 
+    public function test_content_analysis_follows_the_requested_language(): void
+    {
+        config()->set('services.openai.api_key', null);
+        config()->set('services.anthropic.api_key', null);
+        $post = ContentPost::query()->firstOrFail();
+
+        $this->actingAs($this->user)
+            ->withHeader('Accept-Language', 'fr-FR,fr;q=0.9')
+            ->getJson("/api/content/{$post->id}")
+            ->assertOk()
+            ->assertJsonPath('content.hook_analysis', fn (string $analysis): bool => str_starts_with($analysis, "L'accroche"));
+
+        $this->assertDatabaseHas('content_posts', ['id' => $post->id, 'analysis_locale' => 'fr']);
+
+        $this->actingAs($this->user)
+            ->withHeader('Accept-Language', 'en-US,en;q=0.9')
+            ->getJson("/api/content/{$post->id}")
+            ->assertOk()
+            ->assertJsonPath('content.hook_analysis', fn (string $analysis): bool => str_starts_with($analysis, 'The hook'));
+
+        $this->assertDatabaseHas('content_posts', ['id' => $post->id, 'analysis_locale' => 'en']);
+
+        $this->actingAs($this->user)
+            ->withHeader('Accept-Language', 'fr')
+            ->getJson("/api/content/{$post->id}")
+            ->assertOk()
+            ->assertJsonPath('content.hook_analysis', fn (string $analysis): bool => str_starts_with($analysis, "L'accroche"));
+
+        $post->refresh();
+        $this->assertSame('en', $post->analysis_locale);
+        $this->assertSame(['fr', 'en'], array_keys($post->analysis_translations));
+    }
+
+    public function test_french_requests_localize_moment_intelligence_and_mock_drafts(): void
+    {
+        config()->set('services.openai.api_key', null);
+        config()->set('services.anthropic.api_key', null);
+
+        $momentResponse = $this->actingAs($this->user)
+            ->withHeader('Accept-Language', 'fr')
+            ->postJson('/api/moments', [
+                'content' => "J'ai changé de direction après avoir compris ce que mes clients demandaient vraiment.",
+                'category' => 'Lesson',
+                'happened_at' => now()->toDateString(),
+            ])
+            ->assertCreated()
+            ->assertJsonPath('moment.story_score', 7)
+            ->assertJsonPath('moment.story_reasons.0', 'personnel et précis')
+            ->assertJsonPath('moment.story_reasons.1', 'transformation forte');
+
+        $post = ContentPost::query()->firstOrFail();
+
+        $this->actingAs($this->user)
+            ->withHeader('Accept-Language', 'fr')
+            ->postJson("/api/content/{$post->id}/remix", [
+                'format' => 'carousel',
+                'life_moment_id' => $momentResponse->json('moment.id'),
+            ])
+            ->assertCreated()
+            ->assertJsonPath('remix.generated_content.why_it_works.0', 'Une ouverture sous tension qui éveille immédiatement la curiosité');
+    }
+
     public function test_new_moment_gets_story_intelligence_and_an_opportunity(): void
     {
         $response = $this->actingAs($this->user)->postJson('/api/moments', [

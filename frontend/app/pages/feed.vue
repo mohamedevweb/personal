@@ -56,16 +56,6 @@ async function save(post: ContentPost) {
   }
 }
 
-async function dismiss(post: ContentPost) {
-  try {
-    await apiFetch(`/api/content/${post.id}/dismiss`, { method: 'POST' })
-    if (data.value) data.value.items = data.value.items.filter(item => item.id !== post.id)
-    toast.success(t('feed.dismissed'))
-  } catch (exception: unknown) {
-    toast.error(apiErrorMessage(exception, t('feed.dismissError')))
-  }
-}
-
 async function remix(post: ContentPost) {
   try {
     const response = await apiFetch<{ remix: { id: number } }>(`/api/content/${post.id}/remix`, {
@@ -98,7 +88,7 @@ onMounted(loadFeed)
       </button>
     </div>
     <div v-else class="mt-7 grid auto-rows-fr gap-5 sm:grid-cols-2 xl:grid-cols-3">
-      <ContentCard v-for="post in data?.items" :key="post.id" :post="post" @save="save" @dismiss="dismiss" @remix="remix" />
+      <ContentCard v-for="post in data?.items" :key="post.id" :post="post" @save="save" @remix="remix" />
     </div>
   </main>
 </template>

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Remix;
+use App\Services\RemixDraftService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class RemixController extends Controller
 {
@@ -28,6 +30,16 @@ class RemixController extends Controller
         $remix->update($data);
 
         return response()->json(['remix' => $remix->fresh()]);
+    }
+
+    public function retry(Request $request, Remix $remix, RemixDraftService $drafts): JsonResponse
+    {
+        $this->ensureOwner($request, $remix);
+        abort_unless($remix->status === 'failed', Response::HTTP_CONFLICT);
+
+        return response()->json([
+            'remix' => $drafts->retry($remix, app()->getLocale()),
+        ], Response::HTTP_ACCEPTED);
     }
 
     private function ensureOwner(Request $request, Remix $remix): void

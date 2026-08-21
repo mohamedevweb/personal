@@ -81,8 +81,10 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function (): void {
 // Generation calls a language model, so it gets a tighter budget than the rest
 // of the authenticated API.
 Route::middleware(['auth:sanctum', 'verified', 'throttle:generation'])->group(function (): void {
+    Route::post('/content/{content}/analysis', [ContentController::class, 'analyze']);
     Route::post('/content/{content}/remix', [ContentController::class, 'remix']);
     Route::post('/moments/{moment}/create-content', [MomentController::class, 'createContent']);
+    Route::post('/remixes/{remix}/retry', [RemixController::class, 'retry']);
     Route::post('/chat', ChatController::class);
 });
 
