@@ -3,11 +3,9 @@
 namespace App\Services;
 
 use App\Models\ContentPost;
-use App\Models\CreatorProfile;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 
 /**
  * Ranks the shared content pool for one creator.
@@ -26,47 +24,28 @@ class RecommendationService
      */
     private const CANDIDATE_MULTIPLIER = 8;
 
-    /** Beating the creator's own average by this much scores full marks. */
-    private const OUTLIER_CEILING = 3.0;
-
-    /** A post reaching this share of its creator's audience counts as top reach. */
-    private const REACH_CEILING = 6.0;
-
-    public function __construct(private readonly ContentPostView $view) {}
+    public function __construct(
+        private readonly ContentPostView $view,
+        private readonly FeedRanker $ranker,
+    ) {}
 
     /** @return Collection<int, array<string, mixed>> */
     public function forUser(User $user, int $limit = 12): Collection
     {
-        $terms = $this->profileTerms($user->creatorProfile);
         $savedIds = $user->savedContent()->pluck('content_post_id')->flip();
 
         return $this->candidates($user, $limit)
-            ->map(function (ContentPost $post) use ($terms, $user, $savedIds): array {
-                $creatorSimilarity = $this->overlap($terms, [
-                    $post->creator->niche,
-                    ...($post->creator->niche_topics ?? []),
-                ]);
-                $nicheSimilarity = $this->overlap($terms, $post->tags ?? []);
-                $outlier = min(1, $post->outlier_score / self::OUTLIER_CEILING);
-                $reach = min(1, $post->engagement_rate / self::REACH_CEILING);
-                $freshness = $this->freshness($post);
+            ->map(function (ContentPost $post) use ($user, $savedIds): array {
+                $ranking = $this->ranker->rank($post, $user->creatorProfile);
 
-                $score = round(100 * (
-                    0.35 * $outlier
-                    + 0.20 * $creatorSimilarity
-                    + 0.15 * $nicheSimilarity
-                    + 0.15 * $reach
-                    + 0.15 * $freshness
-                ), 1);
-
-                return $this->view->make($post, $user, $score, $savedIds->has($post->id)) + [
-                    'why_recommended' => $this->reason($post, $nicheSimilarity),
+                return $this->view->make($post, $user, $ranking['score'], $savedIds->has($post->id)) + [
+                    'why_recommended' => $this->reason($post, $ranking['niche_similarity']),
                     'signals' => array_values(array_filter([
                         // The lift itself is already on the card as a localized badge,
                         // so it is deliberately not repeated here.
                         $post->published_at->isAfter(now()->subDay()) ? 'Trending' : null,
-                        $nicheSimilarity >= 0.6 ? 'Great fit for you' : null,
-                        $creatorSimilarity >= 0.6 ? 'Similar creator' : null,
+                        $ranking['niche_similarity'] >= 0.6 ? 'Great fit for you' : null,
+                        $ranking['creator_relevance'] >= 0.6 ? 'Similar creator' : null,
                         $post->published_at->diffForHumans(),
                     ])),
                 ];
@@ -112,54 +91,6 @@ class RecommendationService
             ->whereHas('creator', fn (Builder $creator): Builder => $creator->where(
                 'followers', '>=', (int) config('services.discovery.min_followers'),
             ));
-    }
-
-    /**
-     * Share of the creator's own vocabulary found in the given text.
-     *
-     * Matching is substring-based because hashtags arrive glued together
-     * ("veganmealprep"), which a token comparison would never line up with "vegan".
-     *
-     * @param  Collection<int, string>  $terms
-     * @param  list<string|null>  $against
-     */
-    private function overlap(Collection $terms, array $against): float
-    {
-        $haystack = Str::lower(implode(' ', array_filter($against)));
-
-        // Neutral rather than zero: an unclassified account should rank below a
-        // matched one, not be eliminated on missing data.
-        if ($terms->isEmpty() || trim($haystack) === '') {
-            return 0.4;
-        }
-
-        $matches = $terms->filter(fn (string $term): bool => str_contains($haystack, $term))->count();
-
-        // Three shared terms is already a confident match. Requiring full overlap
-        // would punish creators who describe the same niche in wider language.
-        return min(1, $matches / min(3, $terms->count()));
-    }
-
-    /** @return Collection<int, string> */
-    private function profileTerms(?CreatorProfile $profile): Collection
-    {
-        $text = Str::lower(implode(' ', array_filter([
-            $profile?->niche,
-            $profile?->positioning,
-            ...($profile?->topics ?? []),
-        ])));
-
-        return collect(preg_split('/\W+/', $text))
-            ->filter(fn (string $term): bool => strlen($term) > 3)
-            ->unique()
-            ->values();
-    }
-
-    private function freshness(ContentPost $post): float
-    {
-        $window = max(1, (int) config('services.discovery.feed_window_days')) * 24;
-
-        return max(0, 1 - ($post->published_at->diffInHours(now()) / $window));
     }
 
     private function reason(ContentPost $post, float $nicheSimilarity): string

@@ -81,7 +81,10 @@ class SyncInstagramAccountTest extends TestCase
             'like_count' => 84,
         ]);
         $this->assertSame(1900, $account->media()->firstOrFail()->metrics['views']);
-        $this->assertContains('Saas', $user->creatorProfile()->firstOrFail()->topics);
+        $creatorProfile = $user->creatorProfile()->firstOrFail();
+        $this->assertContains('Saas', $creatorProfile->topics);
+        $this->assertSame($creatorProfile->niche, $creatorProfile->creator_dna['primary_niche']);
+        $this->assertNotNull($creatorProfile->dna_analyzed_at);
     }
 
     public function test_unavailable_insights_do_not_fan_out_one_request_per_metric(): void

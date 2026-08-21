@@ -14,7 +14,15 @@ use Throwable;
  * captions — via a language model. When no model is configured it falls back to a
  * word-frequency heuristic, so the sync never depends on an LLM being present.
  *
- * @phpstan-type Signals array{niche: ?string, topics: list<string>, tone: list<string>}
+ * @phpstan-type Signals array{
+ *   primary_niche: ?string,
+ *   sub_niches: list<string>,
+ *   topics: list<string>,
+ *   audience: list<string>,
+ *   language: string,
+ *   content_pillars: list<string>,
+ *   tone: list<string>
+ * }
  */
 class NicheDetectionService
 {
@@ -54,17 +62,22 @@ class NicheDetectionService
         $input = collect($context)->map(fn ($v, $k): string => "{$k}: {$v}")->implode("\n");
 
         $result = $this->llm->object(
-            'You classify an Instagram creator into a concise content niche. Read the bio, the bio link and a '
-            .'sample of captions. Return a short niche label (2-4 words), the topics they cover, and their tone. '
-            .'Base it on evidence in the profile, not guesses.',
+            'Build a precise Creator DNA from an Instagram profile. Identify the narrowest defensible primary niche, '
+            .'then its adjacent sub-niches, concrete topics, intended audiences, main content pillars, language and '
+            .'tone. Preserve useful hierarchy: for example business, entrepreneurship, SaaS, AI SaaS, build in public. '
+            .'Base every field on the bio, link metadata, captions and available profile evidence, never guesses.',
             $input,
             [
                 'type' => 'object',
                 'additionalProperties' => false,
-                'required' => ['niche', 'topics', 'tone'],
+                'required' => ['primary_niche', 'sub_niches', 'topics', 'audience', 'language', 'content_pillars', 'tone'],
                 'properties' => [
-                    'niche' => ['type' => 'string'],
+                    'primary_niche' => ['type' => 'string'],
+                    'sub_niches' => ['type' => 'array', 'items' => ['type' => 'string']],
                     'topics' => ['type' => 'array', 'items' => ['type' => 'string']],
+                    'audience' => ['type' => 'array', 'items' => ['type' => 'string']],
+                    'language' => ['type' => 'string'],
+                    'content_pillars' => ['type' => 'array', 'items' => ['type' => 'string']],
                     'tone' => ['type' => 'array', 'items' => ['type' => 'string']],
                 ],
             ],
@@ -74,11 +87,15 @@ class NicheDetectionService
             return null;
         }
 
-        $niche = trim((string) ($result['niche'] ?? ''));
+        $niche = trim((string) ($result['primary_niche'] ?? ''));
 
         return [
-            'niche' => $niche !== '' ? $niche : null,
-            'topics' => $this->stringList($result['topics'] ?? [], 6),
+            'primary_niche' => $niche !== '' ? $niche : null,
+            'sub_niches' => $this->stringList($result['sub_niches'] ?? [], 6),
+            'topics' => $this->stringList($result['topics'] ?? [], 10),
+            'audience' => $this->stringList($result['audience'] ?? [], 6),
+            'language' => trim((string) ($result['language'] ?? 'und')) ?: 'und',
+            'content_pillars' => $this->stringList($result['content_pillars'] ?? [], 8),
             'tone' => $this->stringList($result['tone'] ?? [], 3),
         ];
     }
@@ -145,11 +162,25 @@ class NicheDetectionService
             $tone[] = Str::length($captions) / max(count($media), 1) < 350 ? 'Concise' : 'Story-driven';
         }
 
+        $primaryNiche = $topics === [] ? null : implode(' / ', array_slice($topics, 0, 2));
+
         return [
-            'niche' => $topics === [] ? null : implode(' / ', array_slice($topics, 0, 2)),
+            'primary_niche' => $primaryNiche,
+            'sub_niches' => array_slice($topics, 1, 4),
             'topics' => $topics,
+            'audience' => [],
+            'language' => $this->language($captions.' '.($account->bio ?? '')),
+            'content_pillars' => array_slice($topics, 0, 5),
             'tone' => array_values(array_unique($tone)),
         ];
+    }
+
+    private function language(string $text): string
+    {
+        $frenchSignals = preg_match_all('/\b(avec|dans|pour|une|des|les|mon|mes|comment|pourquoi)\b/iu', $text);
+        $englishSignals = preg_match_all('/\b(with|this|that|your|how|why|from|into|building)\b/iu', $text);
+
+        return $frenchSignals > $englishSignals ? 'fr' : ($englishSignals > 0 ? 'en' : 'und');
     }
 
     /**
@@ -158,7 +189,7 @@ class NicheDetectionService
     private function stringList(mixed $values, int $limit): array
     {
         return collect(is_array($values) ? $values : [])
-            ->filter('is_string')
+            ->filter(fn (mixed $value): bool => is_string($value))
             ->map(fn (string $value): string => trim($value))
             ->filter()
             ->unique()

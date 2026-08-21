@@ -19,6 +19,9 @@ class DiscoveredProfile
         public readonly int $followers,
         public readonly Collection $posts,
         public readonly ?string $bio = null,
+        public readonly ?string $externalId = null,
+        public readonly bool $isPrivate = false,
+        public readonly array $metadata = [],
     ) {}
 
     /**

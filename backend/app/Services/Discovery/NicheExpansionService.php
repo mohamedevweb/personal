@@ -18,11 +18,40 @@ class NicheExpansionService
     public function __construct(private readonly LlmJsonService $llm) {}
 
     /** @return list<string> */
+    public function queriesFor(User $user): array
+    {
+        $profile = $user->creatorProfile;
+
+        if ($profile
+            && is_array($profile->discovery_queries)
+            && $profile->discovery_queries !== []
+            && $this->cacheIsFresh($profile)) {
+            return $profile->discovery_queries;
+        }
+
+        $seed = $this->querySeeds($profile);
+        $queries = $this->expandQueries($seed, $profile) ?: $seed;
+        $queries = $this->cleanQueries($queries);
+
+        if ($profile) {
+            $profile->forceFill([
+                'discovery_queries' => $queries,
+                'discovery_refreshed_at' => now(),
+            ])->save();
+        }
+
+        return $queries;
+    }
+
+    /** @return list<string> */
     public function hashtagsFor(User $user): array
     {
         $profile = $user->creatorProfile;
 
-        if ($profile && $this->cacheIsFresh($profile)) {
+        if ($profile
+            && is_array($profile->discovery_hashtags)
+            && $profile->discovery_hashtags !== []
+            && $this->cacheIsFresh($profile)) {
             return $profile->discovery_hashtags;
         }
 
@@ -40,11 +69,78 @@ class NicheExpansionService
         return $hashtags;
     }
 
+    /** @param list<string> $seed @return list<string>|null */
+    private function expandQueries(array $seed, ?CreatorProfile $profile): ?array
+    {
+        if ($seed === []) {
+            return null;
+        }
+
+        $limit = (int) config('services.discovery.search_query_limit');
+        $dna = $profile?->creator_dna ?? [];
+
+        $result = $this->llm->object(
+            "Generate {$limit} concise Instagram account-search queries for this Creator DNA. Queries should find "
+            .'people who consistently publish in the same precise niche, such as AI founder, SaaS founder, indie '
+            .'hacker, solopreneur or build in public. Use natural search phrases, not hashtags or generic reach terms.',
+            json_encode([
+                'primary_niche' => $dna['primary_niche'] ?? $profile?->niche,
+                'sub_niches' => $dna['sub_niches'] ?? [],
+                'topics' => $dna['topics'] ?? $profile?->topics ?? [],
+                'audience' => $dna['audience'] ?? [],
+                'content_pillars' => $dna['content_pillars'] ?? [],
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) ?: implode(', ', $seed),
+            [
+                'type' => 'object',
+                'additionalProperties' => false,
+                'required' => ['queries'],
+                'properties' => [
+                    'queries' => ['type' => 'array', 'items' => ['type' => 'string']],
+                ],
+            ],
+        );
+
+        $queries = $result['queries'] ?? null;
+
+        return is_array($queries) ? array_values(array_filter($queries, 'is_string')) : null;
+    }
+
+    /** @return list<string> */
+    private function querySeeds(?CreatorProfile $profile): array
+    {
+        $dna = $profile?->creator_dna ?? [];
+
+        return $this->cleanQueries([
+            (string) ($dna['primary_niche'] ?? $profile?->niche ?? ''),
+            ...($dna['sub_niches'] ?? []),
+            ...($dna['topics'] ?? $profile?->topics ?? []),
+            ...($dna['content_pillars'] ?? []),
+        ]);
+    }
+
+    /** @param list<string> $queries @return list<string> */
+    private function cleanQueries(array $queries): array
+    {
+        $blocked = (array) config('services.discovery.blocked_hashtags');
+
+        return collect($queries)
+            ->filter(fn (mixed $query): bool => is_string($query))
+            ->map(fn (string $query): string => Str::of($query)
+                ->lower()
+                ->replaceMatches('/[^\pL\pN\s-]/u', ' ')
+                ->squish()
+                ->value())
+            ->filter(fn (string $query): bool => strlen($query) > 2)
+            ->reject(fn (string $query): bool => in_array(str_replace(' ', '', $query), $blocked, true))
+            ->unique()
+            ->take((int) config('services.discovery.search_query_limit'))
+            ->values()
+            ->all();
+    }
+
     private function cacheIsFresh(CreatorProfile $profile): bool
     {
-        return is_array($profile->discovery_hashtags)
-            && $profile->discovery_hashtags !== []
-            && $profile->discovery_refreshed_at !== null
+        return $profile->discovery_refreshed_at !== null
             && $profile->discovery_refreshed_at->isAfter(now()->subDays((int) config('services.discovery.cache_days')));
     }
 

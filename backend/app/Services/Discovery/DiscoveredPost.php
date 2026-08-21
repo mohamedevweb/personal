@@ -27,6 +27,9 @@ class DiscoveredPost
         public readonly CarbonImmutable $publishedAt,
         public readonly string $format,
         public readonly array $hashtags,
+        public readonly ?string $externalId = null,
+        public readonly int $shares = 0,
+        public readonly array $metadata = [],
     ) {}
 
     /**
@@ -35,6 +38,6 @@ class DiscoveredPost
      */
     public function engagement(): int
     {
-        return $this->likes + $this->comments;
+        return $this->likes + $this->comments + $this->shares;
     }
 }

@@ -4,11 +4,16 @@ namespace App\Providers;
 
 use Anthropic\Client as AnthropicClient;
 use Anthropic\RequestOptions;
+use App\Exceptions\ContentDiscoveryException;
 use App\Services\ClaudeContentGenerationService;
 use App\Services\ContentGenerationService;
+use App\Services\Discovery\ApifyInstagramDataProvider;
 use App\Services\Discovery\ApifyInstagramDiscoveryService;
 use App\Services\Discovery\ApifyProfileScraperService;
 use App\Services\Discovery\ContentDiscoveryService;
+use App\Services\Discovery\HikerInstagramProvider;
+use App\Services\Discovery\InstagramDataProvider;
+use App\Services\Discovery\MockInstagramDataProvider;
 use App\Services\Discovery\MockInstagramDiscoveryService;
 use App\Services\Discovery\MockProfileScraperService;
 use App\Services\Discovery\ProfileDiscoveryService;
@@ -46,24 +51,41 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(ContentDiscoveryService::class, function (): ContentDiscoveryService {
-            // Like the generation driver, "apify" without a token degrades to the
-            // deterministic mock so the feed still fills instead of breaking.
             return match (true) {
                 config('services.discovery.driver') === 'apify'
                     && (bool) config('services.discovery.apify.token') => $this->app->make(ApifyInstagramDiscoveryService::class),
 
-                default => $this->app->make(MockInstagramDiscoveryService::class),
+                config('services.discovery.driver') === 'mock'
+                    && ! $this->app->environment('production') => $this->app->make(MockInstagramDiscoveryService::class),
+
+                default => throw new ContentDiscoveryException('Content discovery is not configured for the selected provider.'),
             };
         });
 
         $this->app->bind(ProfileDiscoveryService::class, function (): ProfileDiscoveryService {
-            // Same degrade-to-mock rule as the discovery driver: no token means
-            // the deterministic mock, so account measurement still runs in dev.
             return match (true) {
                 config('services.discovery.driver') === 'apify'
                     && (bool) config('services.discovery.apify.token') => $this->app->make(ApifyProfileScraperService::class),
 
-                default => $this->app->make(MockProfileScraperService::class),
+                config('services.discovery.driver') === 'mock'
+                    && ! $this->app->environment('production') => $this->app->make(MockProfileScraperService::class),
+
+                default => throw new ContentDiscoveryException('Profile discovery is not configured for the selected provider.'),
+            };
+        });
+
+        $this->app->bind(InstagramDataProvider::class, function (): InstagramDataProvider {
+            return match (true) {
+                config('services.discovery.driver') === 'hiker'
+                    && (bool) config('services.discovery.hiker.api_key') => $this->app->make(HikerInstagramProvider::class),
+
+                config('services.discovery.driver') === 'apify'
+                    && (bool) config('services.discovery.apify.token') => $this->app->make(ApifyInstagramDataProvider::class),
+
+                config('services.discovery.driver') === 'mock'
+                    && ! $this->app->environment('production') => $this->app->make(MockInstagramDataProvider::class),
+
+                default => throw new ContentDiscoveryException('Instagram discovery is not configured for the selected provider.'),
             };
         });
     }

@@ -5,9 +5,10 @@ namespace Tests\Feature;
 use App\Jobs\MeasureAccountEngagement;
 use App\Models\ContentPost;
 use App\Models\Creator;
+use App\Services\Discovery\CreatorNicheCatalog;
 use App\Services\Discovery\CreatorNicheService;
-use App\Services\Discovery\PostPerformance;
-use App\Services\Discovery\ProfileDiscoveryService;
+use App\Services\Discovery\InstagramDataProvider;
+use App\Services\Discovery\OutlierScore;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -26,9 +27,10 @@ class MeasureAccountEngagementTest extends TestCase
     private function measure(string ...$usernames): void
     {
         (new MeasureAccountEngagement($usernames))->handle(
-            app(ProfileDiscoveryService::class),
+            app(InstagramDataProvider::class),
             app(CreatorNicheService::class),
-            app(PostPerformance::class),
+            app(CreatorNicheCatalog::class),
+            app(OutlierScore::class),
         );
     }
 
@@ -49,6 +51,7 @@ class MeasureAccountEngagementTest extends TestCase
         // The niche is read from the account itself, not inherited from whoever
         // happened to discover it.
         $this->assertNotEmpty($creator->niche_topics);
+        $this->assertGreaterThan(0, $creator->niches()->count());
 
         $this->assertGreaterThan(0, $creator->posts()->count());
     }
@@ -57,7 +60,8 @@ class MeasureAccountEngagementTest extends TestCase
     {
         $this->measure('pasta.daily');
 
-        $posts = Creator::query()->where('username', 'pasta.daily')->firstOrFail()->posts;
+        $creator = Creator::query()->where('username', 'pasta.daily')->firstOrFail();
+        $posts = $creator->posts;
 
         // Every post is measured, and the median post of an account sits at 1.0 by
         // definition — so a scrape produces both winners and losers, not a batch
@@ -71,6 +75,8 @@ class MeasureAccountEngagementTest extends TestCase
             $posts->pluck('outlier_score')->all(),
             $posts->pluck('performance_ratio')->all(),
         );
+
+        $this->assertNotNull($creator->performance_baselines['views']);
     }
 
     public function test_it_scores_posts_discovered_before_the_baseline_was_known(): void

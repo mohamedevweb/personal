@@ -65,6 +65,7 @@ class MockInstagramDiscoveryService implements ContentDiscoveryService
             publishedAt: CarbonImmutable::now()->subHours(($seed % 240) + 2),
             format: $format,
             hashtags: array_values(array_unique([$tag, ...array_slice($hashtags, 0, 3)])),
+            externalId: "mock-{$tag}-{$index}",
         );
     }
 }

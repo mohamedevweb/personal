@@ -29,6 +29,7 @@ class ContentPostView
             'views' => $post->views,
             'likes' => $post->likes,
             'comments' => $post->comments,
+            'shares' => $post->shares,
             'published_at' => $post->published_at,
             'performance_ratio' => $post->performance_ratio,
             'outlier_score' => $post->outlier_score,
