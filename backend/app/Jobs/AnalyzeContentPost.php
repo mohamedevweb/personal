@@ -21,7 +21,9 @@ class AnalyzeContentPost implements ShouldBeUnique, ShouldQueue
     public function __construct(
         public readonly int $contentPostId,
         public readonly string $locale,
-    ) {}
+    ) {
+        $this->onQueue('interactive');
+    }
 
     public function uniqueId(): string
     {

@@ -589,6 +589,7 @@
   "content": {
     "backToFeed": "← Back to your feed",
     "analysis": "Personal analysis",
+    "analysisImproving": "Deep analysis in progress",
     "loadError": "Personal could not open this pattern.",
     "usualPerformance": "this creator's usual performance",
     "hook": "Hook",
@@ -616,6 +617,26 @@
   },
   "remix": {
     "backToAnalysis": "Back to the pattern",
+    "generatingEyebrow": "Draft in progress",
+    "generatingTitle": "Your page is ready. Personal is writing now.",
+    "generatingCopy": "The pattern, your moment and your voice are being brought together in the background.",
+    "generatingLeave": "You can leave this page. Your draft will keep preparing.",
+    "generatingSteps": {
+      "1": {
+        "title": "Reading the pattern"
+      },
+      "2": {
+        "title": "Connecting your story"
+      },
+      "3": {
+        "title": "Writing in your voice"
+      }
+    },
+    "generationFailed": "This draft needs another try.",
+    "generationFailedCopy": "The writing service did not respond correctly. Your selection is still saved.",
+    "retry": "Try writing again",
+    "retrying": "Trying again…",
+    "retryError": "Personal could not restart this draft. Try again.",
     "statusDraft": "Draft",
     "statusReady": "Ready",
     "unsaved": "Unsaved changes",

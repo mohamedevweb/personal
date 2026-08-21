@@ -23,7 +23,9 @@ class GenerateRemix implements ShouldQueue
     public function __construct(
         public readonly int $remixId,
         public readonly string $locale,
-    ) {}
+    ) {
+        $this->onQueue('interactive');
+    }
 
     public function handle(ContentGenerationService $generator, PostInsightService $insights): void
     {

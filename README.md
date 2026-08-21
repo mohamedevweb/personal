@@ -23,7 +23,7 @@ Recommendation scoring is deterministic and explainable — see [How the For You
 
 - `frontend/` — Nuxt/Vue product application, authentication and onboarding
 - `backend/` — Laravel REST API, product domain, seeded benchmark layer, encrypted Instagram credentials, and queue-backed sync
-- `docker-compose.yml` — Postgres, API (php-fpm + nginx), queue worker, scheduler and the Nuxt server
+- `docker-compose.yml` — Postgres, API (php-fpm + nginx), background and interactive queue workers, scheduler and the Nuxt server
 
 The Instagram boundary lives under `backend/app/Services/Instagram`. Product code consumes normalized `InstagramAccount` and `InstagramMedia` models and never consumes Meta response shapes directly.
 
@@ -174,7 +174,7 @@ Composition:
 
 - `app` — php-fpm, and the only service that runs migrations (`RUN_MIGRATIONS=true`)
 - `web` — nginx, serving `public/` and proxying PHP to `app`
-- `queue` / `scheduler` — the same image running `queue:work` and `schedule:work`
+- `queue` / `interactive-queue` / `scheduler` — the same image running discovery work, creator-facing AI work and scheduled tasks
 - `frontend` — the Nuxt Nitro server
 - `postgres` — with a health check the backend services wait on
 

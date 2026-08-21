@@ -589,6 +589,7 @@
   "content": {
     "backToFeed": "← Retour à votre feed",
     "analysis": "Analyse Personal",
+    "analysisImproving": "Analyse approfondie en cours",
     "loadError": "Personal n’a pas pu ouvrir ce format.",
     "usualPerformance": "la performance habituelle de ce créateur",
     "hook": "Accroche",
@@ -616,6 +617,26 @@
   },
   "remix": {
     "backToAnalysis": "Retour au schéma",
+    "generatingEyebrow": "Brouillon en préparation",
+    "generatingTitle": "Votre page est prête. Personal écrit maintenant.",
+    "generatingCopy": "Le schéma, votre moment et votre voix sont réunis en arrière-plan.",
+    "generatingLeave": "Vous pouvez quitter cette page. Le brouillon continuera à se préparer.",
+    "generatingSteps": {
+      "1": {
+        "title": "Lecture du schéma"
+      },
+      "2": {
+        "title": "Lien avec votre histoire"
+      },
+      "3": {
+        "title": "Écriture dans votre voix"
+      }
+    },
+    "generationFailed": "Le brouillon a besoin d’un nouvel essai.",
+    "generationFailedCopy": "Le service d’écriture n’a pas répondu correctement. Votre sélection est conservée.",
+    "retry": "Relancer la rédaction",
+    "retrying": "Relance en cours…",
+    "retryError": "Personal n’a pas pu relancer ce brouillon. Réessaie.",
     "statusDraft": "Brouillon",
     "statusReady": "Prêt",
     "unsaved": "Modifications non enregistrées",

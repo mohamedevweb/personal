@@ -24,8 +24,10 @@ const loading = ref(true)
 const saving = ref(false)
 const switching = ref<Format | null>(null)
 const copied = ref(false)
+const retrying = ref(false)
 /** The last payload the server acknowledged, used to tell edited from saved. */
 const pristine = ref('')
+let remixTimer: ReturnType<typeof setTimeout> | undefined
 
 const tabs = ref<HTMLButtonElement[]>([])
 const slideInputs = ref<HTMLTextAreaElement[]>([])
@@ -194,20 +196,54 @@ function guardUnload(event: BeforeUnloadEvent) {
   event.returnValue = ''
 }
 
-onMounted(async () => {
-  window.addEventListener('beforeunload', guardUnload)
+function scheduleRemixPoll(delay = 2000) {
+  clearTimeout(remixTimer)
+  remixTimer = setTimeout(() => loadRemix(false), delay)
+}
+
+async function loadRemix(initial = true) {
   try {
     const response = await apiFetch<{ remix: Remix }>(`/api/remixes/${route.params.id}`)
     remix.value = response.remix
-    pristine.value = JSON.stringify(response.remix.generated_content)
+    if (response.remix.status === 'generating') {
+      scheduleRemixPoll()
+    } else if (response.remix.status !== 'failed') {
+      pristine.value = JSON.stringify(response.remix.generated_content)
+    }
   } catch (exception: unknown) {
-    toast.error(apiErrorMessage(exception, t('remix.loadError')))
+    if (initial) {
+      toast.error(apiErrorMessage(exception, t('remix.loadError')))
+    } else {
+      scheduleRemixPoll(4000)
+    }
   } finally {
-    loading.value = false
+    if (initial) loading.value = false
   }
+}
+
+async function retryGeneration() {
+  if (!remix.value || retrying.value) return
+  retrying.value = true
+  try {
+    const response = await apiFetch<{ remix: Remix }>(`/api/remixes/${remix.value.id}/retry`, { method: 'POST' })
+    remix.value = response.remix
+    scheduleRemixPoll(1200)
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('remix.retryError')))
+  } finally {
+    retrying.value = false
+  }
+}
+
+onMounted(async () => {
+  window.addEventListener('beforeunload', guardUnload)
+  await loadRemix()
 })
 
-onBeforeUnmount(() => window.removeEventListener('beforeunload', guardUnload))
+onBeforeUnmount(() => {
+  window.removeEventListener('beforeunload', guardUnload)
+  clearTimeout(remixTimer)
+})
 </script>
 
 <template>
@@ -219,6 +255,52 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', guardUnload))
         <div class="h-72 animate-pulse rounded-[18px] bg-[var(--sand-soft)]" />
       </div>
     </div>
+
+    <section v-else-if="remix?.status === 'generating'" class="page-shell pt-8">
+      <NuxtLink
+        :to="`/content/${remix.source_content?.id}`"
+        class="inline-flex items-center gap-1.5 text-[13px] text-[var(--muted)] transition hover:text-[var(--ink)]"
+      >
+        <AppIcon name="chevron" :size="15" class="rotate-180" />
+        {{ $t('remix.backToAnalysis') }}
+      </NuxtLink>
+
+      <div class="mx-auto max-w-3xl py-14 text-center md:py-20">
+        <span class="mx-auto grid h-14 w-14 place-items-center rounded-[18px] bg-[var(--accent-soft)] text-[var(--accent-ink)]">
+          <AppIcon name="sparkles" :size="24" class="animate-breathe" />
+        </span>
+        <p class="mt-7 text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--faint)]">{{ $t('remix.generatingEyebrow') }}</p>
+        <h1 class="mx-auto mt-3 max-w-2xl font-serif text-[38px] leading-[1.08] tracking-[-.035em] md:text-[48px]">{{ $t('remix.generatingTitle') }}</h1>
+        <p class="mx-auto mt-4 max-w-[48ch] text-[14.5px] leading-6 text-[var(--muted)]">{{ $t('remix.generatingCopy') }}</p>
+
+        <div class="mx-auto mt-10 grid max-w-2xl gap-3 text-left sm:grid-cols-3">
+          <div v-for="step in 3" :key="step" class="rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-5">
+            <span class="grid h-8 w-8 place-items-center rounded-[10px] bg-[var(--paper)] text-[12px] font-medium text-[var(--muted)]">{{ step }}</span>
+            <p class="mt-4 text-[13px] font-medium">{{ $t(`remix.generatingSteps.${step}.title`) }}</p>
+            <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-[var(--line-soft)]">
+              <span class="block h-full animate-pulse rounded-full bg-[var(--accent)]" :class="step === 1 ? 'w-full' : step === 2 ? 'w-2/3' : 'w-1/3'" />
+            </div>
+          </div>
+        </div>
+
+        <p class="mt-7 text-[12.5px] text-[var(--faint)]">{{ $t('remix.generatingLeave') }}</p>
+      </div>
+    </section>
+
+    <section v-else-if="remix?.status === 'failed'" class="page-shell pt-16 text-center">
+      <span class="mx-auto grid h-12 w-12 place-items-center rounded-[16px] bg-[var(--accent-soft)] text-[var(--accent-ink)]">
+        <AppIcon name="sparkles" :size="21" />
+      </span>
+      <h1 class="mt-6 font-serif text-[34px] tracking-[-.03em]">{{ $t('remix.generationFailed') }}</h1>
+      <p class="mx-auto mt-3 max-w-[42ch] text-sm leading-6 text-[var(--muted)]">{{ $t('remix.generationFailedCopy') }}</p>
+      <button
+        class="mt-7 inline-flex h-11 items-center rounded-full bg-[var(--ink)] px-5 text-[14px] font-medium text-[var(--paper)] transition hover:bg-black disabled:opacity-60"
+        :disabled="retrying"
+        @click="retryGeneration"
+      >
+        {{ retrying ? $t('remix.retrying') : $t('remix.retry') }}
+      </button>
+    </section>
 
     <template v-else-if="remix">
       <!-- Everything that changes the draft's state lives in one bar that stays

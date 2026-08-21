@@ -2,12 +2,18 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\AnalyzeContentPost;
+use App\Jobs\GenerateRemix;
 use App\Models\ContentPost;
+use App\Models\Remix;
 use App\Models\SavedContent;
 use App\Models\User;
+use App\Services\ContentGenerationService;
+use App\Services\Discovery\PostInsightService;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
 class PersonalMvpTest extends TestCase
@@ -89,6 +95,7 @@ class PersonalMvpTest extends TestCase
 
     public function test_content_analysis_follows_the_requested_language(): void
     {
+        Queue::fake();
         config()->set('services.openai.api_key', null);
         config()->set('services.anthropic.api_key', null);
         $post = ContentPost::query()->firstOrFail();
@@ -97,16 +104,28 @@ class PersonalMvpTest extends TestCase
             ->withHeader('Accept-Language', 'fr-FR,fr;q=0.9')
             ->getJson("/api/content/{$post->id}")
             ->assertOk()
+            ->assertJsonPath('content.analysis_status', 'pending')
             ->assertJsonPath('content.hook_analysis', fn (string $analysis): bool => str_starts_with($analysis, "L'accroche"));
 
+        $this->actingAs($this->user)
+            ->withHeader('Accept-Language', 'fr-FR,fr;q=0.9')
+            ->postJson("/api/content/{$post->id}/analysis")
+            ->assertAccepted();
+        Queue::assertPushed(AnalyzeContentPost::class, fn (AnalyzeContentPost $job): bool => $job->contentPostId === $post->id
+            && $job->locale === 'fr'
+            && $job->queue === 'interactive');
+
+        (new AnalyzeContentPost($post->id, 'fr'))->handle(app(PostInsightService::class));
         $this->assertDatabaseHas('content_posts', ['id' => $post->id, 'analysis_locale' => 'fr']);
 
         $this->actingAs($this->user)
             ->withHeader('Accept-Language', 'en-US,en;q=0.9')
             ->getJson("/api/content/{$post->id}")
             ->assertOk()
+            ->assertJsonPath('content.analysis_status', 'pending')
             ->assertJsonPath('content.hook_analysis', fn (string $analysis): bool => str_starts_with($analysis, 'The hook'));
 
+        (new AnalyzeContentPost($post->id, 'en'))->handle(app(PostInsightService::class));
         $this->assertDatabaseHas('content_posts', ['id' => $post->id, 'analysis_locale' => 'en']);
 
         $this->actingAs($this->user)
@@ -122,6 +141,7 @@ class PersonalMvpTest extends TestCase
 
     public function test_french_requests_localize_moment_intelligence_and_mock_drafts(): void
     {
+        Queue::fake();
         config()->set('services.openai.api_key', null);
         config()->set('services.anthropic.api_key', null);
 
@@ -139,14 +159,26 @@ class PersonalMvpTest extends TestCase
 
         $post = ContentPost::query()->firstOrFail();
 
-        $this->actingAs($this->user)
+        $response = $this->actingAs($this->user)
             ->withHeader('Accept-Language', 'fr')
             ->postJson("/api/content/{$post->id}/remix", [
                 'format' => 'carousel',
                 'life_moment_id' => $momentResponse->json('moment.id'),
             ])
-            ->assertCreated()
-            ->assertJsonPath('remix.generated_content.why_it_works.0', 'Une ouverture sous tension qui éveille immédiatement la curiosité');
+            ->assertAccepted()
+            ->assertJsonPath('remix.status', 'generating')
+            ->assertJsonPath('remix.generated_content', []);
+
+        $remixId = $response->json('remix.id');
+        (new GenerateRemix($remixId, 'fr'))->handle(
+            app(ContentGenerationService::class),
+            app(PostInsightService::class),
+        );
+
+        $this->assertSame(
+            'Une ouverture sous tension qui éveille immédiatement la curiosité',
+            Remix::query()->findOrFail($remixId)->generated_content['why_it_works'][0],
+        );
     }
 
     public function test_new_moment_gets_story_intelligence_and_an_opportunity(): void
@@ -167,6 +199,7 @@ class PersonalMvpTest extends TestCase
 
     public function test_remix_uses_source_pattern_and_personal_moment(): void
     {
+        Queue::fake();
         $post = ContentPost::query()->firstOrFail();
         $moment = $this->user->moments()->firstOrFail();
 
@@ -175,12 +208,26 @@ class PersonalMvpTest extends TestCase
             'life_moment_id' => $moment->id,
         ]);
 
-        $response->assertCreated()
+        $response->assertAccepted()
             ->assertJsonPath('remix.format', 'carousel')
             ->assertJsonPath('remix.life_moment_id', $moment->id)
-            ->assertJsonCount(6, 'remix.generated_content.slides');
-        $this->assertSame($post->hook, $response->json('remix.generated_content.original_pattern'));
-        $this->assertSame($moment->content, $response->json('remix.generated_content.your_context'));
+            ->assertJsonPath('remix.status', 'generating')
+            ->assertJsonPath('remix.generated_content', []);
+
+        $remixId = $response->json('remix.id');
+        Queue::assertPushed(GenerateRemix::class, fn (GenerateRemix $job): bool => $job->remixId === $remixId
+            && $job->queue === 'interactive');
+
+        (new GenerateRemix($remixId, 'en'))->handle(
+            app(ContentGenerationService::class),
+            app(PostInsightService::class),
+        );
+        $remix = Remix::query()->findOrFail($remixId);
+
+        $this->assertSame('draft', $remix->status);
+        $this->assertCount(6, $remix->generated_content['slides']);
+        $this->assertSame($post->hook, $remix->generated_content['original_pattern']);
+        $this->assertSame($moment->content, $remix->generated_content['your_context']);
     }
 
     public function test_personal_memory_is_editable(): void
