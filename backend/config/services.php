@@ -109,11 +109,9 @@ return [
         'min_post_engagement' => (int) env('DISCOVERY_MIN_POST_ENGAGEMENT', 500),
         'ranking' => [
             'weights' => [
-                'outlier' => (float) env('FEED_WEIGHT_OUTLIER', 0.35),
-                'creator_relevance' => (float) env('FEED_WEIGHT_CREATOR_RELEVANCE', 0.20),
-                'niche_similarity' => (float) env('FEED_WEIGHT_NICHE_SIMILARITY', 0.15),
-                'reach' => (float) env('FEED_WEIGHT_REACH', 0.15),
-                'recency' => (float) env('FEED_WEIGHT_RECENCY', 0.15),
+                'outlier' => (float) env('FEED_WEIGHT_OUTLIER', 0.60),
+                'reach' => (float) env('FEED_WEIGHT_REACH', 0.20),
+                'recency' => (float) env('FEED_WEIGHT_RECENCY', 0.20),
             ],
             'outlier_ceiling' => (float) env('FEED_OUTLIER_CEILING', 3.0),
             'reach_ceiling' => (float) env('FEED_REACH_CEILING', 6.0),

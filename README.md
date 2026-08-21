@@ -8,7 +8,7 @@ PostgreSQL is the configured application database. PHPUnit uses an isolated in-m
 
 - Email and password accounts with Sanctum API tokens
 - Real Instagram Login onboarding and background import
-- Personalized **For You** feed with 12 ranked daily opportunities
+- Global feed with 12 ranked daily opportunities
 - Content analysis with hook, structure, fit, and performance context
 - Reel, carousel, and caption remix flows grounded in life moments
 - Editable carousel slides with reorder, delete, and regeneration controls
@@ -92,7 +92,7 @@ A lift is a ratio, and a ratio has no sense of scale: an account whose median po
 
 There is deliberately **no fallback**. An unmeasured post carries no evidence, so when measurement has not run yet — or has failed in the queue — the feed shows its empty state rather than degrading to raw scrape output. A page of two-like posts is worth less than an honest empty one.
 
-`FeedRanker` then combines outlier score, creator relevance, niche similarity, reach and freshness. Every weight and ceiling lives under `services.discovery.ranking`, so the formula can be tuned without being duplicated across jobs or controllers.
+`FeedRanker` then combines outlier score, reach and freshness. The same global ordering is used for every creator, apart from content each user has dismissed. Every weight and ceiling lives under `services.discovery.ranking`, so the formula can be tuned without being duplicated across jobs or controllers. Niche relevance can be added later when the shared catalogue covers enough distinct niches to support a useful personalized feed.
 
 Niche is read from the account itself. `CreatorNicheService` classifies a discovered creator from their bio, their recurring hashtags and a sample of captions, and the result is cached on the creator so the model is not re-run on every measurement. Discovery previously stamped every account with the niche of whichever user found them, which described the searcher rather than the creator.
 

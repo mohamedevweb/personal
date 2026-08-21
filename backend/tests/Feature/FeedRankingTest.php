@@ -143,17 +143,29 @@ class FeedRankingTest extends TestCase
         $this->assertNotContains($stale->hook, $hooks);
     }
 
-    public function test_an_off_niche_creator_ranks_below_a_matching_one(): void
+    public function test_users_with_different_niches_receive_the_same_global_ranking(): void
     {
         $offNiche = $this->creator('gym.bro', 20_000, 900);
         $offNiche->update(['niche' => 'strength training', 'niche_topics' => ['powerlifting', 'gym']]);
 
         $match = $this->storePost($this->creator('small.vegan', 20_000, 900), 2.0);
-        $stranger = $this->storePost($offNiche, 2.0, ['tags' => ['powerlifting', 'gym']]);
+        $stranger = $this->storePost($offNiche, 2.2, ['tags' => ['powerlifting', 'gym']]);
 
-        $hooks = $this->feedHooks();
+        $otherUser = User::factory()->create();
+        CreatorProfile::query()->create([
+            'user_id' => $otherUser->id,
+            'niche' => 'strength training',
+            'topics' => ['powerlifting', 'gym'],
+        ]);
 
-        // Same lift on both, so niche and creator similarity are what separate them.
-        $this->assertLessThan(array_search($stranger->hook, $hooks, true), array_search($match->hook, $hooks, true));
+        $veganFeed = app(RecommendationService::class)->forUser($this->user);
+        $strengthFeed = app(RecommendationService::class)->forUser($otherUser);
+
+        $this->assertSame($veganFeed->pluck('hook')->all(), $strengthFeed->pluck('hook')->all());
+        $this->assertSame($veganFeed->pluck('recommendation_score')->all(), $strengthFeed->pluck('recommendation_score')->all());
+        $this->assertSame($stranger->hook, $veganFeed->first()['hook']);
+        $this->assertContains($match->hook, $veganFeed->pluck('hook')->all());
+        $this->assertFalse($veganFeed->pluck('signals')->flatten()->contains('Great fit for you'));
+        $this->assertFalse($veganFeed->pluck('signals')->flatten()->contains('Similar creator'));
     }
 }

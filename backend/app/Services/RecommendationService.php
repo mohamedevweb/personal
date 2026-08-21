@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 /**
- * Ranks the shared content pool for one creator.
+ * Ranks the shared content pool globally, while preserving per-user saves and
+ * dismissals.
  *
  * The ordering question is "did this post beat the account that published it",
  * not "did this post get a lot of likes". A 2M-follower account posting its usual
@@ -36,16 +37,14 @@ class RecommendationService
 
         return $this->candidates($user, $limit)
             ->map(function (ContentPost $post) use ($user, $savedIds): array {
-                $ranking = $this->ranker->rank($post, $user->creatorProfile);
+                $ranking = $this->ranker->rank($post);
 
                 return $this->view->make($post, $user, $ranking['score'], $savedIds->has($post->id)) + [
-                    'why_recommended' => $this->reason($post, $ranking['niche_similarity']),
+                    'why_recommended' => $this->reason($post),
                     'signals' => array_values(array_filter([
                         // The lift itself is already on the card as a localized badge,
                         // so it is deliberately not repeated here.
                         $post->published_at->isAfter(now()->subDay()) ? 'Trending' : null,
-                        $ranking['niche_similarity'] >= 0.6 ? 'Great fit for you' : null,
-                        $ranking['creator_relevance'] >= 0.6 ? 'Similar creator' : null,
                         $post->published_at->diffForHumans(),
                     ])),
                 ];
@@ -57,7 +56,7 @@ class RecommendationService
 
     /**
      * Posts that cleared every bar: measured against their own creator, beating it,
-     * recent enough to still describe the niche, and carrying enough absolute
+     * recent enough to still be useful, and carrying enough absolute
      * engagement for any of that to mean something.
      *
      * There is deliberately no fallback. An unmeasured post carries no evidence at
@@ -93,18 +92,14 @@ class RecommendationService
             ));
     }
 
-    private function reason(ContentPost $post, float $nicheSimilarity): string
+    private function reason(ContentPost $post): string
     {
         $lift = round($post->outlier_score, 1);
-
-        if ($post->outlier_score >= 2 && $nicheSimilarity >= 0.6) {
-            return "A genuine breakout: {$lift}× what {$post->creator->username} usually gets, on a topic you already cover.";
-        }
 
         if ($post->outlier_score >= 2) {
             return "This beat {$post->creator->username}'s own average by {$lift}×, so the idea did the work rather than the audience size.";
         }
 
-        return "Above average for {$post->creator->username} ({$lift}×) and close to the topics your audience expects from you.";
+        return "Above average for {$post->creator->username} ({$lift}×), with enough engagement to make it a useful global benchmark.";
     }
 }

@@ -415,27 +415,13 @@
     "skip": "Continue without connecting"
   },
   "feed": {
-    "dailyBrief": "{day} · Your daily brief",
-    "greeting": "Good morning",
-    "greetingNamed": "Good morning, {name}.",
-    "greetingPlain": "Good morning.",
-    "foundOpportunities": "I found {highlight} for you today.",
-    "opportunitiesHighlight": "{count} content opportunities",
-    "createFromScratch": "Create from scratch",
-    "strongMatch": "A strong match today · {score}%",
-    "yourMoment": "Your moment: {content}",
-    "seePattern": "See the pattern",
     "worthCreating": "Worth creating today",
-    "rankedForYou": "Ranked for you",
     "loadError": "Personal could not load today’s opportunities.",
     "remixError": "Personal could not draft this right now. Please try again.",
     "emptyTitle": "No content yet.",
-    "emptyBody": "We’re finding creators in your niche. This can take a moment right after connecting Instagram.",
+    "emptyBody": "We’re finding standout content from creators across the platform. This can take a moment right after connecting Instagram.",
     "refresh": "Refresh my feed",
-    "refreshing": "Finding content…",
-    "opportunitiesToday": "Opportunities today",
-    "bestLift": "Best lift in your feed",
-    "whyFirst": "Why this one first"
+    "refreshing": "Finding content…"
   },
   "create": {
     "eyebrow": "Create",

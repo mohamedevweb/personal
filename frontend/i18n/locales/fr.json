@@ -415,27 +415,13 @@
     "skip": "Continuer sans connecter Instagram"
   },
   "feed": {
-    "dailyBrief": "{day} · Votre brief du jour",
-    "greeting": "Bonjour",
-    "greetingNamed": "Bonjour, {name}.",
-    "greetingPlain": "Bonjour.",
-    "foundOpportunities": "J’ai trouvé {highlight} pour vous aujourd’hui.",
-    "opportunitiesHighlight": "{count} opportunités de contenu",
-    "createFromScratch": "Créer de zéro",
-    "strongMatch": "Un bon match aujourd’hui · {score}%",
-    "yourMoment": "Votre moment : {content}",
-    "seePattern": "Voir le schéma",
     "worthCreating": "À créer aujourd’hui",
-    "rankedForYou": "Classé pour vous",
     "loadError": "Personal n’a pas pu charger les opportunités du jour.",
     "remixError": "Personal n’a pas pu rédiger ceci pour l’instant. Veuillez réessayer.",
     "emptyTitle": "Rien pour l’instant.",
-    "emptyBody": "On cherche des créateurs dans ta niche. Ça peut prendre un moment juste après la connexion Instagram.",
+    "emptyBody": "On cherche les contenus qui se démarquent parmi tous les créateurs. Ça peut prendre un moment juste après la connexion Instagram.",
     "refresh": "Rafraîchir mon feed",
-    "refreshing": "Recherche en cours…",
-    "opportunitiesToday": "Opportunités du jour",
-    "bestLift": "Meilleure performance du feed",
-    "whyFirst": "Pourquoi celle-ci d’abord"
+    "refreshing": "Recherche en cours…"
   },
   "create": {
     "eyebrow": "Créer",

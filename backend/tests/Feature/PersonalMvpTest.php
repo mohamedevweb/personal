@@ -23,7 +23,7 @@ class PersonalMvpTest extends TestCase
         $this->user = User::query()->where('email', 'creator@personal.local')->firstOrFail();
     }
 
-    public function test_feed_returns_ranked_personalized_content(): void
+    public function test_feed_returns_ranked_global_content(): void
     {
         $response = $this->actingAs($this->user)->getJson('/api/feed');
 
