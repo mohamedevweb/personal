@@ -2,6 +2,7 @@
 
 namespace App\Services\Discovery;
 
+use App\Services\InstagramMediaProxy;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use OpenAI\Contracts\ClientContract as OpenAiClient;
@@ -13,7 +14,10 @@ use Throwable;
  */
 class ContentSafetyPolicy
 {
-    public function __construct(private readonly OpenAiClient $openai) {}
+    public function __construct(
+        private readonly OpenAiClient $openai,
+        private readonly InstagramMediaProxy $media,
+    ) {}
 
     public function creator(DiscoveredProfile $profile): ContentSafetyDecision
     {
@@ -56,9 +60,15 @@ class ContentSafetyPolicy
             $input = [['type' => 'text', 'text' => $text !== '' ? $text : 'Instagram publication']];
 
             if ($imageUrl) {
+                $moderationUrl = $this->moderationImageUrl($imageUrl);
+
+                if ($moderationUrl === null) {
+                    return $this->unavailable();
+                }
+
                 $input[] = [
                     'type' => 'image_url',
-                    'image_url' => ['url' => $imageUrl],
+                    'image_url' => ['url' => $moderationUrl],
                 ];
             }
 
@@ -132,5 +142,14 @@ class ContentSafetyPolicy
         }
 
         return new ContentSafetyDecision(ContentSafetyDecision::ALLOWED);
+    }
+
+    private function moderationImageUrl(string $imageUrl): ?string
+    {
+        if (! $this->media->supports($imageUrl)) {
+            return $imageUrl;
+        }
+
+        return $this->media->moderationDataUrl($imageUrl);
     }
 }

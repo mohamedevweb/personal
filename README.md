@@ -237,6 +237,34 @@ npm run dev
 - Daily queued sync keeps profile/media current; unavailable metrics are omitted rather than filled with fake values.
 - Disconnecting deletes the Instagram account row, encrypted token, and locally imported media.
 
+## Error monitoring
+
+Sentry captures unhandled Laravel API, queue and scheduler exceptions, together with Nuxt
+browser and Nitro server errors. It is disabled by default and starts only when a DSN is set.
+Default PII collection and session replay are intentionally disabled. Performance traces are
+sampled at 10 percent by default and can be changed independently on each runtime.
+
+Create one Laravel project and one Nuxt project in the same Sentry organization, then set:
+
+```dotenv
+# backend/.env
+SENTRY_LARAVEL_DSN=https://examplePublicKey@o0.ingest.sentry.io/1
+SENTRY_ENVIRONMENT=production
+SENTRY_RELEASE=git-commit-sha
+SENTRY_TRACES_SAMPLE_RATE=0.1
+
+# frontend runtime environment
+NUXT_PUBLIC_SENTRY_DSN=https://examplePublicKey@o0.ingest.sentry.io/2
+NUXT_PUBLIC_SENTRY_ENVIRONMENT=production
+NUXT_PUBLIC_SENTRY_RELEASE=git-commit-sha
+NUXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE=0.1
+```
+
+Use the same commit SHA for both releases so distributed frontend to API traces line up. For
+readable production JavaScript stack traces, provide `SENTRY_ORG`, `SENTRY_PROJECT` and a secret
+`SENTRY_AUTH_TOKEN` only while running `npm run build`. The token uploads source maps and must
+never use the `NUXT_PUBLIC` prefix or be present in the runtime container.
+
 ## Verification
 
 ```bash

@@ -13,8 +13,11 @@ use App\Services\Discovery\DiscoveredPost;
 use App\Services\Discovery\DiscoveredProfile;
 use App\Services\Discovery\InstagramDataProvider;
 use App\Services\Discovery\OutlierScore;
+use App\Services\InstagramMediaProxy;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Mockery;
 use OpenAI\Resources\Moderations;
 use OpenAI\Responses\Moderations\CreateResponse;
@@ -72,7 +75,7 @@ class ContentSafetyPolicyTest extends TestCase
             ]),
         ]);
 
-        $decision = (new ContentSafetyPolicy($client))->post($this->discoveredPost('Une publication'));
+        $decision = $this->policy($client)->post($this->discoveredPost('Une publication'));
 
         $this->assertSame(ContentSafetyDecision::BLOCKED, $decision->status);
         $this->assertContains('moderation:sexual', $decision->reasons);
@@ -85,6 +88,85 @@ class ContentSafetyPolicyTest extends TestCase
         });
     }
 
+    public function test_it_downloads_instagram_thumbnails_before_multimodal_moderation(): void
+    {
+        Storage::fake('local');
+        Http::fake([
+            'https://scontent-cdg4-3.cdninstagram.com/*' => Http::response('jpeg-body', 200, ['Content-Type' => 'image/jpeg']),
+        ]);
+        config([
+            'services.discovery.safety.use_openai' => true,
+            'services.openai.api_key' => 'test-key',
+        ]);
+        $client = new ClientFake([
+            CreateResponse::fake([
+                'results' => [['categories' => [
+                    'hate/threatening' => false,
+                    'sexual' => false,
+                    'violence' => false,
+                ]]],
+            ]),
+        ]);
+        $post = $this->discoveredPost('Une publication');
+        $post = new DiscoveredPost(
+            sourceUrl: $post->sourceUrl,
+            username: $post->username,
+            displayName: $post->displayName,
+            avatarUrl: $post->avatarUrl,
+            followers: $post->followers,
+            caption: $post->caption,
+            thumbnailUrl: 'https://scontent-cdg4-3.cdninstagram.com/image.jpg?token=temporary',
+            likes: $post->likes,
+            comments: $post->comments,
+            views: $post->views,
+            publishedAt: $post->publishedAt,
+            format: $post->format,
+            hashtags: $post->hashtags,
+            externalId: $post->externalId,
+        );
+
+        $decision = $this->policy($client)->post($post);
+
+        $this->assertTrue($decision->isAllowed());
+        Http::assertSentCount(1);
+        $client->assertSent(Moderations::class, fn (string $method, array $parameters): bool => $method === 'create'
+            && $parameters['input'][1]['image_url']['url'] === 'data:image/jpeg;base64,'.base64_encode('jpeg-body'));
+    }
+
+    public function test_it_keeps_an_instagram_post_pending_when_its_thumbnail_cannot_be_downloaded(): void
+    {
+        Storage::fake('local');
+        Http::fake(['https://scontent-cdg4-3.cdninstagram.com/*' => Http::response('', 403)]);
+        config([
+            'services.discovery.safety.use_openai' => true,
+            'services.discovery.safety.fail_closed' => true,
+            'services.openai.api_key' => 'test-key',
+        ]);
+        $client = new ClientFake;
+        $post = $this->discoveredPost('Une publication');
+        $post = new DiscoveredPost(
+            sourceUrl: $post->sourceUrl,
+            username: $post->username,
+            displayName: $post->displayName,
+            avatarUrl: $post->avatarUrl,
+            followers: $post->followers,
+            caption: $post->caption,
+            thumbnailUrl: 'https://scontent-cdg4-3.cdninstagram.com/missing.jpg',
+            likes: $post->likes,
+            comments: $post->comments,
+            views: $post->views,
+            publishedAt: $post->publishedAt,
+            format: $post->format,
+            hashtags: $post->hashtags,
+            externalId: $post->externalId,
+        );
+
+        $decision = $this->policy($client)->post($post);
+
+        $this->assertSame(ContentSafetyDecision::PENDING, $decision->status);
+        $this->assertSame(['moderation:unavailable'], $decision->reasons);
+    }
+
     public function test_it_leaves_content_pending_when_remote_moderation_is_unavailable(): void
     {
         config([
@@ -94,7 +176,7 @@ class ContentSafetyPolicyTest extends TestCase
         ]);
         $client = new ClientFake([new RuntimeException('Unavailable')]);
 
-        $decision = (new ContentSafetyPolicy($client))->post($this->discoveredPost('Une publication'));
+        $decision = $this->policy($client)->post($this->discoveredPost('Une publication'));
 
         $this->assertSame(ContentSafetyDecision::PENDING, $decision->status);
         $this->assertSame(['moderation:unavailable'], $decision->reasons);
@@ -162,6 +244,11 @@ class ContentSafetyPolicyTest extends TestCase
             app(OutlierScore::class),
             app(ContentSafetyPolicy::class),
         );
+    }
+
+    private function policy(ClientFake $client): ContentSafetyPolicy
+    {
+        return new ContentSafetyPolicy($client, app(InstagramMediaProxy::class));
     }
 
     private function profile(string $username, string $bio): DiscoveredProfile

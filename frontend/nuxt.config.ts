@@ -1,9 +1,27 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+const sentrySourceMapsEnabled = Boolean(
+  process.env.SENTRY_AUTH_TOKEN
+  && process.env.SENTRY_ORG
+  && process.env.SENTRY_PROJECT
+)
+
 export default defineNuxtConfig({
   srcDir: 'app/',
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  modules: ['@nuxtjs/tailwindcss', '@nuxtjs/i18n'],
+  modules: ['@nuxtjs/tailwindcss', '@nuxtjs/i18n', '@sentry/nuxt/module'],
+  sentry: {
+    authToken: process.env.SENTRY_AUTH_TOKEN,
+    org: process.env.SENTRY_ORG,
+    project: process.env.SENTRY_PROJECT,
+    release: process.env.NUXT_PUBLIC_SENTRY_RELEASE
+      ? { name: process.env.NUXT_PUBLIC_SENTRY_RELEASE }
+      : undefined,
+    silent: !sentrySourceMapsEnabled,
+    sourcemaps: {
+      disable: !sentrySourceMapsEnabled
+    }
+  },
   css: ['~/assets/css/main.css'],
   i18n: {
     locales: [
@@ -29,7 +47,13 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: 'http://localhost:8000',
-      demoBookingUrl: 'https://cal.com/mc-studio/demo-personal-app'
+      demoBookingUrl: 'https://cal.com/mc-studio/demo-personal-app',
+      sentry: {
+        dsn: '',
+        environment: '',
+        release: '',
+        tracesSampleRate: 0.1
+      }
     }
   },
   app: {

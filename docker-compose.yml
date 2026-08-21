@@ -113,6 +113,10 @@ services:
       # browser can reach — not the compose service name.
       NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-http://localhost:8000}
       NUXT_PUBLIC_DEMO_BOOKING_URL: ${NUXT_PUBLIC_DEMO_BOOKING_URL:-https://cal.com/mc-studio/demo-personal-app}
+      NUXT_PUBLIC_SENTRY_DSN: ${NUXT_PUBLIC_SENTRY_DSN:-}
+      NUXT_PUBLIC_SENTRY_ENVIRONMENT: ${NUXT_PUBLIC_SENTRY_ENVIRONMENT:-local}
+      NUXT_PUBLIC_SENTRY_RELEASE: ${NUXT_PUBLIC_SENTRY_RELEASE:-}
+      NUXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE: ${NUXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE:-0.1}
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     depends_on:

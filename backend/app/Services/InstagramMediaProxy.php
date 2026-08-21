@@ -32,6 +32,23 @@ class InstagramMediaProxy
 
     public function response(string $sourceUrl, string $cacheKey): ?Response
     {
+        $image = $this->image($sourceUrl, $cacheKey);
+
+        return $image ? $this->imageResponse($image['body'], $image['content_type']) : null;
+    }
+
+    public function moderationDataUrl(string $sourceUrl): ?string
+    {
+        $image = $this->image($sourceUrl, 'moderation:'.hash('sha256', $sourceUrl));
+
+        return $image
+            ? 'data:'.$image['content_type'].';base64,'.base64_encode($image['body'])
+            : null;
+    }
+
+    /** @return array{body: string, content_type: string}|null */
+    private function image(string $sourceUrl, string $cacheKey): ?array
+    {
         if (! $this->supports($sourceUrl)) {
             return null;
         }
@@ -43,7 +60,7 @@ class InstagramMediaProxy
         $cached = $this->cached($disk, $mediaPath, $metadataPath);
 
         if ($cached && $cached['fresh']) {
-            return $this->imageResponse($cached['body'], $cached['content_type']);
+            return ['body' => $cached['body'], 'content_type' => $cached['content_type']];
         }
 
         $upstream = $this->fetch($sourceUrl);
@@ -59,11 +76,11 @@ class InstagramMediaProxy
                     'cached_at' => now()->toIso8601String(),
                 ], JSON_THROW_ON_ERROR));
 
-                return $this->imageResponse($body, $contentType);
+                return ['body' => $body, 'content_type' => $contentType];
             }
         }
 
-        return $cached ? $this->imageResponse($cached['body'], $cached['content_type']) : null;
+        return $cached ? ['body' => $cached['body'], 'content_type' => $cached['content_type']] : null;
     }
 
     /** @return array{body: string, content_type: string, fresh: bool}|null */
