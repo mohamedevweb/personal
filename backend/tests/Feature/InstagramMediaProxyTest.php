@@ -45,6 +45,24 @@ class InstagramMediaProxyTest extends TestCase
         $this->get("/api/media/content/{$post->id}")->assertForbidden();
     }
 
+    public function test_signed_carousel_media_route_proxies_the_requested_slide(): void
+    {
+        Storage::fake('local');
+        Http::preventStrayRequests();
+        $source = 'https://scontent-sea5-1.cdninstagram.com/carousel-2.jpg';
+        Http::fake([$source => Http::response('second-slide', 200, ['Content-Type' => 'image/jpeg'])]);
+        $post = $this->createPost('https://scontent-sea5-1.cdninstagram.com/carousel-1.jpg');
+        $post->update(['media_urls' => [$post->thumbnail_url, $source]]);
+        $path = URL::temporarySignedRoute(
+            'media.content.item',
+            now()->addHour(),
+            ['content' => $post, 'position' => 1],
+            absolute: false,
+        );
+
+        $this->get($path)->assertOk()->assertContent('second-slide');
+    }
+
     public function test_media_proxy_rejects_non_instagram_hosts_without_making_a_request(): void
     {
         Storage::fake('local');
@@ -62,11 +80,18 @@ class InstagramMediaProxyTest extends TestCase
         $user = User::factory()->create();
         $post = $this->createPost('https://instagram.ftce2-1.fna.fbcdn.net/thumb.jpg');
         $post->creator->update(['avatar_url' => 'https://scontent-sea5-1.cdninstagram.com/avatar.jpg']);
+        $post->update(['media_urls' => [
+            'https://instagram.ftce2-1.fna.fbcdn.net/thumb.jpg',
+            'https://scontent-sea5-1.cdninstagram.com/second.jpg',
+        ]]);
 
         $payload = app(ContentPostView::class)->make($post->fresh(), $user);
 
         $this->assertStringStartsWith('https://api.personal.test/api/media/content/', $payload['thumbnail_url']);
         $this->assertStringContainsString('signature=', $payload['thumbnail_url']);
+        $this->assertCount(2, $payload['media_urls']);
+        $this->assertStringStartsWith('https://api.personal.test/api/media/content/', $payload['media_urls'][1]);
+        $this->assertStringContainsString('/1?', $payload['media_urls'][1]);
         $this->assertStringStartsWith('https://api.personal.test/api/media/creator/', $payload['creator']['avatar_url']);
 
         $post->update(['thumbnail_url' => 'https://images.unsplash.com/photo.jpg']);

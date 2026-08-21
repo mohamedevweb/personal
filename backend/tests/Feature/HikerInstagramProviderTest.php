@@ -54,6 +54,25 @@ class HikerInstagramProviderTest extends TestCase
                     'play_count' => 45_000,
                     'thumbnail_url' => 'https://cdn.example.test/reel.jpg',
                     'usertags' => [],
+                ], [
+                    'pk' => 'media-2',
+                    'code' => 'CAROUSEL123',
+                    'taken_at' => '2026-08-18T10:00:00Z',
+                    'media_type' => 8,
+                    'user' => ['username' => 'saas.builder'],
+                    'caption_text' => 'A carousel #aisaas',
+                    'like_count' => 900,
+                    'comment_count' => 50,
+                    'thumbnail_url' => 'https://cdn.example.test/carousel-cover.jpg',
+                    'carousel_media' => [[
+                        'image_versions2' => ['candidates' => [[
+                            'url' => 'https://cdn.example.test/carousel-1.jpg',
+                        ]]],
+                    ], [
+                        'image_versions2' => ['candidates' => [[
+                            'url' => 'https://cdn.example.test/carousel-2.jpg',
+                        ]]],
+                    ]],
                 ]], null]);
             }
 
@@ -86,6 +105,10 @@ class HikerInstagramProviderTest extends TestCase
         $this->assertSame('reel', $posts->first()?->format);
         $this->assertSame(45_000, $posts->first()?->views);
         $this->assertSame(['aisaas'], $posts->first()?->hashtags);
+        $this->assertSame([
+            'https://cdn.example.test/carousel-1.jpg',
+            'https://cdn.example.test/carousel-2.jpg',
+        ], $posts->get(1)?->mediaUrls);
         $this->assertSame('ai.founder', $search->first()?->username);
         $this->assertSame('indie.hacker', $related->first()?->username);
     }

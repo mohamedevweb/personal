@@ -1,12 +1,21 @@
 <script setup lang="ts">
-import type { InstagramSyncStatus } from '~/types/instagram'
+import type { CreatorInspiration, CreatorInspirationResponse, InstagramSyncStatus } from '~/types/instagram'
 
 definePageMeta({ layout: false })
 
 const route = useRoute()
 const { t } = useI18n()
 const { status, loading, error, connect, loadStatus, startPolling } = useInstagram()
+const { apiFetch } = usePersonalApi()
 const toast = useToast()
+const inspirationData = ref<CreatorInspirationResponse | null>(null)
+const inspirationLoading = ref(false)
+const searchQuery = ref('')
+const searchResults = ref<CreatorInspiration[]>([])
+const searching = ref(false)
+const saving = ref(false)
+const selected = ref<CreatorInspiration[]>([])
+const inspirationsLoaded = ref(false)
 
 const stages = computed<{ key: InstagramSyncStatus; label: string }[]>(() => [
   { key: 'connecting', label: t('onboarding.stages.connecting') },
@@ -30,11 +39,87 @@ watch(connectionError, (message) => {
   if (message) toast.error(message)
 }, { immediate: true })
 
-// Keep the onboarding gate (auth.global) in sync the moment the import finishes,
-// so leaving for the feed is instant instead of being re-checked at the gate.
 const onboarded = useState('personal-onboarded', () => false)
+
+const availableCreators = computed(() => {
+  const creators = [...selected.value, ...(inspirationData.value?.suggestions || []), ...searchResults.value]
+  return Array.from(new Map(creators.map(creator => [creator.username.toLowerCase(), creator])).values())
+})
+
+const canContinue = computed(() => selected.value.length >= 3 && selected.value.length <= 5)
+
+function isSelected(username: string) {
+  return selected.value.some(creator => creator.username.toLowerCase() === username.toLowerCase())
+}
+
+function toggleCreator(creator: CreatorInspiration) {
+  if (isSelected(creator.username)) {
+    selected.value = selected.value.filter(item => item.username.toLowerCase() !== creator.username.toLowerCase())
+    return
+  }
+
+  if (selected.value.length >= 5) {
+    toast.error(t('onboarding.inspirations.maximumError'))
+    return
+  }
+
+  selected.value = [...selected.value, { ...creator, is_selected: true }]
+}
+
+function initials(creator: CreatorInspiration) {
+  return (creator.display_name || creator.username).slice(0, 2).toUpperCase()
+}
+
+async function loadInspirations() {
+  if (inspirationsLoaded.value || inspirationLoading.value) return
+  inspirationLoading.value = true
+
+  try {
+    inspirationData.value = await apiFetch<CreatorInspirationResponse>('/api/creator-inspirations')
+    selected.value = inspirationData.value.selected
+    inspirationsLoaded.value = true
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('onboarding.inspirations.loadError')))
+  } finally {
+    inspirationLoading.value = false
+  }
+}
+
+async function searchCreators() {
+  const query = searchQuery.value.trim()
+  if (query.length < 2 || searching.value) return
+  searching.value = true
+
+  try {
+    const response = await apiFetch<{ items: CreatorInspiration[] }>(`/api/creator-inspirations/search?q=${encodeURIComponent(query)}`)
+    searchResults.value = response.items
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('onboarding.inspirations.searchError')))
+  } finally {
+    searching.value = false
+  }
+}
+
+async function saveInspirations() {
+  if (!canContinue.value || saving.value) return
+  saving.value = true
+
+  try {
+    await apiFetch('/api/creator-inspirations', {
+      method: 'PUT',
+      body: { handles: selected.value.map(creator => creator.username) }
+    })
+    onboarded.value = true
+    await navigateTo('/feed')
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('onboarding.inspirations.saveError')))
+  } finally {
+    saving.value = false
+  }
+}
+
 watch(() => status.value.account?.sync_status, (syncStatus) => {
-  if (status.value.connected && syncStatus === 'completed') onboarded.value = true
+  if (status.value.connected && syncStatus === 'completed') void loadInspirations()
 })
 
 // Let the user into the app without connecting Instagram. The cookie makes the
@@ -48,6 +133,9 @@ function skipConnection() {
 
 onMounted(async () => {
   await loadStatus()
+  if (status.value.connected && status.value.account?.sync_status === 'completed') {
+    await loadInspirations()
+  }
   if (route.query.instagram === 'connected' || (status.value.connected && status.value.account?.sync_status !== 'completed')) {
     startPolling()
   }
@@ -55,7 +143,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main class="min-h-screen overflow-hidden bg-[var(--paper)] text-[var(--ink)]">
+  <main class="min-h-screen overflow-x-hidden bg-[var(--paper)] text-[var(--ink)]">
     <header class="flex h-20 items-center justify-between px-6 md:px-10">
       <NuxtLink to="/feed" class="b-focus w-fit">
         <PersonalLogo :size="22" />
@@ -115,25 +203,80 @@ onMounted(async () => {
             <span class="text-[var(--positive)]">✓</span>
           </div>
 
-          <h1 class="font-serif text-5xl leading-[1.02] tracking-[-0.045em] md:text-7xl">
-            {{ status.account?.sync_status === 'completed' ? $t('onboarding.readyTitle') : $t('onboarding.understandingTitle') }}
-          </h1>
-          <p class="mt-7 max-w-lg text-[17px] leading-7 text-[var(--muted)]">
-            <template v-if="status.account?.sync_status === 'completed'">
-              {{ $t('onboarding.importedCopy', { count: status.account.imported_media_count }) }}
-            </template>
-            <template v-else>
-              {{ $t('onboarding.importingCopy') }}
-            </template>
-          </p>
+          <template v-if="status.account?.sync_status === 'completed'">
+            <h1 class="font-serif text-4xl leading-[1.02] tracking-[-0.045em] md:text-6xl">
+              {{ $t('onboarding.inspirations.title') }}
+            </h1>
+            <p class="mt-5 max-w-lg text-[16px] leading-7 text-[var(--muted)]">
+              {{ $t('onboarding.inspirations.copy') }}
+            </p>
 
-          <NuxtLink
-            v-if="status.account?.sync_status === 'completed'"
-            to="/feed"
-            class="mt-10 inline-flex h-[54px] items-center rounded-full bg-[var(--ink)] px-7 text-[15px] font-medium text-[var(--paper)] transition hover:-translate-y-0.5 hover:bg-black"
-          >
-            {{ $t('onboarding.startPersonal') }}&nbsp; →
-          </NuxtLink>
+            <div class="mt-7 flex items-center justify-between text-sm">
+              <span class="font-medium">{{ $t('onboarding.inspirations.selected', { count: selected.length }) }}</span>
+              <span class="text-[var(--faint)]">{{ $t('onboarding.inspirations.range') }}</span>
+            </div>
+
+            <form class="mt-4 flex gap-2" @submit.prevent="searchCreators">
+              <label for="creator-search" class="sr-only">{{ $t('onboarding.inspirations.searchLabel') }}</label>
+              <input
+                id="creator-search"
+                v-model="searchQuery"
+                type="text"
+                autocomplete="off"
+                class="min-w-0 flex-1 rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 py-3 text-sm outline-none transition focus:border-[var(--ink)]"
+                :placeholder="$t('onboarding.inspirations.searchPlaceholder')"
+              >
+              <button
+                type="submit"
+                class="rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 py-3 text-sm font-medium transition hover:bg-white disabled:cursor-wait disabled:opacity-50"
+                :disabled="searching || searchQuery.trim().length < 2"
+              >
+                {{ searching ? $t('onboarding.inspirations.searching') : $t('onboarding.inspirations.search') }}
+              </button>
+            </form>
+
+            <div v-if="inspirationLoading" class="mt-5 grid grid-cols-2 gap-3">
+              <div v-for="i in 4" :key="i" class="h-16 animate-pulse rounded-[16px] bg-[var(--line-soft)]" />
+            </div>
+            <div v-else class="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <button
+                v-for="creator in availableCreators"
+                :key="creator.username"
+                type="button"
+                class="flex min-w-0 items-center gap-3 rounded-[16px] border bg-[var(--surface)] p-3 text-left transition hover:border-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+                :class="isSelected(creator.username) ? 'border-[var(--accent)] ring-1 ring-[var(--accent)]' : 'border-[var(--line)]'"
+                @click="toggleCreator(creator)"
+              >
+                <img v-if="creator.avatar_url" :src="creator.avatar_url" :alt="creator.display_name" class="h-10 w-10 shrink-0 rounded-full object-cover">
+                <span v-else class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[var(--paper)] text-xs font-semibold">{{ initials(creator) }}</span>
+                <span class="min-w-0 flex-1">
+                  <span class="block truncate text-sm font-medium">{{ creator.display_name }}</span>
+                  <span class="block truncate text-xs text-[var(--faint)]">@{{ creator.username }}</span>
+                </span>
+                <span class="grid h-6 w-6 shrink-0 place-items-center rounded-full border text-xs" :class="isSelected(creator.username) ? 'border-[var(--accent)] bg-[var(--accent)] text-white' : 'border-[var(--line)] text-[var(--faint)]'">
+                  {{ isSelected(creator.username) ? '✓' : '+' }}
+                </span>
+              </button>
+            </div>
+
+            <button
+              type="button"
+              class="mt-7 inline-flex h-[52px] items-center rounded-full bg-[var(--ink)] px-7 text-[15px] font-medium text-[var(--paper)] transition hover:-translate-y-0.5 hover:bg-black disabled:cursor-not-allowed disabled:opacity-40"
+              :disabled="!canContinue || saving"
+              @click="saveInspirations"
+            >
+              {{ saving ? $t('onboarding.inspirations.saving') : $t('onboarding.inspirations.continue') }}&nbsp; →
+            </button>
+          </template>
+
+          <template v-else>
+            <h1 class="font-serif text-5xl leading-[1.02] tracking-[-0.045em] md:text-7xl">
+              {{ $t('onboarding.understandingTitle') }}
+            </h1>
+            <p class="mt-7 max-w-lg text-[17px] leading-7 text-[var(--muted)]">
+              {{ $t('onboarding.importingCopy') }}
+            </p>
+          </template>
 
           <button
             v-if="status.account?.sync_status === 'failed'"

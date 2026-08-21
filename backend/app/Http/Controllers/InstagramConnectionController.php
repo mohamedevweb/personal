@@ -17,18 +17,25 @@ class InstagramConnectionController extends Controller
 
     public function status(Request $request): JsonResponse
     {
+        $inspirationCount = $request->user()->inspirationCreators()->count();
         $account = $request->user()->instagramAccount()
             ->withCount(['media as imported_media_count'])
             ->first();
 
         if (! $account) {
-            return response()->json(['connected' => false]);
+            return response()->json([
+                'connected' => false,
+                'inspiration_count' => $inspirationCount,
+                'onboarding_complete' => false,
+            ]);
         }
 
         $profile = $request->user()->creatorProfile()->first();
 
         return response()->json([
             'connected' => true,
+            'inspiration_count' => $inspirationCount,
+            'onboarding_complete' => $account->sync_status === 'completed' && $inspirationCount >= 3,
             'account' => [
                 'username' => $account->username,
                 'display_name' => $account->display_name,

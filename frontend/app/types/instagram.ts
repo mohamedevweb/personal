@@ -29,6 +29,25 @@ export interface CreatorProfile {
 
 export interface InstagramStatusResponse {
   connected: boolean
+  inspiration_count: number
+  onboarding_complete: boolean
   account?: InstagramAccount
   profile?: CreatorProfile | null
+}
+
+export interface CreatorInspiration {
+  username: string
+  display_name: string
+  avatar_url: string | null
+  followers: number
+  niche: string | null
+  is_selected: boolean
+  is_measured: boolean
+}
+
+export interface CreatorInspirationResponse {
+  selected: CreatorInspiration[]
+  suggestions: CreatorInspiration[]
+  minimum: number
+  maximum: number
 }

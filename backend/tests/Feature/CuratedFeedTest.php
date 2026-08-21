@@ -78,6 +78,42 @@ class CuratedFeedTest extends TestCase
         $this->assertSame(4, $feed->where('creator.niche', 'sport-fitness')->count());
     }
 
+    public function test_private_inspirations_lead_the_feed_and_keep_the_approved_catalog_as_fallback(): void
+    {
+        $this->posts('FR', 12, niche: 'sport-fitness', baseOutlier: 5);
+        $this->posts('FR', 4, 'discovered', 'tech-ai', 2);
+        $inspiration = Creator::query()->where('curation_status', 'discovered')->firstOrFail();
+        $inspiration->update(['safety_status' => 'allowed']);
+        $this->user->inspirationCreators()->attach($inspiration->id, ['priority' => 0]);
+
+        $feed = app(RecommendationService::class)->forUser($this->user);
+
+        $this->assertSame(12, $feed->count());
+        $this->assertSame(2, $feed->take(2)->where('creator.username', $inspiration->username)->count());
+        $this->assertSame(2, $feed->where('creator.username', $inspiration->username)->count());
+        $this->assertSame(10, $feed->where('creator.username', '!=', $inspiration->username)->count());
+    }
+
+    public function test_global_feed_ignores_personal_niche_and_market_quotas_but_keeps_catalog_guards(): void
+    {
+        $this->user->creatorProfile()->update(['primary_vertical' => 'tech-ai']);
+        $this->posts('US', 12, niche: 'sport-fitness', baseOutlier: 5);
+        $this->posts('FR', 12, niche: 'tech-ai', baseOutlier: 2);
+        $this->posts('GB', 3, 'discovered', 'food-cooking', 8);
+
+        $feed = app(RecommendationService::class)->globalForUser($this->user);
+
+        $this->assertSame(12, $feed->count());
+        $this->assertTrue($feed->every(fn (array $post): bool => $post['creator']['niche'] === 'sport-fitness'));
+        $this->assertFalse($feed->pluck('hook')->contains(
+            fn (string $hook): bool => str_contains($hook, 'discovered'),
+        ));
+
+        $this->actingAs($this->user)->getJson('/api/feed/global')
+            ->assertOk()
+            ->assertJsonCount(12, 'items');
+    }
+
     private function posts(
         string $market,
         int $count,

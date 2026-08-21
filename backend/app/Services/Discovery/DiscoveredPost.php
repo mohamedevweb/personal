@@ -12,7 +12,10 @@ use Carbon\CarbonImmutable;
  */
 class DiscoveredPost
 {
-    /** @param list<string> $hashtags */
+    /**
+     * @param  list<string>  $hashtags
+     * @param  list<string>  $mediaUrls
+     */
     public function __construct(
         public readonly string $sourceUrl,
         public readonly string $username,
@@ -30,6 +33,7 @@ class DiscoveredPost
         public readonly ?string $externalId = null,
         public readonly int $shares = 0,
         public readonly array $metadata = [],
+        public readonly array $mediaUrls = [],
     ) {}
 
     /**

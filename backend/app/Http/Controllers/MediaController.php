@@ -17,6 +17,17 @@ class MediaController extends Controller
         return $response;
     }
 
+    public function contentItem(ContentPost $content, int $position, InstagramMediaProxy $media): Response
+    {
+        $sourceUrl = $content->media_urls[$position] ?? null;
+        abort_unless(is_string($sourceUrl), 404);
+
+        $response = $media->response($sourceUrl, "content:{$content->id}:{$position}");
+        abort_if($response === null, 404);
+
+        return $response;
+    }
+
     public function creator(Creator $creator, InstagramMediaProxy $media): Response
     {
         $response = $media->response((string) $creator->avatar_url, "creator:{$creator->id}");

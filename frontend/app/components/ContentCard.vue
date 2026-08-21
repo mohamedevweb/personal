@@ -6,18 +6,58 @@ const props = defineProps<{ post: ContentPost }>()
 defineEmits<{ save: [post: ContentPost], remix: [post: ContentPost] }>()
 
 const expanded = ref(false)
+const activeMediaIndex = ref(0)
 const mediaKind = computed(() => {
   const format = (props.post.format || '').toLowerCase()
   if (format.includes('reel') || format.includes('video')) return 'reel'
   if (format.includes('carousel')) return 'carousel'
   return 'image'
 })
+const mediaUrls = computed(() => {
+  const urls = props.post.media_urls?.filter(Boolean) || []
+  return urls.length > 0 ? urls : props.post.thumbnail_url ? [props.post.thumbnail_url] : []
+})
+const activeMediaUrl = computed(() => mediaUrls.value[activeMediaIndex.value] || null)
+const hasPreviousMedia = computed(() => activeMediaIndex.value > 0)
+const hasNextMedia = computed(() => activeMediaIndex.value < mediaUrls.value.length - 1)
 // Instagram cuts the caption after a couple of lines and reveals the rest behind
 // an inline "more", so we truncate on length to keep that button on the line.
 const caption = computed(() => [props.post.hook, props.post.caption].filter(Boolean).join(' '))
 const isLongCaption = computed(() => caption.value.length > 80)
 const visibleCaption = computed(() => (expanded.value || !isLongCaption.value ? caption.value : `${caption.value.slice(0, 80).trimEnd()}… `))
 const engagement = computed(() => (props.post.likes || 0) + (props.post.comments || 0) + (props.post.shares || 0))
+
+let touchStart: { x: number, y: number } | null = null
+
+function showPreviousMedia() {
+  if (hasPreviousMedia.value) activeMediaIndex.value--
+}
+
+function showNextMedia() {
+  if (hasNextMedia.value) activeMediaIndex.value++
+}
+
+function rememberTouch(event: TouchEvent) {
+  const touch = event.touches[0]
+  if (touch) touchStart = { x: touch.clientX, y: touch.clientY }
+}
+
+function navigateFromSwipe(event: TouchEvent) {
+  const touch = event.changedTouches[0]
+  if (!touch || !touchStart) return
+
+  const horizontalDistance = touch.clientX - touchStart.x
+  const verticalDistance = touch.clientY - touchStart.y
+  touchStart = null
+
+  if (Math.abs(horizontalDistance) < 40 || Math.abs(horizontalDistance) <= Math.abs(verticalDistance)) return
+  if (horizontalDistance > 0) showPreviousMedia()
+  else showNextMedia()
+}
+
+watch(() => props.post.id, () => {
+  activeMediaIndex.value = 0
+})
 </script>
 
 <template>
@@ -47,13 +87,49 @@ const engagement = computed(() => (props.post.likes || 0) + (props.post.comments
       <AppIcon name="dots" :size="16" class="shrink-0 text-[var(--muted)]" />
     </header>
 
-    <NuxtLink :to="`/content/${post.id}`" class="relative block aspect-[4/3] overflow-hidden bg-[var(--sand)]">
-      <img v-if="post.thumbnail_url" :src="post.thumbnail_url" :alt="post.hook" class="h-full w-full object-cover">
-      <AppIcon v-if="mediaKind !== 'image'" :name="mediaKind" :size="22" :stroke-width="1.9" class="absolute right-3 top-3 text-white drop-shadow-[0_1px_3px_rgba(0,0,0,.55)]" />
-      <span v-if="mediaKind === 'carousel'" class="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
-        <i v-for="dot in 5" :key="dot" class="h-[5px] w-[5px] rounded-full" :class="dot === 1 ? 'bg-white' : 'bg-white/45'" />
+    <div
+      class="relative aspect-[4/3] overflow-hidden bg-[var(--sand)]"
+      @touchstart.passive="rememberTouch"
+      @touchend.passive="navigateFromSwipe"
+    >
+      <NuxtLink :to="`/content/${post.id}`" class="block h-full w-full">
+        <img v-if="activeMediaUrl" :src="activeMediaUrl" :alt="post.hook" class="h-full w-full object-cover">
+      </NuxtLink>
+      <AppIcon v-if="mediaKind !== 'image'" :name="mediaKind" :size="22" :stroke-width="1.9" class="pointer-events-none absolute right-3 top-3 text-white drop-shadow-[0_1px_3px_rgba(0,0,0,.55)]" />
+
+      <button
+        v-if="hasPreviousMedia"
+        type="button"
+        class="absolute left-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition hover:bg-black/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        :aria-label="$t('contentCard.previousSlide')"
+        @click="showPreviousMedia"
+      >
+        <AppIcon name="chevron" :size="18" class="rotate-180" />
+      </button>
+      <button
+        v-if="hasNextMedia"
+        type="button"
+        class="absolute right-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition hover:bg-black/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        :aria-label="$t('contentCard.nextSlide')"
+        @click="showNextMedia"
+      >
+        <AppIcon name="chevron" :size="18" />
+      </button>
+
+      <span v-if="mediaUrls.length > 1" class="absolute bottom-2 left-1/2 flex -translate-x-1/2">
+        <button
+          v-for="(_, index) in mediaUrls"
+          :key="index"
+          type="button"
+          class="inline-flex h-4 w-4 items-center justify-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+          :aria-label="$t('contentCard.goToSlide', { slide: index + 1 })"
+          :aria-current="index === activeMediaIndex ? 'true' : undefined"
+          @click="activeMediaIndex = index"
+        >
+          <i class="h-[5px] w-[5px] rounded-full shadow-[0_1px_2px_rgba(0,0,0,.25)]" :class="index === activeMediaIndex ? 'bg-white' : 'bg-white/45'" />
+        </button>
       </span>
-    </NuxtLink>
+    </div>
 
     <div class="flex items-center gap-3.5 px-3 pb-1 pt-2.5 text-[var(--ink)]">
       <AppIcon name="heart" :size="21" :stroke-width="1.6" />

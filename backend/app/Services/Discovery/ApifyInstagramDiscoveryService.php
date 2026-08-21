@@ -127,6 +127,9 @@ class ApifyInstagramDiscoveryService implements ContentDiscoveryService
             return null;
         }
 
+        $thumbnailUrl = is_string($item['displayUrl'] ?? null) ? $item['displayUrl'] : null;
+        $format = $this->format((string) ($item['type'] ?? 'Image'));
+
         return new DiscoveredPost(
             sourceUrl: $url,
             username: $username,
@@ -137,16 +140,17 @@ class ApifyInstagramDiscoveryService implements ContentDiscoveryService
             // result cannot be judged and has to be re-scraped as a profile.
             followers: 0,
             caption: (string) ($item['caption'] ?? ''),
-            thumbnailUrl: $item['displayUrl'] ?? null,
+            thumbnailUrl: $thumbnailUrl,
             // Apify returns -1 when Instagram hides the count; treat that as unknown.
             likes: max(0, (int) ($item['likesCount'] ?? 0)),
             comments: max(0, (int) ($item['commentsCount'] ?? 0)),
             views: max(0, (int) ($item['videoViewCount'] ?? $item['videoPlayCount'] ?? 0)),
             publishedAt: $this->publishedAt($item['timestamp'] ?? null),
-            format: $this->format((string) ($item['type'] ?? 'Image')),
+            format: $format,
             hashtags: array_values(array_filter((array) ($item['hashtags'] ?? []), 'is_string')),
             externalId: isset($item['id']) ? (string) $item['id'] : null,
             shares: max(0, (int) ($item['sharesCount'] ?? 0)),
+            mediaUrls: $format === 'carousel' ? InstagramCarouselMedia::urls($item, $thumbnailUrl) : [],
         );
     }
 

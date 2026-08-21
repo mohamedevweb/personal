@@ -67,6 +67,11 @@ class ScrapeCreatorsInstagramProviderTest extends TestCase
                         'like_count' => 900,
                         'comment_count' => 50,
                         'display_uri' => 'https://cdn.example.test/carousel.jpg',
+                        'carousel_media' => [[
+                            'display_uri' => 'https://cdn.example.test/carousel-1.jpg',
+                        ], [
+                            'display_uri' => 'https://cdn.example.test/carousel-2.jpg',
+                        ]],
                     ]],
                 ]);
             }
@@ -132,6 +137,10 @@ class ScrapeCreatorsInstagramProviderTest extends TestCase
         $this->assertSame('media-2', $posts->first()?->externalId);
         $this->assertSame('carousel', $posts->first()?->format);
         $this->assertSame(['buildinpublic'], $posts->first()?->hashtags);
+        $this->assertSame([
+            'https://cdn.example.test/carousel-1.jpg',
+            'https://cdn.example.test/carousel-2.jpg',
+        ], $posts->first()?->mediaUrls);
         $this->assertSame('saas.builder', $search->first()?->username);
         $this->assertSame(25_000, $search->first()?->followers);
         $this->assertSame('indie.hacker', $related->first()?->username);

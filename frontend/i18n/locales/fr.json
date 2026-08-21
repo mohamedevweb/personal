@@ -77,12 +77,12 @@
       "terms": "Conditions"
     },
     "hero": {
-      "badge": "Accès anticipé · 40 créateurs",
       "titleLineOne": "Vous êtes créateur.",
       "titleLineTwo": "Pas une machine à contenu.",
       "subtitle": "Personal trouve ce qui marche dans votre niche et le réécrit avec votre vie. Votre voix, votre semaine, dix minutes.",
       "getAccess": "Accès anticipé",
       "seeHow": "Voir comment ça marche",
+      "openHow": "Voir comment Personal construit ce brief",
       "reassuranceOne": "Gratuit en accès anticipé",
       "reassuranceTwo": "Personal ne publie jamais à votre place",
       "mediaLabel": "Personal, un matin",
@@ -298,9 +298,8 @@
       }
     },
     "cta": {
-      "title": "Allez vivre une vie intéressante.",
-      "titleTurn": "On prend les notes.",
-      "copy": "Personal surveille votre niche, se souvient de votre semaine, et garde un brouillon prêt pour quand vous l'êtes.",
+      "title": "Vivez une vie intéressante.",
+      "copy": "Personal fait attention pour vous.",
       "button": "Accès anticipé",
       "bookDemo": "Réserver une démo",
       "reassurance": "Gratuit en accès anticipé · Personal ne publie jamais à votre place"
@@ -376,10 +375,29 @@
       "finding_patterns": "Recherche de schémas"
     },
     "placeholderQuote": "Votre contenu devient du contexte — pas un tableau de bord.",
-    "skip": "Continuer sans connecter Instagram"
+    "skip": "Continuer sans connecter Instagram",
+    "inspirations": {
+      "title": "Qui t’inspire sur Instagram ?",
+      "copy": "Choisis 3 à 5 créateurs que tu regardes vraiment pour créer. Personal donnera la priorité à leurs meilleurs contenus et complétera avec ton univers.",
+      "selected": "{count} sélectionné(s)",
+      "range": "3 minimum, 5 maximum",
+      "searchLabel": "Rechercher un créateur Instagram",
+      "searchPlaceholder": "{'@'}handle ou lien Instagram",
+      "search": "Rechercher",
+      "searching": "Recherche…",
+      "continue": "Créer mon feed",
+      "saving": "Création du feed…",
+      "maximumError": "Tu peux choisir jusqu’à 5 créateurs.",
+      "loadError": "Personal n’a pas pu charger les créateurs proposés.",
+      "searchError": "Personal n’a pas pu rechercher ce compte Instagram.",
+      "saveError": "Personal n’a pas pu enregistrer tes inspirations. Réessaie."
+    }
   },
   "feed": {
+    "forYou": "Pour toi",
+    "global": "Global",
     "worthCreating": "À créer aujourd’hui",
+    "globalWorthCreating": "Ce qui marche partout",
     "loadError": "Personal n’a pas pu charger les opportunités du jour.",
     "remixError": "Personal n’a pas pu rédiger ceci pour l’instant. Veuillez réessayer.",
     "refreshed": "Ton feed est à jour.",
@@ -711,7 +729,10 @@
     "remixForMe": "Remixer pour moi",
     "more": "plus",
     "viewComments": "Voir les {count} commentaires",
-    "openProfile": "Voir le compte de {'@'}{username} sur Instagram"
+    "openProfile": "Voir le compte de {'@'}{username} sur Instagram",
+    "previousSlide": "Diapositive précédente",
+    "nextSlide": "Diapositive suivante",
+    "goToSlide": "Aller à la diapositive {slide}"
   },
   "legal": {
     "privacy": {

@@ -51,6 +51,8 @@ class MockInstagramDiscoveryService implements ContentDiscoveryService
         $hook = sprintf(self::HOOKS[$seed % count(self::HOOKS)], $tag);
         $handle = Str::slug($tag, '').'.'.['studio', 'daily', 'lab', 'hq', 'co'][$seed % 5];
 
+        $thumbnailUrl = "https://picsum.photos/seed/{$seed}/640/800";
+
         return new DiscoveredPost(
             sourceUrl: "https://www.instagram.com/p/mock-{$tag}-{$index}/",
             username: $handle,
@@ -58,7 +60,7 @@ class MockInstagramDiscoveryService implements ContentDiscoveryService
             avatarUrl: "https://i.pravatar.cc/150?u={$handle}",
             followers: $followers,
             caption: $hook."\n\nSave this for your next #{$tag} post.",
-            thumbnailUrl: "https://picsum.photos/seed/{$seed}/640/800",
+            thumbnailUrl: $thumbnailUrl,
             likes: $likes,
             comments: $comments,
             views: $views,
@@ -66,6 +68,9 @@ class MockInstagramDiscoveryService implements ContentDiscoveryService
             format: $format,
             hashtags: array_values(array_unique([$tag, ...array_slice($hashtags, 0, 3)])),
             externalId: "mock-{$tag}-{$index}",
+            mediaUrls: $format === 'carousel'
+                ? collect(range(0, 4))->map(fn (int $slide): string => "https://picsum.photos/seed/{$seed}-{$slide}/640/800")->all()
+                : [],
         );
     }
 }

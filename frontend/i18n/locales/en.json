@@ -77,12 +77,12 @@
       "terms": "Terms"
     },
     "hero": {
-      "badge": "Early access · 40 creators",
       "titleLineOne": "You're a creator.",
       "titleLineTwo": "Not a content machine.",
       "subtitle": "Personal finds what's working in your niche and rewrites it with your life. Your voice, your week, ten minutes.",
       "getAccess": "Get early access",
       "seeHow": "See how it works",
+      "openHow": "See how Personal builds this brief",
       "reassuranceOne": "Free during early access",
       "reassuranceTwo": "Personal never posts for you",
       "mediaLabel": "Personal, one morning",
@@ -298,9 +298,8 @@
       }
     },
     "cta": {
-      "title": "Go live an interesting life.",
-      "titleTurn": "We'll take the notes.",
-      "copy": "Personal watches your niche, remembers your week, and has a draft waiting when you are.",
+      "title": "Live an interesting life.",
+      "copy": "Personal is paying attention.",
       "button": "Get early access",
       "bookDemo": "Book a demo",
       "reassurance": "Free during early access · Personal never posts for you"
@@ -376,10 +375,29 @@
       "finding_patterns": "Finding patterns"
     },
     "placeholderQuote": "Your content becomes context—not a dashboard.",
-    "skip": "Continue without connecting"
+    "skip": "Continue without connecting",
+    "inspirations": {
+      "title": "Who inspires you on Instagram?",
+      "copy": "Choose 3 to 5 creators you genuinely watch when you create. Personal will prioritize their best content and complete the feed with your world.",
+      "selected": "{count} selected",
+      "range": "3 minimum, 5 maximum",
+      "searchLabel": "Search for an Instagram creator",
+      "searchPlaceholder": "{'@'}handle or Instagram link",
+      "search": "Search",
+      "searching": "Searching…",
+      "continue": "Build my feed",
+      "saving": "Building your feed…",
+      "maximumError": "You can choose up to 5 creators.",
+      "loadError": "Personal could not load creator suggestions.",
+      "searchError": "Personal could not search for that Instagram account.",
+      "saveError": "Personal could not save your inspirations. Please try again."
+    }
   },
   "feed": {
+    "forYou": "For you",
+    "global": "Global",
     "worthCreating": "Worth creating today",
+    "globalWorthCreating": "What is working everywhere",
     "loadError": "Personal could not load today’s opportunities.",
     "remixError": "Personal could not draft this right now. Please try again.",
     "refreshed": "Your feed is up to date.",
@@ -711,7 +729,10 @@
     "remixForMe": "Remix for me",
     "more": "more",
     "viewComments": "View all {count} comments",
-    "openProfile": "View {'@'}{username} on Instagram"
+    "openProfile": "View {'@'}{username} on Instagram",
+    "previousSlide": "Previous slide",
+    "nextSlide": "Next slide",
+    "goToSlide": "Go to slide {slide}"
   },
   "legal": {
     "privacy": {

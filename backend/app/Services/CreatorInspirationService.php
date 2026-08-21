@@ -1,0 +1,291 @@
+<?php
+
+namespace App\Services;
+
+use App\Jobs\MeasureAccountEngagement;
+use App\Models\Creator;
+use App\Models\User;
+use App\Services\Discovery\CanonicalCreatorVerticals;
+use App\Services\Discovery\ContentSafetyDecision;
+use App\Services\Discovery\DiscoveredProfile;
+use App\Services\Discovery\InstagramDataProviderManager;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+
+class CreatorInspirationService
+{
+    private const SUGGESTION_LIMIT = 6;
+
+    public function __construct(
+        private readonly InstagramDataProviderManager $providers,
+        private readonly CanonicalCreatorVerticals $verticals,
+        private readonly InstagramMediaProxy $media,
+    ) {}
+
+    /** @return array{selected: list<array<string, mixed>>, suggestions: list<array<string, mixed>>, minimum: int, maximum: int} */
+    public function forUser(User $user): array
+    {
+        $selected = $user->inspirationCreators()->get();
+        $selectedIds = $selected->pluck('id');
+        $vertical = $this->primaryVertical($user);
+        $market = $user->creatorProfile?->market;
+
+        $pool = Creator::query()
+            ->where('curation_status', 'approved')
+            ->where('safety_status', ContentSafetyDecision::ALLOWED)
+            ->whereNotIn('id', $selectedIds)
+            ->orderByDesc('followers')
+            ->get();
+
+        $suggestions = $pool
+            ->sortByDesc(fn (Creator $creator): int => ($vertical && $creator->niche === $vertical ? 4 : 0)
+                + ($market && $creator->market === $market ? 2 : 0)
+                + ($creator->is_catalog_seed ? 1 : 0)
+            )
+            ->take(self::SUGGESTION_LIMIT)
+            ->values();
+
+        return [
+            'selected' => $selected->map(fn (Creator $creator): array => $this->render($creator, true))->all(),
+            'suggestions' => $suggestions->map(fn (Creator $creator): array => $this->render($creator, false))->all(),
+            'minimum' => 3,
+            'maximum' => 5,
+        ];
+    }
+
+    /** @return list<array<string, mixed>> */
+    public function search(User $user, string $query, int $limit = self::SUGGESTION_LIMIT): array
+    {
+        $query = trim($query);
+        $exactHandle = str_starts_with($query, '@') || filter_var($query, FILTER_VALIDATE_URL)
+            ? $this->handleFromInput($query, allowKeywords: true)
+            : null;
+        $selected = $user->inspirationCreators()->pluck('creators.id')->flip();
+        $needle = Str::lower($exactHandle ?: $query);
+
+        $local = Creator::query()
+            ->where('safety_status', '!=', ContentSafetyDecision::BLOCKED)
+            ->where(function ($builder) use ($needle): void {
+                $like = "%{$needle}%";
+                $builder->whereRaw('LOWER(username) LIKE ?', [$like])
+                    ->orWhereRaw('LOWER(display_name) LIKE ?', [$like]);
+            })
+            ->orderByDesc('followers')
+            ->limit($limit)
+            ->get();
+
+        if ($exactHandle && $local->contains(fn (Creator $creator): bool => Str::lower($creator->username) === Str::lower($exactHandle))) {
+            return $local->map(fn (Creator $creator): array => $this->render($creator, $selected->has($creator->id)))->all();
+        }
+
+        $remote = $exactHandle
+            ? collect(array_filter([$this->providers->provider()->getProfile($exactHandle)]))
+            : $this->providers->provider()->searchAccounts($query, $limit);
+
+        $remote->each(fn (DiscoveredProfile $profile) => Cache::put(
+            $this->profileCacheKey($profile->username),
+            $profile,
+            now()->addMinutes(30),
+        ));
+
+        $remoteResults = $remote
+            ->reject(fn (DiscoveredProfile $profile): bool => $profile->isPrivate)
+            ->map(fn (DiscoveredProfile $profile): array => $this->renderProfile($profile))
+            ->values();
+
+        return $local
+            ->map(fn (Creator $creator): array => $this->render($creator, $selected->has($creator->id)))
+            ->concat($remoteResults)
+            ->unique(fn (array $creator): string => Str::lower($creator['username']))
+            ->take($limit)
+            ->values()
+            ->all();
+    }
+
+    /** @param list<string> $inputs @return list<array<string, mixed>> */
+    public function select(User $user, array $inputs): array
+    {
+        $handles = collect($inputs)
+            ->map(fn (string $input): ?string => $this->handleFromInput($input))
+            ->filter()
+            ->unique(fn (string $handle): string => Str::lower($handle))
+            ->values();
+
+        if ($handles->count() < 3 || $handles->count() > 5) {
+            throw ValidationException::withMessages([
+                'handles' => ['Choose between 3 and 5 Instagram creators.'],
+            ]);
+        }
+
+        $creators = $handles->map(fn (string $handle): Creator => $this->resolveCreator($user, $handle));
+
+        DB::transaction(function () use ($user, $creators): void {
+            $sync = $creators->values()->mapWithKeys(
+                fn (Creator $creator, int $priority): array => [$creator->id => ['priority' => $priority]],
+            )->all();
+
+            $user->inspirationCreators()->sync($sync);
+        });
+
+        $due = $creators
+            ->filter(fn (Creator $creator): bool => $creator->safety_status !== ContentSafetyDecision::BLOCKED
+                && (! $creator->last_measured_at || ! $creator->posts()->exists()))
+            ->pluck('username')
+            ->unique()
+            ->values();
+
+        $due->chunk(10)->each(fn (Collection $chunk) => MeasureAccountEngagement::dispatch($chunk->all()));
+
+        return $user->inspirationCreators()->get()
+            ->map(fn (Creator $creator): array => $this->render($creator, true))
+            ->all();
+    }
+
+    private function resolveCreator(User $user, string $handle): Creator
+    {
+        $existing = Creator::query()->whereRaw('LOWER(username) = ?', [Str::lower($handle)])->first();
+
+        if ($existing?->safety_status === ContentSafetyDecision::BLOCKED) {
+            throw ValidationException::withMessages(['handles' => ["@{$handle} cannot be selected."]]);
+        }
+
+        if ($existing) {
+            return $existing;
+        }
+
+        $profile = Cache::get($this->profileCacheKey($handle)) ?: $this->providers->provider()->getProfile($handle);
+
+        if (! $profile || $profile->isPrivate) {
+            throw ValidationException::withMessages(['handles' => ["@{$handle} is unavailable or private."]]);
+        }
+
+        $vertical = $this->primaryVertical($user) ?? 'unclassified';
+        $creator = Creator::query()
+            ->when($profile->externalId, fn ($query) => $query->where('instagram_user_id', $profile->externalId))
+            ->orWhereRaw('LOWER(username) = ?', [Str::lower($profile->username)])
+            ->first() ?? new Creator;
+        $isNew = ! $creator->exists;
+        $attributes = [
+            'instagram_user_id' => $profile->externalId ?: $creator->instagram_user_id,
+            'username' => $profile->username,
+            'display_name' => $profile->displayName ?: $profile->username,
+            'avatar_url' => $profile->avatarUrl,
+            'bio' => $profile->bio,
+            'followers' => $profile->followers,
+            'average_views' => (int) $profile->posts->avg(fn ($post): int => $post->views),
+            'average_likes' => (int) $profile->posts->avg(fn ($post): int => $post->likes),
+            'metadata' => array_replace_recursive($creator->metadata ?? [], $profile->metadata, [
+                'inspirations' => ['first_selected_at' => now()->toIso8601String()],
+            ]),
+            'discovered_at' => $creator->discovered_at ?: now(),
+            'last_fetched_at' => now(),
+        ];
+
+        if ($isNew) {
+            $attributes += [
+                'niche' => $vertical,
+                'niche_topics' => [],
+                'market' => $user->creatorProfile?->market,
+                'primary_language' => 'unknown',
+                'curation_status' => 'discovered',
+                'is_catalog_seed' => false,
+                'baseline_engagement' => 0,
+                'safety_status' => ContentSafetyDecision::PENDING,
+                'safety_reasons' => [],
+            ];
+        }
+
+        $creator->fill($attributes)->save();
+
+        return $creator;
+    }
+
+    private function handleFromInput(string $input, bool $allowKeywords = false): ?string
+    {
+        $input = trim($input);
+        $candidate = ltrim($input, '@');
+
+        if (filter_var($input, FILTER_VALIDATE_URL)) {
+            $host = Str::lower((string) parse_url($input, PHP_URL_HOST));
+            if (! in_array($host, ['instagram.com', 'www.instagram.com'], true)) {
+                throw ValidationException::withMessages(['handles' => ['Use an Instagram profile link.']]);
+            }
+
+            $candidate = explode('/', trim((string) parse_url($input, PHP_URL_PATH), '/'))[0] ?? '';
+        }
+
+        if (preg_match('/^[A-Za-z0-9._]{1,30}$/', $candidate) === 1) {
+            return $candidate;
+        }
+
+        if ($allowKeywords) {
+            return null;
+        }
+
+        throw ValidationException::withMessages(['handles' => ["{$input} is not a valid Instagram handle."]]);
+    }
+
+    /** @return array<string, mixed> */
+    private function render(Creator $creator, bool $selected): array
+    {
+        return [
+            'username' => $creator->username,
+            'display_name' => $creator->display_name,
+            'avatar_url' => $this->avatarUrl($creator),
+            'followers' => $creator->followers,
+            'niche' => $creator->niche,
+            'is_selected' => $selected,
+            'is_measured' => (bool) $creator->last_measured_at,
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private function renderProfile(DiscoveredProfile $profile): array
+    {
+        return [
+            'username' => $profile->username,
+            'display_name' => $profile->displayName ?: $profile->username,
+            // Remote CDN media is deliberately not embedded before the account is
+            // stored, because Instagram blocks it in third-party image elements.
+            'avatar_url' => null,
+            'followers' => $profile->followers,
+            'niche' => null,
+            'is_selected' => false,
+            'is_measured' => false,
+        ];
+    }
+
+    private function avatarUrl(Creator $creator): ?string
+    {
+        if (! $creator->avatar_url || ! $this->media->supports($creator->avatar_url)) {
+            return $creator->avatar_url;
+        }
+
+        $path = URL::temporarySignedRoute(
+            'media.creator',
+            now()->addHours((int) config('services.instagram_media_proxy.signature_hours')),
+            ['creator' => $creator->id],
+            absolute: false,
+        );
+
+        return rtrim((string) config('app.url'), '/').$path;
+    }
+
+    private function primaryVertical(User $user): ?string
+    {
+        return $this->verticals->canonical($user->creatorProfile?->primary_vertical)
+            ?? $this->verticals->fromSignals([
+                $user->creatorProfile?->niche,
+                ...($user->creatorProfile?->topics ?? []),
+            ]);
+    }
+
+    private function profileCacheKey(string $username): string
+    {
+        return 'creator-inspiration-profile:'.Str::lower($username);
+    }
+}

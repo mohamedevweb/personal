@@ -300,6 +300,7 @@ class MeasureAccountEngagement implements ShouldQueue
             'hook' => $this->hook($post, $creator->niche),
             'caption' => $post->caption,
             'thumbnail_url' => $post->thumbnailUrl,
+            'media_urls' => $post->mediaUrls,
             'views' => $post->views,
             'likes' => $post->likes,
             'comments' => $post->comments,

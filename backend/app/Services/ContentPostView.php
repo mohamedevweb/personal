@@ -29,6 +29,7 @@ class ContentPostView
             'hook' => $post->hook,
             'caption' => $post->caption,
             'thumbnail_url' => $this->mediaUrl('media.content', 'content', $post->id, $post->thumbnail_url),
+            'media_urls' => $this->contentMediaUrls($post),
             'views' => $post->views,
             'likes' => $post->likes,
             'comments' => $post->comments,
@@ -69,5 +70,34 @@ class ContentPostView
         );
 
         return rtrim((string) config('app.url'), '/').$path;
+    }
+
+    /** @return list<string> */
+    private function contentMediaUrls(ContentPost $post): array
+    {
+        $sourceUrls = collect($post->media_urls ?? [])
+            ->filter(fn (mixed $url): bool => is_string($url) && $url !== '')
+            ->values();
+
+        if ($sourceUrls->isEmpty() && $post->thumbnail_url) {
+            $sourceUrls->push($post->thumbnail_url);
+        }
+
+        return $sourceUrls
+            ->map(function (string $sourceUrl, int $position) use ($post): string {
+                if (! $this->media->supports($sourceUrl)) {
+                    return $sourceUrl;
+                }
+
+                $path = URL::temporarySignedRoute(
+                    'media.content.item',
+                    now()->addHours((int) config('services.instagram_media_proxy.signature_hours')),
+                    ['content' => $post->id, 'position' => $position],
+                    absolute: false,
+                );
+
+                return rtrim((string) config('app.url'), '/').$path;
+            })
+            ->all();
     }
 }

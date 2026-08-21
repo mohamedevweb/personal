@@ -16,16 +16,12 @@ const config = useRuntimeConfig()
     <div class="b-glow-blob pointer-events-none absolute left-1/2 top-1/2 h-[420px] w-[720px] -translate-x-1/2 -translate-y-1/2 opacity-70" aria-hidden="true" />
 
     <div class="relative mx-auto max-w-3xl text-center">
-      <h2 data-reveal class="font-display text-[44px] leading-[1] tracking-[-.03em] sm:text-[62px] md:text-[80px]">
-        {{ $t('landing.cta.title') }}
-        <span class="block italic text-[#a8a196]">{{ $t('landing.cta.titleTurn') }}</span>
+      <h2 data-reveal class="font-display text-[42px] leading-[1.04] tracking-[-.03em] sm:text-[58px] md:text-[74px]">
+        <span class="block">{{ $t('landing.cta.title') }}</span>
+        <span class="block">{{ $t('landing.cta.copy') }}</span>
       </h2>
 
-      <p data-reveal class="mx-auto mt-7 max-w-lg text-[18px] leading-[1.55] text-[#b3aaa1] md:text-[21px]" style="--reveal-delay:100ms">
-        {{ $t('landing.cta.copy') }}
-      </p>
-
-      <div data-reveal class="mt-12 flex flex-col items-center justify-center gap-3 sm:flex-row" style="--reveal-delay:160ms">
+      <div data-reveal class="mt-11 flex flex-col items-center justify-center gap-3 sm:flex-row" style="--reveal-delay:160ms">
         <LandingButtonLink to="/login" size="lg" class="w-full sm:w-auto">
           {{ $t('landing.cta.button') }}
           <AppIcon name="arrow" :size="17" class="transition-transform duration-300 group-hover:translate-x-1" />

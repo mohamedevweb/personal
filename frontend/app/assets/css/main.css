@@ -359,3 +359,50 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .animate-breathe { animation: none; }
   [class*="b-drift"] { animation: none !important; }
 }
+
+/* ---------------------------------------------------------------------------
+   The hero stage.
+
+   Every other section on the launch page is a flow layout on ivory. The hero
+   is a stage: a night ground with the field of posts drifting through it, and
+   the copy, the brief and the readouts sitting still on top of it. The
+   primitives below exist for that one composition, and nothing outside the
+   hero uses them.
+   --------------------------------------------------------------------------- */
+@layer utilities {
+  /* The floor the field comes out of. Light pools at the bottom of the stage,
+     in the signature, so the drift reads as arriving from somewhere rather
+     than as particles in a box. */
+  .b-floor {
+    background:
+      radial-gradient(58% 38% at 50% 106%, rgba(224, 79, 54, .24) 0%, rgba(224, 79, 54, .07) 46%, transparent 74%),
+      linear-gradient(180deg, transparent 56%, rgba(224, 79, 54, .045) 100%);
+  }
+
+  /* The furthest plane: a column rail printed into the dark at the threshold
+     of visible. */
+  .b-guide {
+    background: linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, .05) 16%, rgba(255, 255, 255, .05) 76%, transparent 100%);
+  }
+}
+
+@layer components {
+  /* The knob: a paper disc carrying the mark, sitting on the corner of a card
+     that floats over the field. It is the only control the stage has that is
+     not a word. */
+  .b-knob {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 46px;
+    width: 46px;
+    border-radius: 999px;
+    background: var(--b-surface);
+    color: var(--b-black);
+    box-shadow: 0 14px 34px -16px rgba(9, 8, 7, .9);
+    transition: transform .45s cubic-bezier(.22, 1, .36, 1), background .3s ease;
+  }
+  .b-knob:hover { background: #fff; transform: scale(1.09) rotate(9deg); }
+}
+
+

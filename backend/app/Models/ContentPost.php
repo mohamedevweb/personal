@@ -21,6 +21,7 @@ class ContentPost extends Model
             'measured_at' => 'datetime',
             'shares' => 'integer',
             'metadata' => 'array',
+            'media_urls' => 'array',
             'analysis_translations' => 'array',
             'safety_reasons' => 'array',
             'last_fetched_at' => 'datetime',

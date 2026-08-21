@@ -38,27 +38,71 @@ class RecommendationService
     {
         $savedIds = $user->savedContent()->pluck('content_post_id')->flip();
         $primaryVertical = $this->primaryVertical($user);
+        $inspirationIds = $user->inspirationCreators()->pluck('creators.id');
 
-        $ranked = $this->candidates($user, $limit, $primaryVertical)
+        $ranked = $this->candidates($user, $limit, $primaryVertical, $inspirationIds)
             ->map(fn (ContentPost $post): array => ['post' => $post, 'ranking' => $this->ranker->rank($post)])
             ->sortByDesc('ranking.score')
             ->values();
 
-        return $this->markets->allocate($ranked, $user->creatorProfile?->market, $limit, $primaryVertical)
-            ->map(function (array $item) use ($user, $savedIds): array {
-                $post = $item['post'];
-                $ranking = $item['ranking'];
+        $inspirationLookup = $inspirationIds->flip();
+        $inspired = $ranked
+            ->filter(fn (array $item): bool => $inspirationLookup->has($item['post']->creator_id))
+            ->groupBy('post.creator_id')
+            ->flatMap(fn (Collection $posts): Collection => $posts->take(2))
+            ->sortByDesc('ranking.score')
+            ->take($limit)
+            ->values();
+        $fallback = $this->markets->allocate(
+            $ranked->reject(fn (array $item): bool => $inspirationLookup->has($item['post']->creator_id)),
+            $user->creatorProfile?->market,
+            max(0, $limit - $inspired->count()),
+            $primaryVertical,
+        );
 
-                return $this->view->make($post, $user, $ranking['score'], $savedIds->has($post->id)) + [
-                    'why_recommended' => $this->reason($post),
-                    'signals' => array_values(array_filter([
-                        // The lift itself is already on the card as a localized badge,
-                        // so it is deliberately not repeated here.
-                        $post->published_at->isAfter(now()->subDay()) ? 'Trending' : null,
-                        $post->published_at->diffForHumans(),
-                    ])),
-                ];
-            })
+        return $this->render($inspired->concat($fallback), $user, $savedIds);
+    }
+
+    /** @return Collection<int, array<string, mixed>> */
+    public function globalForUser(User $user, int $limit = 12): Collection
+    {
+        $savedIds = $user->savedContent()->pluck('content_post_id')->flip();
+        $ranked = $this->pool($user, collect())
+            ->whereNotNull('measured_at')
+            ->where('outlier_score', '>=', (float) config('services.discovery.min_outlier_score'))
+            ->whereHas('creator', fn (Builder $creator): Builder => $creator->where('curation_status', 'approved'))
+            ->orderByDesc('outlier_score')
+            ->limit($limit * self::CANDIDATE_MULTIPLIER)
+            ->get()
+            ->map(fn (ContentPost $post): array => ['post' => $post, 'ranking' => $this->ranker->rank($post)])
+            ->sortByDesc('ranking.score')
+            ->take($limit)
+            ->values();
+
+        return $this->render($ranked, $user, $savedIds);
+    }
+
+    /**
+     * @param  Collection<int, array{post: ContentPost, ranking: array<string, float>}>  $ranked
+     * @param  Collection<int, mixed>  $savedIds
+     * @return Collection<int, array<string, mixed>>
+     */
+    private function render(Collection $ranked, User $user, Collection $savedIds): Collection
+    {
+        return $ranked->map(function (array $item) use ($user, $savedIds): array {
+            $post = $item['post'];
+            $ranking = $item['ranking'];
+
+            return $this->view->make($post, $user, $ranking['score'], $savedIds->has($post->id)) + [
+                'why_recommended' => $this->reason($post),
+                'signals' => array_values(array_filter([
+                    // The lift itself is already on the card as a localized badge,
+                    // so it is deliberately not repeated here.
+                    $post->published_at->isAfter(now()->subDay()) ? 'Trending' : null,
+                    $post->published_at->diffForHumans(),
+                ])),
+            ];
+        })
             ->values();
     }
 
@@ -74,14 +118,26 @@ class RecommendationService
      *
      * @return Collection<int, ContentPost>
      */
-    private function candidates(User $user, int $limit, ?string $primaryVertical): Collection
-    {
-        $query = $this->pool($user)
+    private function candidates(
+        User $user,
+        int $limit,
+        ?string $primaryVertical,
+        Collection $inspirationIds,
+    ): Collection {
+        $query = $this->pool($user, $inspirationIds)
             ->whereNotNull('measured_at')
             ->where('outlier_score', '>=', (float) config('services.discovery.min_outlier_score'));
 
+        $inspired = $inspirationIds->isEmpty()
+            ? collect()
+            : (clone $query)
+                ->whereIn('creator_id', $inspirationIds)
+                ->orderByDesc('outlier_score')
+                ->limit($limit * self::CANDIDATE_MULTIPLIER)
+                ->get();
+
         if (config('creator_catalog.curated_only')) {
-            return collect(['FR', 'GB', 'US'])
+            return $inspired->concat(collect(['FR', 'GB', 'US'])
                 ->flatMap(function (string $market) use ($query, $limit, $primaryVertical): Collection {
                     $marketQuery = (clone $query)
                         ->whereHas('creator', fn (Builder $creator): Builder => $creator->where('market', $market));
@@ -99,7 +155,7 @@ class RecommendationService
                             ->limit($limit * self::CANDIDATE_MULTIPLIER)
                             ->get(),
                     );
-                })
+                }))
                 ->unique('id')
                 ->values();
         }
@@ -112,14 +168,14 @@ class RecommendationService
                 ->get()
             : collect();
 
-        return $matching->concat(
+        return $inspired->concat($matching)->concat(
             $query->orderByDesc('outlier_score')
                 ->limit($limit * self::CANDIDATE_MULTIPLIER)
                 ->get(),
         )->unique('id')->values();
     }
 
-    private function pool(User $user): Builder
+    private function pool(User $user, Collection $inspirationIds): Builder
     {
         $window = now()->subDays((int) config('services.discovery.feed_window_days'));
 
@@ -131,12 +187,18 @@ class RecommendationService
             // The absolute floors. outlier_score is a ratio, so on its own it rates a
             // post going from two likes to three as a 1.5x breakout.
             ->whereRaw('likes + comments >= ?', [(int) config('services.discovery.min_post_engagement')])
-            ->whereHas('creator', function (Builder $creator): void {
+            ->whereHas('creator', function (Builder $creator) use ($inspirationIds): void {
                 $creator->where('followers', '>=', (int) config('services.discovery.min_followers'))
                     ->where('safety_status', 'allowed');
 
                 if (config('creator_catalog.curated_only')) {
-                    $creator->where('curation_status', 'approved');
+                    $creator->where(function (Builder $curation) use ($inspirationIds): void {
+                        $curation->where('curation_status', 'approved');
+
+                        if ($inspirationIds->isNotEmpty()) {
+                            $curation->orWhereIn('id', $inspirationIds);
+                        }
+                    });
                 }
             });
     }

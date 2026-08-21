@@ -94,6 +94,11 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('generation', fn (Request $request) => Limit::perMinute(10)
             ->by($request->user()?->id ?: $request->ip()));
+
+        // Creator search can spend provider credits, so it only runs after an
+        // explicit user action and has a separate per-account budget.
+        RateLimiter::for('discovery', fn (Request $request) => Limit::perMinute(10)
+            ->by($request->user()?->id ?: $request->ip()));
     }
 
     private function registerModelClients(): void

@@ -193,6 +193,8 @@ class HikerInstagramProvider implements InstagramDataProvider
         $format = $this->format((int) ($row['media_type'] ?? 1), (string) ($row['product_type'] ?? ''));
         $caption = (string) ($row['caption_text'] ?? data_get($row, 'caption.text', ''));
 
+        $thumbnailUrl = $this->thumbnail($row);
+
         return new DiscoveredPost(
             sourceUrl: $code
                 ? 'https://www.instagram.com/'.($format === 'reel' ? 'reel' : 'p').'/'.$code.'/'
@@ -202,7 +204,7 @@ class HikerInstagramProvider implements InstagramDataProvider
             avatarUrl: $profile?->avatarUrl ?: $this->nullableString($owner['profile_pic_url'] ?? null),
             followers: $profile?->followers ?? 0,
             caption: $caption,
-            thumbnailUrl: $this->thumbnail($row),
+            thumbnailUrl: $thumbnailUrl,
             likes: max(0, (int) ($row['like_count'] ?? 0)),
             comments: max(0, (int) ($row['comment_count'] ?? 0)),
             views: max(0, (int) ($row['play_count'] ?? $row['view_count'] ?? 0)),
@@ -225,6 +227,7 @@ class HikerInstagramProvider implements InstagramDataProvider
                     ],
                 ],
             ], fn (mixed $value): bool => $value !== null),
+            mediaUrls: $format === 'carousel' ? InstagramCarouselMedia::urls($row, $thumbnailUrl) : [],
         );
     }
 

@@ -6,6 +6,7 @@ use App\Jobs\DiscoverNicheContent;
 use App\Services\RecommendationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Symfony\Component\HttpFoundation\Response;
 
 class FeedController extends Controller
@@ -14,6 +15,19 @@ class FeedController extends Controller
     {
         $items = $recommendations->forUser($request->user());
 
+        return $this->response($request, $items);
+    }
+
+    public function global(Request $request, RecommendationService $recommendations): JsonResponse
+    {
+        $items = $recommendations->globalForUser($request->user());
+
+        return $this->response($request, $items);
+    }
+
+    /** @param Collection<int, array<string, mixed>> $items */
+    private function response(Request $request, Collection $items): JsonResponse
+    {
         return response()->json([
             'greeting_name' => str($request->user()->name)->before(' ')->toString(),
             'opportunity_count' => $items->count(),

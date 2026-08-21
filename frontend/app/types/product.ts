@@ -14,6 +14,7 @@ export interface ContentPost {
   hook: string
   caption: string
   thumbnail_url: string | null
+  media_urls: string[]
   views: number
   likes: number
   comments: number

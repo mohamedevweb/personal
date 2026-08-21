@@ -141,6 +141,9 @@ class DatabaseSeeder extends Seeder
                     'format' => $index % 3 === 0 ? 'Carousel' : 'Reel',
                     'caption' => $hook."\n\nThe useful part was not the outcome. It was the decision that changed what happened next. Here is the honest breakdown and the lesson I would carry into the next build.",
                     'thumbnail_url' => $images[$index % count($images)],
+                    'media_urls' => $index % 3 === 0
+                        ? collect(range(0, 4))->map(fn (int $slide): string => $images[($index + $slide) % count($images)])->all()
+                        : [],
                     'views' => $views,
                     'likes' => $likes,
                     'comments' => $comments,

@@ -3,7 +3,11 @@ import type { InstagramStatusResponse } from '~/types/instagram'
 export function useInstagram() {
   const { apiFetch } = usePersonalApi()
   const { t } = useI18n()
-  const status = ref<InstagramStatusResponse>({ connected: false })
+  const status = ref<InstagramStatusResponse>({
+    connected: false,
+    inspiration_count: 0,
+    onboarding_complete: false
+  })
   const loading = ref(true)
   const error = ref<string | null>(null)
   let pollTimer: ReturnType<typeof setTimeout> | undefined

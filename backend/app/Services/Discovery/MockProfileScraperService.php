@@ -51,6 +51,9 @@ class MockProfileScraperService implements ProfileDiscoveryService
         $comments = (int) round($likes * (0.01 + (($postSeed % 40) / 1000)));
         $views = $likes * (5 + ($postSeed % 12));
 
+        $format = self::FORMATS[$postSeed % count(self::FORMATS)];
+        $thumbnailUrl = "https://picsum.photos/seed/{$postSeed}/640/800";
+
         return new DiscoveredPost(
             sourceUrl: "https://www.instagram.com/p/mock-{$username}-{$index}/",
             username: $username,
@@ -58,14 +61,17 @@ class MockProfileScraperService implements ProfileDiscoveryService
             avatarUrl: "https://i.pravatar.cc/150?u={$username}",
             followers: $followers,
             caption: "Recent post {$index} from {$username}",
-            thumbnailUrl: "https://picsum.photos/seed/{$postSeed}/640/800",
+            thumbnailUrl: $thumbnailUrl,
             likes: $likes,
             comments: $comments,
             views: $views,
             publishedAt: CarbonImmutable::now()->subHours(($postSeed % 240) + 2),
-            format: self::FORMATS[$postSeed % count(self::FORMATS)],
+            format: $format,
             hashtags: [],
             externalId: "mock-{$username}-{$index}",
+            mediaUrls: $format === 'carousel'
+                ? collect(range(0, 4))->map(fn (int $slide): string => "https://picsum.photos/seed/{$postSeed}-{$slide}/640/800")->all()
+                : [],
         );
     }
 }

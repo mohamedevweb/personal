@@ -234,6 +234,8 @@ class ScrapeCreatorsInstagramProvider implements InstagramDataProvider
         $caption = is_array($caption) ? ($caption['text'] ?? '') : $caption;
         $caption = is_string($caption) ? $caption : '';
 
+        $thumbnailUrl = $this->thumbnail($row);
+
         return new DiscoveredPost(
             sourceUrl: $code
                 ? 'https://www.instagram.com/'.($format === 'reel' ? 'reel' : 'p').'/'.$code.'/'
@@ -243,7 +245,7 @@ class ScrapeCreatorsInstagramProvider implements InstagramDataProvider
             avatarUrl: $profile?->avatarUrl ?: $this->nullableString($owner['profile_pic_url'] ?? null),
             followers: $profile?->followers ?? 0,
             caption: $caption,
-            thumbnailUrl: $this->thumbnail($row),
+            thumbnailUrl: $thumbnailUrl,
             likes: max(0, (int) ($row['like_count'] ?? data_get($row, 'edge_media_preview_like.count', 0))),
             comments: max(0, (int) ($row['comment_count'] ?? data_get($row, 'edge_media_to_comment.count', 0))),
             views: max(0, (int) ($row['play_count'] ?? $row['video_play_count'] ?? $row['video_view_count'] ?? $row['view_count'] ?? 0)),
@@ -269,6 +271,7 @@ class ScrapeCreatorsInstagramProvider implements InstagramDataProvider
                     ],
                 ],
             ], fn (mixed $value): bool => $value !== null),
+            mediaUrls: $format === 'carousel' ? InstagramCarouselMedia::urls($row, $thumbnailUrl) : [],
         );
     }
 

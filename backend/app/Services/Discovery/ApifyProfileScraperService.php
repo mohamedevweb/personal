@@ -115,6 +115,9 @@ class ApifyProfileScraperService implements ProfileDiscoveryService
             return null;
         }
 
+        $thumbnailUrl = is_string($post['displayUrl'] ?? null) ? $post['displayUrl'] : null;
+        $format = $this->format((string) ($post['type'] ?? 'Image'));
+
         return new DiscoveredPost(
             sourceUrl: $url,
             username: $username,
@@ -122,13 +125,13 @@ class ApifyProfileScraperService implements ProfileDiscoveryService
             avatarUrl: is_string($avatarUrl) ? $avatarUrl : null,
             followers: $followers,
             caption: (string) ($post['caption'] ?? ''),
-            thumbnailUrl: $post['displayUrl'] ?? null,
+            thumbnailUrl: $thumbnailUrl,
             // Apify returns -1 when Instagram hides the count; treat that as unknown.
             likes: max(0, (int) ($post['likesCount'] ?? 0)),
             comments: max(0, (int) ($post['commentsCount'] ?? 0)),
             views: max(0, (int) ($post['videoViewCount'] ?? $post['videoPlayCount'] ?? 0)),
             publishedAt: $this->publishedAt($post['timestamp'] ?? null),
-            format: $this->format((string) ($post['type'] ?? 'Image')),
+            format: $format,
             hashtags: array_values(array_filter((array) ($post['hashtags'] ?? []), 'is_string')),
             externalId: isset($post['id']) ? (string) $post['id'] : null,
             shares: max(0, (int) ($post['sharesCount'] ?? 0)),
@@ -136,6 +139,7 @@ class ApifyProfileScraperService implements ProfileDiscoveryService
                 'short_code' => $post['shortCode'] ?? null,
                 'duration' => $post['videoDuration'] ?? null,
             ], fn (mixed $value): bool => $value !== null),
+            mediaUrls: $format === 'carousel' ? InstagramCarouselMedia::urls($post, $thumbnailUrl) : [],
         );
     }
 

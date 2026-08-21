@@ -59,6 +59,10 @@ Cost and depth are tunable with `OPENAI_MODEL`, `OPENAI_MAX_OUTPUT_TOKENS`, and 
 
 A post earns its place by beating the account that published it, not by coming from a large one. The connected account still comes from Meta's official Instagram API. Public discovery goes through `InstagramDataProvider`, with HikerAPI as the default driver, ScrapeCreators as a second real-data driver, Apify as a fallback, and a deterministic mock for tests and unconfigured development.
 
+After the first Instagram import, onboarding asks the user to choose three to five creators who genuinely inspire their work. Personal suggests safe approved accounts from the detected vertical and only calls the discovery provider when the user explicitly searches or pastes a handle. This private selection leads that user's feed, with at most two posts per inspiration for diversity. The approved catalogue fills every remaining place while newly selected accounts are measured and checked for safety. A user-selected account stays `discovered` and never becomes part of the global catalogue without the normal editorial approval.
+
+The feed has two views. `GET /api/feed` powers **For You**, combining private inspirations with approved creators close to the user's vertical and market. `GET /api/feed/global` powers **Global**, ranking all recent, measured and safe posts from approved creators with the same outlier and freshness model, but without niche or market quotas.
+
 Set `DISCOVERY_DRIVER=scrapecreators` and `SCRAPECREATORS_API_KEY` to run the normal creator discovery and account measurement jobs through ScrapeCreators. Profile responses use ScrapeCreators' provider-side cache for the same three-day window as account measurement by default. Change `SCRAPECREATORS_CACHE_MAX_AGE` when testing freshness versus cost.
 
 To compare HikerAPI and ScrapeCreators on the same niche without writing to the database, run:

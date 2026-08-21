@@ -4,6 +4,7 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ContentController;
+use App\Http\Controllers\CreatorInspirationController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\InstagramConnectionController;
@@ -49,6 +50,10 @@ Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 've
 Route::get('/media/content/{content}', [MediaController::class, 'content'])
     ->middleware('signed:relative')
     ->name('media.content');
+Route::get('/media/content/{content}/{position}', [MediaController::class, 'contentItem'])
+    ->whereNumber('position')
+    ->middleware('signed:relative')
+    ->name('media.content.item');
 Route::get('/media/creator/{creator}', [MediaController::class, 'creator'])
     ->middleware('signed:relative')
     ->name('media.creator');
@@ -64,6 +69,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function (): void {
     Route::get('/me/profile', [ProfileController::class, 'show']);
     Route::patch('/me/profile', [ProfileController::class, 'update']);
     Route::get('/feed', [FeedController::class, 'index']);
+    Route::get('/feed/global', [FeedController::class, 'global']);
     Route::post('/feed/refresh', [FeedController::class, 'refresh']);
     Route::get('/content/{content}', [ContentController::class, 'show']);
     Route::post('/content/{content}/save', [ContentController::class, 'save']);
@@ -76,6 +82,13 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function (): void {
     Route::get('/saved', SavedContentController::class);
     Route::get('/remixes/{remix}', [RemixController::class, 'show']);
     Route::patch('/remixes/{remix}', [RemixController::class, 'update']);
+    Route::get('/creator-inspirations', [CreatorInspirationController::class, 'index']);
+    Route::put('/creator-inspirations', [CreatorInspirationController::class, 'update'])
+        ->middleware('throttle:discovery');
+});
+
+Route::middleware(['auth:sanctum', 'verified', 'throttle:discovery'])->group(function (): void {
+    Route::get('/creator-inspirations/search', [CreatorInspirationController::class, 'search']);
 });
 
 // Generation calls a language model, so it gets a tighter budget than the rest

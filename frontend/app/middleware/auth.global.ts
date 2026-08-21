@@ -29,9 +29,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return navigateTo('/verify-email')
   }
 
-  // First-login onboarding gate: connecting Instagram and finishing the import
-  // is the first thing a new account does. Until it completes, the rest of the
-  // app stays out of reach. Once done we cache it so we stop re-checking.
+  // First-login onboarding gate: the creator connects Instagram, completes the
+  // import and chooses the private inspiration set that seeds their first feed.
   const onboarded = useState('personal-onboarded', () => false)
 
   // The user can choose to skip connecting Instagram; that choice (persisted in
@@ -43,7 +42,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (!onboarded.value) {
     try {
       const status = await apiFetch<InstagramStatusResponse>('/api/integrations/instagram/status')
-      onboarded.value = status.connected && status.account?.sync_status === 'completed'
+      onboarded.value = status.onboarding_complete
     } catch {
       // If we cannot verify the connection, don't trap the user on a blank gate.
       return
