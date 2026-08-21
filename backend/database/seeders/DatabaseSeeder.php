@@ -30,15 +30,15 @@ class DatabaseSeeder extends Seeder
         CreatorProfile::query()->updateOrCreate(['user_id' => $user->id], [
             'instagram_username' => null,
             'display_name' => 'Mohamed Chettah',
-            'bio' => 'Building products for creators and sharing the founder journey.',
-            'niche' => 'Entrepreneurship / SaaS',
-            'audience_description' => 'Founders, creators and entrepreneurs building internet businesses.',
-            'positioning' => 'Building products at the intersection of SaaS and the creator economy.',
-            'topics' => ['Building products', 'Creator economy', 'Entrepreneurship', 'Founder journey'],
-            'tone' => ['Direct', 'Personal', 'Transparent', 'Educational'],
-            'current_projects' => ['Personal'],
-            'goals' => ['Build a personal brand', 'Grow an audience', 'Launch Personal'],
-            'content_strengths' => ['Founder stories', 'Personal lessons', 'Behind the scenes'],
+            'bio' => null,
+            'niche' => null,
+            'audience_description' => null,
+            'positioning' => null,
+            'topics' => [],
+            'tone' => [],
+            'current_projects' => [],
+            'goals' => [],
+            'content_strengths' => [],
         ]);
 
         $creators = collect([

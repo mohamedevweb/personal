@@ -148,6 +148,22 @@ class PersonalMvpTest extends TestCase
         $this->assertNull($profile->discovery_refreshed_at);
     }
 
+    public function test_demo_personal_memory_is_empty_without_a_synced_instagram_account(): void
+    {
+        $this->assertFalse($this->user->instagramAccount()->exists());
+
+        $this->actingAs($this->user)->getJson('/api/me/profile')
+            ->assertOk()
+            ->assertJsonPath('profile.niche', null)
+            ->assertJsonPath('profile.audience_description', null)
+            ->assertJsonPath('profile.positioning', null)
+            ->assertJsonPath('profile.topics', [])
+            ->assertJsonPath('profile.tone', [])
+            ->assertJsonPath('profile.current_projects', [])
+            ->assertJsonPath('profile.goals', [])
+            ->assertJsonPath('profile.content_strengths', []);
+    }
+
     public function test_a_new_personal_memory_does_not_claim_placeholder_insights(): void
     {
         $user = User::factory()->create();
