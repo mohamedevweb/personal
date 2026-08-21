@@ -37,14 +37,14 @@ $catalog = [
         ['paulinelaigneau', ['entrepreneuriat', 'podcast', 'personal branding'], 'Entrepreneure et créatrice française publiant des conseils business.', $sources['branding']],
         ['antoinebm', ['création de contenu', 'marketing', 'entrepreneuriat'], 'Créateur français spécialisé dans les business de contenu.', $sources['branding']],
         ['anthonybourbon1', ['entrepreneuriat', 'investissement', 'personal branding'], 'Entrepreneur français avec une présence éditoriale incarnée.', $sources['branding']],
-        ['elarch', ['entrepreneuriat', 'investissement', 'leadership'], 'Entrepreneur français publiant des formats incarnés sur le business.', $sources['branding']],
+        ['yomidenzel', ['entrepreneuriat', 'e-commerce', 'personal branding'], 'Entrepreneur francophone publiant des formats incarnés sur le business en ligne.', 'https://veryimportantpeople.fr/NEWS/Top-10-des-influenceurs-business-et-entrepreneurs-francais-en-2026'],
     ],
     'tech-ai' => [
         ['bprkt', ['produits tech', 'setup', 'tests'], 'Créateur français spécialisé dans les produits et usages tech.', $sources['tech']],
         ['leotechmaker', ['technologie', 'produits tech', 'vulgarisation'], 'Créateur français spécialisé dans l’actualité et les produits tech.', $sources['tech']],
         ['mrjojol67', ['smartphones', 'produits tech', 'tests'], 'Créateur tech français publiant des tests et de la vulgarisation.', $sources['tech']],
         ['jbaptisten', ['produits tech', 'tests', 'actualité tech'], 'Créateur français historique de contenus high-tech.', $sources['tech']],
-        ['stevenlathoud', ['produits tech', 'vidéo', 'tests'], 'Créateur français mêlant démonstrations tech et production vidéo.', $sources['tech']],
+        ['pulseeon_', ['produits tech', 'astuces', 'tests'], 'Créateur tech français publiant des tests produits et des astuces courtes.', 'https://www.heepsy.com/es/top-instagram/tech/france'],
     ],
     'beauty-fashion' => [
         ['lenamahfouf', ['mode', 'lifestyle', 'luxe'], 'Créatrice française reconnue dans la mode et le lifestyle.', $sources['beauty']],
@@ -57,14 +57,12 @@ $catalog = [
         ['chloe___bloom', ['méditation', 'développement personnel', 'bien-être'], 'Créatrice française centrée sur le bien-être et la méditation.', $sources['wellness']],
         ['christophe_andre_officiel', ['méditation', 'santé mentale', 'psychologie'], 'Psychiatre français publiant du contenu incarné sur la santé mentale.', $sources['wellness']],
         ['lilibarbery', ['méditation', 'respiration', 'bien-être'], 'Créatrice française spécialisée dans la méditation et la respiration.', $sources['wellness']],
-        ['delphine.py', ['psychologie', 'santé mentale', 'émotions'], 'Psychologue et créatrice française spécialisée dans la santé mentale.', 'https://podcasts.apple.com/fr/podcast/cest-une-belle-journ%C3%A9e-pour-en-parler/id1669932172'],
-        ['thebraingutscientist', ['neurosciences', 'santé globale', 'bien-être'], 'Docteure et créatrice française sur la santé du cerveau et du microbiote.', 'https://www.modash.io/find-influencers/france/health'],
+        ['doc_charlotte_neurologue', ['neurologie', 'santé globale', 'prévention'], 'Neurologue et créatrice française vulgarisant le fonctionnement du cerveau.', 'https://influencers.feedspot.com/france_health_instagram_influencers/'],
+        ['anaiswerestchack', ['prévention', 'santé globale', 'accès aux soins'], 'Médecin et créatrice française publiant des conseils de santé et de prévention.', 'https://leclaireur.fnac.com/evenement/662564-dr-anais-werestchack-et-brice-philippon-en-dedicace-a-la-fnac-clermont-ferrand/'],
     ],
 ];
 
 $entries = [];
-$pendingHandles = ['paulinelaigneau', 'elarch', 'bprkt', 'jbaptisten', 'stevenlathoud', 'delphine.py', 'thebraingutscientist'];
-
 foreach ($catalog as $vertical => $creators) {
     foreach ($creators as [$handle, $topics, $rationale, $editorialSource]) {
         $entries[] = [
@@ -76,7 +74,7 @@ foreach ($catalog as $vertical => $creators) {
             'rationale' => $rationale,
             'source_urls' => ["https://www.instagram.com/{$handle}/", $editorialSource],
             'editorially_verified_at' => '2026-08-21',
-            'status' => in_array($handle, $pendingHandles, true) ? 'pending' : 'approved',
+            'status' => 'approved',
         ];
     }
 }

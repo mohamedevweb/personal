@@ -26,6 +26,7 @@ class DiscoverNicheContentTest extends TestCase
         parent::setUp();
 
         config([
+            'creator_catalog.curated_only' => false,
             'services.discovery.driver' => 'mock',
             'services.discovery.search_query_limit' => 3,
             'services.discovery.search_results_per_query' => 3,
@@ -117,6 +118,48 @@ class DiscoverNicheContentTest extends TestCase
             MeasureAccountEngagement::class,
             fn (MeasureAccountEngagement $job): bool => in_array('waiting.creator', $job->usernames, true),
         );
+    }
+
+    public function test_curated_refresh_measures_approved_creators_without_content_in_chunks(): void
+    {
+        Bus::fake();
+        config([
+            'creator_catalog.curated_only' => true,
+            'services.discovery.measure_batch' => 12,
+            'services.discovery.measure_chunk' => 10,
+        ]);
+
+        foreach (range(1, 12) as $index) {
+            Creator::query()->create([
+                'username' => "approved.{$index}",
+                'display_name' => "Approved {$index}",
+                'niche' => 'tech-ai',
+                'followers' => 25_000,
+                'average_views' => 0,
+                'average_likes' => 0,
+                'curation_status' => 'approved',
+                'last_measured_at' => now(),
+            ]);
+        }
+
+        Creator::query()->create([
+            'username' => 'not.approved',
+            'display_name' => 'Not Approved',
+            'niche' => 'tech-ai',
+            'followers' => 25_000,
+            'average_views' => 0,
+            'average_likes' => 0,
+            'curation_status' => 'discovered',
+        ]);
+
+        $this->discover();
+
+        Bus::assertDispatchedTimes(MeasureAccountEngagement::class, 2);
+        $handles = Bus::dispatched(MeasureAccountEngagement::class)
+            ->flatMap(fn (MeasureAccountEngagement $job): array => $job->usernames);
+
+        $this->assertCount(12, $handles);
+        $this->assertFalse($handles->contains('not.approved'));
     }
 
     public function test_reach_bait_terms_are_stripped_from_account_queries(): void

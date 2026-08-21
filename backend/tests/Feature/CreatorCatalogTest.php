@@ -38,16 +38,13 @@ class CreatorCatalogTest extends TestCase
             $this->assertTrue($group->every(fn (array $entry): bool => $entry['market'] === 'FR'));
         }
 
-        $this->assertCount(23, $entries->where('status', 'approved'));
+        $this->assertCount(30, $entries->where('status', 'approved'));
+        $this->assertCount(0, $entries->where('status', 'pending'));
         $this->assertEqualsCanonicalizing(
-            ['paulinelaigneau', 'elarch', 'bprkt', 'jbaptisten', 'stevenlathoud', 'delphine.py', 'thebraingutscientist'],
-            $entries->where('status', 'pending')->pluck('handle')->all(),
+            ['jujufitcats', 'majormouvement', 'caroline.mignaux', 'leotechmaker', 'mrjojol67', 'paulinelaigneau', 'bprkt', 'jbaptisten'],
+            $entries->pluck('handle')->intersect(['jujufitcats', 'majormouvement', 'caroline.mignaux', 'leotechmaker', 'mrjojol67', 'paulinelaigneau', 'bprkt', 'jbaptisten'])->all(),
         );
-        $this->assertEqualsCanonicalizing(
-            ['jujufitcats', 'majormouvement', 'caroline.mignaux', 'leotechmaker', 'mrjojol67', 'paulinelaigneau', 'elarch'],
-            $entries->pluck('handle')->intersect(['jujufitcats', 'majormouvement', 'caroline.mignaux', 'leotechmaker', 'mrjojol67', 'paulinelaigneau', 'elarch'])->all(),
-        );
-        $this->assertEmpty($entries->pluck('handle')->intersect(['juju_fitcats', 'major_mouvement', 'carolinemignaux', 'leo_techmaker', 'jojol', 'leoduff', 'matthieustefani', 'alexhitchens']));
+        $this->assertEmpty($entries->pluck('handle')->intersect(['juju_fitcats', 'major_mouvement', 'carolinemignaux', 'leo_techmaker', 'jojol', 'leoduff', 'matthieustefani', 'alexhitchens', 'elarch', 'stevenlathoud', 'delphine.py', 'thebraingutscientist']));
         $this->assertTrue($entries->every(function (array $entry): bool {
             $instagramUrl = "https://www.instagram.com/{$entry['handle']}/";
 
@@ -194,6 +191,19 @@ class CreatorCatalogTest extends TestCase
 
         $this->artisan('personal:audit-creator-catalog --provider=mock --handle=second_coach')
             ->assertSuccessful();
+    }
+
+    public function test_audit_fails_clearly_when_handles_are_missing_from_deployed_manifest(): void
+    {
+        $provider = \Mockery::mock(InstagramDataProvider::class);
+        $provider->shouldNotReceive('getProfile');
+        $manager = \Mockery::mock(InstagramDataProviderManager::class);
+        $manager->shouldNotReceive('provider');
+        $this->app->instance(InstagramDataProviderManager::class, $manager);
+
+        $this->artisan('personal:audit-creator-catalog --provider=mock --handle=missing_coach')
+            ->expectsOutput('No catalog entries matched the supplied filters. Deploy the manifest containing these handles before auditing them.')
+            ->assertFailed();
     }
 
     public function test_audit_reports_provider_error_details_with_null_metrics(): void

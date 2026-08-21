@@ -100,7 +100,7 @@ Discovery cost is capped on every axis: search queries have a cooldown (`DISCOVE
 
 ## Curated creator catalog
 
-The first production dataset is a versioned Golden Catalog in `backend/database/catalog/instagram_creators.php`. It contains 30 human-curated French creators, five in each of the six canonical verticals. Each entry records the exact Instagram URL, editorial sources, topics and rationale. Followers and recognition tiers are intentionally absent because they are measured rather than guessed. Every entry starts as `pending`, so its presence in the manifest never authorizes a database write.
+The first production dataset is a versioned Golden Catalog in `backend/database/catalog/instagram_creators.php`. It contains 30 human-curated French creators, five in each of the six canonical verticals. Each entry records the exact Instagram URL, editorial sources, topics and rationale. Followers and recognition tiers are intentionally absent because they are measured rather than guessed. Entries start as `pending` during review and are changed to `approved` only after the human editorial decision. Golden Catalog FR v1 is now fully approved for import.
 
 Run the read-only audit first. It makes one profile request per creator. A separate posts request is made only when the profile response contains fewer than six publications. It then writes JSON and CSV reports under `backend/storage/app/private/catalog-reports` on the host and `/var/www/html/storage/app/private/catalog-reports` inside Docker:
 

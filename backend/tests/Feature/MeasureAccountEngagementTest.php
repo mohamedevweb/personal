@@ -117,7 +117,7 @@ class MeasureAccountEngagementTest extends TestCase
         $this->assertLessThan(1.0, $orphan->outlier_score);
     }
 
-    public function test_it_skips_recently_measured_accounts(): void
+    public function test_it_rebuilds_content_for_a_recently_measured_account_when_posts_are_missing(): void
     {
         $fresh = Creator::query()->create([
             'username' => 'sushi.co',
@@ -134,9 +134,8 @@ class MeasureAccountEngagementTest extends TestCase
 
         $fresh->refresh();
 
-        // Untouched: still the seeded values, no posts ingested.
-        $this->assertSame(123, $fresh->followers);
-        $this->assertSame(0, $fresh->posts()->count());
+        $this->assertNotSame(123, $fresh->followers);
+        $this->assertGreaterThan(0, $fresh->posts()->count());
     }
 
     public function test_top_accounts_rank_by_engagement_rate(): void

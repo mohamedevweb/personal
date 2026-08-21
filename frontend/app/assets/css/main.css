@@ -115,6 +115,23 @@ button, a { -webkit-tap-highlight-color: transparent; }
   --b-line: var(--line);
   --b-line-soft: var(--line-soft);
   --b-display: var(--display);
+
+  /* The signature, given a full scale. The launch page leans on red the way
+     the product leans on it in a chart: to say "this is the number that
+     matters". One hue, six steps, no second accent anywhere on the page. */
+  --b-red-50: #fdf7f4;
+  --b-red-100: #fbeee9;
+  --b-red-200: #f4d3c8;
+  --b-red-300: #eda893;
+  --b-red-400: #ea7a5e;
+  --b-red-500: #e04f36;
+  --b-red-600: #c53f28;
+  --b-red-700: #a8402a;
+  /* Red on the near-black surfaces has to lift off them, so it warms and
+     brightens rather than staying at the ivory-side value. */
+  --b-red-lit: #ff6a4d;
+  --b-glow: rgba(224, 79, 54, .38);
+  --b-glow-soft: rgba(224, 79, 54, .12);
 }
 
 @layer utilities {
@@ -188,4 +205,158 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 @media (prefers-reduced-motion: reduce) {
   .js-reveal [data-reveal] { opacity: 1; transform: none; transition: none; }
+}
+
+/* ---------------------------------------------------------------------------
+   Launch page surfaces — texture, glow and the technical voice.
+
+   The page is built from two grounds. Ivory carries the argument in editorial
+   serif; near-black carries the numbers, printed over a dot matrix so the dark
+   sections read as instrumentation rather than as a mood. Red is the only
+   accent on either ground, and it is always attached to a fact.
+   --------------------------------------------------------------------------- */
+@layer utilities {
+  /* The halftone. A 4px matrix on ivory, a 5px one on black, both faint enough
+     to be felt rather than seen — it gives large empty areas a material. */
+  .b-dots {
+    background-image: radial-gradient(rgba(23, 23, 21, .1) 1px, transparent 1px);
+    background-size: 4px 4px;
+  }
+
+  .b-dots-lit {
+    background-image: radial-gradient(rgba(255, 255, 255, .13) 1px, transparent 1px);
+    background-size: 5px 5px;
+  }
+
+  /* Hairline graph paper, for the frames that hold a chart or a mock. */
+  .b-graph {
+    background-image:
+      linear-gradient(to right, rgba(23, 23, 21, .05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(23, 23, 21, .05) 1px, transparent 1px);
+    background-size: 34px 34px;
+  }
+
+  /* Masks that let a texture die out instead of stopping at an edge. */
+  .b-fade-b { mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%); }
+  .b-fade-r { mask-image: linear-gradient(to right, #000 0%, #000 55%, transparent 100%); }
+  .b-fade-radial { mask-image: radial-gradient(70% 60% at 50% 42%, #000 0%, transparent 100%); }
+
+  /* Warm red light thrown onto ivory behind the hero. */
+  .b-dawn {
+    background:
+      radial-gradient(58% 42% at 50% 0%, var(--b-glow-soft) 0%, rgba(224, 79, 54, .05) 42%, transparent 72%),
+      radial-gradient(38% 30% at 82% 18%, rgba(224, 79, 54, .07) 0%, transparent 70%);
+  }
+
+  /* The dark ground, lit from above in the signature rather than in gold. The
+     launch page uses this everywhere the app uses .hero-night. */
+  .b-night {
+    background:
+      radial-gradient(96% 62% at 50% -14%, rgba(224, 79, 54, .5) 0%, rgba(150, 46, 30, .26) 30%, rgba(38, 20, 16, .22) 56%, rgba(11, 10, 9, 0) 78%),
+      linear-gradient(180deg, #17120f 0%, #0b0a09 60%);
+  }
+
+  .b-glow-blob {
+    background: radial-gradient(circle at center, var(--b-glow) 0%, rgba(224, 79, 54, .1) 45%, transparent 70%);
+    filter: blur(28px);
+  }
+}
+
+@layer components {
+  /* The technical label. Meuze-tight tracking on a monospaced stack: it is the
+     voice the product uses for anything measured, and it sits deliberately
+     apart from the serif that carries the prose. */
+  .b-mono {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* A measured value carrying the signature: the outlier ratios, the deltas,
+     the counts. Never used for decoration. */
+  .b-metric {
+    color: var(--b-red-600);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.01em;
+  }
+
+  /* Small red-on-ivory pill. One line, one fact. */
+  .b-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    border-radius: 999px;
+    border: 1px solid var(--b-red-200);
+    background: var(--b-red-100);
+    color: var(--b-red-700);
+    padding: .3rem .7rem;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  /* The live indicator: a red dot with a ring pulsing out of it. Used once per
+     section at most, always next to something that is actually updating. */
+  .b-live {
+    position: relative;
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: var(--b-red-500);
+    flex: none;
+  }
+  .b-live::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: 999px;
+    border: 1px solid var(--b-red-500);
+    animation: ping 2.4s cubic-bezier(0, 0, .2, 1) infinite;
+  }
+
+  /* The primary action. Red, with the light coming from the top of the pill so
+     it reads as a physical button rather than a flat fill. */
+  .b-btn-red {
+    background: linear-gradient(180deg, var(--b-red-400) 0%, var(--b-red-500) 42%, var(--b-red-600) 100%);
+    color: #fff;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .28),
+      0 10px 26px -12px rgba(197, 63, 40, .78);
+    transition: box-shadow .3s ease, transform .3s ease, filter .3s ease;
+  }
+  .b-btn-red:hover {
+    filter: saturate(1.06) brightness(1.03);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .3),
+      0 16px 34px -14px rgba(197, 63, 40, .9);
+  }
+  .b-btn-red:active { transform: translateY(1px); }
+}
+
+@keyframes ping {
+  0% { transform: scale(1); opacity: .9; }
+  75%, 100% { transform: scale(2.6); opacity: 0; }
+}
+
+/* The proof marquee. Duplicated content scrolls one full copy, so the seam is
+   never visible. */
+@keyframes b-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+/* A value counting itself up as its bar grows. */
+@keyframes b-grow {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .b-live::after,
+  .animate-breathe { animation: none; }
+  [class*="b-drift"] { animation: none !important; }
 }

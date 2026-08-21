@@ -98,6 +98,7 @@ class MeasureAccountEngagement implements ShouldQueue
 
         $fresh = Creator::query()
             ->whereIn('username', $usernames)
+            ->whereHas('posts')
             ->where('last_measured_at', '>', now()->subDays((int) config('services.discovery.measure_cooldown_days')))
             ->pluck('username')
             ->all();

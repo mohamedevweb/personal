@@ -42,8 +42,10 @@ class AuditCreatorCatalog extends Command
             ))
             ->values();
 
+        $retryReport = $this->option('retry-report');
+
         try {
-            $entries = $this->onlyPreviousProviderErrors($entries, $this->option('retry-report'));
+            $entries = $this->onlyPreviousProviderErrors($entries, $retryReport);
         } catch (InvalidArgumentException $exception) {
             $this->error($exception->getMessage());
 
@@ -51,9 +53,15 @@ class AuditCreatorCatalog extends Command
         }
 
         if ($entries->isEmpty()) {
-            $this->info('No provider errors to retry.');
+            if (is_string($retryReport) && trim($retryReport) !== '') {
+                $this->info('No provider errors to retry.');
 
-            return self::SUCCESS;
+                return self::SUCCESS;
+            }
+
+            $this->error('No catalog entries matched the supplied filters. Deploy the manifest containing these handles before auditing them.');
+
+            return self::FAILURE;
         }
 
         $provider = $providers->provider((string) $this->option('provider'));

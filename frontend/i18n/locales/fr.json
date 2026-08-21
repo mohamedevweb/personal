@@ -58,7 +58,7 @@
   "landing": {
     "head": {
       "title": "Personal — des contenus que vous seul pouviez publier",
-      "description": "Personal trouve ce qui marche dans votre niche, le relie à ce que vous avez vécu, et l'écrit dans votre voix."
+      "description": "Personal trouve les posts qui surperforment dans votre niche, les relie à ce que vous avez vraiment vécu, et les écrit dans votre voix."
     },
     "nav": {
       "label": "Sections de la page",
@@ -73,17 +73,32 @@
       "terms": "Conditions"
     },
     "hero": {
+      "badge": "Accès anticipé · 40 créateurs",
       "titleLineOne": "Vous êtes créateur.",
       "titleLineTwo": "Pas une machine à contenu.",
-      "subtitle": "Personal trouve ce qui marche dans votre niche et le réécrit avec votre vie à vous.",
+      "subtitle": "Personal trouve ce qui marche dans votre niche et le réécrit avec votre vie. Votre voix, votre semaine, dix minutes.",
       "getAccess": "Accès anticipé",
       "seeHow": "Voir comment ça marche",
-      "reassurance": "Gratuit en accès anticipé · Personal ne publie jamais à votre place",
+      "reassuranceOne": "Gratuit en accès anticipé",
+      "reassuranceTwo": "Personal ne publie jamais à votre place",
       "mediaLabel": "Personal, un matin",
+      "readouts": {
+        "outlier": {
+          "label": "Outlier trouvé",
+          "value": "8,4×",
+          "note": "au-dessus de la moyenne de son créateur"
+        },
+        "match": {
+          "label": "Moment relié",
+          "value": "94 %",
+          "note": "de correspondance avec votre note de mardi"
+        }
+      },
       "brief": {
         "eyebrow": "Votre niche, ce matin",
         "greeting": "Bonjour Mohamed.",
         "count": "4 opportunités",
+        "updated": "Mis à jour il y a 6 min",
         "tabs": {
           "understand": "Me comprendre",
           "find": "Trouver ce qui marche",
@@ -91,24 +106,40 @@
         },
         "rows": {
           "one": {
-            "title": "8,4× d'engagement",
-            "body": "Échec → prise de conscience → leçon surperforme dans votre niche cette semaine."
+            "metric": "8,4×",
+            "title": "d'engagement, dans votre niche",
+            "body": "Échec → prise de conscience → leçon bat tout le reste cette semaine."
           },
           "two": {
-            "title": "Moment détecté",
-            "body": "Votre histoire de pivot colle au format qui marche en ce moment."
+            "metric": "94 %",
+            "title": "de match avec votre histoire de pivot",
+            "body": "Le format qui marche en ce moment colle à ce que vous avez noté mardi."
           },
           "three": {
-            "title": "12 outliers trouvés",
-            "body": "Des posts qui battent la moyenne de leur propre créateur, à votre taille."
+            "metric": "12",
+            "title": "outliers trouvés cette nuit",
+            "body": "Des posts qui battent la moyenne de leur propre créateur — à votre taille, pas à 2M d'abonnés."
           }
         }
       }
     },
+    "proof": {
+      "scanned": "1 400 posts lus chaque matin",
+      "outliers": "Des outliers, pas des top posts",
+      "niches": "Votre niche, pas internet",
+      "voice": "Votre voix, apprise de vos légendes",
+      "minutes": "Du brouillon au post en dix minutes"
+    },
     "stat": {
-      "label": "Outlier",
+      "label": "Outlier détecté",
       "value": "8,4×",
-      "copy": "Au-dessus de la moyenne de son propre créateur. Dans votre niche. Pendant qu'il monte encore."
+      "copy": "Pas le plus gros post d'Instagram. Celui qui bat le compte qui l'a publié — dans votre niche, à votre taille, pendant qu'il monte encore.",
+      "chart": {
+        "title": "Un compte · 14 derniers posts",
+        "window": "Indexé sur sa propre moyenne",
+        "baseline": "Sa moyenne",
+        "axis": "Du plus ancien au plus récent"
+      }
     },
     "how": {
       "eyebrow": "Comment ça marche",
@@ -117,50 +148,58 @@
       "steps": {
         "understand": {
           "title": "Comprendre",
-          "body": "Connectez Instagram une fois. Personal lit vos 40 derniers posts et vous dit ce qu'il a compris."
+          "body": "Connectez Instagram une fois. Personal lit vos 40 derniers posts et vous écrit noir sur blanc ce qu'il a compris.",
+          "caption": "Lu en direct depuis votre compte"
         },
         "discover": {
           "title": "Trouver",
-          "body": "Chaque matin, les posts qui battent la moyenne de leur propre créateur, à votre taille."
+          "body": "Chaque matin, les posts qui battent la moyenne de leur propre créateur — filtrés à votre niche et à votre taille.",
+          "caption": "Actualisé chaque matin"
         },
         "connect": {
           "title": "Relier",
-          "body": "Le format qui marche, plus l'histoire que vous avez déjà vécue."
+          "body": "Le format qui marche maintenant, mis face à une histoire que vous avez déjà vécue cette semaine.",
+          "caption": "Relié à vos Moments"
         },
         "write": {
           "title": "Écrire",
-          "body": "Reel, carrousel ou légende. Votre voix. Dix minutes."
+          "body": "Reel, carrousel ou légende. Votre structure, votre voix, votre histoire. Dix minutes jusqu'à la publication.",
+          "caption": "Un brouillon, jamais un post"
         }
       },
       "profile": {
         "label": "Ce que Personal a compris",
+        "source": "40 posts lus",
         "niche": "Niche",
-        "nicheValue": "Création de produits indépendants",
+        "nicheValue": "Création de produits en indépendant",
         "audience": "Audience",
-        "audienceValue": "Fondateurs solos, 22–34 ans",
+        "audienceValue": "Fondateurs solo, 22–34 ans",
         "tone": "Ton",
         "toneValue": "Direct · honnête · pince-sans-rire",
         "positioning": "Positionnement",
-        "positioningValue": "Construit en public, montre le désordre"
+        "positioningValue": "Construit en public, montre le bazar",
+        "correct": "Une erreur ? Dites-le en une phrase et Personal réécrit sa lecture."
       },
       "outliers": {
         "label": "Outliers dans votre niche",
+        "window": "7 derniers jours",
+        "more": "9 de plus",
         "views": "{count} vues",
-        "baseline": "moyenne du créateur ~42 K",
+        "baseline": "Moyenne du créateur ~42K",
         "items": {
           "one": {
             "hook": "L'erreur de prix qui m'a coûté 8 mois",
-            "views": "352 K",
+            "views": "352K",
             "ratio": "8,4"
           },
           "two": {
             "hook": "Personne ne vous dit ça sur vos 1 000 premiers",
-            "views": "180 K",
+            "views": "180K",
             "ratio": "5,1"
           },
           "three": {
             "hook": "J'ai refait tout mon onboarding en un week-end",
-            "views": "121 K",
+            "views": "121K",
             "ratio": "3,7"
           }
         }
@@ -170,10 +209,12 @@
         "patternQuote": "« La décision que j'ai failli ne pas prendre… »",
         "momentLabel": "Votre moment · mardi",
         "momentQuote": "« J'ai failli refuser mon premier client à 10 k€ parce que je ne me sentais pas prêt. »",
-        "verdict": "Ce format marche en ce moment, et quelque chose qui vous est arrivé cette semaine lui va étonnamment bien."
+        "verdict": "Ce format marche en ce moment, et quelque chose qui vous est arrivé cette semaine y colle particulièrement bien."
       },
       "draft": {
         "label": "Reel · 40 secondes",
+        "voice": "Votre voix",
+        "source": "Construit à partir de votre Moment de mardi et d'un format qui surperforme dans votre niche en ce moment.",
         "beats": {
           "hook": {
             "label": "Accroche",
@@ -181,11 +222,11 @@
           },
           "two": {
             "label": "Temps 2",
-            "value": "Pourquoi je ne me croyais pas prêt, et ce dont j'avais vraiment peur."
+            "value": "Pourquoi je ne me sentais pas prêt, et ce dont j'avais vraiment peur."
           },
           "three": {
             "label": "Temps 3",
-            "value": "La phrase de mon associé qui m'a fait envoyer le mail quand même."
+            "value": "La phrase de mon associé qui m'a fait envoyer l'e-mail quand même."
           },
           "close": {
             "label": "Chute",
@@ -197,10 +238,10 @@
     "moments": {
       "eyebrow": "Moments",
       "title": "Vous vivez. Personal <em>prend des notes</em>.",
-      "lede": "Un appel client, une mauvaise semaine, une prise de conscience à 1h du matin. Notez-le et oubliez-le — Personal s'en souvient au bon moment.",
+      "lede": "Un appel client, une mauvaise semaine, une prise de conscience à 1 h du matin. Notez-le et oubliez-le — Personal s'en souvient au bon moment.",
       "cards": {
         "one": {
-          "text": "Un client m'a demandé pourquoi je facture plus qu'une agence. Pour une fois j'avais une bonne réponse.",
+          "text": "Un client m'a demandé pourquoi je facture plus qu'une agence. Pour une fois, j'avais une bonne réponse.",
           "meta": "Mardi · Conversation"
         },
         "two": {
@@ -208,47 +249,50 @@
           "meta": "Il y a 6 jours · Tournant"
         },
         "three": {
-          "text": "Personne ne vous prévient du silence qui suit un lancement.",
+          "text": "Personne ne vous prévient du silence juste après un lancement.",
           "meta": "La semaine dernière · Prise de conscience"
         },
         "four": {
-          "text": "Note vocale, 40 s, sur le chemin du retour",
-          "meta": "Dimanche · Voix"
+          "text": "Note vocale, 40 s, sur le trajet du retour",
+          "meta": "Dimanche · Vocal"
         },
         "five": {
-          "text": "Capture du mail de désabonnement qui a vraiment piqué.",
+          "text": "Capture de l'e-mail de désabonnement qui m'a vraiment piqué.",
           "meta": "Lundi · Capture"
         }
       },
       "used": "Devenu un Reel le 12 nov.",
-      "note": "Rien n'est un contenu tant que vous ne l'avez pas décidé."
+      "note": "Rien n'est du contenu tant que vous ne l'avez pas décidé."
     },
     "faq": {
       "eyebrow": "FAQ",
       "title": "Les questions que les créateurs posent en premier.",
+      "lede": "Pour le reste, écrivez-nous — on accompagne chaque créateur à la main en ce moment.",
       "items": {
         "sound": {
           "q": "Est-ce que ça va me ressembler ?",
-          "a": "C'est toute l'idée. Personal apprend votre ton à partir de vos propres légendes et vous montre ce qu'il a compris avant d'écrire une ligne. Chaque brouillon part de vos histoires, et vous le corrigez en langage courant."
+          "a": "C'est tout l'enjeu. Personal apprend votre ton à partir de vos propres légendes et vous montre ce qu'il a compris avant d'écrire une ligne. Chaque brouillon part de vos histoires, et vous le corrigez en langage courant."
         },
         "different": {
           "q": "Encore un générateur de contenu IA ?",
-          "a": "Non. Un générateur invente à partir de rien. Personal part de deux choses qui existent déjà : ce qui marche dans votre niche, et ce qui vous est vraiment arrivé."
+          "a": "Non. Un générateur invente à partir de rien. Personal part de deux choses qui existent déjà : ce qui marche dans votre niche cette semaine, et ce qui vous est vraiment arrivé."
         },
         "post": {
           "q": "Est-ce que Personal publie à ma place ?",
-          "a": "Jamais. Personal rédige, vous décidez. Vos Moments vous appartiennent, ne sont jamais montrés à d'autres créateurs, et vous pouvez les supprimer à tout moment."
+          "a": "Jamais. Personal écrit, vous décidez. Vos Moments restent les vôtres, ne sont jamais montrés à d'autres créateurs, et vous pouvez les supprimer à tout moment."
         },
         "cost": {
           "q": "Combien ça coûte ?",
-          "a": "Rien pendant l'accès anticipé. Nous accompagnons un petit groupe de créateurs à la main et construisons la suite autour de ce qu'ils nous disent."
+          "a": "Rien pendant l'accès anticipé. On accompagne un petit groupe de créateurs à la main et on construit le reste autour de ce qu'ils nous disent."
         }
       }
     },
     "cta": {
       "title": "Allez vivre une vie intéressante.",
-      "copy": "Personal fera attention pour vous.",
+      "titleTurn": "On prend les notes.",
+      "copy": "Personal surveille votre niche, se souvient de votre semaine, et garde un brouillon prêt pour quand vous l'êtes.",
       "button": "Accès anticipé",
+      "secondary": "Voir comment ça marche",
       "reassurance": "Gratuit en accès anticipé · Personal ne publie jamais à votre place"
     },
     "footer": {
@@ -271,9 +315,6 @@
     "toggleToRegister": "Pas encore de compte ? Créez-en un",
     "toggleToLogin": "Vous avez déjà un compte ? Connectez-vous",
     "genericError": "Nous n’avons pas pu vous connecter. Veuillez réessayer.",
-    "google": "Continuer avec Google",
-    "dividerLogin": "Ou connectez-vous par e-mail",
-    "dividerRegister": "Ou inscrivez-vous par e-mail",
     "emailPlaceholder": "E-mail",
     "passwordPlaceholder": "Mot de passe",
     "namePlaceholder": "Nom complet",

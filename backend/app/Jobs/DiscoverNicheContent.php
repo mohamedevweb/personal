@@ -33,6 +33,8 @@ class DiscoverNicheContent implements ShouldQueue
     public function handle(NicheExpansionService $expansion, InstagramDataProvider $provider): void
     {
         if (config('creator_catalog.curated_only')) {
+            $this->queueCuratedMeasurements();
+
             return;
         }
 
@@ -95,6 +97,28 @@ class DiscoverNicheContent implements ShouldQueue
         if ($handles !== []) {
             MeasureAccountEngagement::dispatch($handles);
         }
+    }
+
+    private function queueCuratedMeasurements(): void
+    {
+        $measurementCutoff = now()->subDays((int) config('services.discovery.measure_cooldown_days'));
+        $handles = Creator::query()
+            ->where('curation_status', 'approved')
+            ->where(function ($query) use ($measurementCutoff): void {
+                $query->whereDoesntHave('posts')
+                    ->orWhereNull('last_measured_at')
+                    ->orWhere('last_measured_at', '<=', $measurementCutoff);
+            })
+            ->orderByRaw('CASE WHEN last_measured_at IS NULL THEN 0 ELSE 1 END')
+            ->orderBy('last_measured_at')
+            ->limit((int) config('services.discovery.measure_batch'))
+            ->pluck('username')
+            ->filter()
+            ->values();
+
+        $handles
+            ->chunk(max(1, (int) config('services.discovery.measure_chunk')))
+            ->each(fn (Collection $chunk) => MeasureAccountEngagement::dispatch($chunk->values()->all()));
     }
 
     /** @return list<string> */

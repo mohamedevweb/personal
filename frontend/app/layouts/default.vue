@@ -49,7 +49,7 @@ const pageTitle = computed(() => {
 
 <template>
   <div class="min-h-screen bg-[var(--paper)] text-[var(--ink)]">
-    <aside class="fixed inset-y-0 left-0 z-30 hidden w-[264px] flex-col border-r border-[var(--line)] bg-[var(--rail)] px-3 pb-[74px] pt-5 md:flex">
+    <aside class="fixed inset-y-0 left-0 z-30 hidden w-[264px] flex-col border-r border-[var(--line)] bg-[var(--rail)] px-3 py-5 md:flex">
       <NuxtLink to="/feed" class="b-focus block w-fit px-2 py-1">
         <PersonalLogo :size="22" />
       </NuxtLink>

@@ -7,19 +7,19 @@ const links = [
 </script>
 
 <template>
-  <footer class="px-6 py-14 md:px-10">
+  <footer class="border-t border-[var(--b-line)] px-5 py-14 md:px-10">
     <div class="mx-auto flex max-w-[1200px] flex-col gap-10 md:flex-row md:items-end md:justify-between">
       <div>
         <PersonalLogo :size="24" />
-        <p class="b-eyebrow mt-5">{{ $t('landing.footer.brandline') }}</p>
+        <p class="b-mono mt-5 text-[var(--b-red-600)]">{{ $t('landing.footer.brandline') }}</p>
       </div>
 
       <div class="flex flex-col gap-6 md:items-end">
         <nav class="flex flex-wrap items-center gap-x-7 gap-y-3 text-[14px] text-[var(--b-stone)]">
-          <a v-for="link in links" :key="link.hash" :href="link.hash" class="b-focus transition-colors hover:text-[var(--b-black)]">{{ $t(link.key) }}</a>
-          <NuxtLink to="/login" class="b-focus transition-colors hover:text-[var(--b-black)]">{{ $t('landing.nav.signIn') }}</NuxtLink>
-          <NuxtLink to="/terms" class="b-focus transition-colors hover:text-[var(--b-black)]">{{ $t('landing.nav.terms') }}</NuxtLink>
-          <NuxtLink to="/privacy" class="b-focus transition-colors hover:text-[var(--b-black)]">{{ $t('landing.nav.privacy') }}</NuxtLink>
+          <a v-for="link in links" :key="link.hash" :href="link.hash" class="b-focus transition-colors hover:text-[var(--b-red-700)]">{{ $t(link.key) }}</a>
+          <NuxtLink to="/login" class="b-focus transition-colors hover:text-[var(--b-red-700)]">{{ $t('landing.nav.signIn') }}</NuxtLink>
+          <NuxtLink to="/terms" class="b-focus transition-colors hover:text-[var(--b-red-700)]">{{ $t('landing.nav.terms') }}</NuxtLink>
+          <NuxtLink to="/privacy" class="b-focus transition-colors hover:text-[var(--b-red-700)]">{{ $t('landing.nav.privacy') }}</NuxtLink>
         </nav>
         <div class="flex items-center gap-5">
           <LanguageSwitcher />

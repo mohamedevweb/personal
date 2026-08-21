@@ -58,7 +58,7 @@
   "landing": {
     "head": {
       "title": "Personal — content only you could post",
-      "description": "Personal finds what's working in your niche, connects it to what actually happened to you, and writes it in your voice."
+      "description": "Personal finds the posts outperforming in your niche, connects them to what actually happened to you, and writes them in your voice."
     },
     "nav": {
       "label": "Page sections",
@@ -73,17 +73,32 @@
       "terms": "Terms"
     },
     "hero": {
+      "badge": "Early access · 40 creators",
       "titleLineOne": "You're a creator.",
       "titleLineTwo": "Not a content machine.",
-      "subtitle": "Personal finds what's working in your niche and rewrites it with your life.",
+      "subtitle": "Personal finds what's working in your niche and rewrites it with your life. Your voice, your week, ten minutes.",
       "getAccess": "Get early access",
       "seeHow": "See how it works",
-      "reassurance": "Free during early access · Personal never posts for you",
+      "reassuranceOne": "Free during early access",
+      "reassuranceTwo": "Personal never posts for you",
       "mediaLabel": "Personal, one morning",
+      "readouts": {
+        "outlier": {
+          "label": "Outlier found",
+          "value": "8.4×",
+          "note": "above its own creator's average"
+        },
+        "match": {
+          "label": "Moment matched",
+          "value": "94%",
+          "note": "fit with your note from Tuesday"
+        }
+      },
       "brief": {
         "eyebrow": "Your niche, this morning",
         "greeting": "Morning, Mohamed.",
         "count": "4 opportunities",
+        "updated": "Updated 6 min ago",
         "tabs": {
           "understand": "Understand me",
           "find": "Find what works",
@@ -91,24 +106,40 @@
         },
         "rows": {
           "one": {
-            "title": "8.4× engagement",
-            "body": "Failure → realization → lesson is outperforming in your niche this week."
+            "metric": "8.4×",
+            "title": "engagement, in your niche",
+            "body": "Failure → realization → lesson is beating everything else this week."
           },
           "two": {
-            "title": "Moment matched",
-            "body": "Your pivot story fits the format that's working right now."
+            "metric": "94%",
+            "title": "match with your pivot story",
+            "body": "The format working right now fits something you wrote down on Tuesday."
           },
           "three": {
-            "title": "12 outliers found",
-            "body": "Posts beating their own creator's average, at your size."
+            "metric": "12",
+            "title": "outliers found overnight",
+            "body": "Posts beating their own creator's average — at your size, not at 2M followers."
           }
         }
       }
     },
+    "proof": {
+      "scanned": "1,400 posts read every morning",
+      "outliers": "Outliers, not top posts",
+      "niches": "Your niche, not the internet",
+      "voice": "Your voice, learned from your captions",
+      "minutes": "Draft to post in ten minutes"
+    },
     "stat": {
-      "label": "Outlier",
+      "label": "Outlier detected",
       "value": "8.4×",
-      "copy": "Above its own creator's average. In your niche. While it's still climbing."
+      "copy": "Not the biggest post on Instagram. The one beating the account that published it — in your niche, at your size, while it's still climbing.",
+      "chart": {
+        "title": "One account · last 14 posts",
+        "window": "Indexed to its own average",
+        "baseline": "Its average",
+        "axis": "Oldest → newest"
+      }
     },
     "how": {
       "eyebrow": "How it works",
@@ -117,23 +148,28 @@
       "steps": {
         "understand": {
           "title": "Understand",
-          "body": "Connect Instagram once. Personal reads your last 40 posts and tells you what it understood."
+          "body": "Connect Instagram once. Personal reads your last 40 posts and tells you, in writing, what it understood.",
+          "caption": "Read live from your account"
         },
         "discover": {
           "title": "Discover",
-          "body": "Every morning, the posts beating their own creator's average — at your size."
+          "body": "Every morning, the posts beating their own creator's average — filtered to your niche and your size.",
+          "caption": "Refreshed every morning"
         },
         "connect": {
           "title": "Connect",
-          "body": "The format that's working, plus the story you already lived."
+          "body": "The format that's working right now, held against a story you already lived this week.",
+          "caption": "Matched against your Moments"
         },
         "write": {
           "title": "Write",
-          "body": "Reel, carousel or caption. Your voice. Ten minutes."
+          "body": "Reel, carousel or caption. Your structure, your voice, your story. Ten minutes to posted.",
+          "caption": "A draft, never a post"
         }
       },
       "profile": {
         "label": "What Personal understood",
+        "source": "40 posts read",
         "niche": "Niche",
         "nicheValue": "Independent product building",
         "audience": "Audience",
@@ -141,12 +177,15 @@
         "tone": "Tone",
         "toneValue": "Direct · honest · deadpan",
         "positioning": "Positioning",
-        "positioningValue": "Builds in public, shows the mess"
+        "positioningValue": "Builds in public, shows the mess",
+        "correct": "Wrong about something? Say so in one sentence and Personal rewrites the read."
       },
       "outliers": {
         "label": "Outliers in your niche",
+        "window": "Last 7 days",
+        "more": "9 more",
         "views": "{count} views",
-        "baseline": "creator average ~42K",
+        "baseline": "Creator average ~42K",
         "items": {
           "one": {
             "hook": "The pricing mistake that cost me 8 months",
@@ -174,6 +213,8 @@
       },
       "draft": {
         "label": "Reel · 40 seconds",
+        "voice": "Your voice",
+        "source": "Built from your Tuesday Moment and a format outperforming in your niche right now.",
         "beats": {
           "hook": {
             "label": "Hook",
@@ -226,6 +267,7 @@
     "faq": {
       "eyebrow": "FAQ",
       "title": "The questions creators ask first.",
+      "lede": "Anything else, ask us directly — we're onboarding every creator by hand right now.",
       "items": {
         "sound": {
           "q": "Will it sound like me?",
@@ -233,7 +275,7 @@
         },
         "different": {
           "q": "Another AI content generator?",
-          "a": "No. A generator invents from nothing. Personal starts from two things that already exist: what's working in your niche, and what actually happened to you."
+          "a": "No. A generator invents from nothing. Personal starts from two things that already exist: what's working in your niche this week, and what actually happened to you."
         },
         "post": {
           "q": "Does Personal post for me?",
@@ -247,8 +289,10 @@
     },
     "cta": {
       "title": "Go live an interesting life.",
-      "copy": "Personal will pay attention for you.",
+      "titleTurn": "We'll take the notes.",
+      "copy": "Personal watches your niche, remembers your week, and has a draft waiting when you are.",
       "button": "Get early access",
+      "secondary": "See how it works",
       "reassurance": "Free during early access · Personal never posts for you"
     },
     "footer": {
@@ -271,9 +315,6 @@
     "toggleToRegister": "No account yet? Create one",
     "toggleToLogin": "Already have an account? Sign in",
     "genericError": "We could not sign you in. Please try again.",
-    "google": "Continue with Google",
-    "dividerLogin": "Or sign in with email",
-    "dividerRegister": "Or sign up with email",
     "emailPlaceholder": "Email",
     "passwordPlaceholder": "Password",
     "namePlaceholder": "Full name",
