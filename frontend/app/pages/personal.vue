@@ -89,7 +89,7 @@ onMounted(async () => {
       </div>
       <div v-if="editing" class="flex justify-end gap-3 p-5">
         <button class="rounded-full px-5 py-2.5 text-sm text-[var(--muted)] transition hover:text-[var(--ink)]" @click="editing = false">{{ $t('personal.cancel') }}</button>
-        <button class="inline-flex h-11 items-center justify-center rounded-full bg-[var(--ink)] px-5 text-[14px] font-medium text-[var(--paper)] transition hover:bg-black disabled:opacity-60" :disabled="saving" @click="saveProfile">{{ saving ? $t('personal.saving') : $t('personal.saveMemory') }}</button>
+        <button class="inline-flex h-11 items-center justify-center rounded-full b-btn-red px-5 text-[14px] font-medium transition disabled:opacity-60" :disabled="saving" @click="saveProfile">{{ saving ? $t('personal.saving') : $t('personal.saveMemory') }}</button>
       </div>
     </div>
   </main>

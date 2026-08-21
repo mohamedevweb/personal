@@ -55,7 +55,7 @@ onMounted(async () => {
     <div v-else class="mt-5 rounded-[18px] border border-dashed border-[var(--line)] bg-[var(--surface)] px-6 py-16 text-center">
       <p class="font-serif text-[26px] tracking-[-.02em]">{{ $t('saved.emptyTitle') }}</p>
       <p class="mx-auto mt-3 max-w-md text-sm leading-6 text-[var(--muted)]">{{ $t('saved.emptyCopy') }}</p>
-      <NuxtLink to="/feed" class="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-[var(--ink)] px-5 text-[14px] font-medium text-[var(--paper)] transition hover:bg-black">{{ $t('saved.exploreFeed') }}</NuxtLink>
+      <NuxtLink to="/feed" class="mt-6 inline-flex h-11 items-center justify-center rounded-full b-btn-red px-5 text-[14px] font-medium transition">{{ $t('saved.exploreFeed') }}</NuxtLink>
     </div>
   </main>
 </template>

@@ -77,7 +77,7 @@
       "terms": "Conditions"
     },
     "hero": {
-      "titleLineOne": "Vous êtes créateur.",
+      "titleLineOne": "Vous êtes <span class=\"b-lit\">créateur</span>.",
       "titleLineTwo": "Pas une machine à contenu.",
       "subtitle": "Personal trouve ce qui marche dans votre niche et le réécrit avec votre vie. Votre voix, votre semaine, dix minutes.",
       "getAccess": "Accès anticipé",
@@ -87,47 +87,94 @@
       "reassuranceTwo": "Personal ne publie jamais à votre place",
       "mediaLabel": "Personal, un matin",
       "readouts": {
-        "outlier": {
-          "label": "Outlier trouvé",
-          "value": "8,4×",
-          "note": "au-dessus de la moyenne de son créateur"
+        "creators": {
+          "label": "Créateurs en accès anticipé",
+          "value": "40",
+          "note": "qui écrivent avec Personal chaque semaine"
         },
-        "match": {
-          "label": "Posts lus",
-          "value": "1 400",
-          "note": "scannés dans votre niche depuis minuit"
+        "published": {
+          "label": "Posts publiés",
+          "value": "320",
+          "note": "écrits avec Personal, dans leur voix"
         },
         "speed": {
-          "label": "Brouillon prêt",
+          "label": "Du Moment au post",
           "value": "10 min",
-          "note": "d'un Moment à un post publiable"
+          "note": "le temps qu’ils y passent, en moyenne"
         }
       },
       "brief": {
-        "eyebrow": "Votre niche, ce matin",
         "greeting": "Bonjour Mohamed.",
-        "count": "4 opportunités",
         "updated": "Mis à jour il y a 6 min",
+        "tabsLabel": "Ce que fait Personal, en trois temps",
         "tabs": {
           "understand": "Me comprendre",
           "find": "Trouver ce qui marche",
           "remix": "Remixer pour moi"
         },
-        "rows": {
-          "one": {
-            "metric": "8,4×",
-            "title": "d'engagement, dans votre niche",
-            "body": "Échec → prise de conscience → leçon bat tout le reste cette semaine."
+        "panels": {
+          "understand": {
+            "eyebrow": "Votre compte, relu",
+            "count": "3 choses apprises",
+            "rows": {
+              "one": {
+                "metric": "40",
+                "title": "posts lus, une fois",
+                "body": "Vos légendes, vos formats, vos horaires. Personal vous relit avant de vous écrire."
+              },
+              "two": {
+                "metric": "3",
+                "title": "formats qui vous ressemblent",
+                "body": "Récit personnel, coulisses, leçon apprise. C’est là que vous êtes le plus vous."
+              },
+              "three": {
+                "metric": "Mardi",
+                "title": "votre dernier Moment",
+                "body": "Le jour où vous avez décidé d’arrêter les carrousels de conseils."
+              }
+            }
           },
-          "two": {
-            "metric": "94 %",
-            "title": "de match avec votre histoire de pivot",
-            "body": "Le format qui marche en ce moment colle à ce que vous avez noté mardi."
+          "find": {
+            "eyebrow": "Votre niche, ce matin",
+            "count": "4 opportunités",
+            "rows": {
+              "one": {
+                "metric": "8,4×",
+                "title": "d'engagement, dans votre niche",
+                "body": "Échec → prise de conscience → leçon bat tout le reste cette semaine."
+              },
+              "two": {
+                "metric": "94 %",
+                "title": "de match avec votre histoire de pivot",
+                "body": "Le format qui marche en ce moment colle à ce que vous avez noté mardi."
+              },
+              "three": {
+                "metric": "12",
+                "title": "outliers trouvés cette nuit",
+                "body": "Des posts qui battent la moyenne de leur propre créateur — à votre taille, pas à 2M d'abonnés."
+              }
+            }
           },
-          "three": {
-            "metric": "12",
-            "title": "outliers trouvés cette nuit",
-            "body": "Des posts qui battent la moyenne de leur propre créateur — à votre taille, pas à 2M d'abonnés."
+          "remix": {
+            "eyebrow": "Votre semaine, réécrite",
+            "count": "1 brouillon",
+            "rows": {
+              "one": {
+                "metric": "1",
+                "title": "brouillon qui vous attend",
+                "body": "Écrit à partir de l’outlier de ce matin et de ce que vous avez noté mardi."
+              },
+              "two": {
+                "metric": "9 min",
+                "title": "depuis le Moment",
+                "body": "Il ne vous reste qu’à décider si c’est vrai."
+              },
+              "three": {
+                "metric": "0",
+                "title": "publication automatique",
+                "body": "Personal ne publie jamais à votre place. Vous copiez, vous décidez, vous publiez."
+              }
+            }
           }
         }
       }
@@ -396,8 +443,6 @@
   "feed": {
     "forYou": "Pour toi",
     "global": "Global",
-    "worthCreating": "À créer aujourd’hui",
-    "globalWorthCreating": "Ce qui marche partout",
     "loadError": "Personal n’a pas pu charger les opportunités du jour.",
     "remixError": "Personal n’a pas pu rédiger ceci pour l’instant. Veuillez réessayer.",
     "refreshed": "Ton feed est à jour.",

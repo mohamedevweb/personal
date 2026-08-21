@@ -123,15 +123,11 @@ onMounted(loadFeed)
       </button>
     </div>
 
-    <p class="mt-4 text-[11px] font-semibold uppercase tracking-[.18em] text-[var(--muted)]">
-      {{ activeFeed === 'personal' ? $t('feed.worthCreating') : $t('feed.globalWorthCreating') }}
-    </p>
-
     <div v-if="loading" class="mt-7 grid gap-5 sm:grid-cols-2 xl:grid-cols-3"><div v-for="i in 6" :key="i" class="h-[380px] animate-pulse rounded-[18px] bg-[var(--sand-soft)]" /></div>
     <div v-else-if="data && data.items.length === 0" class="mt-7 rounded-[18px] border border-dashed border-[var(--line)] bg-[var(--surface)] px-6 py-16 text-center">
       <h3 class="font-serif text-2xl tracking-[-.02em]">{{ $t('feed.emptyTitle') }}</h3>
       <p class="mx-auto mt-3 max-w-md text-sm leading-6 text-[var(--muted)]">{{ $t('feed.emptyBody') }}</p>
-      <button class="mt-6 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-5 text-[14px] font-medium text-[var(--paper)] transition hover:bg-black disabled:cursor-wait disabled:opacity-60" :disabled="refreshing" @click="refresh">
+      <button class="mt-6 inline-flex h-11 items-center justify-center gap-2 rounded-full b-btn-red px-5 text-[14px] font-medium transition disabled:cursor-wait disabled:opacity-60" :disabled="refreshing" @click="refresh">
         <AppIcon name="sparkles" :size="16" />{{ refreshing ? $t('feed.refreshing') : $t('feed.refresh') }}
       </button>
     </div>

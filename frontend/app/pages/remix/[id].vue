@@ -305,7 +305,7 @@ onBeforeUnmount(() => {
       <h1 class="mt-6 font-serif text-[34px] tracking-[-.03em]">{{ $t('remix.generationFailed') }}</h1>
       <p class="mx-auto mt-3 max-w-[42ch] text-sm leading-6 text-[var(--muted)]">{{ $t('remix.generationFailedCopy') }}</p>
       <button
-        class="mt-7 inline-flex h-11 items-center rounded-full bg-[var(--ink)] px-5 text-[14px] font-medium text-[var(--paper)] transition hover:bg-black disabled:opacity-60"
+        class="mt-7 inline-flex h-11 items-center rounded-full b-btn-red px-5 text-[14px] font-medium transition disabled:opacity-60"
         :disabled="retrying"
         @click="retryGeneration"
       >
@@ -355,7 +355,7 @@ onBeforeUnmount(() => {
             </button>
             <button
               v-else
-              class="inline-flex h-9 items-center rounded-full bg-[var(--ink)] px-4 text-[12.5px] font-medium text-[var(--paper)] transition hover:bg-black disabled:opacity-60"
+              class="inline-flex h-9 items-center rounded-full b-btn-red px-4 text-[12.5px] font-medium transition disabled:opacity-60"
               :disabled="saving"
               @click="save('ready')"
             >
@@ -585,7 +585,7 @@ onBeforeUnmount(() => {
     <div v-else class="page-shell pt-16 text-center">
       <p class="font-serif text-[30px] tracking-[-.02em]">{{ $t('remix.loadError') }}</p>
       <p class="mx-auto mt-3 max-w-[38ch] text-sm leading-6 text-[var(--muted)]">{{ $t('remix.loadErrorCopy') }}</p>
-      <NuxtLink to="/create" class="mt-7 inline-flex h-11 items-center rounded-full bg-[var(--ink)] px-5 text-[14px] font-medium text-[var(--paper)] transition hover:bg-black">
+      <NuxtLink to="/create" class="mt-7 inline-flex h-11 items-center rounded-full b-btn-red px-5 text-[14px] font-medium transition">
         {{ $t('remix.startAnother') }}
       </NuxtLink>
     </div>

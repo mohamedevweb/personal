@@ -121,7 +121,7 @@ watch(error, (message) => {
           <input v-model="account.email" type="email" autocomplete="email" required class="settings-input">
         </label>
 
-        <button type="submit" class="inline-flex h-11 items-center justify-center rounded-full bg-[var(--ink)] px-5 text-[14px] font-medium text-[var(--paper)] transition hover:bg-black disabled:cursor-wait disabled:opacity-60" :disabled="accountSaving">
+        <button type="submit" class="inline-flex h-11 items-center justify-center rounded-full b-btn-red px-5 text-[14px] font-medium transition disabled:cursor-wait disabled:opacity-60" :disabled="accountSaving">
           {{ accountSaving ? $t('settings.saving') : $t('settings.account.save') }}
         </button>
       </form>
@@ -157,7 +157,7 @@ watch(error, (message) => {
           <input v-model="password.password_confirmation" type="password" autocomplete="new-password" required class="settings-input">
         </label>
 
-        <button type="submit" class="inline-flex h-11 items-center justify-center rounded-full bg-[var(--ink)] px-5 text-[14px] font-medium text-[var(--paper)] transition hover:bg-black disabled:cursor-wait disabled:opacity-60" :disabled="passwordSaving">
+        <button type="submit" class="inline-flex h-11 items-center justify-center rounded-full b-btn-red px-5 text-[14px] font-medium transition disabled:cursor-wait disabled:opacity-60" :disabled="passwordSaving">
           {{ passwordSaving ? $t('settings.saving') : $t('settings.password.save') }}
         </button>
       </form>
@@ -180,7 +180,7 @@ watch(error, (message) => {
         </div>
         <button class="ml-auto text-xs text-[var(--faint)] transition hover:text-[var(--danger)]" @click="disconnect">{{ $t('settings.disconnect') }}</button>
       </div>
-      <button v-else class="mt-7 inline-flex h-11 items-center justify-center rounded-full bg-[var(--ink)] px-5 text-[14px] font-medium text-[var(--paper)] transition hover:bg-black disabled:opacity-60" :disabled="loading" @click="connect">{{ $t('settings.continueWithInstagram') }}</button>
+      <button v-else class="mt-7 inline-flex h-11 items-center justify-center rounded-full b-btn-red px-5 text-[14px] font-medium transition disabled:opacity-60" :disabled="loading" @click="connect">{{ $t('settings.continueWithInstagram') }}</button>
     </section>
 
     <!-- Privacy -->

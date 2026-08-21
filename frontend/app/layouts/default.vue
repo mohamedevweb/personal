@@ -65,7 +65,7 @@ const pageTitle = computed(() => {
               class="flex items-center gap-3 rounded-[10px] px-3 py-2 text-[13.5px] transition"
               :class="route.path === item.to ? 'bg-[var(--line-soft)] font-medium text-[var(--ink)]' : 'text-[var(--muted)] hover:bg-[var(--sand-soft)] hover:text-[var(--ink)]'"
             >
-              <AppIcon :name="item.icon" :size="17" />
+              <AppIcon :name="item.icon" :size="17" :class="route.path === item.to ? 'text-[var(--accent)]' : ''" />
               {{ $t(item.label) }}
             </NuxtLink>
           </div>
@@ -96,7 +96,7 @@ const pageTitle = computed(() => {
               <img v-if="user?.avatar_url" :src="user.avatar_url" alt="" class="h-full w-full object-cover">
               <AppIcon v-else name="user" :size="17" />
             </NuxtLink>
-            <NuxtLink to="/create" class="grid h-10 w-10 place-items-center rounded-full bg-[var(--ink)] text-[var(--paper)] transition hover:bg-black" :aria-label="$t('nav.create')">
+            <NuxtLink to="/create" class="grid h-10 w-10 place-items-center rounded-full b-btn-red transition" :aria-label="$t('nav.create')">
               <AppIcon name="plus" :size="18" />
             </NuxtLink>
           </div>
@@ -108,7 +108,7 @@ const pageTitle = computed(() => {
           <PersonalMark :size="19" />
           <span class="font-serif text-[19px] tracking-[-.02em]">{{ $t(pageTitle) }}</span>
         </NuxtLink>
-        <NuxtLink to="/create" class="grid h-9 w-9 place-items-center rounded-full bg-[var(--ink)] text-[var(--paper)]" :aria-label="$t('nav.create')"><AppIcon name="plus" /></NuxtLink>
+        <NuxtLink to="/create" class="grid h-9 w-9 place-items-center rounded-full b-btn-red" :aria-label="$t('nav.create')"><AppIcon name="plus" /></NuxtLink>
       </header>
 
       <div class="pb-20 md:pb-0"><slot /></div>
@@ -116,10 +116,10 @@ const pageTitle = computed(() => {
 
     <nav class="fixed inset-x-0 bottom-0 z-30 flex h-16 items-center justify-around border-t border-[var(--line)] bg-[var(--surface)]/95 px-2 backdrop-blur md:hidden">
       <NuxtLink v-for="item in mobileNav" :key="item.to" :to="item.to" class="flex min-w-12 flex-col items-center gap-1 text-[10px]" :class="route.path === item.to ? 'text-[var(--ink)]' : 'text-[var(--faint)]'">
-        <AppIcon :name="item.icon" :size="18" />{{ $t(item.label) }}
+        <AppIcon :name="item.icon" :size="18" :class="route.path === item.to ? 'text-[var(--accent)]' : ''" />{{ $t(item.label) }}
       </NuxtLink>
       <NuxtLink to="/settings" class="flex min-w-12 flex-col items-center gap-1 text-[10px]" :class="route.path === '/settings' ? 'text-[var(--ink)]' : 'text-[var(--faint)]'">
-        <AppIcon name="settings" :size="18" />{{ $t('nav.settings') }}
+        <AppIcon name="settings" :size="18" :class="route.path === '/settings' ? 'text-[var(--accent)]' : ''" />{{ $t('nav.settings') }}
       </NuxtLink>
     </nav>
 

@@ -159,7 +159,7 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
 
           <div class="border-t border-[var(--line-soft)] px-6 py-5">
             <button
-              class="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--ink)] text-[15px] font-medium text-[var(--paper)] transition hover:bg-black disabled:cursor-wait disabled:opacity-60"
+              class="flex h-12 w-full items-center justify-center gap-2 rounded-full b-btn-red text-[15px] font-medium transition disabled:cursor-wait disabled:opacity-60"
               :disabled="generating"
               @click="createRemix"
             >

@@ -5,9 +5,11 @@
  * no card under it, so it reads as an instrument pinned to the scene rather
  * than as another panel competing with the brief.
  *
- * The glyph and the label carry the signature, in the brightened value the
- * palette keeps for the dark surfaces. They are what names the measurement, so
- * the red lands on the fact rather than on the number, which stays in ivory.
+ * The glyph and the number carry the signature, in the brightened value the
+ * palette keeps for the dark surfaces: the measurement is the reason the
+ * readout exists, so it is the thing set in red and set large. The label that
+ * names it is the brand eyebrow, so the readout is two faces rather than
+ * three: the serif for the number, Inter for every word around it.
  */
 defineProps<{ icon: string, label: string, value: string, note: string }>()
 </script>
@@ -19,9 +21,9 @@ defineProps<{ icon: string, label: string, value: string, note: string }>()
     </span>
 
     <div class="[text-shadow:0_2px_16px_rgba(9,8,7,.6)]">
-      <dt class="b-mono text-[var(--b-red-lit)]">{{ label }}</dt>
-      <dd class="font-display mt-1.5 text-[27px] leading-none tracking-[-.02em] text-[var(--b-ivory)]">{{ value }}</dd>
-      <dd class="mt-1.5 max-w-[15rem] text-[12.5px] leading-[1.45] text-white/45">{{ note }}</dd>
+      <dt class="b-eyebrow !text-white/50">{{ label }}</dt>
+      <dd class="font-display mt-2.5 text-[40px] leading-none tracking-[-.02em] text-[var(--b-red-lit)] md:text-[46px]">{{ value }}</dd>
+      <dd class="mt-3 max-w-[15rem] text-[12.5px] leading-[1.45] text-white/45">{{ note }}</dd>
     </div>
   </dl>
 </template>

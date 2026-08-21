@@ -1,18 +1,36 @@
 <script setup lang="ts">
-/** The morning brief: the first thing you see of Personal is it already working. */
+/**
+ * The morning brief: the first thing you see of Personal is it already working.
+ *
+ * The three tabs are the product's three moves, and they are real: clicking one
+ * swaps the panel under it. It is still a mock — no request is made, the copy is
+ * fixed — but a tab that did nothing would be the one thing above the fold that
+ * lies about the product.
+ */
 const { t } = useI18n()
 
 const TABS = ['understand', 'find', 'remix'] as const
+type Tab = typeof TABS[number]
 
-const rows = computed(() => (['one', 'two', 'three'] as const).map((key, index) => ({
-  key,
-  // Only the top row is live-red. A brief where everything is urgent is a brief
-  // that says nothing.
-  accent: index === 0,
-  metric: t(`landing.hero.brief.rows.${key}.metric`),
-  title: t(`landing.hero.brief.rows.${key}.title`),
-  body: t(`landing.hero.brief.rows.${key}.body`)
-})))
+// The middle move is the one the page is arguing for, so it is the one open.
+const active = ref<Tab>('find')
+
+const panel = computed(() => {
+  const key = `landing.hero.brief.panels.${active.value}`
+  return {
+    eyebrow: t(`${key}.eyebrow`),
+    count: t(`${key}.count`),
+    rows: (['one', 'two', 'three'] as const).map((row, index) => ({
+      key: row,
+      // Only the top row is live-red. A brief where everything is urgent is a
+      // brief that says nothing.
+      accent: index === 0,
+      metric: t(`${key}.rows.${row}.metric`),
+      title: t(`${key}.rows.${row}.title`),
+      body: t(`${key}.rows.${row}.body`)
+    }))
+  }
+})
 
 // Seven days of niche activity behind the greeting: enough to show the week has
 // a shape, small enough to stay furniture.
@@ -24,31 +42,35 @@ const WEEK = [34, 48, 41, 62, 55, 78, 96]
     <div class="flex items-center justify-between border-b border-[var(--b-line-soft)] px-5 py-4 md:px-7">
       <PersonalLogo :size="15" />
 
-      <div class="hidden items-center gap-6 text-[12.5px] text-[var(--b-stone)] sm:flex">
-        <span
-          v-for="(tab, index) in TABS"
+      <div class="hidden items-center gap-6 text-[12.5px] sm:flex" role="tablist" :aria-label="$t('landing.hero.brief.tabsLabel')">
+        <button
+          v-for="tab in TABS"
           :key="tab"
-          class="relative py-1"
-          :class="index === 1 ? 'font-medium text-[var(--b-black)]' : ''"
+          type="button"
+          role="tab"
+          :aria-selected="active === tab"
+          class="b-focus relative py-1 transition-colors"
+          :class="active === tab ? 'font-medium text-[var(--b-black)]' : 'text-[var(--b-stone)] hover:text-[var(--b-black)]'"
+          @click="active = tab"
         >
           {{ $t(`landing.hero.brief.tabs.${tab}`) }}
           <span
-            v-if="index === 1"
+            v-if="active === tab"
             class="absolute -bottom-[17px] left-0 right-0 h-[2px] rounded-full bg-[var(--b-black)]"
             aria-hidden="true"
           />
-        </span>
+        </button>
       </div>
 
       <span class="h-7 w-7 rounded-full bg-[#e9e4d9]" aria-hidden="true" />
     </div>
 
-    <div class="px-5 pb-6 pt-6 md:px-7 md:pb-8">
+    <div class="px-5 pb-6 pt-6 md:px-7 md:pb-8" role="tabpanel">
       <div class="flex items-start justify-between gap-6">
         <div class="min-w-0">
           <p class="b-mono flex items-center gap-2.5 text-[var(--b-stone)]">
             <span class="b-live" aria-hidden="true" />
-            {{ $t('landing.hero.brief.eyebrow') }}
+            {{ panel.eyebrow }}
           </p>
 
           <p class="font-display mt-3 text-[27px] tracking-[-.02em] md:text-[32px]">{{ $t('landing.hero.brief.greeting') }}</p>
@@ -68,13 +90,13 @@ const WEEK = [34, 48, 41, 62, 55, 78, 96]
       </div>
 
       <p class="b-mono mt-5 flex items-center justify-between border-t border-[var(--b-line-soft)] pt-4 text-[var(--b-stone)]">
-        <span>{{ $t('landing.hero.brief.count') }}</span>
+        <span>{{ panel.count }}</span>
         <span>{{ $t('landing.hero.brief.updated') }}</span>
       </p>
 
       <ul class="mt-1 divide-y divide-[var(--b-line-soft)]">
         <li
-          v-for="row in rows"
+          v-for="row in panel.rows"
           :key="row.key"
           class="-mx-3 flex items-start gap-3.5 rounded-[10px] px-3 py-4"
           :class="row.accent ? 'bg-[#f6f3ec]' : ''"
@@ -93,12 +115,7 @@ const WEEK = [34, 48, 41, 62, 55, 78, 96]
             <p class="mt-1 text-[13.5px] leading-[1.55] text-[var(--b-stone)]">{{ row.body }}</p>
           </div>
 
-          <AppIcon
-            name="chevron"
-            :size="15"
-            class="mt-1 shrink-0"
-            :class="'text-[#c9c2b4]'"
-          />
+          <AppIcon name="chevron" :size="15" class="mt-1 shrink-0 text-[#c9c2b4]" />
         </li>
       </ul>
     </div>

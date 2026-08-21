@@ -100,7 +100,7 @@ function toggleMode() {
 
             <button
               type="submit"
-              class="b-focus inline-flex h-[52px] w-full items-center justify-center rounded-full bg-[var(--b-black)] text-[15px] font-medium text-[var(--b-ivory)] transition-colors duration-300 hover:bg-black disabled:cursor-wait disabled:opacity-60"
+              class="b-focus b-btn-red inline-flex h-[52px] w-full items-center justify-center rounded-full text-[15px] font-medium disabled:cursor-wait disabled:opacity-60"
               :disabled="loading"
             >
               {{ loading ? $t('login.loading') : (isLogin ? $t('login.submitLogin') : $t('login.submitRegister')) }}
@@ -125,7 +125,7 @@ function toggleMode() {
 
       <!-- The aside: the one hero moment on the page. Warm light falling into
            the near-black card, with the product already working inside it. -->
-      <section class="hero-night relative hidden overflow-hidden rounded-[24px] px-10 py-16 text-[var(--b-ivory)] lg:flex lg:flex-col lg:items-center lg:justify-center">
+      <section class="b-night relative hidden overflow-hidden rounded-[24px] px-10 py-16 text-[var(--b-ivory)] lg:flex lg:flex-col lg:items-center lg:justify-center">
         <PersonalMark
           :size="440"
           class="pointer-events-none absolute left-1/2 top-[38%] -translate-x-1/2 -translate-y-1/2 text-white/[.028]"
@@ -148,26 +148,26 @@ function toggleMode() {
               <p class="text-[11px] font-semibold uppercase tracking-[.16em] text-[#a8a196]">
                 {{ $t('login.aside.card.eyebrow') }}
               </p>
-              <span class="grid h-7 w-7 place-items-center rounded-full bg-white/10 text-white" aria-hidden="true">
+              <span class="grid h-7 w-7 place-items-center rounded-full bg-[rgba(224,79,54,.16)] text-[var(--b-red-lit)]" aria-hidden="true">
                 <AppIcon name="sparkles" :size="14" />
               </span>
             </div>
 
-            <p class="mt-4 font-display text-[38px] leading-none tracking-[-.02em]">{{ $t('login.aside.card.metric') }}</p>
+            <p class="mt-4 font-display text-[38px] leading-none tracking-[-.02em] text-[var(--b-red-lit)]">{{ $t('login.aside.card.metric') }}</p>
             <p class="mt-2 flex items-center gap-2 text-[12.5px] text-[#a8a196]">
-              <span class="h-1.5 w-1.5 rounded-full bg-[var(--b-signature)]" aria-hidden="true" />
+              <span class="b-live" aria-hidden="true" />
               {{ $t('login.aside.card.period') }}
             </p>
 
             <svg viewBox="0 0 300 84" class="mt-5 w-full" preserveAspectRatio="none" aria-hidden="true">
               <defs>
                 <linearGradient id="login-curve" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#ffffff" stop-opacity=".28" />
-                  <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+                  <stop offset="0%" stop-color="var(--b-red-lit)" stop-opacity=".34" />
+                  <stop offset="100%" stop-color="var(--b-red-lit)" stop-opacity="0" />
                 </linearGradient>
               </defs>
               <path :d="`${CURVE} L300 84 L0 84 Z`" fill="url(#login-curve)" />
-              <path :d="CURVE" fill="none" stroke="#ffffff" stroke-width="1.6" vector-effect="non-scaling-stroke" />
+              <path :d="CURVE" fill="none" stroke="var(--b-red-lit)" stroke-width="1.6" vector-effect="non-scaling-stroke" />
             </svg>
 
             <div class="mt-3 flex justify-between text-[11px] tracking-[.14em] text-[#7d776c]" aria-hidden="true">
@@ -186,5 +186,8 @@ function toggleMode() {
 }
 
 .auth-input::placeholder { color: var(--b-stone); }
-.auth-input:focus { border-color: #cfc7b8; }
+.auth-input:focus {
+  border-color: var(--b-red-300);
+  box-shadow: 0 0 0 3px var(--b-glow-soft);
+}
 </style>

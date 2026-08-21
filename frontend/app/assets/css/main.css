@@ -317,8 +317,10 @@ button, a { -webkit-tap-highlight-color: transparent; }
     animation: ping 2.4s cubic-bezier(0, 0, .2, 1) infinite;
   }
 
-  /* The primary action. Red, with the light coming from the top of the pill so
-     it reads as a physical button rather than a flat fill. */
+  /* The primary action, shared by the launch page and the app. Red, with the
+     light coming from the top of the pill so it reads as a physical button
+     rather than a flat fill. Every screen has exactly one kind of "yes", and
+     this is it — signing in, publishing a remix, connecting an account. */
   .b-btn-red {
     background: linear-gradient(180deg, var(--b-red-400) 0%, var(--b-red-500) 42%, var(--b-red-600) 100%);
     color: #fff;
@@ -334,6 +336,15 @@ button, a { -webkit-tap-highlight-color: transparent; }
       0 16px 34px -14px rgba(197, 63, 40, .9);
   }
   .b-btn-red:active { transform: translateY(1px); }
+
+  /* A pending or blocked action stops behaving like a button: the pill keeps
+     its colour so the eye does not lose the primary, but the light dies. */
+  .b-btn-red:disabled,
+  .b-btn-red[aria-disabled="true"] {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28);
+    filter: none;
+    transform: none;
+  }
 }
 
 @keyframes ping {
@@ -409,3 +420,9 @@ button, a { -webkit-tap-highlight-color: transparent; }
 }
 
 
+
+/* Emphasis in the signature, for a word that lives inside a translation and so
+   cannot carry a utility class of its own. It uses the brightened red, so it
+   belongs to the night ground of the hero and nowhere else. Declared outside
+   @layer on purpose: Tailwind scans components, not locale files. */
+.b-lit { color: var(--b-red-lit); }

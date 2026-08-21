@@ -216,7 +216,7 @@ onUnmounted(() => {
                       @click="clearConversation"
                     >{{ $t('chat.clear') }}</button>
                     <button
-                      class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[var(--ink)] text-[var(--paper)] transition hover:bg-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
+                      class="grid h-9 w-9 shrink-0 place-items-center rounded-full b-btn-red transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
                       :disabled="!draft.trim() || sending"
                       :aria-label="$t('chat.send')"
                       @click="send()"

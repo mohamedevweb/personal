@@ -168,7 +168,7 @@ onMounted(async () => {
           </p>
 
           <button
-            class="mt-10 inline-flex h-[54px] items-center gap-3 rounded-full bg-[var(--ink)] px-7 text-[15px] font-medium text-[var(--paper)] transition hover:-translate-y-0.5 hover:bg-black disabled:cursor-wait disabled:opacity-60"
+            class="mt-10 inline-flex h-[54px] items-center gap-3 rounded-full b-btn-red px-7 text-[15px] font-medium transition hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-60"
             :disabled="loading"
             @click="connect"
           >
@@ -261,7 +261,7 @@ onMounted(async () => {
 
             <button
               type="button"
-              class="mt-7 inline-flex h-[52px] items-center rounded-full bg-[var(--ink)] px-7 text-[15px] font-medium text-[var(--paper)] transition hover:-translate-y-0.5 hover:bg-black disabled:cursor-not-allowed disabled:opacity-40"
+              class="mt-7 inline-flex h-[52px] items-center rounded-full b-btn-red px-7 text-[15px] font-medium transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40"
               :disabled="!canContinue || saving"
               @click="saveInspirations"
             >

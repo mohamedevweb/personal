@@ -77,7 +77,7 @@
       "terms": "Terms"
     },
     "hero": {
-      "titleLineOne": "You're a creator.",
+      "titleLineOne": "You're a <span class=\"b-lit\">creator</span>.",
       "titleLineTwo": "Not a content machine.",
       "subtitle": "Personal finds what's working in your niche and rewrites it with your life. Your voice, your week, ten minutes.",
       "getAccess": "Get early access",
@@ -87,47 +87,94 @@
       "reassuranceTwo": "Personal never posts for you",
       "mediaLabel": "Personal, one morning",
       "readouts": {
-        "outlier": {
-          "label": "Outlier found",
-          "value": "8.4×",
-          "note": "above its own creator's average"
+        "creators": {
+          "label": "Creators in early access",
+          "value": "40",
+          "note": "writing with Personal every week"
         },
-        "match": {
-          "label": "Posts read",
-          "value": "1,400",
-          "note": "scanned in your niche since midnight"
+        "published": {
+          "label": "Posts published",
+          "value": "320",
+          "note": "written with Personal, in their own voice"
         },
         "speed": {
-          "label": "Draft ready",
+          "label": "From Moment to post",
           "value": "10 min",
-          "note": "from a Moment to something postable"
+          "note": "what it takes them, on average"
         }
       },
       "brief": {
-        "eyebrow": "Your niche, this morning",
         "greeting": "Morning, Mohamed.",
-        "count": "4 opportunities",
         "updated": "Updated 6 min ago",
+        "tabsLabel": "What Personal does, in three moves",
         "tabs": {
           "understand": "Understand me",
           "find": "Find what works",
           "remix": "Remix for me"
         },
-        "rows": {
-          "one": {
-            "metric": "8.4×",
-            "title": "engagement, in your niche",
-            "body": "Failure → realization → lesson is beating everything else this week."
+        "panels": {
+          "understand": {
+            "eyebrow": "Your account, read back",
+            "count": "3 things learned",
+            "rows": {
+              "one": {
+                "metric": "40",
+                "title": "posts read, once",
+                "body": "Your captions, your formats, the hours you post. Personal reads you before it writes as you."
+              },
+              "two": {
+                "metric": "3",
+                "title": "formats that sound like you",
+                "body": "Personal story, behind the scenes, lesson learned. That is where you are most yourself."
+              },
+              "three": {
+                "metric": "Tuesday",
+                "title": "your last Moment",
+                "body": "The day you decided to stop posting advice carousels."
+              }
+            }
           },
-          "two": {
-            "metric": "94%",
-            "title": "match with your pivot story",
-            "body": "The format working right now fits something you wrote down on Tuesday."
+          "find": {
+            "eyebrow": "Your niche, this morning",
+            "count": "4 opportunities",
+            "rows": {
+              "one": {
+                "metric": "8.4×",
+                "title": "engagement, in your niche",
+                "body": "Failure → realization → lesson is beating everything else this week."
+              },
+              "two": {
+                "metric": "94%",
+                "title": "match with your pivot story",
+                "body": "The format working right now fits something you wrote down on Tuesday."
+              },
+              "three": {
+                "metric": "12",
+                "title": "outliers found overnight",
+                "body": "Posts beating their own creator's average — at your size, not at 2M followers."
+              }
+            }
           },
-          "three": {
-            "metric": "12",
-            "title": "outliers found overnight",
-            "body": "Posts beating their own creator's average — at your size, not at 2M followers."
+          "remix": {
+            "eyebrow": "Your week, rewritten",
+            "count": "1 draft",
+            "rows": {
+              "one": {
+                "metric": "1",
+                "title": "draft waiting for you",
+                "body": "Written from this morning’s outlier and what you wrote down on Tuesday."
+              },
+              "two": {
+                "metric": "9 min",
+                "title": "since the Moment",
+                "body": "All that is left is deciding whether it is true."
+              },
+              "three": {
+                "metric": "0",
+                "title": "automatic posts",
+                "body": "Personal never posts for you. You copy it, you decide, you publish."
+              }
+            }
           }
         }
       }
@@ -396,8 +443,6 @@
   "feed": {
     "forYou": "For you",
     "global": "Global",
-    "worthCreating": "Worth creating today",
-    "globalWorthCreating": "What is working everywhere",
     "loadError": "Personal could not load today’s opportunities.",
     "remixError": "Personal could not draft this right now. Please try again.",
     "refreshed": "Your feed is up to date.",

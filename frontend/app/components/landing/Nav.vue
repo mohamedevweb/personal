@@ -59,7 +59,7 @@ onUnmounted(() => {
         ]"
       >
         <NuxtLink to="/" class="b-focus -m-2 shrink-0 p-2" :aria-label="$t('landing.nav.home')">
-          <PersonalLogo :size="25" />
+          <PersonalLogo :size="25" :tone="onNight ? 'signature-lit' : 'signature'" />
         </NuxtLink>
 
         <nav class="absolute left-1/2 hidden -translate-x-1/2 items-center gap-8 md:flex" :aria-label="$t('landing.nav.label')">

@@ -49,7 +49,7 @@ async function resend() {
         </div>
         <h1 class="mt-7 font-serif text-[44px] leading-[1.04] tracking-[-0.035em]">{{ $t('verifyEmail.verifiedTitle') }}</h1>
         <p class="mt-5 text-[16px] leading-7 text-[var(--muted)]">{{ $t('verifyEmail.verifiedCopy') }}</p>
-        <NuxtLink to="/feed" class="mt-9 inline-flex h-[52px] items-center justify-center rounded-full bg-[var(--ink)] px-7 text-[15px] font-medium text-[var(--paper)] transition hover:bg-black">
+        <NuxtLink to="/feed" class="mt-9 inline-flex h-[52px] items-center justify-center rounded-full b-btn-red px-7 text-[15px] font-medium transition">
           {{ $t('verifyEmail.continue') }}
         </NuxtLink>
       </template>
@@ -63,7 +63,7 @@ async function resend() {
 
         <button
           type="button"
-          class="mt-9 inline-flex h-[52px] items-center justify-center rounded-full bg-[var(--ink)] px-7 text-[15px] font-medium text-[var(--paper)] transition hover:bg-black disabled:cursor-wait disabled:opacity-60"
+          class="mt-9 inline-flex h-[52px] items-center justify-center rounded-full b-btn-red px-7 text-[15px] font-medium transition disabled:cursor-wait disabled:opacity-60"
           :disabled="sending"
           @click="resend"
         >

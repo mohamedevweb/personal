@@ -10,11 +10,12 @@
  * Only the field moves: the copy stays exactly where it was set.
  */
 
-// The three facts above the fold, each one a real thing Personal found that
-// morning. Same numbers the strip carried before, read straight off the night.
+// The three facts above the fold. They are the people, not the machinery: how
+// many creators are on it, what they published with it, and what it costs them
+// in time. The mechanism has the whole rest of the page to explain itself.
 const STATS = [
-  { key: 'outlier', icon: 'trend' },
-  { key: 'match', icon: 'eye' },
+  { key: 'creators', icon: 'user' },
+  { key: 'published', icon: 'paper-plane' },
   { key: 'speed', icon: 'clock' }
 ] as const
 </script>
@@ -49,7 +50,9 @@ const STATS = [
           class="font-display text-[46px] leading-[.98] tracking-[-.03em] text-[var(--b-ivory)] sm:text-[64px] md:text-[80px] lg:text-[92px]"
           style="--reveal-delay:60ms"
         >
-          <span class="block">{{ $t('landing.hero.titleLineOne') }}</span>
+          <!-- The word the whole claim turns on carries the signature, so it
+               lives inside the translation and the line renders its markup. -->
+          <span class="block" v-html="$t('landing.hero.titleLineOne')" />
           <!-- The turn in the sentence is the negative, so it gets the italic.
                It is a type decision, not a colour one. -->
           <span class="block italic">{{ $t('landing.hero.titleLineTwo') }}</span>

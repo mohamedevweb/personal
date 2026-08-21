@@ -94,7 +94,7 @@ onMounted(load)
           <p class="mt-2 max-w-xl text-[15px] leading-6 text-[var(--muted)]">{{ $t('moments.subtitle') }}</p>
         </div>
       </div>
-      <button class="inline-flex h-11 w-fit shrink-0 items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-5 text-[14px] font-medium text-[var(--paper)] transition hover:bg-black" @click="modalOpen = true">
+      <button class="inline-flex h-11 w-fit shrink-0 items-center justify-center gap-2 rounded-full b-btn-red px-5 text-[14px] font-medium transition" @click="modalOpen = true">
         <AppIcon name="plus" :size="17" />{{ $t('moments.addMoment') }}
       </button>
     </header>
@@ -119,7 +119,7 @@ onMounted(load)
           <span v-for="reason in moment.story_reasons" :key="reason" class="text-xs text-[var(--muted)]">✓ {{ storyReason(reason) }}</span>
         </div>
         <div class="mt-6 flex items-center gap-3 border-t border-[var(--line-soft)] pt-4">
-          <button class="inline-flex h-9 items-center justify-center rounded-full bg-[var(--ink)] px-4 text-[12.5px] font-medium text-[var(--paper)] transition hover:bg-black" @click="turnIntoContent(moment)">{{ $t('moments.turnIntoContent') }}</button>
+          <button class="inline-flex h-9 items-center justify-center rounded-full b-btn-red px-4 text-[12.5px] font-medium transition" @click="turnIntoContent(moment)">{{ $t('moments.turnIntoContent') }}</button>
           <button class="text-xs text-[var(--faint)] transition hover:text-[var(--danger)]" @click="removeMoment(moment)">{{ $t('moments.delete') }}</button>
         </div>
       </article>
@@ -143,7 +143,7 @@ onMounted(load)
             <input v-model="form.happened_at" type="date" class="mt-2 w-full rounded-[12px] border border-[var(--line)] bg-[var(--surface)] px-3 py-3 text-sm outline-none">
           </label>
         </div>
-        <button class="mt-6 h-12 w-full rounded-full bg-[var(--ink)] text-[15px] font-medium text-[var(--paper)] transition hover:bg-black disabled:opacity-60" :disabled="saving">{{ saving ? $t('moments.finding') : $t('moments.saveMoment') }}</button>
+        <button class="mt-6 h-12 w-full rounded-full b-btn-red text-[15px] font-medium transition disabled:opacity-60" :disabled="saving">{{ saving ? $t('moments.finding') : $t('moments.saveMoment') }}</button>
       </form>
     </div>
   </main>
