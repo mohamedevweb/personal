@@ -239,6 +239,14 @@
       "sourceMoment": "your moment from Tuesday",
       "use": "Use this",
       "another": "Try another angle",
+      "preview": {
+        "label": "Instagram preview",
+        "badge": "Preview",
+        "handle": "{'@'}mohamed",
+        "audio": "Original audio",
+        "more": "more",
+        "photo": "Your photo"
+      },
       "never": "Personal drafts. You decide. Nothing is published without you."
     },
     "moments": {

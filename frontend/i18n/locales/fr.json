@@ -239,6 +239,14 @@
       "sourceMoment": "votre moment de mardi",
       "use": "Utiliser",
       "another": "Un autre angle",
+      "preview": {
+        "label": "Aperçu Instagram",
+        "badge": "Aperçu",
+        "handle": "{'@'}mohamed",
+        "audio": "Son original",
+        "more": "plus",
+        "photo": "Votre photo"
+      },
       "never": "Personal rédige. Vous décidez. Rien n’est publié sans vous."
     },
     "moments": {

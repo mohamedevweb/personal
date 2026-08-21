@@ -7,6 +7,9 @@ const FORMATS: Format[] = ['reel', 'carousel', 'post']
 const active = ref<Format>('reel')
 const tabs = ref<HTMLButtonElement[]>([])
 
+/** Which carousel slide the preview beside the strip is showing. */
+const slide = ref(0)
+
 const beats = computed(() => (['hook', 'two', 'three', 'close'] as const).map(key => ({
   key,
   label: t(`landing.remix.reel.beats.${key}.label`),
@@ -75,28 +78,36 @@ function onKeydown(event: KeyboardEvent, index: number) {
             tabindex="0"
             class="b-focus"
           >
-            <div class="p-6 md:p-9">
-              <p class="b-eyebrow">{{ $t(`landing.remix.${format}.meta`) }}</p>
+            <div class="grid gap-10 p-6 md:grid-cols-[1fr_300px] md:gap-12 md:p-9">
+              <div>
+                <p class="b-eyebrow">{{ $t(`landing.remix.${format}.meta`) }}</p>
 
-              <dl v-if="format === 'reel'" class="mt-7 divide-y divide-[var(--b-line-soft)]">
-                <div v-for="beat in beats" :key="beat.key" class="grid gap-2 py-5 first:pt-0 last:pb-0 sm:grid-cols-[92px_1fr] sm:gap-6">
-                  <dt class="b-eyebrow sm:pt-1">{{ beat.label }}</dt>
-                  <dd class="font-display text-[20px] leading-[1.35] tracking-[-.01em] md:text-[23px]">{{ beat.value }}</dd>
-                </div>
-              </dl>
+                <dl v-if="format === 'reel'" class="mt-7 divide-y divide-[var(--b-line-soft)]">
+                  <div v-for="beat in beats" :key="beat.key" class="grid gap-2 py-5 first:pt-0 last:pb-0 sm:grid-cols-[92px_1fr] sm:gap-6">
+                    <dt class="b-eyebrow sm:pt-1">{{ beat.label }}</dt>
+                    <dd class="font-display text-[20px] leading-[1.35] tracking-[-.01em] md:text-[23px]">{{ beat.value }}</dd>
+                  </div>
+                </dl>
 
-              <ol v-else-if="format === 'carousel'" class="mt-7 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2">
-                <li
-                  v-for="(slide, index) in slides"
-                  :key="slide"
-                  class="flex aspect-[4/5] w-[176px] shrink-0 snap-start flex-col justify-between rounded-[14px] border border-[var(--b-line)] bg-[#f4f1ea] p-5"
-                >
-                  <span class="b-eyebrow">{{ index + 1 }}/{{ slides.length }}</span>
-                  <p class="font-display text-[19px] leading-[1.25] tracking-[-.01em]">{{ slide }}</p>
-                </li>
-              </ol>
+                <ol v-else-if="format === 'carousel'" class="mt-7 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2">
+                  <li v-for="(item, index) in slides" :key="item" class="shrink-0 snap-start">
+                    <button
+                      type="button"
+                      class="b-focus flex aspect-[4/5] w-[176px] flex-col justify-between rounded-[14px] border bg-[#f4f1ea] p-5 text-left transition-colors duration-300"
+                      :class="index === slide ? 'border-[var(--b-signature)]' : 'border-[var(--b-line)] hover:border-[#d6cfc1]'"
+                      :aria-pressed="index === slide"
+                      @click="slide = index"
+                    >
+                      <span class="b-eyebrow">{{ index + 1 }}/{{ slides.length }}</span>
+                      <p class="font-display text-[19px] leading-[1.25] tracking-[-.01em]">{{ item }}</p>
+                    </button>
+                  </li>
+                </ol>
 
-              <p v-else class="mt-7 max-w-[46rem] whitespace-pre-line text-[16px] leading-[1.75]">{{ $t('landing.remix.post.body') }}</p>
+                <p v-else class="mt-7 max-w-[46rem] whitespace-pre-line text-[16px] leading-[1.75]">{{ $t('landing.remix.post.body') }}</p>
+              </div>
+
+              <LandingRemixPreview :format="format" :slide="slide" />
             </div>
 
             <div class="flex flex-col gap-5 border-t border-[var(--b-line-soft)] bg-[#faf8f4] px-6 py-5 md:flex-row md:items-center md:justify-between md:px-9">
