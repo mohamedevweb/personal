@@ -415,7 +415,7 @@ onBeforeUnmount(() => {
                   v-for="(slide, index) in slides"
                   :key="slide.id"
                   class="group flex aspect-[4/5] w-[248px] shrink-0 snap-start flex-col rounded-[16px] border p-4 transition"
-                  :class="index === 0 ? 'hero-night border-transparent text-white' : 'border-[var(--line)] bg-[var(--surface)]'"
+                  :class="index === 0 ? 'b-night border-transparent text-white' : 'border-[var(--line)] bg-[var(--surface)]'"
                 >
                   <header class="flex items-center justify-between">
                     <span class="remix-label" :class="index === 0 && 'text-[var(--gold)]'">

@@ -119,7 +119,7 @@ onMounted(load)
           <span v-for="reason in moment.story_reasons" :key="reason" class="text-xs text-[var(--muted)]">✓ {{ storyReason(reason) }}</span>
         </div>
         <div class="mt-6 flex items-center gap-3 border-t border-[var(--line-soft)] pt-4">
-          <button class="inline-flex h-9 items-center justify-center rounded-full b-btn-red px-4 text-[12.5px] font-medium transition" @click="turnIntoContent(moment)">{{ $t('moments.turnIntoContent') }}</button>
+          <button class="inline-flex h-9 items-center justify-center rounded-full bg-[var(--ink)] px-4 text-[12.5px] font-medium text-[var(--paper)] transition hover:bg-black" @click="turnIntoContent(moment)">{{ $t('moments.turnIntoContent') }}</button>
           <button class="text-xs text-[var(--faint)] transition hover:text-[var(--danger)]" @click="removeMoment(moment)">{{ $t('moments.delete') }}</button>
         </div>
       </article>

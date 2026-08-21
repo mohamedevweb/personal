@@ -56,16 +56,16 @@ onMounted(async () => {
   <main class="page-shell pb-16 pt-2">
     <p v-if="drafting" class="mb-5 text-sm text-[var(--muted)]">{{ $t('create.drafting') }}</p>
 
-    <section class="hero-night relative overflow-hidden rounded-[24px] px-6 py-14 text-center text-white md:px-12 md:py-16">
-      <p class="inline-flex items-center gap-2.5 text-[10px] font-semibold uppercase tracking-[.22em] text-[var(--gold)]">
-        <span class="grid h-6 w-6 place-items-center rounded-full border border-[var(--gold)]/35"><AppIcon name="sparkles" :size="12" /></span>
+    <section class="b-night relative overflow-hidden rounded-[24px] px-6 py-14 text-center text-white md:px-12 md:py-16">
+      <p class="inline-flex items-center gap-2.5 text-[10px] font-semibold uppercase tracking-[.22em] text-[var(--b-red-lit)]">
+        <span class="grid h-6 w-6 place-items-center rounded-full border border-[var(--b-red-lit)]/35"><AppIcon name="sparkles" :size="12" /></span>
         {{ $t('create.personalsPick') }}
       </p>
       <h2 class="mx-auto mt-7 max-w-3xl font-serif text-[34px] leading-[1.08] tracking-[-.03em] md:text-[50px]">{{ opportunityCopy('title') || $t('create.pickTitleFallback') }}</h2>
       <p class="mx-auto mt-5 max-w-xl text-[15px] leading-7 text-white/65">{{ opportunityCopy('explanation') || $t('create.pickCopyFallback') }}</p>
       <button
         v-if="opportunities[0]?.life_moment"
-        class="mt-9 inline-flex h-12 items-center rounded-full bg-[var(--paper)] px-6 text-[14px] font-medium text-[var(--night)] transition hover:bg-white disabled:cursor-wait disabled:opacity-70"
+        class="b-btn-red mt-9 inline-flex h-12 items-center rounded-full px-6 text-[14px] font-medium disabled:cursor-wait disabled:opacity-70"
         :disabled="drafting"
         @click="createFromMoment(opportunities[0].life_moment!)"
       >

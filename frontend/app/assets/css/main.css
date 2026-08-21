@@ -63,14 +63,6 @@ button, a { -webkit-tap-highlight-color: transparent; }
     font-feature-settings: "liga" 1, "kern" 1;
   }
 
-  /* Warm light falling into a near-black card — the signature surface for the
-     one hero moment on a page. */
-  .hero-night {
-    background:
-      radial-gradient(105% 72% at 50% -18%, rgba(230, 178, 66, .82) 0%, rgba(148, 103, 24, .45) 28%, rgba(44, 35, 20, .3) 56%, rgba(13, 12, 10, 0) 76%),
-      linear-gradient(180deg, #1b1813 0%, var(--night) 62%);
-  }
-
   .panel-night { background: rgba(255, 255, 255, .045); border: 1px solid rgba(255, 255, 255, .085); }
 
   /* Every screen sits in the same column: the sticky header and the page body
@@ -247,8 +239,9 @@ button, a { -webkit-tap-highlight-color: transparent; }
     background: radial-gradient(62% 44% at 50% 0%, rgba(224, 79, 54, .045) 0%, rgba(224, 79, 54, .018) 45%, transparent 74%);
   }
 
-  /* The dark ground, lit from above in the signature rather than in gold. The
-     launch page uses this everywhere the app uses .hero-night. */
+  /* The one dark ground in the product: near-black, lit from above in the
+     signature. Every near-black card wears it — the launch page's sections,
+     the login aside, the pick on Create, the onboarding panel. */
   .b-night {
     background:
       radial-gradient(94% 60% at 50% -16%, rgba(224, 79, 54, .16) 0%, rgba(120, 60, 44, .09) 32%, rgba(11, 10, 9, 0) 72%),

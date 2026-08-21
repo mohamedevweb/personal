@@ -290,7 +290,7 @@ onMounted(async () => {
 
       </div>
 
-      <aside class="hero-night relative min-h-[430px] overflow-hidden rounded-[24px] p-7 text-white md:p-10">
+      <aside class="b-night relative min-h-[430px] overflow-hidden rounded-[24px] p-7 text-white md:p-10">
         <div class="absolute right-8 top-8 flex gap-1.5">
           <span v-for="i in 3" :key="i" class="h-1.5 w-1.5 rounded-full bg-white/25" />
         </div>

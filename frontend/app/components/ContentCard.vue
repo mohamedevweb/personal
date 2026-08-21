@@ -176,7 +176,7 @@ watch(() => props.post.id, () => {
         </button>
         <button
           type="button"
-          class="inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-full b-btn-red px-4 text-[12.5px] font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+          class="inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-4 text-[12.5px] font-medium text-[var(--paper)] transition hover:bg-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
           @click="$emit('remix', post)"
         >
           {{ $t('contentCard.remixForMe') }}
