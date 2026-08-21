@@ -102,10 +102,18 @@ Discovery cost is capped on every axis: search queries have a cooldown (`DISCOVE
 
 The first production dataset is a versioned Golden Catalog in `backend/database/catalog/instagram_creators.php`. It contains 30 human-curated French creators, five in each of the six canonical verticals. Each entry records the exact Instagram URL, editorial sources, topics and rationale. Followers and recognition tiers are intentionally absent because they are measured rather than guessed. Every entry starts as `pending`, so its presence in the manifest never authorizes a database write.
 
-Run the read-only audit first. It makes one profile request per creator. A separate posts request is made only when the profile response contains fewer than six usable recent publications. It then writes JSON and CSV reports under `backend/storage/app/private/catalog-reports` on the host and `/var/www/html/storage/app/private/catalog-reports` inside Docker:
+Run the read-only audit first. It makes one profile request per creator. A separate posts request is made only when the profile response contains fewer than six publications. It then writes JSON and CSV reports under `backend/storage/app/private/catalog-reports` on the host and `/var/www/html/storage/app/private/catalog-reports` inside Docker:
 
 ```bash
 docker compose exec app php artisan personal:audit-creator-catalog
+```
+
+To audit only newly added or corrected handles, repeat `--handle` as needed:
+
+```bash
+docker compose exec app php artisan personal:audit-creator-catalog \
+  --handle=first_creator \
+  --handle=second_creator
 ```
 
 Provider failures are reported separately from editorial rejections. They include the HTTP status and provider message when available, leave unknown metrics as `null`, and can be retried without paying again for successful rows:

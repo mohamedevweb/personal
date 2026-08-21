@@ -69,7 +69,8 @@
       "getAccess": "Accès anticipé",
       "skip": "Aller au contenu",
       "privacy": "Confidentialité",
-      "home": "Personal, retour en haut"
+      "home": "Personal, retour en haut",
+      "terms": "Conditions"
     },
     "hero": {
       "titleLineOne": "Vous êtes créateur.",
@@ -283,7 +284,9 @@
     "haveAccount": "Vous avez déjà un compte ?",
     "goToRegister": "Créer un compte",
     "goToLogin": "Se connecter",
-    "legal": "En continuant, vous acceptez notre",
+    "legal": "En continuant, vous acceptez nos",
+    "legalTermsLink": "conditions d’utilisation",
+    "legalAnd": "et notre",
     "legalLink": "politique de confidentialité",
     "home": "Retour à personal.app",
     "aside": {
@@ -982,6 +985,326 @@
           "title": "Nous contacter",
           "p": {
             "mail": "Écrivez à privacy{'@'}usepersonal.app pour toute question, demande d’exercice de droits ou signalement lié à cette politique.",
+            "post": "Par courrier : [ADRESSE POSTALE DE L’ÉDITEUR]."
+          }
+        }
+      }
+    },
+    "terms": {
+      "head": {
+        "title": "Conditions générales d’utilisation — Personal",
+        "description": "Le contrat entre vous et Personal : ce que fait le service, ce que vous pouvez publier, ce que l’intelligence artificielle ne garantit pas et comment y mettre fin."
+      },
+      "hero": {
+        "eyebrow": "Conditions",
+        "title": "Conditions générales d’utilisation",
+        "lede": "Ces conditions forment le contrat entre vous et Personal. Elles disent ce que fait le service, ce que nous vous devons, ce que vous nous devez et comment chacun peut y mettre fin. Elles sont écrites pour être lues, pas pour être passées.",
+        "updated": "Dernière mise à jour : 21 août 2026",
+        "back": "Retour à l’accueil"
+      },
+      "toc": {
+        "label": "Sommaire"
+      },
+      "s": {
+        "summary": {
+          "title": "L’essentiel en six points",
+          "items": {
+            "free": {
+              "term": "L’accès anticipé est gratuit",
+              "detail": "Personal ne coûte rien pendant l’accès anticipé. Aucun moyen de paiement n’est demandé et aucune fonctionnalité existante ne devient payante sans préavis ni votre accord."
+            },
+            "yours": {
+              "term": "Vos contenus restent les vôtres",
+              "detail": "Vous conservez l’intégralité des droits sur vos Moments, vos brouillons et vos publications. Nous ne détenons que l’autorisation nécessaire pour faire fonctionner le service."
+            },
+            "author": {
+              "term": "Vous êtes l’auteur",
+              "detail": "Un modèle écrit un brouillon ; vous le lisez, le modifiez et décidez de publier. Ce qui finit sur votre compte est à vous, la responsabilité aussi."
+            },
+            "noPost": {
+              "term": "Nous ne publions jamais à votre place",
+              "detail": "Personal ne dispose d’aucune autorisation de publier, de programmer ou d’envoyer quoi que ce soit sur votre compte Instagram. Publier reste un geste manuel."
+            },
+            "beta": {
+              "term": "Le service est jeune",
+              "detail": "Les fonctionnalités changent, des pannes arrivent, et nous ne promettons aucune disponibilité ininterrompue. Nous vous prévenons avant tout changement substantiel."
+            },
+            "leave": {
+              "term": "Vous pouvez partir à tout moment",
+              "detail": "Supprimez votre compte quand vous le souhaitez, sans justification, sans pénalité et sans rien perdre de ce que vous avez déjà publié."
+            }
+          }
+        },
+        "object": {
+          "title": "Ce que couvrent ces conditions",
+          "p": {
+            "accept": "Ces conditions régissent votre utilisation de Personal, le service publié à l’adresse usepersonal.app et sur ses sous-domaines. Créer un compte, ou simplement utiliser le service, vaut acceptation pleine et entière. Si vous ne les acceptez pas, n’utilisez pas Personal.",
+            "who": "Elles s’appliquent que vous utilisiez Personal en tant que créateur indépendant ou pour le compte d’une société. Si vous les acceptez pour une société, vous confirmez avoir le pouvoir de l’engager.",
+            "together": "Elles se lisent avec notre politique de confidentialité, qui décrit ce que nous faisons de vos données personnelles et fait partie du même contrat."
+          }
+        },
+        "publisher": {
+          "title": "Qui édite Personal",
+          "p": {
+            "who": "Personal est édité par [RAISON SOCIALE — forme juridique, adresse du siège, numéro SIREN/RCS], qui agit comme prestataire au titre des présentes conditions.",
+            "director": "Directeur de la publication : [DIRECTEUR DE LA PUBLICATION]. Contact : legal{'@'}usepersonal.app.",
+            "host": "L’application et sa base de données PostgreSQL sont hébergées chez [HÉBERGEUR], dans l’Union européenne. Le nom de domaine et la zone DNS sont gérés par OVH, 2 rue Kellermann, 59100 Roubaix, France."
+          }
+        },
+        "service": {
+          "title": "Ce que fait le service",
+          "p": {
+            "intro": "Personal est un outil d’écriture pour créateurs Instagram. Il lit ce qui fonctionne déjà dans votre niche, retient les moments de votre vie que vous notez et propose des brouillons qui vous ressemblent. Concrètement, un compte vous donne :"
+          },
+          "items": {
+            "feed": {
+              "term": "Un fil Pour vous",
+              "detail": "Les publications publiques des créateurs de votre niche, classées sur ce qui performe réellement plutôt que sur la fraîcheur."
+            },
+            "moments": {
+              "term": "Les Moments",
+              "detail": "Un espace privé pour noter ce qui vous arrive, afin qu’un brouillon ait matière vraie où puiser."
+            },
+            "remix": {
+              "term": "Les remix",
+              "detail": "Un brouillon écrit à partir d’une publication qui fonctionne et d’un de vos moments, que vous pouvez réécrire autant de fois que nécessaire."
+            },
+            "chat": {
+              "term": "Un assistant créatif",
+              "detail": "Une conversation pour affiner un angle, une accroche ou une légende."
+            },
+            "profile": {
+              "term": "Un profil créateur",
+              "detail": "Votre positionnement, votre ton et vos sujets, à l’aune desquels chaque suggestion est mesurée."
+            },
+            "instagram": {
+              "term": "Une connexion Instagram",
+              "detail": "Facultative. Elle importe les informations publiques de votre compte et vos publications récentes pour que les suggestions reposent sur vos chiffres réels."
+            }
+          },
+          "note": "Cette liste décrit le service tel qu’il existe aujourd’hui. Des fonctionnalités arrivent, changent et disparaissent parfois ; la section « Disponibilité et évolutions » dit comment nous procédons."
+        },
+        "account": {
+          "title": "Votre compte",
+          "p": {
+            "intro": "Un compte est personnel, individuel et rattaché à une adresse e-mail vérifiée."
+          },
+          "items": {
+            "age": {
+              "term": "Âge",
+              "detail": "Personal s’adresse aux créateurs disposant d’un compte Instagram professionnel. Vous devez avoir au moins 16 ans pour ouvrir un compte."
+            },
+            "truth": {
+              "term": "Des informations exactes",
+              "detail": "Le nom et l’adresse e-mail que vous indiquez doivent être les vôtres et rester à jour. Une adresse non vérifiée bloque l’accès à l’essentiel du service."
+            },
+            "security": {
+              "term": "La sécurité de votre compte",
+              "detail": "Vous êtes responsable de votre mot de passe et de tout ce qui est fait depuis votre compte. Écrivez à legal{'@'}usepersonal.app si vous pensez qu’un tiers y a accès, et changez votre mot de passe depuis les Réglages."
+            },
+            "sharing": {
+              "term": "Un compte par créateur",
+              "detail": "Ne partagez, ne vendez et ne cédez pas votre compte. Vous pouvez connecter différents comptes Instagram au fil du temps, mais un compte Personal appartient à une seule personne."
+            }
+          }
+        },
+        "price": {
+          "title": "Prix",
+          "p": {
+            "free": "Personal est gratuit pendant l’accès anticipé. Aucun moyen de paiement n’est demandé et aucun débit ne peut vous être appliqué.",
+            "later": "Des offres payantes pourront apparaître plus tard. Le cas échéant, nous l’annonçons par e-mail au moins 30 jours à l’avance, les nouvelles conditions ne s’appliquent qu’une fois acceptées par vous, et vous gardez toujours le choix de partir plutôt que de payer.",
+            "costs": "Vos propres frais — accès internet, matériel, votre compte Instagram — restent à votre charge."
+          }
+        },
+        "instagram": {
+          "title": "La connexion Instagram",
+          "p": {
+            "optional": "Connecter votre compte Instagram professionnel est facultatif et réversible. Cela passe par Instagram Login, chez Meta, et nous ne voyons jamais votre mot de passe Instagram.",
+            "scope": "La connexion donne à Personal un accès en lecture seule : les informations publiques de votre profil, vos publications récentes et leurs statistiques publiques. Personal ne dispose d’aucune autorisation de publier, de commenter, d’envoyer des messages ni de suivre des comptes en votre nom."
+          },
+          "items": {
+            "meta": {
+              "term": "Les règles de Meta s’appliquent aussi",
+              "detail": "Votre usage de la connexion est également régi par les Conditions d’utilisation d’Instagram et les Meta Platform Terms. Sur ce point, en cas de contradiction avec les présentes, elles prévalent."
+            },
+            "eligible": {
+              "term": "Compte professionnel",
+              "detail": "La connexion exige un compte Instagram professionnel — créateur ou entreprise — comme Meta l’impose pour cette API."
+            },
+            "revoke": {
+              "term": "Retirer l’accès",
+              "detail": "Déconnectez depuis les Réglages dans Personal, ou retirez Personal depuis Instagram : Paramètres → Sites web et applications. Le jeton d’accès et les médias importés sont supprimés immédiatement."
+            },
+            "beyond": {
+              "term": "Hors de notre contrôle",
+              "detail": "Meta peut modifier, restreindre ou interrompre son API à tout moment. Si cela arrive, une partie du service peut cesser de fonctionner sans que ce soit un manquement de notre part."
+            }
+          },
+          "outro": {
+            "publish": "Publier reste un geste manuel : vous copiez le texte que vous avez validé et le publiez vous-même depuis Instagram. Rien ne quitte Personal vers votre compte tout seul."
+          }
+        },
+        "ai": {
+          "title": "Ce que fait l’intelligence artificielle, et ce qu’elle ne promet pas",
+          "p": {
+            "what": "Les brouillons et les réponses de l’assistant sont produits par des modèles de langage opérés par des tiers. Nous ne leur transmettons que ce dont la requête a besoin : la publication analysée, le moment que vous avez choisi, votre profil créateur et votre message.",
+            "review": "Un modèle peut se tromper, inventer un fait ou produire un texte proche de quelque chose qui existe déjà. Relisez chaque brouillon avant qu’il ne quitte Personal. Vous êtes le dernier contrôle, et le seul qui compte.",
+            "author": "Une fois un texte relu et publié, vous en êtes l’auteur. Vous répondez seul de ce qu’il dit, des allégations qu’il porte et de sa conformité aux règles sur la publicité, la transparence des partenariats et la propriété intellectuelle.",
+            "noResult": "Aucun résultat n’est promis. Personal ne garantit ni portée, ni engagement, ni croissance d’audience, ni revenus. Personne ne peut les garantir.",
+            "quota": "La génération est soumise à des limites d’usage raisonnable pour que le service reste disponible pour tous. Nous pouvons ajuster ces limites et vous prévenons lorsqu’elles changent sensiblement."
+          }
+        },
+        "yourContent": {
+          "title": "Vos contenus",
+          "p": {
+            "intro": "Vos Moments, votre profil créateur, vos brouillons et vos publications vous appartiennent. Rien ici ne nous transfère de droit sur eux."
+          },
+          "items": {
+            "licence": {
+              "term": "L’autorisation dont nous avons besoin",
+              "detail": "Pour faire fonctionner le service, vous nous accordez une licence non exclusive, mondiale et gratuite d’héberger, stocker, reproduire et traiter vos contenus — uniquement pour vous les réafficher, produire ce que vous demandez et opérer le service. Elle dure aussi longtemps que vous conservez le contenu, pas davantage."
+            },
+            "noTraining": {
+              "term": "Aucun modèle n’est entraîné dessus",
+              "detail": "Vos contenus ne servent jamais à entraîner un modèle d’IA, ni le nôtre ni celui d’un tiers, ne sont jamais vendus et ne sont montrés à aucun autre créateur."
+            },
+            "warrant": {
+              "term": "Ce que vous nous garantissez",
+              "detail": "Que vous détenez les droits sur ce que vous confiez à Personal et que cela ne porte atteinte aux droits de personne — droit à l’image, vie privée, marque ou droit d’auteur compris."
+            },
+            "backup": {
+              "term": "Vos propres copies",
+              "detail": "Gardez une copie de ce qui compte pour vous. Nous sauvegardons le service, mais Personal n’est pas un service d’archivage et ne peut garantir aucune restauration."
+            }
+          }
+        },
+        "discovery": {
+          "title": "Les publications des autres créateurs",
+          "p": {
+            "what": "Le fil montre des publications publiques d’autres comptes Instagram de votre niche, collectées depuis des pages publiques à des fins d’analyse. Elles sont là pour comprendre ce qui fonctionne, pas pour être copiées.",
+            "rule": "Reproduire mot pour mot la publication d’un autre créateur relève de votre responsabilité, pas de la nôtre, et peut porter atteinte à ses droits. Le remix existe précisément pour que ce que vous publiez sorte de votre propre matière.",
+            "takedown": "Si vous êtes créateur et ne souhaitez pas que vos publications soient analysées par Personal, écrivez à legal{'@'}usepersonal.app : nous retirons votre compte et vos publications de notre base et empêchons leur réapparition."
+          }
+        },
+        "rules": {
+          "title": "Ce que vous ne pouvez pas faire",
+          "p": {
+            "intro": "Utiliser Personal pour produire ou diffuser ce qui suit constitue un manquement aux présentes conditions :"
+          },
+          "items": {
+            "illegal": {
+              "term": "Tout contenu illicite",
+              "detail": "Un contenu illégal, diffamatoire, haineux, harcelant ou violent, ou qui porte atteinte aux droits d’un tiers."
+            },
+            "minors": {
+              "term": "Un contenu préjudiciable aux mineurs",
+              "detail": "Tout contenu qui met en danger, sexualise ou exploite un mineur, sous quelque forme que ce soit."
+            },
+            "deception": {
+              "term": "La tromperie",
+              "detail": "Usurper l’identité d’un tiers, feindre une identité ou une recommandation, publier un contenu sponsorisé sans le signaler, ou porter des allégations trompeuses en matière de santé, d’argent ou de résultats."
+            },
+            "spam": {
+              "term": "Le spam et l’automatisation de masse",
+              "detail": "Produire du contenu en volume à des fins de spam ou d’engagement artificiel, ou revendre l’accès au service comme outil de génération."
+            },
+            "technical": {
+              "term": "L’abus technique",
+              "detail": "Aspirer le service, contourner nos limites de débit, procéder à de l’ingénierie inverse, en sonder la sécurité sans notre accord écrit, ou y accéder via un client automatisé non autorisé."
+            },
+            "competing": {
+              "term": "Reconstruire le service",
+              "detail": "Utiliser Personal, ses sorties ou ses données pour construire, entraîner ou évaluer un produit concurrent."
+            }
+          },
+          "note": "Si vous croisez sur Personal quelque chose de cette liste, signalez-le à legal{'@'}usepersonal.app. Nous examinons chaque signalement."
+        },
+        "ourContent": {
+          "title": "Notre propriété intellectuelle",
+          "p": {
+            "ours": "Le service Personal — son code, son interface, son design, son nom et son logo — appartient à l’éditeur et est protégé. Ces conditions vous accordent un droit d’usage personnel et non transférable, rien de plus.",
+            "output": "Les textes générés pour vous sont à vous, librement utilisables, y compris commercialement. Nous ne revendiquons aucun droit dessus. Notez qu’un modèle peut produire un texte voisin pour quelqu’un d’autre : aucune exclusivité ne peut être garantie sur une sortie générée.",
+            "feedback": "Si vous nous envoyez une idée ou une suggestion sur le produit, nous pouvons l’utiliser sans rien vous devoir, sans que cela nous donne le moindre droit sur le reste de vos contenus."
+          }
+        },
+        "availability": {
+          "title": "Disponibilité et évolutions",
+          "p": {
+            "asis": "Le service est fourni tel qu’il est, en accès anticipé. Nous y mettons un soin réel, mais nous ne promettons ni disponibilité ininterrompue, ni absence d’erreur, ni adéquation à un besoin particulier qui serait le vôtre.",
+            "maintenance": "Nous pouvons interrompre le service pour maintenance, sécurité ou panne technique. Lorsqu’une interruption est prévue et significative, nous l’annonçons à l’avance.",
+            "evolve": "Des fonctionnalités peuvent être ajoutées, modifiées ou retirées au fil du produit. Lorsqu’un changement réduit substantiellement ce que fait le service, nous vous prévenons par e-mail ou dans l’application avant son entrée en vigueur, et vous restez libre de supprimer votre compte.",
+            "deps": "Une partie du service dépend de tiers — Meta, nos prestataires d’IA, notre hébergeur. Leurs pannes deviennent les nôtres, et cela échappe à notre contrôle."
+          }
+        },
+        "suspension": {
+          "title": "Mettre fin au contrat",
+          "p": {
+            "intro": "Chacun peut y mettre fin. Personne n’est retenu ici."
+          },
+          "items": {
+            "you": {
+              "term": "Vous partez",
+              "detail": "Cessez d’utiliser le service, ou demandez la suppression de votre compte en écrivant à privacy{'@'}usepersonal.app depuis l’adresse de votre compte. La procédure d’effacement est décrite dans la politique de confidentialité."
+            },
+            "us": {
+              "term": "Nous suspendons",
+              "detail": "Nous pouvons suspendre ou fermer un compte qui enfreint ces conditions, met en danger le service ou ses utilisateurs, ou sert à un usage illicite. Sauf manquement grave ou illicite, nous vous prévenons d’abord et vous laissons la possibilité d’y remédier."
+            },
+            "effect": {
+              "term": "Ce qui se passe ensuite",
+              "detail": "La fermeture du compte met fin à votre droit d’utiliser le service et déclenche la suppression de vos données dans les conditions prévues par la politique de confidentialité. Les clauses destinées à lui survivre — propriété intellectuelle, responsabilité, droit applicable — subsistent."
+            },
+            "shutdown": {
+              "term": "Si Personal s’arrête",
+              "detail": "Si nous devions arrêter le service, nous vous prévenons au moins 30 jours à l’avance et vous laissons les moyens de récupérer vos contenus."
+            }
+          }
+        },
+        "liability": {
+          "title": "Responsabilité",
+          "p": {
+            "ours": "Nous répondons des dommages résultant directement de notre propre manquement aux présentes conditions. Cette responsabilité n’est ni exclue ni limitée là où la loi l’interdit — notamment en cas d’atteinte à la vie ou à l’intégrité physique, de faute lourde ou de faute dolosive.",
+            "not": "Nous ne répondons pas de ce que nous ne contrôlons pas : le contenu que vous décidez de publier, les résultats qu’il produit ou non, les décisions prises par Instagram sur votre compte, ou la défaillance d’un service tiers.",
+            "cap": "Lorsque la loi permet un plafond et que vous utilisez Personal à des fins professionnelles, notre responsabilité totale est limitée au plus élevé des deux montants suivants : les sommes que vous nous avez versées au cours des douze mois précédant le fait générateur, ou cent euros. Rien dans cette section ne restreint les droits que la loi accorde impérativement au consommateur.",
+            "yours": "Vous répondez de l’usage que vous faites du service et nous garantissez contre toute réclamation d’un tiers née d’un contenu que vous avez publié ou d’un manquement de votre part aux présentes."
+          }
+        },
+        "thirdParty": {
+          "title": "Les services tiers",
+          "p": {
+            "list": "Personal s’appuie sur Meta pour la connexion Instagram, sur OpenAI et Anthropic pour la génération, sur Apify pour la collecte des publications publiques et sur Resend pour les e-mails de service. Utiliser Personal implique ces services, chacun sous ses propres conditions.",
+            "links": "Le service peut renvoyer vers des sites que nous n’exploitons pas. Nous ne sommes pas responsables de ce qui s’y trouve."
+          }
+        },
+        "privacy": {
+          "title": "Les données personnelles",
+          "p": {
+            "policy": "La manière dont nous traitons vos données personnelles — ce que nous collectons, pourquoi, avec qui c’est partagé, combien de temps c’est conservé et comment tout effacer — est exposée en détail dans notre politique de confidentialité, qui fait partie du présent contrat.",
+            "link": "Elle se lit sur usepersonal.app/privacy. En cas de divergence entre un point des présentes conditions et un point de cette politique sur les données personnelles, la politique de confidentialité prévaut."
+          },
+          "cta": "Lire la politique de confidentialité"
+        },
+        "changes": {
+          "title": "Modification des conditions",
+          "p": {
+            "how": "Ces conditions évoluent avec le produit. La date de dernière mise à jour figure en haut de cette page.",
+            "notice": "Toute modification substantielle vous est notifiée par e-mail ou dans l’application au moins 30 jours avant son entrée en vigueur. Continuer à utiliser Personal après cette date vaut acceptation de la nouvelle version ; si vous préférez ne pas l’accepter, supprimez votre compte avant cette date, sans frais."
+          }
+        },
+        "law": {
+          "title": "Droit applicable et litiges",
+          "p": {
+            "law": "Ces conditions sont régies par le droit français. Si vous êtes un consommateur résidant dans un autre pays de l’Union européenne, vous conservez la protection des règles impératives de votre pays.",
+            "first": "En cas de litige, écrivez-nous d’abord à legal{'@'}usepersonal.app. La plupart des choses s’y règlent, et plus vite.",
+            "mediation": "Si vous êtes un consommateur et que notre réponse ne vous satisfait pas, vous pouvez saisir gratuitement un médiateur de la consommation : [MÉDIATEUR DE LA CONSOMMATION — nom, adresse postale et site], dans un délai d’un an à compter de votre réclamation écrite.",
+            "court": "À défaut d’accord, le litige est porté devant les juridictions compétentes. Lorsque vous agissez en qualité de professionnel, compétence est attribuée aux tribunaux de [VILLE DU SIÈGE DE L’ÉDITEUR], y compris en référé et en cas de pluralité de défendeurs."
+          }
+        },
+        "contact": {
+          "title": "Nous contacter",
+          "p": {
+            "mail": "Écrivez à legal{'@'}usepersonal.app pour tout ce qui touche à ces conditions : une question, un signalement, une revendication de droits ou une mise en demeure.",
+            "privacy": "Pour tout ce qui touche à vos données personnelles, privacy{'@'}usepersonal.app atteint les mêmes personnes, plus vite.",
             "post": "Par courrier : [ADRESSE POSTALE DE L’ÉDITEUR]."
           }
         }

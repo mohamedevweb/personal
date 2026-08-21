@@ -18,6 +18,7 @@ class AuditCreatorCatalog extends Command
     protected $signature = 'personal:audit-creator-catalog
         {--market= : Audit one market}
         {--vertical= : Audit one canonical vertical}
+        {--handle=* : Audit one or more exact handles}
         {--retry-report= : Retry only provider errors from a previous JSON report}
         {--provider=scrapecreators : Instagram provider}';
 
@@ -29,9 +30,16 @@ class AuditCreatorCatalog extends Command
         CreatorCatalogEligibility $eligibility,
         CreatorCatalogReportWriter $reports,
     ): int {
+        $handles = collect((array) $this->option('handle'))
+            ->filter(fn (mixed $handle): bool => is_string($handle) && trim($handle) !== '')
+            ->map(fn (string $handle): string => strtolower(ltrim($handle, '@')))
+            ->flip();
         $entries = collect($catalog->entries())
             ->when($this->option('market'), fn ($items) => $items->where('market', strtoupper((string) $this->option('market'))))
             ->when($this->option('vertical'), fn ($items) => $items->where('vertical', $this->option('vertical')))
+            ->when($handles->isNotEmpty(), fn ($items) => $items->filter(
+                fn (array $entry): bool => $handles->has(strtolower(ltrim((string) $entry['handle'], '@'))),
+            ))
             ->values();
 
         try {

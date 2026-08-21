@@ -38,12 +38,16 @@ class CreatorCatalogTest extends TestCase
             $this->assertTrue($group->every(fn (array $entry): bool => $entry['market'] === 'FR'));
         }
 
-        $this->assertTrue($entries->every(fn (array $entry): bool => $entry['status'] === 'pending'));
+        $this->assertCount(23, $entries->where('status', 'approved'));
         $this->assertEqualsCanonicalizing(
-            ['jujufitcats', 'majormouvement', 'caroline.mignaux', 'leotechmaker', 'mrjojol67', 'leoduffoff'],
-            $entries->pluck('handle')->intersect(['jujufitcats', 'majormouvement', 'caroline.mignaux', 'leotechmaker', 'mrjojol67', 'leoduffoff'])->all(),
+            ['paulinelaigneau', 'elarch', 'bprkt', 'jbaptisten', 'stevenlathoud', 'delphine.py', 'thebraingutscientist'],
+            $entries->where('status', 'pending')->pluck('handle')->all(),
         );
-        $this->assertEmpty($entries->pluck('handle')->intersect(['juju_fitcats', 'major_mouvement', 'carolinemignaux', 'leo_techmaker', 'jojol', 'leoduff']));
+        $this->assertEqualsCanonicalizing(
+            ['jujufitcats', 'majormouvement', 'caroline.mignaux', 'leotechmaker', 'mrjojol67', 'paulinelaigneau', 'elarch'],
+            $entries->pluck('handle')->intersect(['jujufitcats', 'majormouvement', 'caroline.mignaux', 'leotechmaker', 'mrjojol67', 'paulinelaigneau', 'elarch'])->all(),
+        );
+        $this->assertEmpty($entries->pluck('handle')->intersect(['juju_fitcats', 'major_mouvement', 'carolinemignaux', 'leo_techmaker', 'jojol', 'leoduff', 'matthieustefani', 'alexhitchens']));
         $this->assertTrue($entries->every(function (array $entry): bool {
             $instagramUrl = "https://www.instagram.com/{$entry['handle']}/";
 
@@ -85,6 +89,7 @@ class CreatorCatalogTest extends TestCase
         $this->assertContains('private_account', $private['reasons']);
         $this->assertContains('impersonal_brand_or_aggregator', $spam['reasons']);
         $this->assertContains('metric_coverage_below_minimum', $missingMetrics['reasons']);
+        $this->assertContains('median_engagement_below_minimum', $missingMetrics['warnings']);
         $this->assertTrue($wrongMarket['accepted']);
         $this->assertContains('market_signal_mismatch', $wrongMarket['warnings']);
         $this->assertContains('inactive', $inactive['reasons']);
@@ -153,7 +158,7 @@ class CreatorCatalogTest extends TestCase
         $this->assertCount(2, Storage::disk('local')->allFiles('catalog-reports'));
     }
 
-    public function test_audit_fetches_posts_only_when_profile_has_fewer_than_six_usable_posts(): void
+    public function test_audit_fetches_posts_only_when_profile_has_fewer_than_six_posts(): void
     {
         Storage::fake('local');
         $entry = $this->catalogEntry('sparse_coach');
@@ -169,6 +174,26 @@ class CreatorCatalogTest extends TestCase
         $this->app->instance(InstagramDataProviderManager::class, $manager);
 
         $this->artisan('personal:audit-creator-catalog --provider=mock')->assertSuccessful();
+    }
+
+    public function test_audit_can_limit_provider_calls_to_exact_handles(): void
+    {
+        Storage::fake('local');
+        $first = $this->catalogEntry('first_coach');
+        $second = $this->catalogEntry('second_coach');
+        $catalog = \Mockery::mock(CreatorCatalog::class);
+        $catalog->shouldReceive('entries')->once()->andReturn([$first, $second]);
+        $this->app->instance(CreatorCatalog::class, $catalog);
+
+        $provider = \Mockery::mock(InstagramDataProvider::class);
+        $provider->shouldReceive('getProfile')->once()->with('second_coach')->andReturn($this->profile(username: 'second_coach'));
+        $provider->shouldNotReceive('getPosts');
+        $manager = \Mockery::mock(InstagramDataProviderManager::class);
+        $manager->shouldReceive('provider')->once()->with('mock')->andReturn($provider);
+        $this->app->instance(InstagramDataProviderManager::class, $manager);
+
+        $this->artisan('personal:audit-creator-catalog --provider=mock --handle=second_coach')
+            ->assertSuccessful();
     }
 
     public function test_audit_reports_provider_error_details_with_null_metrics(): void

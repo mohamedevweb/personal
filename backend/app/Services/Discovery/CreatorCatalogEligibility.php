@@ -49,7 +49,7 @@ class CreatorCatalogEligibility
             $reasons[] = 'metric_coverage_below_minimum';
         }
         if ($median < (int) config('creator_catalog.audit.min_median_engagement')) {
-            $reasons[] = 'median_engagement_below_minimum';
+            $warnings[] = 'median_engagement_below_minimum';
         }
         if ($market['market'] === null || $market['confidence'] < 0.70) {
             $warnings[] = 'market_unverified';

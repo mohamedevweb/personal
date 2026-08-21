@@ -69,7 +69,8 @@
       "getAccess": "Get early access",
       "skip": "Skip to content",
       "privacy": "Privacy",
-      "home": "Personal, back to top"
+      "home": "Personal, back to top",
+      "terms": "Terms"
     },
     "hero": {
       "titleLineOne": "You're a creator.",
@@ -284,6 +285,8 @@
     "goToRegister": "Sign up",
     "goToLogin": "Sign in",
     "legal": "By continuing, you agree to our",
+    "legalTermsLink": "terms of service",
+    "legalAnd": "and our",
     "legalLink": "privacy policy",
     "home": "Back to personal.app",
     "aside": {
@@ -982,6 +985,326 @@
           "title": "Contact us",
           "p": {
             "mail": "Write to privacy{'@'}usepersonal.app for any question, rights request or report related to this policy.",
+            "post": "By post: [PUBLISHER'S POSTAL ADDRESS]."
+          }
+        }
+      }
+    },
+    "terms": {
+      "head": {
+        "title": "Terms of Service — Personal",
+        "description": "The agreement between you and Personal: what the service does, what you may publish, what artificial intelligence does not guarantee, and how either side ends it."
+      },
+      "hero": {
+        "eyebrow": "Terms",
+        "title": "Terms of Service",
+        "lede": "These terms are the agreement between you and Personal. They say what the service does, what we owe you, what you owe us, and how either of us can end it. They are written to be read, not to be skipped.",
+        "updated": "Last updated: 21 August 2026",
+        "back": "Back to home"
+      },
+      "toc": {
+        "label": "Contents"
+      },
+      "s": {
+        "summary": {
+          "title": "The short version, in six points",
+          "items": {
+            "free": {
+              "term": "Early access is free",
+              "detail": "Personal costs nothing during early access. No payment method is requested, and no existing feature becomes payable without notice and your agreement."
+            },
+            "yours": {
+              "term": "Your content stays yours",
+              "detail": "You keep every right to your Moments, your drafts and your posts. We hold only the permission needed to run the service for you."
+            },
+            "author": {
+              "term": "You are the author",
+              "detail": "A model writes a draft; you read it, edit it and decide to publish. What ends up on your account is yours, and so is the responsibility for it."
+            },
+            "noPost": {
+              "term": "We never publish for you",
+              "detail": "Personal holds no permission to post, schedule or send anything on your Instagram account. Publishing stays a manual act."
+            },
+            "beta": {
+              "term": "The service is young",
+              "detail": "Features change, outages happen, and we promise no uninterrupted availability. We tell you before anything substantial changes."
+            },
+            "leave": {
+              "term": "You can leave at any moment",
+              "detail": "Delete your account whenever you want, without justification, without penalty and without losing anything you have already published."
+            }
+          }
+        },
+        "object": {
+          "title": "What these terms cover",
+          "p": {
+            "accept": "These terms govern your use of Personal, the service published at usepersonal.app and its subdomains. Creating an account, or simply using the service, means you accept them in full. If you do not accept them, do not use Personal.",
+            "who": "They apply whether you use Personal as an individual creator or on behalf of a company. If you accept them for a company, you confirm you have the authority to bind it.",
+            "together": "They are read together with our Privacy Policy, which describes what we do with your personal data and forms part of the same agreement."
+          }
+        },
+        "publisher": {
+          "title": "Who publishes Personal",
+          "p": {
+            "who": "Personal is published by [LEGAL ENTITY — legal form, registered address, company number], acting as service provider under these terms.",
+            "director": "Publication director: [PUBLICATION DIRECTOR]. Contact: legal{'@'}usepersonal.app.",
+            "host": "The application and its PostgreSQL database are hosted with [HOSTING PROVIDER], in the European Union. The domain name and DNS zone are managed by OVH, 2 rue Kellermann, 59100 Roubaix, France."
+          }
+        },
+        "service": {
+          "title": "What the service does",
+          "p": {
+            "intro": "Personal is a writing tool for Instagram creators. It reads what already works in your niche, holds on to the moments of your life you write down, and proposes drafts that sound like you. Concretely, an account gives you:"
+          },
+          "items": {
+            "feed": {
+              "term": "A For You feed",
+              "detail": "Public posts by creators in your niche, ranked by what is genuinely performing rather than by recency."
+            },
+            "moments": {
+              "term": "Moments",
+              "detail": "A private place to write down what happens to you, so that a draft has something true to draw from."
+            },
+            "remix": {
+              "term": "Remixes",
+              "detail": "A draft written from a post that works and one of your moments, which you can rewrite as many times as you need."
+            },
+            "chat": {
+              "term": "A creative assistant",
+              "detail": "A conversation to sharpen an angle, a hook or a caption."
+            },
+            "profile": {
+              "term": "A creator profile",
+              "detail": "Your positioning, your voice and your subjects, against which every suggestion is measured."
+            },
+            "instagram": {
+              "term": "An Instagram connection",
+              "detail": "Optional. It imports your public account information and your recent posts so that suggestions rest on your real numbers."
+            }
+          },
+          "note": "This describes the service as it stands today. Features arrive, change and occasionally disappear; the “Availability and changes” section says how we handle that."
+        },
+        "account": {
+          "title": "Your account",
+          "p": {
+            "intro": "An account is personal, individual and tied to a verified email address."
+          },
+          "items": {
+            "age": {
+              "term": "Age",
+              "detail": "Personal is aimed at creators with a professional Instagram account. You must be at least 16 years old to open an account."
+            },
+            "truth": {
+              "term": "Accurate details",
+              "detail": "The name and email address you give must be yours and must be current. An unverified address blocks access to most of the service."
+            },
+            "security": {
+              "term": "Keeping it secure",
+              "detail": "You are responsible for your password and for everything done from your account. Write to legal{'@'}usepersonal.app if you believe someone else has access to it, and change your password from Settings."
+            },
+            "sharing": {
+              "term": "One account per creator",
+              "detail": "Do not share, sell or transfer your account. You may connect different Instagram accounts over time, but one Personal account belongs to one person."
+            }
+          }
+        },
+        "price": {
+          "title": "Price",
+          "p": {
+            "free": "Personal is free during early access. No payment method is requested, and no charge can be applied to you.",
+            "later": "Paid plans may appear later. If that happens, we announce it by email at least 30 days beforehand, the new conditions apply only once you have accepted them, and you always keep the choice to leave rather than pay.",
+            "costs": "Your own costs — internet access, device, your Instagram account — remain yours."
+          }
+        },
+        "instagram": {
+          "title": "Connecting Instagram",
+          "p": {
+            "optional": "Connecting your professional Instagram account is optional and reversible. It goes through Instagram Login, at Meta, and we never see your Instagram password.",
+            "scope": "The connection gives Personal read access only: your public profile information, your recent posts and their public statistics. Personal holds no permission to publish, to comment, to send messages or to follow accounts on your behalf."
+          },
+          "items": {
+            "meta": {
+              "term": "Meta's rules apply too",
+              "detail": "Your use of the connection is also governed by the Instagram Terms of Use and the Meta Platform Terms. On that point, where they conflict with these terms, they prevail."
+            },
+            "eligible": {
+              "term": "Professional account",
+              "detail": "The connection requires an Instagram professional account — creator or business — as Meta requires for this API."
+            },
+            "revoke": {
+              "term": "Withdrawing access",
+              "detail": "Disconnect from Settings in Personal, or remove Personal from Instagram: Settings → Websites and apps. The access token and every imported media item are deleted immediately."
+            },
+            "beyond": {
+              "term": "Beyond our control",
+              "detail": "Meta may change, restrict or interrupt its API at any time. If it does, part of the service can stop working without that being a failure on our side."
+            }
+          },
+          "outro": {
+            "publish": "Publishing stays a manual act: you copy the text you have approved and post it yourself from Instagram. Nothing leaves Personal for your account on its own."
+          }
+        },
+        "ai": {
+          "title": "What artificial intelligence does, and what it does not promise",
+          "p": {
+            "what": "Drafts and assistant replies are produced by language models operated by third parties. We send them only what the request needs: the post being analysed, the moment you selected, your creator profile and your message.",
+            "review": "A model can be wrong, invent a fact, or produce a text close to something that already exists. Read every draft before it leaves Personal. You are the last check, and the only one that counts.",
+            "author": "Once you have reviewed and published a text, you are its author. You alone answer for what it says, for the claims it makes, and for its compliance with the rules on advertising, sponsorship disclosure and intellectual property.",
+            "noResult": "No result is promised. Personal guarantees no reach, no engagement, no follower growth and no income. Nobody can guarantee those.",
+            "quota": "Generation is subject to fair-use limits so that the service stays available to everyone. We may adjust those limits, and we tell you when they change substantially."
+          }
+        },
+        "yourContent": {
+          "title": "Your content",
+          "p": {
+            "intro": "Your Moments, your creator profile, your drafts and your published posts belong to you. Nothing here transfers any right in them to us."
+          },
+          "items": {
+            "licence": {
+              "term": "The permission we need",
+              "detail": "To run the service, you grant us a non-exclusive, worldwide, royalty-free licence to host, store, reproduce and process your content — solely to display it back to you, produce what you ask for, and operate the service. It lasts as long as you keep the content, and no longer."
+            },
+            "noTraining": {
+              "term": "No model is trained on it",
+              "detail": "Your content is never used to train an AI model, ours or anyone else's, is never sold, and is never shown to another creator."
+            },
+            "warrant": {
+              "term": "What you promise us",
+              "detail": "That you hold the rights to whatever you put into Personal, and that it infringes nobody's rights — image, privacy, trade mark or copyright included."
+            },
+            "backup": {
+              "term": "Your own copies",
+              "detail": "Keep a copy of anything that matters to you. We back the service up, but Personal is not an archive service and cannot guarantee recovery."
+            }
+          }
+        },
+        "discovery": {
+          "title": "Other creators' posts",
+          "p": {
+            "what": "The feed shows public posts by other Instagram accounts in your niche, collected from public pages for analysis. They are there so you can understand what works, not so you can copy it.",
+            "rule": "Reproducing another creator's post word for word is your responsibility, not ours, and may infringe their rights. A remix exists precisely so that what you publish comes out of your own material.",
+            "takedown": "If you are a creator and do not want your posts analysed by Personal, write to legal{'@'}usepersonal.app: we remove your account and your posts from our database and prevent them from reappearing."
+          }
+        },
+        "rules": {
+          "title": "What you may not do",
+          "p": {
+            "intro": "Using Personal to produce or spread the following is a breach of these terms:"
+          },
+          "items": {
+            "illegal": {
+              "term": "Anything unlawful",
+              "detail": "Content that is illegal, defamatory, hateful, harassing or violent, or that infringes a third party's rights."
+            },
+            "minors": {
+              "term": "Content harmful to minors",
+              "detail": "Any content that endangers, sexualises or exploits a minor, in any form whatsoever."
+            },
+            "deception": {
+              "term": "Deception",
+              "detail": "Impersonating someone, faking an identity or an endorsement, publishing sponsored content without disclosing it, or making misleading claims about health, money or results."
+            },
+            "spam": {
+              "term": "Spam and mass automation",
+              "detail": "Producing content at volume for spam or artificial engagement, or reselling access to the service as a generation tool."
+            },
+            "technical": {
+              "term": "Technical abuse",
+              "detail": "Scraping the service, circumventing our rate limits, reverse-engineering it, probing its security without our written agreement, or reaching it through an unauthorised automated client."
+            },
+            "competing": {
+              "term": "Rebuilding the service",
+              "detail": "Using Personal, its output or its data to build, train or evaluate a competing product."
+            }
+          },
+          "note": "If you come across something from this list on Personal, tell us at legal{'@'}usepersonal.app. We look at every report."
+        },
+        "ourContent": {
+          "title": "Our intellectual property",
+          "p": {
+            "ours": "The Personal service — its code, its interface, its design, its name and its logo — belongs to the publisher and is protected. These terms grant you a personal, non-transferable right to use it, and nothing more.",
+            "output": "The texts generated for you are yours to use freely, including commercially. We claim no right over them. Note that a model may produce a similar text for someone else: no exclusivity can be guaranteed over a generated output.",
+            "feedback": "If you send us an idea or a suggestion about the product, we may use it without owing you anything, and without that giving us any right over the rest of your content."
+          }
+        },
+        "availability": {
+          "title": "Availability and changes",
+          "p": {
+            "asis": "The service is provided as it is, in early access. We put real care into it, but we do not promise that it will be available without interruption, free of error, or that it will meet a specific need of yours.",
+            "maintenance": "We may interrupt the service for maintenance, security or a technical failure. Where an interruption is planned and significant, we announce it beforehand.",
+            "evolve": "Features can be added, changed or withdrawn as the product develops. Where a change substantially reduces what the service does, we notify you by email or in the app before it takes effect, and you remain free to delete your account.",
+            "deps": "Part of the service depends on third parties — Meta, our AI providers, our host. Their outages become ours, and that is outside our control."
+          }
+        },
+        "suspension": {
+          "title": "Ending the agreement",
+          "p": {
+            "intro": "Either side can end it. Nobody is held here."
+          },
+          "items": {
+            "you": {
+              "term": "You leave",
+              "detail": "Stop using the service, or ask us to delete your account by writing to privacy{'@'}usepersonal.app from your account's address. The erasure procedure is described in the Privacy Policy."
+            },
+            "us": {
+              "term": "We suspend",
+              "detail": "We may suspend or close an account that breaches these terms, endangers the service or its users, or is used unlawfully. Except where the breach is serious or unlawful, we warn you first and give you a chance to put it right."
+            },
+            "effect": {
+              "term": "What happens next",
+              "detail": "Closing the account ends your right to use the service and triggers the deletion of your data under the conditions set out in the Privacy Policy. Clauses meant to survive it — intellectual property, liability, governing law — do."
+            },
+            "shutdown": {
+              "term": "If Personal stops",
+              "detail": "If we ever discontinue the service, we tell you at least 30 days beforehand and leave you the means to retrieve your content."
+            }
+          }
+        },
+        "liability": {
+          "title": "Liability",
+          "p": {
+            "ours": "We are liable for damage resulting directly from our own failure to meet these terms. That liability is neither excluded nor limited where the law forbids it — in particular for death or personal injury, gross negligence or wilful misconduct.",
+            "not": "We are not liable for what we do not control: the content you decide to publish, the results it does or does not produce, decisions taken by Instagram about your account, or the failure of a third-party service.",
+            "cap": "Where the law allows a limit and you use Personal for professional purposes, our total liability is capped at the greater of the sums you paid us in the twelve months preceding the event and one hundred euros. Nothing in this section restricts the rights a consumer holds under mandatory law.",
+            "yours": "You answer for the use you make of the service, and you hold us harmless from any third-party claim arising from content you published or from your breach of these terms."
+          }
+        },
+        "thirdParty": {
+          "title": "Third-party services",
+          "p": {
+            "list": "Personal relies on Meta for the Instagram connection, on OpenAI and Anthropic for generation, on Apify for collecting public posts, and on Resend for service email. Using Personal means those services are involved, each under its own terms.",
+            "links": "The service may point to sites we do not operate. We are not responsible for what is on them."
+          }
+        },
+        "privacy": {
+          "title": "Personal data",
+          "p": {
+            "policy": "How we handle your personal data — what we collect, why, who it is shared with, how long it is kept and how to erase it — is set out in full in our Privacy Policy, which forms part of this agreement.",
+            "link": "Read it at usepersonal.app/privacy. If a point of these terms and a point of that policy disagree about personal data, the Privacy Policy prevails."
+          },
+          "cta": "Read the privacy policy"
+        },
+        "changes": {
+          "title": "Changes to these terms",
+          "p": {
+            "how": "These terms evolve with the product. The last updated date sits at the top of this page.",
+            "notice": "Any substantial change is notified by email or in the app at least 30 days before it takes effect. Continuing to use Personal after that date means you accept the new version; if you would rather not, delete your account before then, at no cost."
+          }
+        },
+        "law": {
+          "title": "Governing law and disputes",
+          "p": {
+            "law": "These terms are governed by French law. If you are a consumer resident in another European Union country, you keep the protection of the mandatory rules of your own country.",
+            "first": "In a dispute, write to us first at legal{'@'}usepersonal.app. Most things are settled there, and faster.",
+            "mediation": "If you are a consumer and our answer does not satisfy you, you may refer the matter free of charge to a consumer mediator: [CONSUMER MEDIATOR — name, postal address and website], within one year of your written complaint.",
+            "court": "Failing agreement, the dispute goes before the competent courts. Where you act as a professional, jurisdiction lies with the courts of [PUBLISHER'S REGISTERED OFFICE], including for urgent proceedings and where there are several defendants."
+          }
+        },
+        "contact": {
+          "title": "Contact us",
+          "p": {
+            "mail": "Write to legal{'@'}usepersonal.app for anything concerning these terms: a question, a report, a rights claim or a formal notice.",
+            "privacy": "For anything concerning your personal data, privacy{'@'}usepersonal.app reaches the same people, faster.",
             "post": "By post: [PUBLISHER'S POSTAL ADDRESS]."
           }
         }
