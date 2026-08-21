@@ -86,8 +86,15 @@ const current = computed(() => STEPS[active.value] ?? STEPS[0]!)
           </li>
         </ol>
 
+        <!-- One frame, held still. The minimum height is the tallest mock, so
+             swapping steps never nudges the layout — and it is the shape the
+             clips are cut to once they land. -->
         <div class="hidden md:sticky md:top-28 md:block md:self-start">
-          <LandingMedia :src="LANDING_CLIPS[current.key]" :label="$t('landing.how.mediaLabel')">
+          <LandingMedia
+            :src="LANDING_CLIPS[current.key]"
+            :label="$t('landing.how.mediaLabel')"
+            class="min-h-[27rem]"
+          >
             <Transition
               mode="out-in"
               enter-active-class="transition-opacity duration-300 ease-out"

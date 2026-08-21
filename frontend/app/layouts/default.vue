@@ -123,6 +123,5 @@ const pageTitle = computed(() => {
       </NuxtLink>
     </nav>
 
-    <ChatAssistant />
   </div>
 </template>

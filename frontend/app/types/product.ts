@@ -82,6 +82,14 @@ export interface PersonalProfile {
     language: string
     content_pillars: string[]
     tone: string[]
+    analysis_status?: 'complete' | 'partial' | 'insufficient_evidence'
+    analysis_method?: 'llm' | 'heuristic' | 'manual' | 'none'
+    confidence?: number
+    evidence?: {
+      caption_count: number
+      bio_available: boolean
+      link_preview_available: boolean
+    }
   } | null
 }
 

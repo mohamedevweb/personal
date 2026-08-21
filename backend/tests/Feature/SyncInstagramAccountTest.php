@@ -2,13 +2,16 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\DiscoverNicheContent;
 use App\Jobs\SyncInstagramAccount;
+use App\Models\CreatorProfile;
 use App\Models\InstagramAccount;
 use App\Models\User;
 use App\Services\Instagram\InstagramApiService;
 use App\Services\Instagram\InstagramAuthService;
 use App\Services\Instagram\NicheDetectionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
@@ -18,6 +21,8 @@ class SyncInstagramAccountTest extends TestCase
 
     public function test_sync_stores_normalized_real_media_and_initializes_creator_profile(): void
     {
+        config()->set('services.openai.api_key');
+        config()->set('services.anthropic.api_key');
         config()->set('services.instagram.graph_url', 'https://graph.instagram.com');
         config()->set('services.instagram.api_version', 'v25.0');
         config()->set('services.instagram.media_limit', 25);
@@ -84,6 +89,8 @@ class SyncInstagramAccountTest extends TestCase
         $creatorProfile = $user->creatorProfile()->firstOrFail();
         $this->assertContains('Saas', $creatorProfile->topics);
         $this->assertSame($creatorProfile->niche, $creatorProfile->creator_dna['primary_niche']);
+        $this->assertSame('partial', $creatorProfile->creator_dna['analysis_status']);
+        $this->assertSame('heuristic', $creatorProfile->creator_dna['analysis_method']);
         $this->assertNotNull($creatorProfile->dna_analyzed_at);
     }
 
@@ -133,5 +140,67 @@ class SyncInstagramAccountTest extends TestCase
         $this->assertSame(2, $insightsRequests);
         $this->assertSame([], $account->media()->firstOrFail()->metrics);
         $this->assertSame('completed', $account->refresh()->sync_status);
+    }
+
+    public function test_sync_does_not_discover_from_insufficient_evidence_or_keep_placeholder_context(): void
+    {
+        Bus::fake();
+        config()->set('services.openai.api_key');
+        config()->set('services.anthropic.api_key');
+        config()->set('services.instagram.graph_url', 'https://graph.instagram.com');
+        config()->set('services.instagram.api_version', 'v25.0');
+
+        $user = User::factory()->create();
+        $account = InstagramAccount::query()->create([
+            'user_id' => $user->id,
+            'instagram_user_id' => '456',
+            'username' => 'mohamed.chettahh',
+            'access_token' => 'server-side-secret',
+            'token_expires_at' => now()->addMonth(),
+            'connected_at' => now(),
+        ]);
+        CreatorProfile::query()->create([
+            'user_id' => $user->id,
+            'niche' => 'Http / Mohamedchettah',
+            'topics' => ['Http', 'Mohamedchettah', 'Vivatech', '2026'],
+            'current_projects' => ['Personal'],
+            'goals' => ['Build a personal brand', 'Grow an audience', 'Launch Personal'],
+            'content_strengths' => ['Founder stories', 'Personal lessons', 'Behind the scenes'],
+        ]);
+
+        Http::fake(function ($request) {
+            if (str_contains($request->url(), '/me/media')) {
+                return Http::response(['data' => [[
+                    'id' => 'media-weak',
+                    'caption' => 'https://mohamedchettah.com @mohamed.chettahh VivaTech 2026',
+                    'media_type' => 'IMAGE',
+                    'media_product_type' => 'FEED',
+                    'timestamp' => '2026-08-20T10:00:00+0000',
+                ]]]);
+            }
+
+            if (str_contains($request->url(), '/insights')) {
+                return Http::response(['data' => []]);
+            }
+
+            return Http::response([
+                'id' => '456',
+                'username' => 'mohamed.chettahh',
+                'name' => 'Mohamed Chettah',
+                'media_count' => 1,
+            ]);
+        });
+
+        (new SyncInstagramAccount($account->id))
+            ->handle(app(InstagramAuthService::class), app(InstagramApiService::class), app(NicheDetectionService::class));
+
+        $profile = $user->creatorProfile()->firstOrFail();
+        $this->assertNull($profile->niche);
+        $this->assertSame([], $profile->topics);
+        $this->assertSame([], $profile->current_projects);
+        $this->assertSame([], $profile->goals);
+        $this->assertSame([], $profile->content_strengths);
+        $this->assertSame('insufficient_evidence', $profile->creator_dna['analysis_status']);
+        Bus::assertNotDispatched(DiscoverNicheContent::class);
     }
 }

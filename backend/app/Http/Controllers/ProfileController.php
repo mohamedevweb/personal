@@ -42,7 +42,7 @@ class ProfileController extends Controller
         $profile = CreatorProfile::query()->firstOrNew(['user_id' => $request->user()->id]);
         $profile->fill($data);
 
-        if (array_intersect(array_keys($data), ['niche', 'topics', 'audience_description', 'positioning', 'tone'])) {
+        if (array_intersect(array_keys($data), ['niche', 'topics', 'audience_description', 'tone'])) {
             $dna = array_merge([
                 'primary_niche' => null,
                 'sub_niches' => [],
@@ -51,11 +51,17 @@ class ProfileController extends Controller
                 'language' => 'und',
                 'content_pillars' => [],
                 'tone' => $profile->tone ?? [],
+                'analysis_status' => 'complete',
+                'analysis_method' => 'manual',
+                'confidence' => 1.0,
             ], $profile->creator_dna ?? []);
             $dna['primary_niche'] = $profile->niche;
             $dna['topics'] = $profile->topics ?? [];
             $dna['audience'] = array_values(array_filter([$profile->audience_description]));
             $dna['tone'] = $profile->tone ?? [];
+            $dna['analysis_status'] = 'complete';
+            $dna['analysis_method'] = 'manual';
+            $dna['confidence'] = 1.0;
             $profile->forceFill([
                 'creator_dna' => $dna,
                 'discovery_queries' => null,
@@ -75,14 +81,11 @@ class ProfileController extends Controller
             ['user_id' => $request->user()->id],
             [
                 'display_name' => $request->user()->name,
-                'niche' => 'Entrepreneurship / SaaS',
-                'audience_description' => 'Founders, creators and entrepreneurs',
-                'positioning' => 'Building products at the intersection of SaaS and the creator economy.',
-                'topics' => ['Building products', 'Creator economy', 'Entrepreneurship', 'Founder journey'],
-                'tone' => ['Direct', 'Personal', 'Transparent', 'Educational'],
-                'current_projects' => ['Personal'],
-                'goals' => ['Build a personal brand', 'Grow an audience', 'Launch Personal'],
-                'content_strengths' => ['Founder stories', 'Personal lessons', 'Behind the scenes'],
+                'topics' => [],
+                'tone' => [],
+                'current_projects' => [],
+                'goals' => [],
+                'content_strengths' => [],
             ],
         );
     }

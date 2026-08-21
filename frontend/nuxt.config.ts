@@ -35,11 +35,18 @@ export default defineNuxtConfig({
     head: {
       title: 'Personal — Your content strategist',
       meta: [
-        { name: 'description', content: 'Personal understands your work and helps you create what matters next.' }
+        { name: 'description', content: 'Personal understands your work and helps you create what matters next.' },
+        { name: 'theme-color', content: '#e04f36' }
       ],
       // Instrument Serif is the brand display face and Inter carries every other
       // line; both are loaded here so the first paint already has them.
       link: [
+        // The SVG mark is the one modern browsers pick; the .ico carries 16/32/48
+        // for the tabs and bookmarks that still ask for it.
+        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico', sizes: '16x16 32x32 48x48' },
+        { rel: 'apple-touch-icon', href: '/apple-touch-icon.png', sizes: '180x180' },
+        { rel: 'manifest', href: '/site.webmanifest' },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
         {

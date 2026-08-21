@@ -100,27 +100,36 @@ Discovery cost is capped on every axis: search queries have a cooldown (`DISCOVE
 
 ## Curated creator catalog
 
-The production catalog is versioned in `backend/database/catalog/instagram_creators.php`. It contains 120 editorial candidates across six canonical verticals, with 10 French, 5 UK and 5 US accounts per vertical. Every entry starts as `pending`: its presence in the manifest never authorizes a database write.
+The first production dataset is a versioned Golden Catalog in `backend/database/catalog/instagram_creators.php`. It contains 30 human-curated French creators, five in each of the six canonical verticals. Each entry records the exact Instagram URL, editorial sources, topics and rationale. Followers and recognition tiers are intentionally absent because they are measured rather than guessed. Every entry starts as `pending`, so its presence in the manifest never authorizes a database write.
 
-Run the read-only audit first. It fetches profiles and recent posts through ScrapeCreators, then writes JSON and CSV reports under `backend/storage/app/private/catalog-reports`:
+Run the read-only audit first. It makes one profile request per creator. A separate posts request is made only when the profile response contains fewer than six usable recent publications. It then writes JSON and CSV reports under `backend/storage/app/private/catalog-reports` on the host and `/var/www/html/storage/app/private/catalog-reports` inside Docker:
 
 ```bash
 docker compose exec app php artisan personal:audit-creator-catalog
 ```
 
-Review the report and change only accepted manifest entries to `approved`. Import is idempotent, applies the manifest's market and canonical vertical, preserves provider provenance, synchronizes subtopics and queues measurement in batches of 10:
+Provider failures are reported separately from editorial rejections. They include the HTTP status and provider message when available, leave unknown metrics as `null`, and can be retried without paying again for successful rows:
+
+```bash
+docker compose exec app php artisan personal:audit-creator-catalog \
+  --retry-report=/var/www/html/storage/app/private/catalog-reports/creator-catalog-audit-YYYYMMDD-HHMMSS.json
+```
+
+`market_unverified` and `market_signal_mismatch` are warnings because the human-validated FR market in the manifest is authoritative. A legacy `recognition_tier_mismatch` is also a warning and proposes the measured tier. Review successful rows, then change only accepted manifest entries to `approved`. Import is idempotent, applies the manifest's market and canonical vertical, calculates recognition tier from the retrieved follower count, preserves provider provenance, synchronizes subtopics and queues measurement in batches of 10:
 
 ```bash
 docker compose exec app php artisan personal:import-creator-catalog
 ```
 
-After the queue has measured exactly 120 approved seeds and the production acceptance checks pass, set `DISCOVERY_CURATED_CATALOG_ONLY=true` and restart the app, queue and scheduler containers. The feed then excludes every non-approved creator, stops automatic search-based insertion, and allocates 12 results as 8 from the user's detected market plus 2 from each other market. An unknown market receives 4 results per market. Missing quota inventory is filled by the best remaining approved content.
+After the queue has measured the 30 approved seeds and the feed is useful, set `DISCOVERY_CURATED_CATALOG_ONLY=true` and restart the app, queue and scheduler containers. The feed then excludes every non-approved creator and stops automatic search-based insertion. Market quotas fall back to the best remaining approved French content while this first catalog is FR-only.
 
-Related-account expansion is also review-only and never writes creators or posts:
+Related-account expansion is review-only and never writes creators or posts. Candidates are ranked by recent activity, metric coverage and median engagement, with niche proximity inherited from the approved seed that surfaced them:
 
 ```bash
 docker compose exec app php artisan personal:discover-creator-candidates
 ```
+
+Use that report to expand deliberately from 30 to 60 and then 120 creators. Add selected candidates to the manifest as `pending`, audit them, approve them and import again. Discovery never promotes candidates automatically.
 
 Measured content is retained for 90 days. The scheduler runs the purge daily and always protects posts saved by a user or used in a remix. Preview it manually with:
 

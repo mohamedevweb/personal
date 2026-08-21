@@ -35,7 +35,9 @@ class CanonicalCreatorVerticals
 
         foreach ((array) config('creator_catalog.verticals') as $slug => $vertical) {
             foreach ($vertical['aliases'] ?? [] as $alias) {
-                if (Str::contains($text, Str::lower($alias))) {
+                $quoted = preg_quote(Str::lower($alias), '/');
+
+                if (preg_match("/(?<![\\pL\\pN]){$quoted}(?![\\pL\\pN])/u", $text) === 1) {
                     return $slug;
                 }
             }

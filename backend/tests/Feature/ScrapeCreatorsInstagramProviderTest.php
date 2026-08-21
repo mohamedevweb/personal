@@ -162,6 +162,16 @@ class ScrapeCreatorsInstagramProviderTest extends TestCase
         app(ScrapeCreatorsInstagramProvider::class)->searchAccounts('fitness', 5);
     }
 
+    public function test_provider_failure_includes_safe_api_error_detail(): void
+    {
+        Http::fake(['*' => Http::response(['message' => 'Insufficient credits'], 402)]);
+
+        $this->expectException(ContentDiscoveryException::class);
+        $this->expectExceptionMessage('ScrapeCreators failed (HTTP 402). Insufficient credits');
+
+        app(ScrapeCreatorsInstagramProvider::class)->getProfile('fitness');
+    }
+
     public function test_rate_limit_responses_are_retried(): void
     {
         config(['services.discovery.scrapecreators.retries' => 2]);

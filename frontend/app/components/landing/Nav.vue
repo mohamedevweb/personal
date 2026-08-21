@@ -21,12 +21,15 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 
 <template>
   <header
-    class="sticky top-0 z-50 border-b transition-colors duration-500"
+    class="sticky top-0 z-50 border-b px-6 transition-colors duration-500 md:px-10"
     :class="lifted
       ? 'border-[var(--b-line)] bg-[var(--b-ivory)]'
       : 'border-transparent bg-transparent'"
   >
-    <div class="mx-auto flex h-[76px] max-w-[1200px] items-center justify-between px-6 md:px-10">
+    <!-- Padding sits outside the max-width box, exactly like every section
+         below, so the logo and the CTA land on the same two rails as the
+         content instead of 40px inside them. -->
+    <div class="mx-auto flex h-[76px] max-w-[1200px] items-center justify-between">
       <NuxtLink to="/" class="b-focus -m-2 p-2" :aria-label="$t('landing.nav.home')">
         <PersonalLogo :size="26" />
       </NuxtLink>

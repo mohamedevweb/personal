@@ -10,12 +10,15 @@ use App\Services\Discovery\DiscoveredProfile;
 use App\Services\Discovery\InstagramDataProvider;
 use App\Services\Discovery\InstagramDataProviderManager;
 use Illuminate\Console\Command;
+use Illuminate\Support\Collection;
+use InvalidArgumentException;
 
 class AuditCreatorCatalog extends Command
 {
     protected $signature = 'personal:audit-creator-catalog
         {--market= : Audit one market}
         {--vertical= : Audit one canonical vertical}
+        {--retry-report= : Retry only provider errors from a previous JSON report}
         {--provider=scrapecreators : Instagram provider}';
 
     protected $description = 'Audit the versioned creator catalog without writing to the database';
@@ -30,6 +33,21 @@ class AuditCreatorCatalog extends Command
             ->when($this->option('market'), fn ($items) => $items->where('market', strtoupper((string) $this->option('market'))))
             ->when($this->option('vertical'), fn ($items) => $items->where('vertical', $this->option('vertical')))
             ->values();
+
+        try {
+            $entries = $this->onlyPreviousProviderErrors($entries, $this->option('retry-report'));
+        } catch (InvalidArgumentException $exception) {
+            $this->error($exception->getMessage());
+
+            return self::FAILURE;
+        }
+
+        if ($entries->isEmpty()) {
+            $this->info('No provider errors to retry.');
+
+            return self::SUCCESS;
+        }
+
         $provider = $providers->provider((string) $this->option('provider'));
         $rows = [];
 
@@ -39,15 +57,17 @@ class AuditCreatorCatalog extends Command
                 $rows[] = $profile
                     ? $eligibility->evaluate($this->withPosts($profile, $provider), $entry)
                     : $this->missing($entry);
-            } catch (ContentDiscoveryException) {
-                $rows[] = $this->missing($entry, 'provider_failure');
+            } catch (ContentDiscoveryException $exception) {
+                $rows[] = $this->providerError($entry, $exception);
             }
         });
         $this->newLine(2);
 
         $summary = $this->summary($rows);
         $paths = $reports->write('creator-catalog-audit', $rows, $summary);
-        $this->table(['Audited', 'Accepted', 'Rejected'], [[$summary['audited'], $summary['accepted'], $summary['rejected']]]);
+        $this->table(['Audited', 'Accepted', 'Rejected', 'Provider errors'], [[
+            $summary['audited'], $summary['accepted'], $summary['rejected'], $summary['provider_errors'],
+        ]]);
         $this->line("JSON: {$paths['json']}");
         $this->line("CSV: {$paths['csv']}");
 
@@ -56,7 +76,7 @@ class AuditCreatorCatalog extends Command
 
     private function withPosts(DiscoveredProfile $profile, InstagramDataProvider $provider): DiscoveredProfile
     {
-        if ($profile->isPrivate) {
+        if ($profile->isPrivate || ! $this->needsMorePosts($profile)) {
             return $profile;
         }
 
@@ -81,30 +101,77 @@ class AuditCreatorCatalog extends Command
     private function missing(array $entry, string $reason = 'profile_not_found'): array
     {
         return [
-            'handle' => $entry['handle'], 'status' => $entry['status'], 'accepted' => false,
-            'reasons' => [$reason], 'expected_market' => $entry['market'],
+            'handle' => $entry['handle'], 'status' => $entry['status'],
+            'provider_status' => 'not_found', 'provider_error' => null, 'accepted' => false,
+            'reasons' => [$reason], 'warnings' => [], 'suggestions' => [], 'expected_market' => $entry['market'],
             'detected_market' => null, 'market_confidence' => 0, 'primary_language' => 'unknown',
-            'vertical' => $entry['vertical'], 'expected_tier' => $entry['recognition_tier'],
-            'detected_tier' => null, 'followers' => 0, 'recent_posts' => 0,
-            'latest_post_at' => null, 'metric_coverage' => 0, 'median_engagement' => 0,
+            'vertical' => $entry['vertical'], 'expected_tier' => $entry['recognition_tier'] ?? null,
+            'detected_tier' => null, 'followers' => null, 'recent_posts' => null,
+            'latest_post_at' => null, 'metric_coverage' => null, 'median_engagement' => null,
             'instagram_user_id' => null, 'display_name' => null, 'bio' => null,
         ];
     }
 
+    private function providerError(array $entry, ContentDiscoveryException $exception): array
+    {
+        return array_replace($this->missing($entry, 'provider_failure'), [
+            'provider_status' => 'error',
+            'provider_error' => $exception->getMessage(),
+            'accepted' => null,
+        ]);
+    }
+
     private function summary(array $rows): array
     {
-        $accepted = collect($rows)->where('accepted', true);
+        $results = collect($rows);
+        $accepted = $results->filter(fn (array $row): bool => $row['accepted'] === true);
+        $errors = $results->where('provider_status', 'error');
 
         return [
             'audited' => count($rows),
             'accepted' => $accepted->count(),
-            'rejected' => count($rows) - $accepted->count(),
-            'quota_targets' => ['per_vertical' => 20, 'markets' => ['FR' => 10, 'GB' => 5, 'US' => 5], 'tiers' => ['leader' => 4, 'established' => 10, 'expert' => 6]],
+            'rejected' => $results->filter(fn (array $row): bool => $row['accepted'] === false)->count(),
+            'provider_errors' => $errors->count(),
+            'quota_targets' => [
+                'total' => (int) config('creator_catalog.target_total'),
+                'per_vertical' => (int) config('creator_catalog.target_per_vertical'),
+                'market' => 'FR',
+            ],
             'accepted_quota_coverage' => $accepted->groupBy('vertical')->map(fn ($vertical): array => [
                 'total' => $vertical->count(),
-                'markets' => $vertical->countBy('expected_market')->all(),
-                'tiers' => $vertical->countBy('expected_tier')->all(),
+                'tiers' => $vertical->countBy('detected_tier')->all(),
             ])->all(),
         ];
+    }
+
+    private function needsMorePosts(DiscoveredProfile $profile): bool
+    {
+        return $profile->posts->count() < (int) config('creator_catalog.audit.min_posts');
+    }
+
+    private function onlyPreviousProviderErrors(Collection $entries, mixed $reportPath): Collection
+    {
+        if (! is_string($reportPath) || trim($reportPath) === '') {
+            return $entries;
+        }
+
+        $contents = @file_get_contents($reportPath);
+        $report = $contents === false ? null : json_decode($contents, true);
+        if (! is_array($report) || ! is_array($report['entries'] ?? null)) {
+            throw new InvalidArgumentException("Retry report [{$reportPath}] is not a readable catalog audit JSON file.");
+        }
+
+        $failedHandles = collect($report['entries'])
+            ->filter(fn (mixed $row): bool => is_array($row) && (
+                ($row['provider_status'] ?? null) === 'error'
+                || in_array('provider_failure', (array) ($row['reasons'] ?? []), true)
+            ))
+            ->pluck('handle')
+            ->map(fn (mixed $handle): string => strtolower(ltrim((string) $handle, '@')))
+            ->flip();
+
+        return $entries
+            ->filter(fn (array $entry): bool => $failedHandles->has(strtolower(ltrim((string) $entry['handle'], '@'))))
+            ->values();
     }
 }

@@ -5,16 +5,26 @@ const { apiFetch } = usePersonalApi()
 const { t } = useI18n()
 const toast = useToast()
 const profile = ref<PersonalProfile | null>(null)
-const instagram = ref<any>(null)
+const instagram = ref<{
+  username: string
+  profile_picture_url: string | null
+  media_count: number | null
+} | null>(null)
 const editing = ref(false)
 const saving = ref(false)
-const draft = reactive<any>({})
+const draft = reactive<Partial<PersonalProfile>>({})
 
 const sections = ['topics', 'tone', 'current_projects', 'goals', 'content_strengths'] as const
+const analysisStatus = computed(() => profile.value?.creator_dna?.analysis_status)
+const analysisMessage = computed(() => {
+  if (analysisStatus.value === 'insufficient_evidence') return t('personal.analysis.insufficient')
+  if (analysisStatus.value === 'partial') return t('personal.analysis.partial')
+  return null
+})
 
 function beginEdit() {
   if (!profile.value) return
-  Object.assign(draft, JSON.parse(JSON.stringify(profile.value)))
+  Object.assign(draft, structuredClone(profile.value))
   editing.value = true
 }
 
@@ -32,7 +42,7 @@ async function saveProfile() {
 
 onMounted(async () => {
   try {
-    const response = await apiFetch<{ profile: PersonalProfile, instagram: any }>('/api/me/profile')
+    const response = await apiFetch<{ profile: PersonalProfile, instagram: typeof instagram.value }>('/api/me/profile')
     profile.value = response.profile
     instagram.value = response.instagram
   } catch (exception: unknown) {
@@ -61,18 +71,20 @@ onMounted(async () => {
         <div>
           <p class="text-sm font-medium">@{{ instagram.username }}</p>
           <p class="text-xs text-[var(--faint)]">{{ $t('personal.liveContext', { count: instagram.media_count || 0 }) }}</p>
+          <p v-if="analysisMessage" class="mt-1 text-xs text-[var(--accent-ink)]">{{ analysisMessage }}</p>
         </div>
         <span class="ml-auto text-xs text-[var(--positive)]">{{ $t('personal.connected') }}</span>
       </div>
 
       <div class="grid md:grid-cols-2">
-        <section class="border-b border-[var(--line-soft)] p-6 md:border-r"><p class="memory-label">{{ $t('personal.positioning') }}</p><textarea v-if="editing" v-model="draft.positioning" class="memory-input min-h-24" /><p v-else class="memory-copy">{{ profile.positioning }}</p></section>
-        <section class="border-b border-[var(--line-soft)] p-6"><p class="memory-label">{{ $t('personal.audience') }}</p><textarea v-if="editing" v-model="draft.audience_description" class="memory-input min-h-24" /><p v-else class="memory-copy">{{ profile.audience_description }}</p></section>
-        <section class="border-b border-[var(--line-soft)] p-6 md:col-span-2"><p class="memory-label">{{ $t('personal.yourNiche') }}</p><input v-if="editing" v-model="draft.niche" class="memory-input"><p v-else class="memory-copy">{{ profile.niche }}</p></section>
+        <section class="border-b border-[var(--line-soft)] p-6 md:border-r"><p class="memory-label">{{ $t('personal.positioning') }}</p><textarea v-if="editing" v-model="draft.positioning" class="memory-input min-h-24" /><p v-else class="memory-copy" :class="{ 'text-[var(--faint)]': !profile.positioning }">{{ profile.positioning || $t('personal.notProvided') }}</p></section>
+        <section class="border-b border-[var(--line-soft)] p-6"><p class="memory-label">{{ $t('personal.audience') }}</p><textarea v-if="editing" v-model="draft.audience_description" class="memory-input min-h-24" /><p v-else class="memory-copy" :class="{ 'text-[var(--faint)]': !profile.audience_description }">{{ profile.audience_description || $t('personal.notProvided') }}</p></section>
+        <section class="border-b border-[var(--line-soft)] p-6 md:col-span-2"><p class="memory-label">{{ $t('personal.yourNiche') }}</p><input v-if="editing" v-model="draft.niche" class="memory-input"><p v-else class="memory-copy" :class="{ 'text-[var(--faint)]': !profile.niche }">{{ profile.niche || $t(analysisStatus === 'insufficient_evidence' ? 'personal.nicheInsufficient' : 'personal.notProvided') }}</p></section>
         <section v-for="(key, index) in sections" :key="key" class="border-b border-[var(--line-soft)] p-6" :class="index % 2 === 0 ? 'md:border-r' : ''">
           <p class="memory-label">{{ $t('personal.sections.' + key) }}</p>
           <input v-if="editing" :value="(draft[key] || []).join(', ')" class="memory-input" @input="draft[key] = ($event.target as HTMLInputElement).value.split(',').map((v: string) => v.trim()).filter(Boolean)">
-          <div v-else class="mt-4 flex flex-wrap gap-2"><span v-for="item in profile[key]" :key="item" class="rounded-full border border-[var(--line)] bg-[var(--paper)] px-3 py-1.5 text-sm">{{ item }}</span></div>
+          <div v-else-if="profile[key]?.length" class="mt-4 flex flex-wrap gap-2"><span v-for="item in profile[key]" :key="item" class="rounded-full border border-[var(--line)] bg-[var(--paper)] px-3 py-1.5 text-sm">{{ item }}</span></div>
+          <p v-else class="mt-3 text-sm text-[var(--faint)]">{{ $t('personal.notProvided') }}</p>
         </section>
       </div>
       <div v-if="editing" class="flex justify-end gap-3 p-5">

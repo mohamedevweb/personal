@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Personal">
+  <!-- The mark from PersonalMark.vue on the signature tile: four petals cut from
+       a disc, leaving the four-pointed star in the negative space. -->
+  <rect width="512" height="512" rx="115" fill="#e04f36"/>
+  <g fill="#f7f5f0" transform="translate(256 256) scale(1.0648)">
+    <path d="M148.59 0 L153.99 .08 C153.58 33.87 138.27 69.79 116.62 95.42 C89.09 128.17 49.62 148.57 6.98 152.09 L0 152.59 C5.22 67.22 61.74 5.05 148.59 0 Z" transform="rotate(0) translate(9.2 9.2)"/>
+    <path d="M148.59 0 L153.99 .08 C153.58 33.87 138.27 69.79 116.62 95.42 C89.09 128.17 49.62 148.57 6.98 152.09 L0 152.59 C5.22 67.22 61.74 5.05 148.59 0 Z" transform="rotate(90) translate(9.2 9.2)"/>
+    <path d="M148.59 0 L153.99 .08 C153.58 33.87 138.27 69.79 116.62 95.42 C89.09 128.17 49.62 148.57 6.98 152.09 L0 152.59 C5.22 67.22 61.74 5.05 148.59 0 Z" transform="rotate(180) translate(9.2 9.2)"/>
+    <path d="M148.59 0 L153.99 .08 C153.58 33.87 138.27 69.79 116.62 95.42 C89.09 128.17 49.62 148.57 6.98 152.09 L0 152.59 C5.22 67.22 61.74 5.05 148.59 0 Z" transform="rotate(270) translate(9.2 9.2)"/>
+  </g>
+</svg>

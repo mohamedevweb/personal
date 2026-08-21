@@ -27,6 +27,8 @@ class CreatorCatalogEligibility
             $posts->take(12)->pluck('caption')->implode("\n"),
         ])));
         $reasons = [];
+        $warnings = [];
+        $suggestions = [];
 
         if ($profile->isPrivate) {
             $reasons[] = 'private_account';
@@ -50,26 +52,34 @@ class CreatorCatalogEligibility
             $reasons[] = 'median_engagement_below_minimum';
         }
         if ($market['market'] === null || $market['confidence'] < 0.70) {
-            $reasons[] = 'market_unverified';
+            $warnings[] = 'market_unverified';
         } elseif ($market['market'] !== $entry['market']) {
-            $reasons[] = 'market_mismatch';
+            $warnings[] = 'market_signal_mismatch';
         }
-        if ($this->tier($profile->followers) !== $entry['recognition_tier']) {
-            $reasons[] = 'recognition_tier_mismatch';
+
+        $detectedTier = $this->tier($profile->followers);
+        $expectedTier = $entry['recognition_tier'] ?? null;
+        if ($expectedTier !== null && $detectedTier !== $expectedTier) {
+            $warnings[] = 'recognition_tier_mismatch';
+            $suggestions[] = 'Set recognition_tier to '.($detectedTier ?? 'null').'.';
         }
 
         return [
             'handle' => $entry['handle'],
             'status' => $entry['status'],
+            'provider_status' => 'ok',
+            'provider_error' => null,
             'accepted' => $reasons === [],
             'reasons' => $reasons,
+            'warnings' => $warnings,
+            'suggestions' => $suggestions,
             'expected_market' => $entry['market'],
             'detected_market' => $market['market'],
             'market_confidence' => $market['confidence'],
             'primary_language' => $market['language'],
             'vertical' => $entry['vertical'],
-            'expected_tier' => $entry['recognition_tier'],
-            'detected_tier' => $this->tier($profile->followers),
+            'expected_tier' => $expectedTier,
+            'detected_tier' => $detectedTier,
             'followers' => $profile->followers,
             'recent_posts' => $posts->count(),
             'latest_post_at' => $latest?->toIso8601String(),

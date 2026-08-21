@@ -121,3 +121,33 @@ Supprimés : `Understand` / `Outliers` / `Connection` / `Remix` en tant que sect
 
 **EN** — Personal — the AI that turns your life into content only you could post. Finds what's working in your niche, connects it to what actually happened to you, writes it in your voice.
 **FR** — Personal — l'IA qui transforme votre vie en contenus que vous seul pouviez publier. Trouve ce qui marche dans votre niche, le relie à ce que vous avez vécu, l'écrit dans votre voix.
+
+---
+
+## Implémentation
+
+`app/pages/index.vue` — 6 blocs : `LandingHero` · `LandingStat` · `LandingHow` · `LandingMoments` · `LandingFaq` · `LandingCta`.
+
+**Les vidéos.** Chaque cadre est un `<LandingMedia>` : il affiche un mock statique (`app/components/landing/mock/`) tant qu'aucun clip n'est fourni, et le clip par-dessus dès qu'il existe. Les clips ne tournent que lorsqu'ils sont à l'écran, et jamais en `prefers-reduced-motion`.
+
+Pour activer une vidéo : déposer le fichier dans `frontend/public/landing/` et le nommer dans `app/composables/useLandingMedia.ts` :
+
+```ts
+export const LANDING_CLIPS = {
+  hero: '/landing/hero.mp4',   // au lieu de null
+  understand: null,
+  discover: null,
+  connect: null,
+  write: null
+}
+```
+
+**Formats à filmer** — muet, en boucle, 6-10 s, sans curseur ni chrome de navigateur :
+
+| Clip | Cadre | Ce qu'on voit |
+|---|---|---|
+| `hero` | 940 × 456 (~2:1) | Le feed du matin se remplit, une carte outlier s'ouvre, un Moment s'y colle, un Reel s'écrit |
+| `understand` | 704 × 432 (~16:10) | Instagram se connecte, le profil se remplit tout seul, une correction en une phrase |
+| `discover` | 704 × 432 | Les outliers remontent un par un avec leur ratio |
+| `connect` | 704 × 432 | Le motif et le Moment se rejoignent |
+| `write` | 704 × 432 | Le Reel s'écrit temps par temps, puis bascule en carrousel |

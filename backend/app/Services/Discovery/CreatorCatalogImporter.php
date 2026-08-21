@@ -11,6 +11,7 @@ class CreatorCatalogImporter
     public function __construct(
         private readonly CreatorNicheCatalog $niches,
         private readonly CreatorMarketDetector $markets,
+        private readonly CreatorCatalogEligibility $eligibility,
     ) {}
 
     /** @param list<array<string, mixed>> $entries @return array{imported: int, skipped: list<string>, jobs: int} */
@@ -61,10 +62,15 @@ class CreatorCatalogImporter
                     'market' => $entry['market'],
                     'primary_language' => $signals['language'],
                     'curation_status' => 'approved',
-                    'recognition_tier' => $entry['recognition_tier'],
+                    'recognition_tier' => $this->eligibility->tier($profile->followers),
                     'is_catalog_seed' => true,
                     'metadata' => array_replace_recursive($creator->metadata ?? [], $profile->metadata, [
-                        'catalog' => ['manifest_version' => 1, 'rationale' => $entry['rationale']],
+                        'catalog' => [
+                            'manifest_version' => config('creator_catalog.manifest_version'),
+                            'rationale' => $entry['rationale'],
+                            'source_urls' => $entry['source_urls'] ?? [],
+                            'editorially_verified_at' => $entry['editorially_verified_at'] ?? null,
+                        ],
                     ]),
                     'discovered_at' => $creator->discovered_at ?: now(),
                     'last_fetched_at' => now(),

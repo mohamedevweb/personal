@@ -412,6 +412,12 @@
     "positioning": "Positionnement",
     "audience": "Audience",
     "yourNiche": "Votre niche",
+    "notProvided": "À compléter",
+    "nicheInsufficient": "Pas encore assez de contenu pour déterminer ta niche",
+    "analysis": {
+      "insufficient": "Instagram ne fournit pas encore assez de signaux. Tu peux compléter ces informations manuellement.",
+      "partial": "Première estimation à confirmer. Tu peux la corriger à tout moment."
+    },
     "cancel": "Annuler",
     "saving": "Enregistrement…",
     "saveMemory": "Enregistrer la mémoire",

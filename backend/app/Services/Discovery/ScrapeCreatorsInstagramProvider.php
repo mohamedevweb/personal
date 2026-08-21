@@ -119,7 +119,11 @@ class ScrapeCreatorsInstagramProvider implements InstagramDataProvider
         }
 
         if (! $response->successful()) {
-            throw new ContentDiscoveryException("ScrapeCreators failed (HTTP {$response->status()}).");
+            $detail = $response->json('message') ?? $response->json('error');
+            $detail = is_string($detail) ? trim($detail) : '';
+            $suffix = $detail !== '' ? ' '.mb_substr($detail, 0, 300) : '';
+
+            throw new ContentDiscoveryException("ScrapeCreators failed (HTTP {$response->status()}).{$suffix}");
         }
 
         $payload = $response->json();

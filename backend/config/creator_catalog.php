@@ -7,6 +7,9 @@ return [
     'statuses' => ['pending', 'approved'],
     'curation_statuses' => ['discovered', 'approved', 'inactive'],
     'recognition_tiers' => ['expert', 'established', 'leader'],
+    'manifest_version' => 'golden-fr-v1',
+    'target_total' => 30,
+    'target_per_vertical' => 5,
 
     'verticals' => [
         'sport-fitness' => ['name' => 'Sport & Fitness', 'aliases' => ['sport', 'fitness', 'musculation', 'running', 'coaching sportif', 'nutrition sportive', 'workout', 'strength training']],

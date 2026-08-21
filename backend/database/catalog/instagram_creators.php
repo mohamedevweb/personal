@@ -1,72 +1,80 @@
 <?php
 
 /*
-| Version 1, editorial candidates only.
+| Golden Catalog FR, version 1.
 |
-| Every entry starts pending. The audit report is the source used by a human
-| editor to promote an entry to approved. A handle being present here is never
-| enough to write it to production.
+| Handles are copied from the Instagram URLs below and supported by a public
+| editorial source. Metrics and recognition tiers deliberately do not live in
+| this file: ScrapeCreators measures them after the human review.
 */
+
+$sources = [
+    'sport' => 'https://www.clickanalytic.com/fr/find-influencers/france/top-25-french-fitness-influencers/',
+    'food' => 'https://www.demotivateur.fr/influence-food/top-influenceurs-food-france',
+    'branding' => 'https://www.favikon.com/blog/top-business-influencers-france',
+    'tech' => 'https://tytopr.com/wp-content/uploads/2025-Tyto-Tech-500.pdf',
+    'beauty' => 'https://www.kolsquare.com/fr/top-influencers/top-10-influenceuses-beaute-francaises',
+    'wellness' => 'https://www.favikon.com/blog/top-wellness-influencers-france',
+];
 
 $catalog = [
     'sport-fitness' => [
-        ['tiboinshape', 'FR', 'leader'], ['sissymua', 'FR', 'leader'], ['juju_fitcats', 'FR', 'leader'], ['major_mouvement', 'FR', 'leader'],
-        ['lucilewoodward', 'FR', 'established'], ['marinelecoq', 'FR', 'established'], ['karoline.ro', 'FR', 'established'], ['fitbyclem', 'FR', 'established'], ['coach_benjamin', 'FR', 'established'], ['mathieu_fit', 'FR', 'expert'],
-        ['thebodycoach', 'GB', 'established'], ['natacha.oceane', 'GB', 'established'], ['courtneydblack', 'GB', 'established'], ['james_smith_pt', 'GB', 'expert'], ['lucydavis_fit', 'GB', 'expert'],
-        ['therock', 'US', 'established'], ['jeffnippard', 'US', 'established'], ['megsquats', 'US', 'expert'], ['syattfitness', 'US', 'expert'], ['soheefit', 'US', 'expert'],
+        ['tiboinshape', ['musculation', 'fitness', 'motivation'], 'Créateur fitness français grand public.', $sources['sport']],
+        ['jujufitcats', ['fitness', 'musculation', 'lifestyle'], 'Créatrice fitness française avec une ligne éditoriale personnelle.', $sources['sport']],
+        ['sissymua', ['fitness', 'coaching', 'bien-être'], 'Créatrice et coach fitness française reconnue.', $sources['sport']],
+        ['justinegallice', ['fitness', 'coaching', 'nutrition sportive'], 'Coach fitness française publiant des entraînements et conseils.', $sources['sport']],
+        ['majormouvement', ['mobilité', 'santé', 'coaching sportif'], 'Kinésithérapeute créateur français centré sur le mouvement.', $sources['sport']],
     ],
     'food-cooking' => [
-        ['cyril_lignac', 'FR', 'leader'], ['philippe_etchebest', 'FR', 'leader'], ['hervecuisine', 'FR', 'leader'], ['whoogyss', 'FR', 'leader'],
-        ['fastgoodcuisine', 'FR', 'established'], ['laurentmariotte', 'FR', 'established'], ['louloukitchen_', 'FR', 'established'], ['les_patisseries_de_mama', 'FR', 'established'], ['healthyfood_creation', 'FR', 'established'], ['charlesetava', 'FR', 'expert'],
-        ['jamieoliver', 'GB', 'established'], ['nigellalawson', 'GB', 'established'], ['deliciouslyella', 'GB', 'established'], ['fitwaffle', 'GB', 'expert'], ['mob', 'GB', 'expert'],
-        ['halfbakedharvest', 'US', 'established'], ['bingingwithbabish', 'US', 'established'], ['wishbonekitchen', 'US', 'expert'], ['justine_snacks', 'US', 'expert'], ['salt_hank', 'US', 'expert'],
+        ['cedricgrolet', ['pâtisserie', 'gastronomie', 'technique'], 'Chef pâtissier français dont le contenu met en scène ses créations.', $sources['food']],
+        ['louloukitchen_', ['recettes', 'cuisine méditerranéenne', 'food lifestyle'], 'Créatrice food française aux recettes courtes et accessibles.', $sources['food']],
+        ['hervecuisine', ['recettes', 'pâtisserie', 'cuisine maison'], 'Créateur français historique de recettes pédagogiques.', $sources['food']],
+        ['diegoalary', ['recettes', 'chef', 'food entertainment'], 'Chef et créateur français publiant principalement de la cuisine.', $sources['food']],
+        ['not_so_superflu', ['recettes', 'anti-gaspillage', 'cuisine maison'], 'Créatrice française reconnue pour ses recettes anti-gaspillage.', $sources['food']],
     ],
     'personal-branding' => [
-        ['yomidenzel', 'FR', 'leader'], ['alexhitchens', 'FR', 'leader'], ['caroline.mignaux', 'FR', 'leader'], ['stanleloup', 'FR', 'leader'],
-        ['antoinebm', 'FR', 'established'], ['marketingmania', 'FR', 'established'], ['matthieustefani', 'FR', 'established'], ['paulduchemin', 'FR', 'established'], ['daniloduchesnes', 'FR', 'established'], ['audreytips', 'FR', 'expert'],
-        ['aliabdaal', 'GB', 'established'], ['steven', 'GB', 'established'], ['danielpriestley', 'GB', 'established'], ['gracebeverley', 'GB', 'expert'], ['chrisducker', 'GB', 'expert'],
-        ['garyvee', 'US', 'established'], ['alexhormozi', 'US', 'established'], ['codie_sanchez', 'US', 'expert'], ['justinwelsh', 'US', 'expert'], ['jasminestar', 'US', 'expert'],
+        ['caroline.mignaux', ['création de contenu', 'marketing', 'podcast'], 'Entrepreneure et créatrice française centrée sur le marketing.', $sources['branding']],
+        ['matthieustefani', ['entrepreneuriat', 'podcast', 'business'], 'Créateur et intervieweur français de l’écosystème entrepreneurial.', $sources['branding']],
+        ['antoinebm', ['création de contenu', 'marketing', 'entrepreneuriat'], 'Créateur français spécialisé dans les business de contenu.', $sources['branding']],
+        ['anthonybourbon1', ['entrepreneuriat', 'investissement', 'personal branding'], 'Entrepreneur français avec une présence éditoriale incarnée.', $sources['branding']],
+        ['alexhitchens', ['entrepreneuriat', 'vente', 'personal branding'], 'Créateur français orienté vente, business et développement personnel.', $sources['branding']],
     ],
     'tech-ai' => [
-        ['micode', 'FR', 'leader'], ['leo_techmaker', 'FR', 'leader'], ['jojol', 'FR', 'leader'], ['ppgarcia75', 'FR', 'leader'],
-        ['underscore_', 'FR', 'established'], ['benjamincode', 'FR', 'established'], ['grafikart.fr', 'FR', 'established'], ['theo', 'FR', 'established'], ['defendintelligence', 'FR', 'established'], ['luc_julia', 'FR', 'expert'],
-        ['mrwhosetheboss', 'GB', 'established'], ['tomscottgo', 'GB', 'established'], ['techspurt', 'GB', 'established'], ['mmitchelldavies', 'GB', 'expert'], ['techflow', 'GB', 'expert'],
-        ['mkbhd', 'US', 'established'], ['ijustine', 'US', 'established'], ['fireship_dev', 'US', 'expert'], ['cleoabram', 'US', 'expert'], ['lexfridman', 'US', 'expert'],
+        ['micode', ['cybersécurité', 'développement', 'tech'], 'Créateur français de vulgarisation informatique.', $sources['tech']],
+        ['leotechmaker', ['technologie', 'produits tech', 'vulgarisation'], 'Créateur français spécialisé dans l’actualité et les produits tech.', $sources['tech']],
+        ['mrjojol67', ['smartphones', 'produits tech', 'tests'], 'Créateur tech français publiant des tests et de la vulgarisation.', $sources['tech']],
+        ['benjamincode', ['développement', 'design', 'carrière tech'], 'Développeur et créateur français centré sur le code et le design.', $sources['tech']],
+        ['leoduffoff', ['technologie', 'produits tech', 'analyse'], 'Créateur français proposant des analyses et critiques tech.', $sources['tech']],
     ],
     'beauty-fashion' => [
-        ['lenamahfouf', 'FR', 'leader'], ['enjoyphoenix', 'FR', 'leader'], ['sananas2106', 'FR', 'leader'], ['noholita', 'FR', 'leader'],
-        ['paolalct', 'FR', 'established'], ['romy', 'FR', 'established'], ['mayadorable', 'FR', 'established'], ['gaelleprudencio', 'FR', 'established'], ['sulivangwed', 'FR', 'established'], ['chloebbbb', 'FR', 'expert'],
-        ['patmcgrathreal', 'GB', 'established'], ['victoriabeckham', 'GB', 'established'], ['alexachung', 'GB', 'established'], ['trinnywoodall', 'GB', 'expert'], ['tamaramory', 'GB', 'expert'],
-        ['haileybieber', 'US', 'established'], ['mikaylajmakeup', 'US', 'established'], ['wisdm', 'US', 'expert'], ['chrissyford', 'US', 'expert'], ['katiejanehughes', 'US', 'expert'],
+        ['lenamahfouf', ['mode', 'lifestyle', 'luxe'], 'Créatrice française reconnue dans la mode et le lifestyle.', $sources['beauty']],
+        ['sananas2106', ['maquillage', 'skincare', 'beauté'], 'Créatrice beauté française spécialisée dans le maquillage.', $sources['beauty']],
+        ['romy', ['beauté', 'mode', 'lifestyle'], 'Créatrice française avec une ligne éditoriale beauté et mode.', $sources['beauty']],
+        ['noholita', ['mode', 'style', 'lifestyle'], 'Créatrice mode française connue pour son contenu de style personnel.', $sources['beauty']],
+        ['paolalct', ['mode', 'beauté', 'lifestyle'], 'Créatrice française active sur les formats mode et beauté.', $sources['beauty']],
     ],
     'wellness' => [
-        ['fabienolicard', 'FR', 'leader'], ['christopheandreofficiel', 'FR', 'leader'], ['lilareinhart_fr', 'FR', 'leader'], ['georgianasegar', 'FR', 'leader'],
-        ['healthy_lalou', 'FR', 'established'], ['healthy_life_mary', 'FR', 'established'], ['jennifer_martin_officiel', 'FR', 'established'], ['charlotte_saintjean', 'FR', 'established'], ['elodiegaramond', 'FR', 'established'], ['gaellepiton', 'FR', 'expert'],
-        ['drchatterjee', 'GB', 'established'], ['thefoodmedic', 'GB', 'established'], ['fearnecotton', 'GB', 'established'], ['mindfulchefuk', 'GB', 'expert'], ['drjuliesmith', 'GB', 'expert'],
-        ['melrobbins', 'US', 'established'], ['hubermanlab', 'US', 'established'], ['gabbybernstein', 'US', 'expert'], ['drmarkhyman', 'US', 'expert'], ['yung_pueblo', 'US', 'expert'],
+        ['chloe___bloom', ['méditation', 'développement personnel', 'bien-être'], 'Créatrice française centrée sur le bien-être et la méditation.', $sources['wellness']],
+        ['christophe_andre_officiel', ['méditation', 'santé mentale', 'psychologie'], 'Psychiatre français publiant du contenu incarné sur la santé mentale.', $sources['wellness']],
+        ['lilibarbery', ['méditation', 'respiration', 'bien-être'], 'Créatrice française spécialisée dans la méditation et la respiration.', $sources['wellness']],
+        ['jonathanlehmann', ['méditation', 'développement personnel', 'santé mentale'], 'Créateur français de contenus de méditation et de développement personnel.', $sources['wellness']],
+        ['fabienolicard', ['cerveau', 'mémoire', 'bien-être mental'], 'Créateur français de vulgarisation autour du cerveau et des capacités mentales.', $sources['wellness']],
     ],
-];
-
-$topics = [
-    'sport-fitness' => ['training', 'coaching', 'performance'],
-    'food-cooking' => ['recipes', 'cooking', 'food culture'],
-    'personal-branding' => ['content creation', 'marketing', 'entrepreneurship'],
-    'tech-ai' => ['technology', 'AI', 'productivity'],
-    'beauty-fashion' => ['beauty', 'fashion', 'style'],
-    'wellness' => ['mental health', 'mindfulness', 'recovery'],
 ];
 
 $entries = [];
 
 foreach ($catalog as $vertical => $creators) {
-    foreach ($creators as [$handle, $market, $tier]) {
+    foreach ($creators as [$handle, $topics, $rationale, $editorialSource]) {
         $entries[] = [
             'handle' => $handle,
-            'market' => $market,
+            'instagram_url' => "https://www.instagram.com/{$handle}/",
+            'market' => 'FR',
             'vertical' => $vertical,
-            'topics' => $topics[$vertical],
-            'recognition_tier' => $tier,
-            'rationale' => 'Editorial candidate with an established public presence in '.$vertical.' for the '.$market.' market.',
+            'topics' => $topics,
+            'rationale' => $rationale,
+            'source_urls' => ["https://www.instagram.com/{$handle}/", $editorialSource],
+            'editorially_verified_at' => '2026-08-21',
             'status' => 'pending',
         ];
     }

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Exceptions\ContentDiscoveryException;
 use App\Jobs\MeasureAccountEngagement;
 use App\Models\Creator;
 use App\Models\CreatorProfile;
@@ -24,21 +25,33 @@ class CreatorCatalogTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_manifest_has_exact_editorial_quotas(): void
+    public function test_manifest_has_exact_golden_catalog_quotas_and_sources(): void
     {
         $entries = collect(app(CreatorCatalog::class)->entries());
 
-        $this->assertCount(120, $entries);
-        $this->assertCount(120, $entries->pluck('handle')->map(fn (string $handle): string => strtolower($handle))->unique());
+        $this->assertCount(30, $entries);
+        $this->assertCount(30, $entries->pluck('handle')->map(fn (string $handle): string => strtolower($handle))->unique());
 
         foreach (array_keys(config('creator_catalog.verticals')) as $vertical) {
             $group = $entries->where('vertical', $vertical);
-            $this->assertCount(20, $group);
-            $this->assertSame(['FR' => 10, 'GB' => 5, 'US' => 5], $group->countBy('market')->sortKeys()->all());
-            $this->assertSame(['established' => 10, 'expert' => 6, 'leader' => 4], $group->countBy('recognition_tier')->sortKeys()->all());
+            $this->assertCount(5, $group);
+            $this->assertTrue($group->every(fn (array $entry): bool => $entry['market'] === 'FR'));
         }
 
         $this->assertTrue($entries->every(fn (array $entry): bool => $entry['status'] === 'pending'));
+        $this->assertEqualsCanonicalizing(
+            ['jujufitcats', 'majormouvement', 'caroline.mignaux', 'leotechmaker', 'mrjojol67', 'leoduffoff'],
+            $entries->pluck('handle')->intersect(['jujufitcats', 'majormouvement', 'caroline.mignaux', 'leotechmaker', 'mrjojol67', 'leoduffoff'])->all(),
+        );
+        $this->assertEmpty($entries->pluck('handle')->intersect(['juju_fitcats', 'major_mouvement', 'carolinemignaux', 'leo_techmaker', 'jojol', 'leoduff']));
+        $this->assertTrue($entries->every(function (array $entry): bool {
+            $instagramUrl = "https://www.instagram.com/{$entry['handle']}/";
+
+            return $entry['instagram_url'] === $instagramUrl
+                && in_array($instagramUrl, $entry['source_urls'], true)
+                && count($entry['source_urls']) >= 2
+                && ! array_key_exists('recognition_tier', $entry);
+        }));
     }
 
     public function test_market_detection_distinguishes_fr_gb_us_and_unknown(): void
@@ -56,7 +69,7 @@ class CreatorCatalogTest extends TestCase
     {
         $entry = [
             'handle' => 'coach', 'market' => 'FR', 'vertical' => 'sport-fitness',
-            'recognition_tier' => 'established', 'status' => 'pending',
+            'status' => 'pending',
         ];
         $eligibility = app(CreatorCatalogEligibility::class);
         $accepted = $eligibility->evaluate($this->profile(), $entry);
@@ -72,8 +85,18 @@ class CreatorCatalogTest extends TestCase
         $this->assertContains('private_account', $private['reasons']);
         $this->assertContains('impersonal_brand_or_aggregator', $spam['reasons']);
         $this->assertContains('metric_coverage_below_minimum', $missingMetrics['reasons']);
-        $this->assertContains('market_mismatch', $wrongMarket['reasons']);
+        $this->assertTrue($wrongMarket['accepted']);
+        $this->assertContains('market_signal_mismatch', $wrongMarket['warnings']);
         $this->assertContains('inactive', $inactive['reasons']);
+
+        $unknownMarket = $eligibility->evaluate($this->profile(bio: 'Weekly training and creator tips'), $entry);
+        $tierSuggestion = $eligibility->evaluate($this->profile(), array_replace($entry, ['recognition_tier' => 'leader']));
+
+        $this->assertTrue($unknownMarket['accepted']);
+        $this->assertContains('market_unverified', $unknownMarket['warnings']);
+        $this->assertTrue($tierSuggestion['accepted']);
+        $this->assertContains('recognition_tier_mismatch', $tierSuggestion['warnings']);
+        $this->assertSame(['Set recognition_tier to established.'], $tierSuggestion['suggestions']);
     }
 
     public function test_repeated_import_upserts_creator_preserves_provenance_and_dispatches_chunks(): void
@@ -84,7 +107,7 @@ class CreatorCatalogTest extends TestCase
         $provider->shouldReceive('getProfile')->twice()->andReturn($profile);
         $entry = [[
             'handle' => 'coach', 'market' => 'FR', 'vertical' => 'sport-fitness',
-            'topics' => ['running', 'coaching'], 'recognition_tier' => 'established',
+            'topics' => ['running', 'coaching'],
             'rationale' => 'Recognized coach.', 'status' => 'approved',
         ]];
         Creator::query()->create([
@@ -105,6 +128,7 @@ class CreatorCatalogTest extends TestCase
         $this->assertSame('sport-fitness', $creator->niche);
         $this->assertSame('FR', $creator->market);
         $this->assertSame('approved', $creator->curation_status);
+        $this->assertSame('established', $creator->recognition_tier);
         $this->assertTrue($creator->is_catalog_seed);
         $this->assertTrue(data_get($creator->metadata, 'providers.hiker.seen'));
         $this->assertSame('scrapecreators', data_get($creator->metadata, 'providers.scrapecreators.provider'));
@@ -116,8 +140,8 @@ class CreatorCatalogTest extends TestCase
     {
         Storage::fake('local');
         $provider = \Mockery::mock(InstagramDataProvider::class);
-        $provider->shouldReceive('getProfile')->times(120)->andReturn($this->profile());
-        $provider->shouldReceive('getPosts')->times(120)->andReturn(collect());
+        $provider->shouldReceive('getProfile')->times(30)->andReturn($this->profile());
+        $provider->shouldNotReceive('getPosts');
         $manager = \Mockery::mock(InstagramDataProviderManager::class);
         $manager->shouldReceive('provider')->once()->with('mock')->andReturn($provider);
         $this->app->instance(InstagramDataProviderManager::class, $manager);
@@ -129,12 +153,84 @@ class CreatorCatalogTest extends TestCase
         $this->assertCount(2, Storage::disk('local')->allFiles('catalog-reports'));
     }
 
+    public function test_audit_fetches_posts_only_when_profile_has_fewer_than_six_usable_posts(): void
+    {
+        Storage::fake('local');
+        $entry = $this->catalogEntry('sparse_coach');
+        $catalog = \Mockery::mock(CreatorCatalog::class);
+        $catalog->shouldReceive('entries')->once()->andReturn([$entry]);
+        $this->app->instance(CreatorCatalog::class, $catalog);
+
+        $provider = \Mockery::mock(InstagramDataProvider::class);
+        $provider->shouldReceive('getProfile')->once()->with('sparse_coach')->andReturn($this->profile(username: 'sparse_coach', postCount: 2));
+        $provider->shouldReceive('getPosts')->once()->with('sparse_coach', 30, 'instagram-1')->andReturn($this->profile(username: 'sparse_coach')->posts);
+        $manager = \Mockery::mock(InstagramDataProviderManager::class);
+        $manager->shouldReceive('provider')->once()->with('mock')->andReturn($provider);
+        $this->app->instance(InstagramDataProviderManager::class, $manager);
+
+        $this->artisan('personal:audit-creator-catalog --provider=mock')->assertSuccessful();
+    }
+
+    public function test_audit_reports_provider_error_details_with_null_metrics(): void
+    {
+        Storage::fake('local');
+        $entry = $this->catalogEntry('failed_coach');
+        $catalog = \Mockery::mock(CreatorCatalog::class);
+        $catalog->shouldReceive('entries')->once()->andReturn([$entry]);
+        $this->app->instance(CreatorCatalog::class, $catalog);
+
+        $provider = \Mockery::mock(InstagramDataProvider::class);
+        $provider->shouldReceive('getProfile')->once()->andThrow(new ContentDiscoveryException('ScrapeCreators failed with HTTP 402: insufficient credits'));
+        $manager = \Mockery::mock(InstagramDataProviderManager::class);
+        $manager->shouldReceive('provider')->once()->with('mock')->andReturn($provider);
+        $this->app->instance(InstagramDataProviderManager::class, $manager);
+
+        $this->artisan('personal:audit-creator-catalog --provider=mock')->assertSuccessful();
+
+        $json = collect(Storage::disk('local')->allFiles('catalog-reports'))->first(fn (string $path): bool => str_ends_with($path, '.json'));
+        $report = json_decode(Storage::disk('local')->get($json), true);
+        $row = $report['entries'][0];
+
+        $this->assertSame('error', $row['provider_status']);
+        $this->assertSame('ScrapeCreators failed with HTTP 402: insufficient credits', $row['provider_error']);
+        $this->assertNull($row['followers']);
+        $this->assertNull($row['accepted']);
+        $this->assertSame(1, $report['summary']['provider_errors']);
+        $this->assertSame(0, $report['summary']['rejected']);
+    }
+
+    public function test_audit_retry_report_only_retries_provider_errors(): void
+    {
+        Storage::fake('local');
+        $failed = $this->catalogEntry('failed_coach');
+        $accepted = $this->catalogEntry('accepted_coach');
+        $catalog = \Mockery::mock(CreatorCatalog::class);
+        $catalog->shouldReceive('entries')->once()->andReturn([$failed, $accepted]);
+        $this->app->instance(CreatorCatalog::class, $catalog);
+        Storage::disk('local')->put('previous.json', json_encode(['entries' => [
+            ['handle' => 'failed_coach', 'reasons' => ['provider_failure']],
+            ['handle' => 'accepted_coach', 'provider_status' => 'ok'],
+        ]]));
+
+        $provider = \Mockery::mock(InstagramDataProvider::class);
+        $provider->shouldReceive('getProfile')->once()->with('failed_coach')->andReturn($this->profile(username: 'failed_coach'));
+        $provider->shouldNotReceive('getPosts');
+        $manager = \Mockery::mock(InstagramDataProviderManager::class);
+        $manager->shouldReceive('provider')->once()->with('mock')->andReturn($provider);
+        $this->app->instance(InstagramDataProviderManager::class, $manager);
+
+        $path = Storage::disk('local')->path('previous.json');
+        $this->artisan("personal:audit-creator-catalog --provider=mock --retry-report={$path}")
+            ->expectsOutputToContain('1')
+            ->assertSuccessful();
+    }
+
     public function test_import_dispatches_measurement_in_chunks_of_ten(): void
     {
         Queue::fake();
         $entries = collect(range(1, 21))->map(fn (int $index): array => [
             'handle' => "coach{$index}", 'market' => 'FR', 'vertical' => 'sport-fitness',
-            'topics' => ['coaching'], 'recognition_tier' => 'established',
+            'topics' => ['coaching'],
             'rationale' => 'Recognized coach.', 'status' => 'approved',
         ])->all();
         $provider = \Mockery::mock(InstagramDataProvider::class);
@@ -182,7 +278,7 @@ class CreatorCatalogTest extends TestCase
         Storage::fake('local');
         $entry = [
             'handle' => 'coach', 'market' => 'FR', 'vertical' => 'sport-fitness',
-            'topics' => ['coaching'], 'recognition_tier' => 'established',
+            'topics' => ['coaching'],
             'rationale' => 'Recognized coach.', 'status' => 'approved',
         ];
         $catalog = \Mockery::mock(CreatorCatalog::class);
@@ -214,8 +310,9 @@ class CreatorCatalogTest extends TestCase
         bool $isPrivate = false,
         int $metricPosts = 6,
         int $daysAgo = 1,
+        int $postCount = 6,
     ): DiscoveredProfile {
-        $posts = collect(range(1, 6))->map(fn (int $index): DiscoveredPost => new DiscoveredPost(
+        $posts = collect(range(1, $postCount))->map(fn (int $index): DiscoveredPost => new DiscoveredPost(
             sourceUrl: "https://instagram.test/p/{$username}-{$index}",
             username: $username,
             displayName: 'Coach',
@@ -244,5 +341,20 @@ class CreatorCatalogTest extends TestCase
             isPrivate: $isPrivate,
             metadata: ['providers' => ['scrapecreators' => ['provider' => 'scrapecreators']]],
         );
+    }
+
+    private function catalogEntry(string $handle): array
+    {
+        return [
+            'handle' => $handle,
+            'instagram_url' => "https://www.instagram.com/{$handle}/",
+            'market' => 'FR',
+            'vertical' => 'sport-fitness',
+            'topics' => ['coaching'],
+            'rationale' => 'Recognized coach.',
+            'source_urls' => ["https://www.instagram.com/{$handle}/", 'https://example.test/ranking'],
+            'editorially_verified_at' => '2026-08-21',
+            'status' => 'pending',
+        ];
     }
 }

@@ -74,30 +74,46 @@ class SyncInstagramAccount implements ShouldQueue
                 ...$signals['topics'],
             ]);
 
-            CreatorProfile::query()->updateOrCreate(
-                ['user_id' => $account->user_id],
-                [
-                    'instagram_username' => $account->username,
-                    'display_name' => $account->display_name,
-                    'bio' => $account->bio,
+            $creatorProfile = CreatorProfile::query()->firstOrNew(['user_id' => $account->user_id]);
+            $manualProfile = data_get($creatorProfile->creator_dna, 'analysis_method') === 'manual';
+            $creatorProfile->fill([
+                'instagram_username' => $account->username,
+                'display_name' => $account->display_name,
+                'bio' => $account->bio,
+                'market' => $market['market'],
+                'market_confidence' => $market['confidence'],
+            ]);
+
+            if (! $manualProfile) {
+                $creatorProfile->fill([
                     'niche' => $signals['primary_niche'],
-                    'positioning' => $account->bio,
+                    'positioning' => $signals['primary_niche'] ? $account->bio : null,
                     'topics' => $signals['topics'],
                     'tone' => $signals['tone'],
-                    'audience_description' => implode(', ', $signals['audience']),
+                    'audience_description' => $signals['audience'] === [] ? null : implode(', ', $signals['audience']),
                     'creator_dna' => $signals,
-                    'market' => $market['market'],
-                    'market_confidence' => $market['confidence'],
                     'primary_vertical' => $primaryVertical,
                     'dna_analyzed_at' => now(),
-                ],
-            );
+                ]);
+            }
+
+            if ($this->hasLegacyPlaceholderContext($creatorProfile)) {
+                $creatorProfile->fill([
+                    'current_projects' => [],
+                    'goals' => [],
+                    'content_strengths' => [],
+                ]);
+            }
+
+            $creatorProfile->save();
 
             $account->update(['sync_status' => 'finding_patterns']);
 
             // The niche is known now, so fill the feed with matching creators. It
             // runs as its own job so a scraper hiccup never fails the sync.
-            DiscoverNicheContent::dispatch($account->user_id);
+            if ($creatorProfile->niche) {
+                DiscoverNicheContent::dispatch($account->user_id);
+            }
 
             $account->update([
                 'sync_status' => 'completed',
@@ -112,5 +128,12 @@ class SyncInstagramAccount implements ShouldQueue
 
             throw $exception;
         }
+    }
+
+    private function hasLegacyPlaceholderContext(CreatorProfile $profile): bool
+    {
+        return $profile->current_projects === ['Personal']
+            && $profile->goals === ['Build a personal brand', 'Grow an audience', 'Launch Personal']
+            && $profile->content_strengths === ['Founder stories', 'Personal lessons', 'Behind the scenes'];
     }
 }

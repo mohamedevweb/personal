@@ -50,11 +50,11 @@ class DiscoverCreatorCandidates extends Command
                 }
 
                 $full = $this->withPosts($provider->getProfile($handle) ?? $candidate, $provider);
-                $expectation = array_replace($seed, ['recognition_tier' => $eligibility->tier($full->followers)]);
-                $row = $eligibility->evaluate($full, $expectation);
+                $row = $eligibility->evaluate($full, $seed);
                 $row['handle'] = $handle;
                 $row['source_seed'] = $seed['handle'];
                 $row['status'] = 'candidate';
+                $row['candidate_score'] = $this->candidateScore($row);
                 $candidates[$handle] = $row;
 
                 if (count($candidates) >= (int) $this->option('max')) {
@@ -63,7 +63,10 @@ class DiscoverCreatorCandidates extends Command
             }
         }
 
-        $rows = array_values($candidates);
+        $rows = collect($candidates)
+            ->sortByDesc('candidate_score')
+            ->values()
+            ->all();
         $paths = $reports->write('creator-candidates', $rows, ['candidates' => count($rows), 'database_writes' => 0]);
         $this->info(count($rows).' candidates exported. No creator or content row was written.');
         $this->line("JSON: {$paths['json']}");
@@ -94,5 +97,14 @@ class DiscoverCreatorCandidates extends Command
             isPrivate: $profile->isPrivate,
             metadata: $profile->metadata,
         );
+    }
+
+    private function candidateScore(array $row): float
+    {
+        $activity = min(1, ((int) ($row['recent_posts'] ?? 0)) / 12);
+        $metrics = (float) ($row['metric_coverage'] ?? 0);
+        $engagement = min(1, log10(max(1, (int) ($row['median_engagement'] ?? 0))) / 5);
+
+        return round(($activity * 0.35) + ($metrics * 0.25) + ($engagement * 0.30) + 0.10, 4);
     }
 }
