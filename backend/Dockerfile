@@ -45,7 +45,8 @@ COPY --chown=www-data:www-data . .
 COPY --from=vendor --chown=www-data:www-data /app/vendor ./vendor
 
 RUN mkdir -p storage/framework/cache/data storage/framework/sessions \
-      storage/framework/views storage/logs bootstrap/cache \
+      storage/framework/views storage/logs storage/app/private/instagram-media \
+      bootstrap/cache \
  && php artisan package:discover --ansi \
  && chown -R www-data:www-data storage bootstrap/cache \
  && chmod -R ug+rwX storage bootstrap/cache

@@ -77,6 +77,7 @@ class ContentPostView
     {
         $sourceUrls = collect($post->media_urls ?? [])
             ->filter(fn (mixed $url): bool => is_string($url) && $url !== '')
+            ->unique()
             ->values();
 
         if ($sourceUrls->isEmpty() && $post->thumbnail_url) {
@@ -87,6 +88,13 @@ class ContentPostView
             ->map(function (string $sourceUrl, int $position) use ($post): string {
                 if (! $this->media->supports($sourceUrl)) {
                     return $sourceUrl;
+                }
+
+                // The first carousel frame is also the post thumbnail. Reusing
+                // its stable route preserves the cache created before carousel
+                // navigation existed and avoids downloading the same file twice.
+                if ($position === 0 && $sourceUrl === $post->thumbnail_url) {
+                    return (string) $this->mediaUrl('media.content', 'content', $post->id, $sourceUrl);
                 }
 
                 $path = URL::temporarySignedRoute(

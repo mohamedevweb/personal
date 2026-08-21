@@ -370,11 +370,14 @@ button, a { -webkit-tap-highlight-color: transparent; }
    hero uses them.
    --------------------------------------------------------------------------- */
 @layer utilities {
-  /* The floor the field comes out of. Light pools at the bottom of the stage,
-     in the signature, so the drift reads as arriving from somewhere rather
-     than as particles in a box. */
+  /* The floor the field comes out of, and the shade the copy is read against.
+     Light pools at the bottom of the stage, in the signature, so the drift
+     reads as arriving from somewhere rather than as particles in a box; the
+     night thickens again where the headline sits, so a tile passing behind it
+     never competes with the letterforms. */
   .b-floor {
     background:
+      radial-gradient(48% 38% at 50% 24%, rgba(9, 8, 7, .74) 0%, rgba(9, 8, 7, .34) 52%, transparent 76%),
       radial-gradient(58% 38% at 50% 106%, rgba(224, 79, 54, .24) 0%, rgba(224, 79, 54, .07) 46%, transparent 74%),
       linear-gradient(180deg, transparent 56%, rgba(224, 79, 54, .045) 100%);
   }

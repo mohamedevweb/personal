@@ -28,18 +28,21 @@ const STATS = [
     class="b-night relative isolate -mt-[74px] min-h-[100svh] overflow-hidden md:-mt-[82px]"
   >
     <!-- Ground, back to front: the matrix, the column rail, the field drifting
-         over both, and the light the field comes out of. -->
-    <div class="b-dots-lit b-fade-b pointer-events-none absolute inset-0 opacity-50" aria-hidden="true" />
+         over both, and the light the field comes out of. The stack is numbered
+         rather than left to document order: an animating canvas is promoted to
+         its own compositing layer, and with every sibling on `z-index: auto`
+         that layer wins and paints straight over the copy. -->
+    <div class="b-dots-lit b-fade-b pointer-events-none absolute inset-0 z-0 opacity-50" aria-hidden="true" />
 
-    <div class="pointer-events-none absolute inset-y-0 left-0 right-0 hidden lg:block" aria-hidden="true">
+    <div class="pointer-events-none absolute inset-y-0 left-0 right-0 z-0 hidden lg:block" aria-hidden="true">
       <span v-for="at in [25, 50, 75]" :key="at" class="b-guide absolute inset-y-0 w-px" :style="{ left: `${at}%` }" />
     </div>
 
-    <LandingSignalField class="pointer-events-none absolute inset-0" />
+    <LandingSignalField class="pointer-events-none absolute inset-0 z-0" />
 
-    <div class="b-floor pointer-events-none absolute inset-x-0 top-0 h-[100svh]" aria-hidden="true" />
+    <div class="b-floor pointer-events-none absolute inset-x-0 top-0 z-0 h-[100svh]" aria-hidden="true" />
 
-    <div class="relative mx-auto max-w-[1200px] px-5 pb-20 pt-[136px] md:px-10 md:pt-[168px]">
+    <div class="relative z-10 mx-auto max-w-[1200px] px-5 pb-20 pt-[136px] md:px-10 md:pt-[168px]">
       <div class="mx-auto max-w-[54rem] text-center">
         <h1
           data-reveal
@@ -65,7 +68,7 @@ const STATS = [
             {{ $t('landing.hero.getAccess') }}
             <AppIcon name="arrow" :size="17" class="transition-transform duration-300 group-hover:translate-x-1" />
           </LandingButtonLink>
-          <LandingButtonLink to="#how" variant="light" size="lg" class="w-full sm:w-auto">
+          <LandingButtonLink to="#how" variant="dark" size="lg" class="w-full sm:w-auto">
             {{ $t('landing.hero.seeHow') }}
           </LandingButtonLink>
         </div>

@@ -20,6 +20,8 @@ x-backend: &backend
   depends_on:
     postgres:
       condition: service_healthy
+  volumes:
+    - instagram-media-cache:/var/www/html/storage/app/private/instagram-media
   restart: unless-stopped
 
 services:
@@ -125,3 +127,4 @@ services:
 
 volumes:
   postgres-data:
+  instagram-media-cache:

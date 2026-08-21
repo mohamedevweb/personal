@@ -90,6 +90,7 @@ class InstagramMediaProxyTest extends TestCase
         $this->assertStringStartsWith('https://api.personal.test/api/media/content/', $payload['thumbnail_url']);
         $this->assertStringContainsString('signature=', $payload['thumbnail_url']);
         $this->assertCount(2, $payload['media_urls']);
+        $this->assertSame($payload['thumbnail_url'], $payload['media_urls'][0]);
         $this->assertStringStartsWith('https://api.personal.test/api/media/content/', $payload['media_urls'][1]);
         $this->assertStringContainsString('/1?', $payload['media_urls'][1]);
         $this->assertStringStartsWith('https://api.personal.test/api/media/creator/', $payload['creator']['avatar_url']);
@@ -97,6 +98,29 @@ class InstagramMediaProxyTest extends TestCase
         $post->update(['thumbnail_url' => 'https://images.unsplash.com/photo.jpg']);
         $payload = app(ContentPostView::class)->make($post->fresh(), $user);
         $this->assertSame('https://images.unsplash.com/photo.jpg', $payload['thumbnail_url']);
+    }
+
+    public function test_feed_deduplicates_repeated_carousel_images(): void
+    {
+        $user = User::factory()->create();
+        $source = 'https://instagram.ftce2-1.fna.fbcdn.net/thumb.jpg';
+        $post = $this->createPost($source);
+        $post->update(['media_urls' => [$source, $source]]);
+
+        $payload = app(ContentPostView::class)->make($post->fresh(), $user);
+
+        $this->assertSame([$payload['thumbnail_url']], $payload['media_urls']);
+    }
+
+    public function test_reel_media_uses_the_thumbnail_route_when_no_carousel_rows_exist(): void
+    {
+        $user = User::factory()->create();
+        $post = $this->createPost('https://instagram.ftce2-1.fna.fbcdn.net/reel.jpg');
+
+        $payload = app(ContentPostView::class)->make($post, $user);
+
+        $this->assertSame([$payload['thumbnail_url']], $payload['media_urls']);
+        $this->assertStringNotContainsString("/{$post->id}/0?", $payload['media_urls'][0]);
     }
 
     private function createPost(string $thumbnailUrl): ContentPost
