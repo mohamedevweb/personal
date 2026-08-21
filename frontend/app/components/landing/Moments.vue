@@ -21,7 +21,7 @@ const cards = computed(() => (['one', 'two', 'three', 'four', 'five'] as const).
 
     <div class="relative mx-auto max-w-[1200px]">
       <div data-reveal class="mx-auto max-w-2xl text-center">
-        <p class="b-mono text-[var(--b-red-600)]">{{ $t('landing.moments.eyebrow') }}</p>
+        <p class="b-mono text-[var(--b-stone)]">{{ $t('landing.moments.eyebrow') }}</p>
 
         <!-- The italic emphasis lives in the translation, so each language puts
              the turn of the sentence in the right place. -->
@@ -44,9 +44,9 @@ const cards = computed(() => (['one', 'two', 'three', 'four', 'five'] as const).
           data-reveal
           :style="{ '--reveal-delay': `${index * 90}ms` }"
           class="b-panel relative mb-5 break-inside-avoid p-6 transition-shadow duration-500 hover:shadow-[0_24px_50px_-40px_rgba(23,23,21,.55)]"
-          :class="card.used ? 'border-[var(--b-red-200)] bg-[var(--b-red-50)]' : ''"
+          :class="card.used ? 'border-[#dcd5c6]' : ''"
         >
-          <!-- The one Moment that shipped carries a red spine, so the wall has a
+          <!-- The one Moment that shipped carries a spine, so the wall has a
                single point of arrival rather than five equal notes. -->
           <span
             v-if="card.used"
@@ -54,7 +54,7 @@ const cards = computed(() => (['one', 'two', 'three', 'four', 'five'] as const).
             aria-hidden="true"
           />
 
-          <p class="b-mono" :class="card.used ? 'text-[var(--b-red-600)]' : 'text-[var(--b-stone)]'">{{ card.meta }}</p>
+          <p class="b-mono text-[var(--b-stone)]">{{ card.meta }}</p>
 
           <p class="mt-4 text-[16px] leading-[1.6]">{{ card.text }}</p>
 
@@ -63,7 +63,7 @@ const cards = computed(() => (['one', 'two', 'three', 'four', 'five'] as const).
               v-for="(bar, barIndex) in WAVEFORM"
               :key="barIndex"
               class="w-[2px] rounded-full"
-              :class="barIndex < 11 ? 'bg-[var(--b-red-400)]' : 'bg-[#cdc6b8]'"
+              :class="barIndex < 11 ? 'bg-[#a9a294]' : 'bg-[#ddd7ca]'"
               :style="{ height: `${bar}%` }"
             />
           </span>

@@ -48,12 +48,15 @@ const progress = computed(() => `${((active.value + 0.5) / STEPS.length) * 100}%
 </script>
 
 <template>
-  <section id="how" class="relative scroll-mt-24 overflow-hidden border-y border-[var(--b-line)] bg-[#f2efe8] px-5 py-24 md:px-10 md:py-32">
+  <!-- No overflow clipping on this section: it would make itself the scrollport
+       for the pinned frame below and stop it sticking. The texture is inset
+       instead, so there is nothing to clip. -->
+  <section id="how" class="relative scroll-mt-24 border-y border-[var(--b-line)] bg-[#f2efe8] px-5 py-24 md:px-10 md:py-32">
     <div class="b-graph b-fade-b pointer-events-none absolute inset-0 opacity-70" aria-hidden="true" />
 
     <div class="relative mx-auto max-w-[1200px]">
       <div data-reveal class="max-w-2xl">
-        <p class="b-mono text-[var(--b-red-600)]">{{ $t('landing.how.eyebrow') }}</p>
+        <p class="b-mono text-[var(--b-stone)]">{{ $t('landing.how.eyebrow') }}</p>
         <h2
           class="mt-6 font-display text-[36px] leading-[1.04] tracking-[-.025em] sm:text-[46px] md:text-[56px]"
           v-html="$t('landing.how.title')"
@@ -66,7 +69,7 @@ const progress = computed(() => `${((active.value + 0.5) / STEPS.length) * 100}%
                for a position along it to mean anything. -->
           <div class="absolute bottom-0 left-0 top-0 hidden w-px bg-[var(--b-line)] md:block" aria-hidden="true">
             <div
-              class="w-px bg-gradient-to-b from-[var(--b-red-400)] to-[var(--b-red-600)] transition-[height] duration-700 ease-out"
+              class="w-px bg-[#c4bcae] transition-[height] duration-700 ease-out"
               :style="{ height: progress }"
             />
           </div>
@@ -75,19 +78,19 @@ const progress = computed(() => `${((active.value + 0.5) / STEPS.length) * 100}%
             v-for="(step, index) in STEPS"
             :key="step.key"
             :ref="(el) => registerBeat(el as Element | null, index)"
-            class="relative border-b border-[var(--b-line)] py-10 transition-opacity duration-500 md:min-h-[58vh] md:border-b-0 md:flex md:flex-col md:justify-center md:py-0"
+            class="relative border-b border-[var(--b-line)] py-10 transition-opacity duration-500 md:min-h-[58vh] md:border-b-0 md:flex md:flex-col md:justify-center md:py-0 md:last:min-h-[34vh]"
             :class="index === active ? 'md:opacity-100' : 'md:opacity-45'"
           >
             <!-- The dot on the rail marking this beat's own place. -->
             <span
               class="absolute -left-9 top-1/2 hidden h-2 w-2 -translate-x-[3.5px] -translate-y-1/2 rounded-full transition-colors duration-500 md:block"
-              :class="index <= active ? 'bg-[var(--b-red-500)]' : 'bg-[var(--b-line)]'"
+              :class="index === active ? 'bg-[var(--b-red-500)]' : 'bg-[var(--b-line)]'"
               aria-hidden="true"
             />
 
-            <p class="b-mono flex items-center gap-3 text-[var(--b-red-600)]">
+            <p class="b-mono flex items-center gap-3 text-[var(--b-stone)]">
               {{ String(index + 1).padStart(2, '0') }}
-              <span class="h-px w-8 bg-[var(--b-red-200)]" aria-hidden="true" />
+              <span class="h-px w-8 bg-[var(--b-line)]" aria-hidden="true" />
             </p>
 
             <h3 class="mt-5 font-display text-[30px] leading-none tracking-[-.02em] md:text-[36px]">
@@ -115,7 +118,7 @@ const progress = computed(() => `${((active.value + 0.5) / STEPS.length) * 100}%
              clips are cut to once they land. -->
         <div class="hidden md:sticky md:top-28 md:block md:self-start">
           <div class="relative">
-            <div class="b-glow-blob pointer-events-none absolute -inset-10 -z-10 opacity-50" aria-hidden="true" />
+            <div class="b-glow-blob pointer-events-none absolute -inset-10 -z-10 opacity-60" aria-hidden="true" />
 
             <LandingMedia
               :src="LANDING_CLIPS[current.key]"

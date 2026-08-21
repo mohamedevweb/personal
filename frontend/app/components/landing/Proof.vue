@@ -11,7 +11,7 @@ const KEYS = ['scanned', 'outliers', 'niches', 'voice', 'minutes'] as const
 </script>
 
 <template>
-  <section class="relative border-y border-[var(--b-line)] bg-[var(--b-red-50)] py-5">
+  <section class="relative border-y border-[var(--b-line)] bg-[var(--b-surface)] py-5">
     <div class="b-dots pointer-events-none absolute inset-0 opacity-40" aria-hidden="true" />
 
     <!-- The rail fades at both ends rather than being clipped, so items arrive
@@ -27,8 +27,8 @@ const KEYS = ['scanned', 'outliers', 'niches', 'voice', 'minutes'] as const
             :key="`${pass}-${key}`"
             class="flex items-center gap-2.5 px-7"
           >
-            <PersonalMark :size="11" class="shrink-0 text-[var(--b-red-500)]" />
-            <span class="b-mono text-[var(--b-red-700)]">{{ $t(`landing.proof.${key}`) }}</span>
+            <PersonalMark :size="10" class="shrink-0 text-[#cdc6b8]" />
+            <span class="b-mono text-[var(--b-stone)]">{{ $t(`landing.proof.${key}`) }}</span>
           </span>
         </template>
       </div>

@@ -7,6 +7,7 @@ use App\Http\Controllers\ContentController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\InstagramConnectionController;
+use App\Http\Controllers\MediaController;
 use App\Http\Controllers\MomentController;
 use App\Http\Controllers\OpportunityController;
 use App\Http\Controllers\ProfileController;
@@ -41,6 +42,16 @@ Route::middleware('auth:sanctum')->group(function (): void {
 Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
     ->middleware(['signed', 'throttle:6,1'])
     ->name('verification.verify');
+
+// Browsers cannot embed some Instagram CDN responses because they carry
+// Cross-Origin-Resource-Policy: same-origin. These URLs are signed so the
+// application remains a bounded media relay rather than an open proxy.
+Route::get('/media/content/{content}', [MediaController::class, 'content'])
+    ->middleware('signed:relative')
+    ->name('media.content');
+Route::get('/media/creator/{creator}', [MediaController::class, 'creator'])
+    ->middleware('signed:relative')
+    ->name('media.creator');
 
 Route::middleware(['auth:sanctum', 'verified'])->prefix('integrations/instagram')->group(function (): void {
     Route::get('/authorize', [InstagramConnectionController::class, 'authorize']);

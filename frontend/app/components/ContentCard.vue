@@ -20,7 +20,7 @@ const visibleCaption = computed(() => (expanded.value || !isLongCaption.value ? 
 </script>
 
 <template>
-  <article class="group overflow-hidden rounded-[20px] border border-[var(--line)] bg-[var(--surface)] shadow-[0_1px_2px_rgba(23,23,26,.04)] transition duration-300 hover:shadow-[0_12px_34px_rgba(23,23,26,.08)]">
+  <article class="group flex h-full flex-col overflow-hidden rounded-[20px] border border-[var(--line)] bg-[var(--surface)] shadow-[0_1px_2px_rgba(23,23,26,.04)] transition duration-300 hover:shadow-[0_12px_34px_rgba(23,23,26,.08)]">
     <!-- The post is shown the way it looks on Instagram: same header, square
          media, action bar, like count and caption ordering. -->
     <header class="flex items-center gap-2.5 px-3 py-2.5">
@@ -77,7 +77,7 @@ const visibleCaption = computed(() => (expanded.value || !isLongCaption.value ? 
     </div>
 
     <!-- Everything Personal adds on top of the post lives below the fold line. -->
-    <div class="border-t border-[var(--line)] bg-[var(--paper)] p-3.5">
+    <div class="flex flex-1 flex-col border-t border-[var(--line)] bg-[var(--paper)] p-3.5">
       <div class="flex flex-wrap items-center gap-1.5">
         <span class="inline-flex items-center gap-1.5 rounded-full bg-[var(--accent-soft)] px-2.5 py-1 text-[11px] font-semibold text-[var(--accent-ink)]">
           <AppIcon name="trend" :size="13" />{{ $t('contentCard.average', { ratio: post.performance_ratio.toFixed(1) }) }}
@@ -96,7 +96,7 @@ const visibleCaption = computed(() => (expanded.value || !isLongCaption.value ? 
         <p class="mt-2 line-clamp-3 text-[12px] leading-[18px] text-[var(--copy)]">{{ post.why_recommended || post.why_it_works }}</p>
       </div>
 
-      <div class="mt-3 grid grid-cols-2 gap-2">
+      <div class="mt-auto grid grid-cols-2 gap-2 pt-3">
         <button
           type="button"
           class="inline-flex h-9 min-w-0 items-center justify-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3 text-[12px] transition hover:bg-[var(--line-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"

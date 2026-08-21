@@ -18,17 +18,20 @@ const outlier = POSTS.indexOf(MAX)
 
 <template>
   <section class="b-night relative overflow-hidden px-5 py-24 text-[var(--b-ivory)] md:px-10 md:py-32">
-    <div class="b-dots-lit pointer-events-none absolute inset-0 opacity-60" aria-hidden="true" />
+    <div class="b-dots-lit pointer-events-none absolute inset-0 opacity-45" aria-hidden="true" />
 
     <div class="relative mx-auto grid max-w-[1200px] items-center gap-14 md:grid-cols-2 md:gap-20">
       <div data-reveal>
-        <p class="b-mono flex items-center gap-2.5 text-[#c9a79c]">
+        <p class="b-mono flex items-center gap-2.5 text-[#8b8078]">
           <span class="b-live" aria-hidden="true" />
           {{ $t('landing.stat.label') }}
         </p>
 
-        <p class="font-display mt-6 text-[112px] leading-[.82] tracking-[-.045em] text-[var(--b-red-lit)] md:text-[176px]">
-          {{ $t('landing.stat.value') }}
+        <p class="font-display mt-6 text-[112px] leading-[.82] tracking-[-.045em] md:text-[176px]">
+          {{ $t('landing.stat.value') }}<!--
+          The multiplier is a unit, not a digit, so it is set at a fraction of
+          the numerals and lifted onto their x-height instead of matching them.
+          --><span class="relative top-[-.8em] ml-[.04em] text-[.3em] tracking-normal">{{ $t('landing.stat.unit') }}</span>
         </p>
 
         <p class="mt-8 max-w-md text-[17px] leading-[1.6] text-[#cfc7bb] md:text-[19px]">
@@ -39,7 +42,7 @@ const outlier = POSTS.indexOf(MAX)
       <!-- Fourteen posts from one account, the eleventh of them the reason this
            section exists. -->
       <figure data-reveal class="relative" style="--reveal-delay:140ms">
-        <figcaption class="b-mono mb-5 flex items-center justify-between text-[#8b8078]">
+        <figcaption class="b-mono mb-5 flex flex-col gap-1 text-[#8b8078] sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <span>{{ $t('landing.stat.chart.title') }}</span>
           <span>{{ $t('landing.stat.chart.window') }}</span>
         </figcaption>
@@ -59,7 +62,7 @@ const outlier = POSTS.indexOf(MAX)
               :key="index"
               class="group relative flex-1 origin-bottom rounded-t-[2px]"
               :class="index === outlier
-                ? 'bg-gradient-to-t from-[var(--b-red-600)] to-[var(--b-red-lit)] shadow-[0_0_28px_rgba(255,106,77,.55)]'
+                ? 'bg-[var(--b-red-lit)] shadow-[0_0_34px_rgba(255,106,77,.35)]'
                 : 'bg-white/[.14]'"
               :style="{ height: height(post) }"
             />

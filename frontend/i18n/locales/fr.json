@@ -89,9 +89,14 @@
           "note": "au-dessus de la moyenne de son créateur"
         },
         "match": {
-          "label": "Moment relié",
-          "value": "94 %",
-          "note": "de correspondance avec votre note de mardi"
+          "label": "Posts lus",
+          "value": "1 400",
+          "note": "scannés dans votre niche depuis minuit"
+        },
+        "speed": {
+          "label": "Brouillon prêt",
+          "value": "10 min",
+          "note": "d'un Moment à un post publiable"
         }
       },
       "brief": {
@@ -124,7 +129,7 @@
       }
     },
     "proof": {
-      "scanned": "1 400 posts lus chaque matin",
+      "scanned": "Vos 40 derniers posts, lus une fois",
       "outliers": "Des outliers, pas des top posts",
       "niches": "Votre niche, pas internet",
       "voice": "Votre voix, apprise de vos légendes",
@@ -132,7 +137,8 @@
     },
     "stat": {
       "label": "Outlier détecté",
-      "value": "8,4×",
+      "value": "8,4",
+      "unit": "×",
       "copy": "Pas le plus gros post d'Instagram. Celui qui bat le compte qui l'a publié — dans votre niche, à votre taille, pendant qu'il monte encore.",
       "chart": {
         "title": "Un compte · 14 derniers posts",

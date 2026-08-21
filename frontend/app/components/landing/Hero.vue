@@ -8,11 +8,11 @@
 </script>
 
 <template>
-  <section class="relative overflow-hidden px-5 md:px-10">
+  <section class="relative overflow-hidden px-5 pb-16 md:px-10 md:pb-24">
     <!-- Ground: red light thrown from the top edge, over a halftone that dies
          out before it reaches the copy. -->
     <div class="b-dawn pointer-events-none absolute inset-x-0 top-0 h-[880px]" aria-hidden="true" />
-    <div class="b-dots b-fade-radial pointer-events-none absolute inset-x-0 top-0 h-[720px] opacity-[.55]" aria-hidden="true" />
+    <div class="b-dots b-fade-radial pointer-events-none absolute inset-x-0 top-0 h-[720px] opacity-40" aria-hidden="true" />
 
     <div class="relative mx-auto max-w-[1200px] pt-24 md:pt-32">
       <div class="mx-auto max-w-[54rem] text-center">
@@ -29,9 +29,9 @@
           style="--reveal-delay:60ms"
         >
           <span class="block">{{ $t('landing.hero.titleLineOne') }}</span>
-          <!-- The turn in the sentence is the negative, so it gets the italic
-               and the signature. It is the only red the headline needs. -->
-          <span class="block italic text-[var(--b-red-600)]">{{ $t('landing.hero.titleLineTwo') }}</span>
+          <!-- The turn in the sentence is the negative, so it gets the italic.
+               It is a type decision, not a colour one. -->
+          <span class="block italic">{{ $t('landing.hero.titleLineTwo') }}</span>
         </h1>
 
         <p
@@ -54,35 +54,34 @@
 
         <p data-reveal class="mt-6 flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 text-[13px] text-[var(--b-stone)]" style="--reveal-delay:220ms">
           <span>{{ $t('landing.hero.reassuranceOne') }}</span>
-          <span class="h-[3px] w-[3px] rounded-full bg-[var(--b-red-400)]" aria-hidden="true" />
+          <span class="h-[3px] w-[3px] rounded-full bg-[#cdc6b8]" aria-hidden="true" />
           <span>{{ $t('landing.hero.reassuranceTwo') }}</span>
         </p>
       </div>
 
       <!-- Deliberately low, so the fold cuts through it. -->
       <div data-reveal class="relative mx-auto mt-16 max-w-[960px] md:mt-24" style="--reveal-delay:280ms">
-        <div class="b-glow-blob pointer-events-none absolute -inset-x-16 -bottom-8 top-16 -z-10 opacity-70" aria-hidden="true" />
+        <div class="b-glow-blob pointer-events-none absolute -inset-x-16 -bottom-8 top-16 -z-10" aria-hidden="true" />
 
         <LandingMedia :src="LANDING_CLIPS.hero" :label="$t('landing.hero.mediaLabel')">
           <LandingMockBrief />
         </LandingMedia>
 
-        <!-- Readouts pinned to the frame. They hang off the edges on a desktop
-             and are folded into the frame itself on a phone, where there is no
-             margin to hang anything in. -->
+      </div>
+
+      <!-- What the frame above actually found, read off it. Three facts on one
+           rail: the strip is the caption the screenshot cannot carry itself. -->
+      <div
+        data-reveal
+        class="mx-auto mt-8 grid max-w-[960px] gap-5 sm:grid-cols-3 sm:gap-0"
+        style="--reveal-delay:360ms"
+      >
         <LandingReadout
-          class="absolute -left-6 top-[26%] hidden lg:flex"
-          :label="$t('landing.hero.readouts.outlier.label')"
-          :value="$t('landing.hero.readouts.outlier.value')"
-          :note="$t('landing.hero.readouts.outlier.note')"
-          style="--reveal-delay:520ms"
-        />
-        <LandingReadout
-          class="absolute -right-8 bottom-[22%] hidden lg:flex"
-          :label="$t('landing.hero.readouts.match.label')"
-          :value="$t('landing.hero.readouts.match.value')"
-          :note="$t('landing.hero.readouts.match.note')"
-          style="--reveal-delay:640ms"
+          v-for="key in (['outlier', 'match', 'speed'] as const)"
+          :key="key"
+          :label="$t(`landing.hero.readouts.${key}.label`)"
+          :value="$t(`landing.hero.readouts.${key}.value`)"
+          :note="$t(`landing.hero.readouts.${key}.note`)"
         />
       </div>
     </div>

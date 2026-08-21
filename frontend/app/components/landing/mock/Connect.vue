@@ -9,14 +9,14 @@ const CIRCUMFERENCE = 2 * Math.PI * 20
 
 <template>
   <div class="p-6 md:p-8">
-    <div class="rounded-[14px] border border-[var(--b-line-soft)] bg-[var(--b-red-50)] p-5">
-      <p class="b-mono text-[var(--b-red-600)]">{{ $t('landing.how.connect.patternLabel') }}</p>
+    <div class="rounded-[14px] border border-[var(--b-line-soft)] bg-[#f6f3ec] p-5">
+      <p class="b-mono text-[var(--b-stone)]">{{ $t('landing.how.connect.patternLabel') }}</p>
       <p class="mt-3 font-display text-[19px] leading-[1.3] tracking-[-.015em]">{{ $t('landing.how.connect.patternQuote') }}</p>
     </div>
 
     <!-- The seam. Two hairlines meeting on the fit score. -->
     <div class="flex items-center gap-4 py-4">
-      <span class="h-px flex-1 bg-gradient-to-r from-transparent to-[var(--b-red-200)]" aria-hidden="true" />
+      <span class="h-px flex-1 bg-gradient-to-r from-transparent to-[var(--b-line)]" aria-hidden="true" />
 
       <span class="relative flex h-[52px] w-[52px] shrink-0 items-center justify-center">
         <svg class="absolute inset-0 -rotate-90" viewBox="0 0 52 52" aria-hidden="true">
@@ -36,7 +36,7 @@ const CIRCUMFERENCE = 2 * Math.PI * 20
         <span class="b-metric font-display text-[17px] leading-none">{{ FIT }}</span>
       </span>
 
-      <span class="h-px flex-1 bg-gradient-to-l from-transparent to-[var(--b-red-200)]" aria-hidden="true" />
+      <span class="h-px flex-1 bg-gradient-to-l from-transparent to-[var(--b-line)]" aria-hidden="true" />
     </div>
 
     <div class="rounded-[14px] border border-[var(--b-line-soft)] p-5">
@@ -44,7 +44,7 @@ const CIRCUMFERENCE = 2 * Math.PI * 20
       <p class="mt-3 font-display text-[19px] leading-[1.3] tracking-[-.015em]">{{ $t('landing.how.connect.momentQuote') }}</p>
     </div>
 
-    <p class="mt-6 border-l-2 border-[var(--b-red-500)] pl-4 text-[13.5px] leading-[1.6] text-[var(--b-stone)]">
+    <p class="mt-6 border-l border-[var(--b-line)] pl-4 text-[13.5px] leading-[1.6] text-[var(--b-stone)]">
       {{ $t('landing.how.connect.verdict') }}
     </p>
   </div>

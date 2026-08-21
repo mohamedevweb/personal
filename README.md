@@ -96,6 +96,8 @@ There is deliberately **no fallback**. An unmeasured post carries no evidence, s
 
 Niche is read from the account itself. `CreatorNicheService` classifies a discovered creator from their bio, their recurring hashtags and a sample of captions, and the result is cached on the creator so the model is not re-run on every measurement. Discovery previously stamped every account with the niche of whichever user found them, which described the searcher rather than the creator.
 
+Instagram CDN images are exposed to the frontend through signed API URLs. The API fetches each image server-side and keeps a temporary local cache under `storage/app/private/instagram-media`, which avoids browser blocking caused by Instagram's cross-origin resource policy. `APP_URL` must be the public HTTPS URL of the backend so the generated media URLs are reachable from the frontend. Cache duration, signature lifetime, request timeout and maximum image size are configurable with the `INSTAGRAM_MEDIA_PROXY_*` variables documented in `backend/.env.example`.
+
 Discovery cost is capped on every axis: search queries have a cooldown (`DISCOVERY_COOLDOWN_DAYS`), accounts have their own (`DISCOVERY_MEASURE_COOLDOWN_DAYS`), and one run measures at most `DISCOVERY_MEASURE_BATCH` accounts. A daily scheduled pass re-measures the stalest tracked accounts within those same limits, which is also how the feed learns about new posts.
 
 ## Curated creator catalog

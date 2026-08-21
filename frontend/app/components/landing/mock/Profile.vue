@@ -15,7 +15,7 @@ const CONFIDENCE: Record<(typeof FIELDS)[number], number> = {
 <template>
   <div class="p-6 md:p-8">
     <div class="flex items-start justify-between gap-6">
-      <p class="b-mono text-[var(--b-red-600)]">{{ $t('landing.how.profile.label') }}</p>
+      <p class="b-mono text-[var(--b-stone)]">{{ $t('landing.how.profile.label') }}</p>
       <p class="b-mono text-[var(--b-stone)]">{{ $t('landing.how.profile.source') }}</p>
     </div>
 
@@ -26,16 +26,16 @@ const CONFIDENCE: Record<(typeof FIELDS)[number], number> = {
           <dd class="text-right text-[14.5px] leading-[1.5] tracking-[-.01em]">{{ $t(`landing.how.profile.${field}Value`) }}</dd>
         </div>
 
-        <!-- The confidence rail. Red as far as Personal is sure, hairline for
+        <!-- The confidence rail. Ink as far as Personal is sure, hairline for
              the rest of the way. -->
         <div class="mt-3 flex items-center gap-3">
           <div class="h-[3px] flex-1 overflow-hidden rounded-full bg-[var(--b-line-soft)]">
             <div
-              class="h-full rounded-full bg-gradient-to-r from-[var(--b-red-400)] to-[var(--b-red-500)]"
+              class="h-full rounded-full bg-[#a9a294]"
               :style="{ width: `${CONFIDENCE[field]}%` }"
             />
           </div>
-          <span class="b-mono w-8 text-right text-[var(--b-red-600)]">{{ CONFIDENCE[field] }}</span>
+          <span class="b-mono w-8 text-right text-[var(--b-stone)]">{{ CONFIDENCE[field] }}</span>
         </div>
       </div>
     </dl>

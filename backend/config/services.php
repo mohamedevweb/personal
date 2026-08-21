@@ -128,6 +128,15 @@ return [
         ],
     ],
 
+    'instagram_media_proxy' => [
+        'disk' => env('INSTAGRAM_MEDIA_CACHE_DISK', 'local'),
+        'cache_days' => (int) env('INSTAGRAM_MEDIA_CACHE_DAYS', 7),
+        'browser_cache_hours' => (int) env('INSTAGRAM_MEDIA_BROWSER_CACHE_HOURS', 24),
+        'signature_hours' => (int) env('INSTAGRAM_MEDIA_SIGNATURE_HOURS', 24),
+        'timeout' => (int) env('INSTAGRAM_MEDIA_TIMEOUT', 15),
+        'max_bytes' => (int) env('INSTAGRAM_MEDIA_MAX_BYTES', 10_485_760),
+    ],
+
     'openai' => [
         'api_key' => env('OPENAI_API_KEY'),
         'model' => env('OPENAI_MODEL', 'gpt-5'),

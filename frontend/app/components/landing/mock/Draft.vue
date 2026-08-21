@@ -14,7 +14,7 @@ const BEATS = [
 <template>
   <div class="p-6 md:p-8">
     <div class="flex items-center justify-between gap-4">
-      <p class="b-mono flex items-center gap-2.5 text-[var(--b-red-600)]">
+      <p class="b-mono flex items-center gap-2.5 text-[var(--b-stone)]">
         <AppIcon name="reel" :size="14" />
         {{ $t('landing.how.draft.label') }}
       </p>
@@ -28,7 +28,7 @@ const BEATS = [
         v-for="(beat, index) in BEATS"
         :key="beat.key"
         class="rounded-full"
-        :class="index === 0 ? 'bg-[var(--b-red-500)]' : 'bg-[var(--b-red-200)]'"
+        :class="index === 0 ? 'bg-[var(--b-red-500)]' : 'bg-[#ddd7ca]'"
         :style="{ width: `${beat.share}%` }"
       />
     </div>
@@ -36,12 +36,11 @@ const BEATS = [
     <ol class="mt-5 divide-y divide-[var(--b-line-soft)] border-t border-[var(--b-line-soft)]">
       <li v-for="(beat, index) in BEATS" :key="beat.key" class="flex gap-4 py-4">
         <span
-          class="b-mono mt-[3px] w-8 shrink-0"
-          :class="index === 0 ? 'text-[var(--b-red-600)]' : 'text-[var(--b-stone)]'"
+          class="b-mono mt-[3px] w-8 shrink-0 text-[var(--b-stone)]"
         >{{ String(index + 1).padStart(2, '0') }}</span>
 
         <div class="min-w-0 flex-1">
-          <p class="b-mono" :class="index === 0 ? 'text-[var(--b-red-600)]' : 'text-[var(--b-stone)]'">
+          <p class="b-mono" :class="index === 0 ? 'text-[var(--b-black)]' : 'text-[var(--b-stone)]'">
             {{ $t(`landing.how.draft.beats.${beat.key}.label`) }}
           </p>
           <p class="mt-2 text-[14.5px] leading-[1.5] tracking-[-.01em]">
@@ -51,9 +50,9 @@ const BEATS = [
       </li>
     </ol>
 
-    <div class="mt-6 flex items-center gap-2.5 rounded-[12px] border border-[var(--b-red-200)] bg-[var(--b-red-50)] px-4 py-3">
-      <PersonalMark :size="13" class="shrink-0 text-[var(--b-red-500)]" />
-      <p class="text-[13px] leading-[1.5] text-[var(--b-red-700)]">{{ $t('landing.how.draft.source') }}</p>
+    <div class="mt-6 flex items-center gap-2.5 rounded-[12px] border border-[var(--b-line-soft)] bg-[#f6f3ec] px-4 py-3">
+      <PersonalMark :size="12" class="shrink-0 text-[var(--b-stone)]" />
+      <p class="text-[13px] leading-[1.5] text-[var(--b-stone)]">{{ $t('landing.how.draft.source') }}</p>
     </div>
   </div>
 </template>

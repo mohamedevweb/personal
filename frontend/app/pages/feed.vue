@@ -97,7 +97,7 @@ onMounted(loadFeed)
         <AppIcon name="sparkles" :size="16" />{{ refreshing ? $t('feed.refreshing') : $t('feed.refresh') }}
       </button>
     </div>
-    <div v-else class="mt-7 grid items-start gap-5 sm:grid-cols-2 xl:grid-cols-3">
+    <div v-else class="mt-7 grid auto-rows-fr gap-5 sm:grid-cols-2 xl:grid-cols-3">
       <ContentCard v-for="post in data?.items" :key="post.id" :post="post" @save="save" @dismiss="dismiss" @remix="remix" />
     </div>
   </main>

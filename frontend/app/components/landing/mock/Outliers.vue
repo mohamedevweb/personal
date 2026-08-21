@@ -31,7 +31,7 @@ function trace(points: readonly number[]) {
 <template>
   <div class="p-6 md:p-8">
     <div class="flex items-start justify-between gap-6">
-      <p class="b-mono flex items-center gap-2.5 text-[var(--b-red-600)]">
+      <p class="b-mono flex items-center gap-2.5 text-[var(--b-stone)]">
         <span class="b-live" aria-hidden="true" />
         {{ $t('landing.how.outliers.label') }}
       </p>
@@ -71,7 +71,7 @@ function trace(points: readonly number[]) {
           class="b-metric shrink-0 rounded-full px-2.5 py-1 text-[12.5px] font-medium"
           :class="item.lead
             ? 'bg-[var(--b-red-500)] text-white'
-            : 'border border-[var(--b-red-200)] bg-[var(--b-red-100)]'"
+            : 'border border-[var(--b-line)] text-[var(--b-stone)]'"
         >
           {{ item.ratio }}×
         </span>
@@ -80,7 +80,7 @@ function trace(points: readonly number[]) {
 
     <p class="b-mono mt-5 flex items-center justify-between text-[var(--b-stone)]">
       <span>{{ $t('landing.how.outliers.baseline') }}</span>
-      <span class="text-[var(--b-red-600)]">{{ $t('landing.how.outliers.more') }}</span>
+      <span>{{ $t('landing.how.outliers.more') }}</span>
     </p>
   </div>
 </template>

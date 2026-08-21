@@ -4,9 +4,12 @@ namespace App\Services;
 
 use App\Models\ContentPost;
 use App\Models\User;
+use Illuminate\Support\Facades\URL;
 
 class ContentPostView
 {
+    public function __construct(private readonly InstagramMediaProxy $media) {}
+
     /**
      * @param  bool|null  $isSaved  Pass a known value when rendering a batch; leaving
      *                              it null costs one query per post.
@@ -25,7 +28,7 @@ class ContentPostView
             'format' => $post->format,
             'hook' => $post->hook,
             'caption' => $post->caption,
-            'thumbnail_url' => $post->thumbnail_url,
+            'thumbnail_url' => $this->mediaUrl('media.content', 'content', $post->id, $post->thumbnail_url),
             'views' => $post->views,
             'likes' => $post->likes,
             'comments' => $post->comments,
@@ -43,12 +46,28 @@ class ContentPostView
             'creator' => [
                 'username' => $post->creator->username,
                 'display_name' => $post->creator->display_name,
-                'avatar_url' => $post->creator->avatar_url,
+                'avatar_url' => $this->mediaUrl('media.creator', 'creator', $post->creator->id, $post->creator->avatar_url),
                 'niche' => $post->creator->niche,
                 'niche_topics' => $post->creator->niche_topics ?? [],
                 'followers' => $post->creator->followers,
                 'average_views' => $post->creator->average_views,
             ],
         ];
+    }
+
+    private function mediaUrl(string $route, string $parameter, int $id, ?string $sourceUrl): ?string
+    {
+        if (! $sourceUrl || ! $this->media->supports($sourceUrl)) {
+            return $sourceUrl;
+        }
+
+        $path = URL::temporarySignedRoute(
+            $route,
+            now()->addHours((int) config('services.instagram_media_proxy.signature_hours')),
+            [$parameter => $id],
+            absolute: false,
+        );
+
+        return rtrim((string) config('app.url'), '/').$path;
     }
 }

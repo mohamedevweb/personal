@@ -1,0 +1,1128 @@
+<title>Les 10 premiers créateurs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+  :root {
+    --ink: #171715;
+    --copy: #3a3833;
+    --muted: #77736d;
+    --faint: #8f8a80;
+    --paper: #f7f5f0;
+    --surface: #fefdfb;
+    --rail: #fbfaf6;
+    --line: #e4dfd4;
+    --line-soft: #efebe2;
+    --accent: #e04f36;
+    --accent-ink: #a8402a;
+    --accent-soft: #fbeee9;
+    --accent-line: #f3dcd3;
+    --positive: #3f7a55;
+    --positive-soft: #eff4ee;
+    --positive-line: #d7e2d5;
+    --danger: #9a3a24;
+    --danger-soft: #fbefea;
+    --danger-line: #ecd8ce;
+    --gold: #7d6428;
+    --warn-soft: #f7f0dd;
+    --warn-line: #e9dcba;
+
+    --display: "Instrument Serif", "Iowan Old Style", Palatino, Georgia, ui-serif, serif;
+    --body: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --shell: 1160px;
+    --measure: 68ch;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #f4f1ea;
+      --copy: #cfcabe;
+      --muted: #948e83;
+      --faint: #7d786e;
+      --paper: #0d0c0a;
+      --surface: #161513;
+      --rail: #121110;
+      --line: #2d2b27;
+      --line-soft: #232120;
+      --accent: #ff6a4d;
+      --accent-ink: #ff8f78;
+      --accent-soft: #24140f;
+      --accent-line: #422019;
+      --positive: #7fb891;
+      --positive-soft: #131a15;
+      --positive-line: #26362b;
+      --danger: #e88a70;
+      --danger-soft: #221310;
+      --danger-line: #3f221b;
+      --gold: #d9bd7e;
+      --warn-soft: #201a0f;
+      --warn-line: #3a3020;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ink: #f4f1ea;
+    --copy: #cfcabe;
+    --muted: #948e83;
+    --faint: #7d786e;
+    --paper: #0d0c0a;
+    --surface: #161513;
+    --rail: #121110;
+    --line: #2d2b27;
+    --line-soft: #232120;
+    --accent: #ff6a4d;
+    --accent-ink: #ff8f78;
+    --accent-soft: #24140f;
+    --accent-line: #422019;
+    --positive: #7fb891;
+    --positive-soft: #131a15;
+    --positive-line: #26362b;
+    --danger: #e88a70;
+    --danger-soft: #221310;
+    --danger-line: #3f221b;
+    --gold: #d9bd7e;
+    --warn-soft: #201a0f;
+    --warn-line: #3a3020;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--copy);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .shell {
+    max-width: var(--shell);
+    margin: 0 auto;
+    padding: 0 28px 120px;
+  }
+
+  /* ---------- masthead ---------- */
+
+  .masthead {
+    padding: 84px 0 40px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 22px;
+  }
+
+  .masthead h1 {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(46px, 8vw, 88px);
+    line-height: 1.02;
+    letter-spacing: -.015em;
+    color: var(--ink);
+    text-wrap: balance;
+    margin: 0 0 20px;
+    max-width: 15ch;
+  }
+
+  .standfirst {
+    font-family: var(--display);
+    font-size: clamp(19px, 2.4vw, 25px);
+    line-height: 1.42;
+    color: var(--muted);
+    max-width: 46ch;
+    margin: 0 0 40px;
+  }
+
+  .masthead .standfirst em { color: var(--ink); font-style: italic; }
+
+  .colophon {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 26px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  .colophon b { color: var(--ink); font-weight: 500; }
+
+  /* ---------- layout ---------- */
+
+  .frame {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  @media (min-width: 1000px) {
+    .frame {
+      grid-template-columns: 208px minmax(0, 1fr);
+      gap: 64px;
+      align-items: start;
+    }
+  }
+
+  .toc { padding: 40px 0 0; }
+
+  @media (min-width: 1000px) {
+    .toc {
+      position: sticky;
+      top: 0;
+      max-height: 100vh;
+      overflow-y: auto;
+      padding: 56px 0 40px;
+    }
+  }
+
+  .toc-label {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin: 0 0 16px;
+  }
+
+  .toc ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .toc a {
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    gap: 8px;
+    padding: 5px 0;
+    font-size: 13.5px;
+    line-height: 1.35;
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+  }
+
+  .toc a span:first-child {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--faint);
+    padding-top: 3px;
+  }
+
+  .toc a:hover { color: var(--accent); }
+  .toc a:hover span:first-child { color: var(--accent); }
+  .toc a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  main { padding-top: 8px; min-width: 0; }
+
+  /* ---------- sections ---------- */
+
+  section {
+    padding: 56px 0 8px;
+    border-top: 1px solid var(--line-soft);
+  }
+
+  section:first-of-type { border-top: 0; }
+
+  .num {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .14em;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 12px;
+  }
+
+  h2 {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(30px, 4.4vw, 42px);
+    line-height: 1.1;
+    letter-spacing: -.01em;
+    color: var(--ink);
+    text-wrap: balance;
+    margin: 0 0 26px;
+    max-width: 22ch;
+  }
+
+  h3 {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -.005em;
+    color: var(--ink);
+    margin: 40px 0 12px;
+  }
+
+  h4 {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin: 32px 0 10px;
+  }
+
+  p { margin: 0 0 18px; max-width: var(--measure); }
+
+  main ul, main ol { max-width: var(--measure); margin: 0 0 20px; padding-left: 20px; }
+  main li { margin-bottom: 9px; }
+  main li::marker { color: var(--faint); }
+
+  strong { color: var(--ink); font-weight: 600; }
+  em { font-style: italic; }
+
+  a { color: var(--accent-ink); }
+
+  code {
+    font-family: var(--mono);
+    font-size: .86em;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-radius: 4px;
+    padding: 1px 5px;
+    color: var(--ink);
+  }
+
+  /* ---------- pull quote ---------- */
+
+  .pull {
+    margin: 30px 0;
+    padding: 0 0 0 22px;
+    border-left: 2px solid var(--accent);
+    max-width: var(--measure);
+  }
+
+  .pull p {
+    font-family: var(--display);
+    font-size: clamp(21px, 2.6vw, 27px);
+    line-height: 1.34;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  .pull p + p { margin-top: 14px; }
+
+  /* ---------- script block (DM templates) ---------- */
+
+  .script {
+    max-width: var(--measure);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 22px 24px;
+    margin: 0 0 22px;
+  }
+
+  .script p {
+    margin: 0 0 12px;
+    color: var(--copy);
+  }
+
+  .script p:last-child { margin-bottom: 0; }
+
+  .script-tag {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 14px !important;
+  }
+
+  /* ---------- callouts ---------- */
+
+  .note {
+    max-width: var(--measure);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--muted);
+    background: var(--rail);
+    border-radius: 3px;
+    padding: 18px 22px;
+    margin: 0 0 24px;
+  }
+
+  .note p:last-child { margin-bottom: 0; }
+  .note p { max-width: none; }
+
+  .note--alert { border-color: var(--danger-line); border-left-color: var(--danger); background: var(--danger-soft); }
+  .note--good { border-color: var(--positive-line); border-left-color: var(--positive); background: var(--positive-soft); }
+  .note--warn { border-color: var(--warn-line); border-left-color: var(--gold); background: var(--warn-soft); }
+
+  .note-label {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin: 0 0 8px !important;
+  }
+
+  .note--alert .note-label { color: var(--danger); }
+  .note--good .note-label { color: var(--positive); }
+  .note--warn .note-label { color: var(--gold); }
+
+  /* ---------- tables ---------- */
+
+  .table-wrap {
+    overflow-x: auto;
+    margin: 0 0 26px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--surface);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  thead th {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: .11em;
+    text-transform: uppercase;
+    color: var(--faint);
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+
+  tbody td {
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--line-soft);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  tbody tr:last-child td { border-bottom: 0; }
+
+  tbody td:first-child { color: var(--ink); }
+
+  .rank {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    width: 1%;
+    white-space: nowrap;
+  }
+
+  .pill {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 20px;
+    border: 1px solid var(--line);
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .pill--stop { border-color: var(--line); color: var(--faint); background: var(--rail); }
+  .pill--now { border-color: var(--accent-line); color: var(--accent-ink); background: var(--accent-soft); }
+  .pill--crit { border-color: var(--danger-line); color: var(--danger); background: var(--danger-soft); }
+
+  /* ---------- pipeline ---------- */
+
+  .pipeline {
+    max-width: var(--measure);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 18px 20px;
+    margin: 0 0 24px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 2;
+    color: var(--muted);
+    overflow-x: auto;
+  }
+
+  .pipeline b { color: var(--accent); font-weight: 500; }
+
+  /* ---------- steps ---------- */
+
+  .steps {
+    max-width: var(--measure);
+    list-style: none;
+    counter-reset: step;
+    padding: 0;
+    margin: 0 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .steps li {
+    counter-increment: step;
+    display: grid;
+    grid-template-columns: 30px 1fr;
+    gap: 14px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--line-soft);
+    margin: 0;
+  }
+
+  .steps li::before {
+    content: counter(step);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--faint);
+    padding-top: 4px;
+  }
+
+  .steps li:last-child { border-bottom: 0; }
+  .steps li.is-key { color: var(--ink); }
+  .steps li.is-key::before { color: var(--accent); }
+
+  /* ---------- closing ---------- */
+
+  .closer {
+    margin-top: 72px;
+    padding-top: 40px;
+    border-top: 2px solid var(--ink);
+  }
+
+  .closer ol {
+    max-width: var(--measure);
+    list-style: none;
+    counter-reset: key;
+    padding: 0;
+    margin: 0;
+  }
+
+  .closer ol li {
+    counter-increment: key;
+    display: grid;
+    grid-template-columns: 42px 1fr;
+    gap: 18px;
+    padding: 22px 0;
+    border-bottom: 1px solid var(--line-soft);
+    margin: 0;
+  }
+
+  .closer ol li::before {
+    content: counter(key);
+    font-family: var(--display);
+    font-size: 34px;
+    line-height: 1;
+    color: var(--accent);
+  }
+
+  .closer ol li p { margin: 0; font-size: 17px; line-height: 1.5; }
+
+  .colophon-end {
+    margin-top: 56px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  @media (max-width: 620px) {
+    .shell { padding: 0 20px 80px; }
+    .masthead { padding: 52px 0 32px; }
+    section { padding: 44px 0 8px; }
+  }
+</style>
+
+<div class="shell">
+
+  <header class="masthead">
+    <p class="eyebrow">Personal · Stratégie d'acquisition</p>
+    <h1>Les 10 premiers créateurs</h1>
+    <p class="standfirst">Pas d'audience, pas d'argent, pas de temps. Le plan qui tient <em>quand même</em> — et ce qu'on refuse de faire pour qu'il tienne.</p>
+    <div class="colophon">
+      <span>Version <b>1</b></span>
+      <span>21 août 2026</span>
+      <span>Horizon <b>90 jours</b></span>
+      <span>usepersonal.app</span>
+    </div>
+  </header>
+
+  <div class="frame">
+
+    <nav class="toc" aria-label="Sommaire">
+      <p class="toc-label">Sommaire</p>
+      <ol>
+        <li><a href="#s0"><span>00</span><span>Le point de départ</span></a></li>
+        <li><a href="#s1"><span>01</span><span>Positionnement</span></a></li>
+        <li><a href="#s2"><span>02</span><span>ICP</span></a></li>
+        <li><a href="#s3"><span>03</span><span>Activation</span></a></li>
+        <li><a href="#s4"><span>04</span><span>Les canaux</span></a></li>
+        <li><a href="#s5"><span>05</span><span>Le Rapport du matin</span></a></li>
+        <li><a href="#s6"><span>06</span><span>Founder-led</span></a></li>
+        <li><a href="#s7"><span>07</span><span>Ambassadeurs</span></a></li>
+        <li><a href="#s8"><span>08</span><span>Boucles</span></a></li>
+        <li><a href="#s9"><span>09</span><span>Pricing</span></a></li>
+        <li><a href="#s10"><span>10</span><span>Le plan</span></a></li>
+        <li><a href="#s11"><span>11</span><span>Scoreboard</span></a></li>
+        <li><a href="#s12"><span>12</span><span>Ce qu'on ne fait pas</span></a></li>
+        <li><a href="#s13"><span>13</span><span>Risques</span></a></li>
+        <li><a href="#s14"><span>—</span><span>Cinq choses</span></a></li>
+      </ol>
+    </nav>
+
+    <main>
+
+      <!-- 00 -->
+      <section id="s0">
+        <span class="num">00</span>
+        <h2>Le point de départ, sans filtre</h2>
+
+        <div class="table-wrap">
+          <table>
+            <tbody>
+              <tr><td><strong>Produit</strong></td><td>Backend et landing en prod. Onboarding Instagram réel, Creator DNA, Moments, Remix opérationnels. For You feed / Why it works / Remix = les trois chantiers encore ouverts</td></tr>
+              <tr><td><strong>Données</strong></td><td>Catalogue FR de 30 créateurs, 6 verticales, mesurés par ScrapeCreators. Scoring outlier déterministe et explicable</td></tr>
+              <tr><td><strong>Audience</strong></td><td>0. Pas de liste, pas de compte créateur, pas de communauté</td></tr>
+              <tr><td><strong>Budget</strong></td><td>~30 €/mois (NDD + VPS) plus les coûts API. Aucun budget média</td></tr>
+              <tr><td><strong>Équipe</strong></td><td>1 personne, qui code aussi</td></tr>
+              <tr><td><strong>Concurrence</strong></td><td>1of10, Vamos, Fastlane, Kleo, Socialinsider. Aucun ne relie la niche à <em>la vie</em> du créateur</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Trois contraintes structurent tout ce qui suit : <strong>pas d'audience, pas d'argent, pas de temps.</strong> Toute tactique qui suppose l'un des trois est hors sujet ce trimestre.</p>
+
+        <div class="note note--alert">
+          <p class="note-label">La contrainte cachée — et c'est la plus grave</p>
+          <p>L'app Meta est en mode développement. Tant que l'App Review n'est pas passée, <strong>seuls les comptes ajoutés manuellement comme testeurs peuvent connecter Instagram.</strong> Cela plafonne l'acquisition à ~25 personnes et ajoute une friction énorme au milieu du funnel. Ce n'est pas un détail technique : c'est le goulot d'étranglement n°1 de l'acquisition.</p>
+        </div>
+      </section>
+
+      <!-- 01 -->
+      <section id="s1">
+        <span class="num">01</span>
+        <h2>Positionnement</h2>
+
+        <p><strong>Catégorie revendiquée :</strong> le système d'exploitation de la marque personnelle. Pas un générateur de contenu.</p>
+
+        <div class="pull">
+          <p>Personal trouve ce qui marche dans votre niche et le réécrit avec votre vie à vous.</p>
+        </div>
+        <p style="color:var(--faint);font-size:13.5px;margin-top:-14px;">↑ la phrase externe, la seule</p>
+
+        <div class="pull">
+          <p>Tout le monde sait générer du texte. Personne ne sait quoi dire. Personal résout le <em>quoi</em>, pas le <em>comment</em>.</p>
+        </div>
+        <p style="color:var(--faint);font-size:13.5px;margin-top:-14px;">↑ la phrase interne, celle qui guide les arbitrages</p>
+
+        <h3>Les trois piliers de différenciation, par ordre de force</h3>
+        <ol>
+          <li><strong>Les Moments.</strong> Le concurrent part d'un prompt vide. Personal part de ce qui vous est réellement arrivé. C'est le seul avantage qu'un modèle plus gros ne rattrape pas — c'est de la donnée, pas de l'intelligence.</li>
+          <li><strong>L'outlier relatif.</strong> Un post ne compte pas parce qu'il vient d'un gros compte, mais parce qu'il bat <strong>la médiane de son propre auteur</strong>. C'est honnête, c'est explicable, et ça se démontre en un screenshot. Aucun concurrent grand public ne raisonne comme ça.</li>
+          <li><strong>Le refus de publier à votre place.</strong> Contre-positionnement assumé face aux outils d'automatisation. « Personal rédige, vous décidez » est un argument de confiance, pas une limitation.</li>
+        </ol>
+
+        <div class="note">
+          <p class="note-label">Vocabulaire</p>
+          <p><strong>Ce qu'on arrête de dire :</strong> « IA », « génération », « automatisation », « gain de temps ». Ces mots rangent Personal dans la catégorie des 400 wrappers ChatGPT. <strong>On dit :</strong> trouver, comprendre, relier, se souvenir.</p>
+        </div>
+
+        <p><strong>L'ennemi désigné</strong> — il en faut un, c'est ce qui rend le message mémorisable : le contenu IA générique. Le post qui aurait pu être écrit par n'importe qui. Angle éditorial récurrent : <em>« L'IA qui invente du contenu ne marchera jamais. L'IA qui se souvient de votre vie, oui. »</em></p>
+      </section>
+
+      <!-- 02 -->
+      <section id="s2">
+        <span class="num">02</span>
+        <h2>ICP — et une distinction qui change tout</h2>
+
+        <h3>Le catalogue n'est pas la liste de prospects</h3>
+        <p>C'est la confusion à éviter. Les 30 créateurs du catalogue (tiboinshape, lenamahfouf, cedricgrolet…) sont un <strong>dataset côté offre</strong> : ils alimentent le feed. Ils ne sont pas des clients. Ils ont des équipes, des agences, aucune douleur, et ne répondent pas aux DM.</p>
+        <ul>
+          <li><strong>Supply side</strong> = le catalogue. On l'étend de 30 → 60 → 120 avec <code>personal:discover-creator-candidates</code>. Objectif : que le feed soit riche.</li>
+          <li><strong>Demand side</strong> = une liste totalement différente, à construire. Objectif : que quelqu'un s'active.</li>
+        </ul>
+
+        <h3>L'ICP réel</h3>
+        <div class="pull">
+          <p>Créateur ou créateur-entrepreneur francophone, 3 000 à 40 000 abonnés Instagram, qui poste au moins 3×/semaine, et qui monétise déjà quelque chose.</p>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Borne</th><th>Pourquoi</th></tr></thead>
+            <tbody>
+              <tr><td>&lt; 3 000 abonnés</td><td>Pas assez d'historique pour que le Creator DNA soit impressionnant, et surtout aucune douleur économique. Il ne paiera jamais</td></tr>
+              <tr><td>&gt; 40 000 abonnés</td><td>Il a déjà un monteur, un ghostwriter ou une agence. Personal remplace un humain qu'il aime bien — vente longue, produit pas prêt</td></tr>
+              <tr><td>Poste &lt; 3×/sem</td><td>La douleur « quoi poster demain » n'existe pas. Personal résout un problème qu'il n'a pas</td></tr>
+              <tr><td>Ne monétise rien</td><td>Pas de budget, et pas d'enjeu. La rétention sera nulle</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note note--good">
+          <p class="note-label">Sous-segment prioritaire — 70 % des DM</p>
+          <p>Le <strong>créateur-entrepreneur</strong> : coach, consultant, fondateur de petite marque, restaurateur, salle de sport, agence. Il a des choses à raconter (sa vie <em>est</em> son métier), il a un budget, il mesure son ROI en clients et pas en likes, et il est joignable ailleurs que sur Instagram. C'est le persona « founder-led marketing » du dashboard — je le remonte de priorité <em>haute</em> à priorité <strong>n°1</strong>.</p>
+        </div>
+
+        <h3>Le filtre de qualification non négociable</h3>
+        <div class="pull">
+          <p>La niche du prospect doit être couverte par le catalogue.</p>
+        </div>
+        <p>Six verticales, et rien d'autre : <code>sport-fitness</code>, <code>food-cooking</code>, <code>personal-branding</code>, <code>tech-ai</code>, <code>beauty-fashion</code>, <code>wellness</code>. FR uniquement.</p>
+        <p>Un créateur hors catalogue voit un feed vide ou hors-sujet, et l'activation est ratée avant d'avoir commencé — le README le dit lui-même : <em>il n'y a délibérément pas de fallback</em>. Mieux vaut 10 créateurs dans la cible que 40 dont 30 voient un écran vide. Ce filtre s'assouplira quand le catalogue passera à 120 créateurs.</p>
+
+        <h4>Anti-ICP</h4>
+        <p>Agences, community managers, marques sans visage, comptes de mèmes ou de repost, e-commerce dropshipping, et tout compte non francophone. Poliment déclinés jusqu'au T2.</p>
+      </section>
+
+      <!-- 03 -->
+      <section id="s3">
+        <span class="num">03</span>
+        <h2>Ce qu'on mesure : l'activation avant tout</h2>
+
+        <p>La définition d'activation de la roadmap est bonne. Je la garde et j'y ajoute une sixième étape — parce que les cinq premières se terminent dans l'app, et que la seule preuve qui compte se produit dehors.</p>
+
+        <ol class="steps">
+          <li>il connecte son compte</li>
+          <li>Personal comprend son profil, et il valide ce qu'il lit</li>
+          <li>il trouve une opportunité de contenu</li>
+          <li>il clique sur <strong>Remix for me</strong></li>
+          <li>il obtient un contenu publiable</li>
+          <li class="is-key"><strong>il publie.</strong></li>
+        </ol>
+
+        <div class="note note--warn">
+          <p class="note-label">À shipper cette semaine</p>
+          <p>L'étape 6 exige un bouton qui n'existe pas : <strong>« J'ai publié ça »</strong> sur un draft. Trois lignes de code, et c'est le moteur de toute la preuve sociale du trimestre — le compteur « X contenus publiés grâce à Personal », les études de cas, et le signal de rétention le plus fiable dont on disposera.</p>
+        </div>
+
+        <h4>Les événements à instrumenter (PostHog)</h4>
+        <div class="pipeline">
+          signup → instagram_connected → dna_ready → dna_confirmed → feed_viewed →<br>
+          opportunity_opened → why_it_works_read → remix_clicked → draft_generated →<br>
+          draft_copied → <b>draft_published</b> → <b>returned_d7</b>
+        </div>
+
+        <p><strong>La métrique nord :</strong> nombre de créateurs ayant atteint <code>draft_published</code> au moins deux semaines de suite. Rien d'autre. Pas les signups, pas le trafic, pas les impressions.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Horizon</th><th>Seuil</th><th>Si atteint</th><th>Si non atteint</th></tr></thead>
+            <tbody>
+              <tr><td>J+14</td><td>10 activés (étape 5)</td><td>On continue</td><td>Le problème est le produit, pas l'acquisition. On arrête les DM et on répare</td></tr>
+              <tr><td>J+30</td><td>5 en rétention S2</td><td>On ouvre les canaux publics</td><td>On refait 20 interviews avant d'écrire une ligne de plus</td></tr>
+              <tr><td>J+60</td><td>3 « je paierais » spontanés</td><td>On construit le paiement</td><td>On n'a pas encore trouvé le vrai problème</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 04 -->
+      <section id="s4">
+        <span class="num">04</span>
+        <h2>Les canaux, priorisés</h2>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th></th><th>Canal</th><th>Coût</th><th>1ᵉʳ résultat</th><th>Ce qu'on en attend</th><th>Quand</th></tr></thead>
+            <tbody>
+              <tr><td class="rank">1</td><td><strong>DM 1:1 avec audit personnalisé</strong></td><td>0 € · 45 min/j</td><td>48 h</td><td>Les 10 premiers activés et toute la connaissance client</td><td><span class="pill pill--now">Maintenant</span></td></tr>
+              <tr><td class="rank">2</td><td><strong>Réseau chaud + intros</strong></td><td>0 €</td><td>24 h</td><td>5-6 activés, conversion 5× le cold</td><td><span class="pill pill--now">Maintenant</span></td></tr>
+              <tr><td class="rank">3</td><td><strong>Build in public (X + LinkedIn FR)</strong></td><td>0 € · 1 h/j</td><td>3-4 sem</td><td>Inbound, crédibilité, premiers ambassadeurs</td><td><span class="pill">J+3</span></td></tr>
+              <tr><td class="rank">4</td><td><strong>Le Cas n°1 — mon propre compte IG</strong></td><td>0 € · 30 min/j</td><td>6-8 sem</td><td>La preuve produit irréfutable</td><td><span class="pill">J+7</span></td></tr>
+              <tr><td class="rank">5</td><td><strong>Ambassadeurs (10) + affiliation</strong></td><td>Gratuité produit</td><td>4-6 sem</td><td>Preuve sociale, distribution empruntée</td><td><span class="pill">J+30</span></td></tr>
+              <tr><td class="rank">6</td><td><strong>Lead magnet public</strong></td><td>1 sem de dev</td><td>6 sem</td><td>Top of funnel scalable, emails</td><td><span class="pill">J+45</span></td></tr>
+              <tr><td class="rank">7</td><td><strong>SEO programmatique sur la donnée outlier</strong></td><td>1-2 sem de dev</td><td>4-6 mois</td><td>Le seul canal composé et défendable</td><td><span class="pill">J+60</span></td></tr>
+              <tr><td class="rank">—</td><td>Product Hunt</td><td>0 €</td><td>—</td><td><em>Une seule cartouche. À garder</em></td><td><span class="pill pill--stop">50 users</span></td></tr>
+              <tr><td class="rank">—</td><td>Publicité payante</td><td>€</td><td>—</td><td>Aucun sens sans rétention prouvée</td><td><span class="pill pill--stop">Jamais ce T</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note">
+          <p class="note-label">L'arbitrage principal</p>
+          <p><strong>Le canal n°1 est le DM, pas le launch post.</strong> À 0 utilisateur et 0 preuve, un post de lancement ne convertit personne : il n'a ni audience ni social proof pour s'appuyer. Le DM, lui, ne dépend d'aucune des trois contraintes. Le launch post existe quand même dimanche — mais son rôle est de <em>documenter</em>, pas d'acquérir.</p>
+        </div>
+      </section>
+
+      <!-- 05 -->
+      <section id="s5">
+        <span class="num">05</span>
+        <h2>Playbook n°1 — Le Rapport du matin</h2>
+
+        <p>C'est le cœur de l'acquisition des 30 prochains jours, et le seul vrai lead magnet dont Personal dispose : <strong>le produit lui-même génère gratuitement un objet de valeur, personnalisé, envoyable en DM.</strong></p>
+
+        <h3>Le principe</h3>
+        <p>On n'envoie pas « salut je lance un outil ». On envoie <strong>le résultat</strong>, avant toute demande. Le créateur reçoit trois choses qu'il ne peut pas obtenir seul :</p>
+        <ol>
+          <li><strong>Son ratio à lui.</strong> « Tes carrousels font 3,2× ta médiane, tes Reels 0,6×. » Il ne le sait pas. Instagram ne le lui dit pas.</li>
+          <li><strong>Trois outliers de sa niche cette semaine</strong>, avec leur ratio et leur mécanisme — le <em>Why it works</em>.</li>
+          <li><strong>Un remix prêt à poster</strong>, écrit pour lui.</li>
+        </ol>
+        <p>Coût marginal : quelques appels API. Effet : on passe d'un taux de réponse de 3-5 % (DM générique) à 20-30 %.</p>
+
+        <h3>Les scripts</h3>
+
+        <div class="script">
+          <p class="script-tag">DM froid — créateur 3k-40k, dans une des 6 verticales</p>
+          <p>Salut [Prénom] — je construis un truc qui compare les posts d'une niche à la moyenne de leur propre auteur, et j'ai fait tourner ton compte dedans.</p>
+          <p>Deux trucs sont sortis : [insight précis et vérifiable, ex. « tes posts où tu montres ton visage font 2,8× ta médiane, ceux avec une citation en fond font 0,5× »].</p>
+          <p>J'ai aussi les 4 posts qui explosent en [niche] cette semaine. Je te les envoie ? Aucune contrepartie, je cherche juste 5 créateurs pour casser le truc.</p>
+        </div>
+        <p><strong>Règles :</strong> moins de 60 mots, l'insight avant la demande, aucun lien dans le premier message, aucun mot du champ « IA / génération / automatisation ». La demande est une question fermée à laquelle « oui » coûte zéro.</p>
+
+        <div class="script">
+          <p class="script-tag">DM chaud — réseau et connaissances</p>
+          <p>J'ai passé 3 mois à construire un truc pour les créateurs : ça trouve ce qui marche dans ta niche et le réécrit avec ce que t'as vraiment vécu.</p>
+          <p>Je cherche 5 personnes pour le casser cette semaine. 20 min avec moi, je te connecte et je te fais tes contenus de la semaine en direct. Tu me dis si c'est nul.</p>
+          <p>(Et si tu penses à quelqu'un de plus pertinent que toi, je prends l'intro.)</p>
+        </div>
+        <p>La demande d'intro à la fin est ce qui fait passer une liste de 13 personnes à 30. C'est le meilleur ratio effort/résultat du plan.</p>
+
+        <div class="script">
+          <p class="script-tag">Relance J+3 — sans réponse</p>
+          <p>Pas de souci si c'est pas le moment. Je te laisse le rapport quand même, il est à toi : [3 outliers + le ratio].</p>
+          <p>Si un jour tu veux la version qui arrive toute seule le matin, je suis là.</p>
+        </div>
+        <p>Donner sans condition à la relance retourne une partie des non-réponses, et ne coûte rien. <strong>Une seule relance. Jamais deux.</strong></p>
+
+        <div class="script">
+          <p class="script-tag">Activation — après un « oui, envoie »</p>
+          <p>Voilà. [screenshot du feed + du remix]</p>
+          <p>Si tu veux, je te connecte ce soir : 2 min, ça lit tes 40 derniers posts et tu reçois ça tous les matins. Je reste avec toi pendant l'install.</p>
+        </div>
+
+        <h3>Le rythme, et le calcul honnête</h3>
+        <p><strong>10 DM par jour, 5 jours sur 7.</strong> 45 minutes, dont 30 à préparer les audits. Non négociable, y compris les jours où il y a un bug en prod.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Source</th><th>Volume</th><th>Réponse</th><th>Connexion</th><th>Activés</th></tr></thead>
+            <tbody>
+              <tr><td>Réseau chaud + intros</td><td>30</td><td>60 %</td><td>30 %</td><td><strong>6-8</strong></td></tr>
+              <tr><td>Cold ciblé (avec audit)</td><td>100</td><td>25 %</td><td>12 %</td><td><strong>4-6</strong></td></tr>
+              <tr><td><strong>Total sur 30 jours</strong></td><td><strong>130</strong></td><td></td><td></td><td><strong>10-14</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pull">
+          <p>Le chaud porte le lancement. Le froid porte l'apprentissage.</p>
+        </div>
+        <p>Les 40-50 contacts prévus dans la roadmap suffisent pour la semaine 1, pas pour l'objectif de 10 activés. Il faut viser 130 sur le mois.</p>
+
+        <h4>Le tracking</h4>
+        <p>Un seul tableau, dix colonnes : handle · niche · abonnés · source · date DM · réponse · audit envoyé · connecté · activé · <strong>verbatim</strong>. La colonne verbatim est la plus précieuse des dix : c'est la matière des landing pages, des posts et du positionnement des six prochains mois.</p>
+      </section>
+
+      <!-- 06 -->
+      <section id="s6">
+        <span class="num">06</span>
+        <h2>Playbook n°2 — Founder-led marketing</h2>
+
+        <h3>Le paradoxe à résoudre</h3>
+        <p>Personal est un outil pour créateurs Instagram, construit par quelqu'un qui n'est pas créateur Instagram. Aucune audience à emprunter, aucune légitimité à afficher.</p>
+
+        <div class="pull">
+          <p>« Je n'ai jamais réussi à créer du contenu. J'ai construit l'outil dont j'avais besoin. Je pars de 0 abonné et je vais construire une audience uniquement avec Personal, en public, en publiant tout — les chiffres, les ratios, les échecs. »</p>
+        </div>
+
+        <p>Ce récit fait trois choses en même temps : il produit la preuve produit qui manque, il génère du contenu de distribution, et il rend l'échec intéressant. C'est le seul actif marketing gratuit, défendable et impossible à copier.</p>
+
+        <h3>Deux terrains, deux rôles</h3>
+        <ul>
+          <li><strong>X et LinkedIn (FR) — le terrain d'acquisition.</strong> C'est là que le build in public fonctionne sans audience préalable : l'algorithme y récompense le contenu, pas le compte. Cible : fondateurs, créateurs-entrepreneurs, early adopters — le sous-segment prioritaire.</li>
+          <li><strong>Instagram — le terrain de la preuve.</strong> Pas pour acquérir (trop lent, il faut de l'audience), mais parce que c'est le seul endroit où « je me suis construit une audience avec mon outil » est démontrable. Chaque post publié est une capture d'écran de plus.</li>
+        </ul>
+
+        <h3>Les cinq piliers éditoriaux</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Pilier</th><th>Ce que c'est</th><th>Fréquence</th><th>Pourquoi</th></tr></thead>
+            <tbody>
+              <tr><td><strong>La donnée</strong></td><td>« J'ai analysé 400 posts fitness FR. Voilà ce qui bat la moyenne »</td><td>1×/sem</td><td>Le plus partageable. Personne d'autre n'a cette donnée</td></tr>
+              <tr><td><strong>Le build</strong></td><td>Ce que j'ai cassé, ce que ça m'a coûté, ce que j'ai appris</td><td>2×/sem</td><td>Attire les fondateurs, crée la sympathie</td></tr>
+              <tr><td><strong>Le Cas n°1</strong></td><td>Mon compte, semaine par semaine, chiffres bruts</td><td>1×/sem</td><td>La preuve. Et le feuilleton fait revenir</td></tr>
+              <tr><td><strong>Les créateurs</strong></td><td>Ce que [X] a publié grâce à Personal, et ce que ça a fait</td><td>1×/sem dès J+21</td><td>Le seul contenu qui vend vraiment</td></tr>
+              <tr><td><strong>L'opinion</strong></td><td>« L'IA qui invente du contenu ne marchera jamais »</td><td>1×/2 sem</td><td>Positionne la catégorie, crée le débat</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note note--good">
+          <p class="note-label">Le pilier sous-exploité</p>
+          <p><strong>La donnée</strong> est le plus fort et le moins utilisé. La base contient déjà des outliers mesurés et explicables par niche. Un post hebdomadaire « Les 5 posts qui ont le plus surperformé en [verticale] cette semaine, et pourquoi » est gratuit à produire (une requête), impossible à copier, utile même sans le produit — et il alimente directement le SEO programmatique.</p>
+        </div>
+
+        <h3>La règle du dogfooding</h3>
+        <p><strong>Chaque contenu publié doit avoir été produit avec Personal.</strong> Le launch post de dimanche compris — et il faut le dire dans le post. « Ce post a été écrit avec l'outil que ce post présente » est l'argument le plus court et le plus convaincant qui existe.</p>
+      </section>
+
+      <!-- 07 -->
+      <section id="s7">
+        <span class="num">07</span>
+        <h2>Playbook n°3 — Ambassadeurs &amp; Concierge</h2>
+
+        <h3>Le Concierge — semaines 1 à 6</h3>
+        <p>Pour chacun des 10 premiers activés, <strong>chaque lundi matin, un DM manuel</strong> : 3 opportunités de leur niche et 1 remix prêt à poster. À la main s'il le faut.</p>
+        <p>C'est du « do things that don't scale » assumé, et ça remplit trois fonctions à la fois : ça compense un produit qui n'est pas encore assez bon pour retenir seul, ça crée un rituel hebdomadaire — l'ancrage de rétention — et ça fait dire au créateur ce qu'il pense en direct. 10 personnes × 15 min = 2 h 30 par semaine. Le meilleur investissement du trimestre.</p>
+
+        <div class="note note--good">
+          <p class="note-label">Le signal à guetter</p>
+          <p>Le jour où un créateur écrit <em>« t'as pas envoyé le truc ce matin ? »</em>, il y a un produit.</p>
+        </div>
+
+        <h3>Les 10 ambassadeurs — à partir de J+30</h3>
+        <p>Recrutés parmi les activés qui ont publié au moins 4 fois. Profil idéal : créateur qui <strong>enseigne la création de contenu</strong> à sa communauté (type Jun Yuh) — son audience est exactement l'ICP, et parler d'outils est déjà son sujet.</p>
+
+        <div class="note note--warn">
+          <p class="note-label">À corriger dans le plan actuel</p>
+          <p>« Accès gratuit » ne vaut rien quand le produit est gratuit pour tout le monde. Ce n'est pas une contrepartie.</p>
+        </div>
+
+        <p>Le deal réel :</p>
+        <ul>
+          <li>Gratuité <strong>à vie</strong>, garantie par écrit, même après le lancement du payant</li>
+          <li><strong>30 % récurrent</strong> sur chaque abonnement référé, à activer avec le paiement</li>
+          <li>Leur nom et leur compte sur la landing page — de la visibilité, pas juste une remise</li>
+          <li>Un call hebdo de 30 min avec le fondateur : ils voient la roadmap, ils l'orientent</li>
+          <li><strong>Le concierge premium</strong> : leurs contenus de la semaine préparés à la main</li>
+        </ul>
+        <p>En échange, une seule chose demandée : <strong>1 contenu par mois</strong> où Personal apparaît naturellement — pas un placement, un « voilà comment je trouve mes idées ». Dix ambassadeurs = dix preuves sociales mensuelles avec de l'audience empruntée.</p>
+      </section>
+
+      <!-- 08 -->
+      <section id="s8">
+        <span class="num">08</span>
+        <h2>Les quatre boucles de croissance</h2>
+
+        <p>Une boucle est un mécanisme qui produit de l'acquisition <strong>sans effort marginal</strong>. C'est ce qui remplace le budget qu'on n'a pas.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th></th><th>Boucle</th><th>Mécanisme</th><th>Quand</th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="rank">1</td>
+                <td><strong>Referral au moment de la valeur</strong></td>
+                <td>Pas au signup — juste après <code>draft_copied</code>, quand la valeur vient d'être ressentie. « Un créateur que tu connais galère avec ça ? Invitez-vous, vous passez tous les deux en illimité. » Le timing est tout : demander au signup, c'est demander avant d'avoir donné</td>
+                <td><span class="pill">J+30</span></td>
+              </tr>
+              <tr>
+                <td class="rank">2</td>
+                <td><strong>Le dogfooding</strong></td>
+                <td>Personal produit le contenu qui vend Personal, qui amène des créateurs, dont les résultats deviennent du contenu. Déjà armée, ne coûte rien — demande juste de la discipline de publication</td>
+                <td><span class="pill pill--now">En cours</span></td>
+              </tr>
+              <tr>
+                <td class="rank">3</td>
+                <td><strong>Le lead magnet public</strong></td>
+                <td>Une page : « Colle ton @, reçois ton rapport. » Creator DNA + ratio par format + 3 outliers, sans compte, contre un email. Le DM du §5, industrialisé. À ne construire qu'une fois l'App Review passée</td>
+                <td><span class="pill">J+45</span></td>
+              </tr>
+              <tr>
+                <td class="rank">4</td>
+                <td><strong>Le SEO programmatique</strong></td>
+                <td>Des pages générées et rafraîchies chaque semaine : <code>/outliers/fitness</code>, <code>/creators/[handle]</code>, <code>/niches/[niche]/formats</code>. Contenu unique, factuel, adossé à une donnée propriétaire. C'est ce qui a construit 1of10</td>
+                <td><span class="pill">J+60</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>La boucle 4 a six mois de latence, mais c'est <strong>le seul canal qui travaille encore quand on dort</strong> — et le seul que la base de données rend possible et que personne d'autre ne peut copier.</p>
+      </section>
+
+      <!-- 09 -->
+      <section id="s9">
+        <span class="num">09</span>
+        <h2>Pricing &amp; monétisation</h2>
+
+        <p><strong>Ne rien facturer avant d'avoir entendu trois « je paierais » spontanés.</strong> Le prix testé trop tôt mesure la politesse, pas la valeur.</p>
+
+        <div class="note">
+          <p class="note-label">L'ancrage à utiliser dans les conversations</p>
+          <p>Un ghostwriter FR coûte 800 à 2 000 €/mois. Un monteur, 500 €. Le prix de Personal doit être manifestement en dessous du « je paie quelqu'un », et clairement au-dessus du « encore un abonnement IA à 9 € » — parce qu'à 9 €, on est rangé dans la catégorie wrapper et on perd le positionnement.</p>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Plan</th><th>Prix</th><th>Contenu</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Free</strong></td><td>0 €</td><td>Le feed du matin, 3 remix/mois. Le feed seul justifie de revenir — et c'est ce qui crée le retour quotidien</td></tr>
+              <tr><td><strong>Creator</strong></td><td><strong>29 €/mois</strong></td><td>Remix illimités, Moments illimités, 1 compte</td></tr>
+              <tr><td><strong>Pro</strong></td><td><strong>79 €/mois</strong></td><td>3 comptes, crédits image et vidéo, priorité support</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>29 € est le point où un créateur qui monétise déjà ne réfléchit pas. Les crédits image/vidéo restent hors abonnement — coût variable réel. C'est le modèle déjà prévu, il est bon.</p>
+
+        <div class="note note--good">
+          <p class="note-label">Le levier d'urgence, à annoncer dès maintenant</p>
+          <p><strong>« Les 50 premiers créateurs gardent 50 % à vie. »</strong> Ça donne une raison de s'inscrire aujourd'hui plutôt que dans trois mois, ça récompense les premiers, ça crée un palier qui se raconte (« il reste 12 places ») — et ça ne coûte rien tant que rien n'est facturé.</p>
+        </div>
+      </section>
+
+      <!-- 10 -->
+      <section id="s10">
+        <span class="num">10</span>
+        <h2>Le plan</h2>
+
+        <h3>J-2 → J+2 · le lancement (21-23 août)</h3>
+        <div class="note note--alert">
+          <p class="note-label">Avant tout le reste</p>
+          <p><strong>Soumettre l'App Review Meta.</strong> Chaque jour de retard est un jour de plafond à 25 comptes.</p>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <tbody>
+              <tr><td><strong>Vendredi</strong></td><td>App Review soumise · liste de 30 prospects qualifiés (6 verticales, 3k-40k) · 13 DM chauds au réseau · bouton « J'ai publié » shippé</td></tr>
+              <tr><td><strong>Samedi</strong></td><td>Produire un vrai contenu <em>avec</em> Personal et le publier · capturer la chaîne complète insight → output · finaliser les screenshots · écrire le launch post</td></tr>
+              <tr><td><strong>Dimanche</strong></td><td>Launch post (X + LinkedIn + story IG) · envoi à tous les leads chauds · 10 premiers DM froids avec audit</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h4>Structure du launch post — l'ordre compte</h4>
+        <ol class="steps">
+          <li>Le problème, incarné en une phrase vécue : <em>« Je voulais devenir créateur. J'ai abandonné au bout de 3 semaines : je ne savais jamais quoi poster. »</em></li>
+          <li>Ce que j'ai construit, en une phrase</li>
+          <li class="is-key"><strong>Le moment magique, en vidéo ou en 3 captures</strong> — un outlier réel, un Moment réel, un Reel réel. C'est 80 % du post</li>
+          <li>Comment ça marche, en 4 temps — le bloc de la landing</li>
+          <li class="is-key"><strong>Ce post a été écrit avec Personal</strong></li>
+          <li>« Je cherche 10 créateurs. Gratuit, je vous installe moi-même. Commentez ou DM »</li>
+        </ol>
+
+        <h3>J+3 → J+30 · les 10 activés</h3>
+        <p>Le seul objectif du mois. Rythme quotidien : <strong>10 DM · 1 post · 1 call créateur.</strong> Rituel du lundi : le Concierge pour tous les activés. Rituel du vendredi : le scoreboard, et un post « la donnée ».</p>
+        <p>Jalons — <strong>J+7</strong> : 3 activés et 3 interviews · <strong>J+14</strong> : 10 activés, sinon on arrête l'acquisition et on répare le produit · <strong>J+21</strong> : premiers verbatims sur la landing · <strong>J+30</strong> : 5 en rétention S2.</p>
+
+        <h3>J+31 → J+60 · la preuve</h3>
+        <p>Recrutement des 10 ambassadeurs · première étude de cas chiffrée · boucle de referral en production · lead magnet public en développement · le Cas n°1 devient un feuilleton hebdo · premières conversations de prix.</p>
+
+        <h3>J+61 → J+90 · les canaux composés</h3>
+        <p>Paiement en ligne et grandfathering des 50 premiers · affiliation ambassadeurs à 30 % · SEO programmatique en ligne · catalogue étendu à 120 créateurs, ce qui lève enfin le filtre de qualification · <strong>et seulement là, Product Hunt</strong>, avec 50 users, 5 témoignages et une démo qui tient.</p>
+      </section>
+
+      <!-- 11 -->
+      <section id="s11">
+        <span class="num">11</span>
+        <h2>Le scoreboard</h2>
+
+        <p>Un tableau, relevé chaque vendredi. Cinq lignes, pas quinze.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Métrique</th><th>S1</th><th>S2</th><th>S3</th><th>S4</th><th>Cible J+30</th></tr></thead>
+            <tbody>
+              <tr><td>Créateurs contactés</td><td></td><td></td><td></td><td></td><td>130</td></tr>
+              <tr><td>Taux de réponse</td><td></td><td></td><td></td><td></td><td>&gt; 20 %</td></tr>
+              <tr><td><strong>Créateurs activés (étape 5)</strong></td><td></td><td></td><td></td><td></td><td><strong>10</strong></td></tr>
+              <tr><td><strong>Contenus publiés via Personal</strong></td><td></td><td></td><td></td><td></td><td><strong>30</strong></td></tr>
+              <tr><td><strong>Rétention S2</strong></td><td></td><td></td><td></td><td></td><td><strong>5</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>Ce qu'on ne mesure pas ce trimestre : visiteurs, impressions, followers, signups. Ce sont des métriques de vanité tant qu'il n'y a pas 10 personnes qui reviennent.</p>
+      </section>
+
+      <!-- 12 -->
+      <section id="s12">
+        <span class="num">12</span>
+        <h2>Ce qu'on ne fait pas</h2>
+
+        <p>Product Hunt maintenant · publicité payante · TikTok, LinkedIn et X en intégration produit · marketplace et clones de créateurs · features agences · blog SEO classique rédigé à la main · communauté Discord · newsletter · webinaires · cold email · prospection hors des 6 verticales · prospection hors FR.</p>
+
+        <div class="pull">
+          <p>Chacune de ces lignes est une bonne idée. Aucune ne sert les 10 premiers activés.</p>
+        </div>
+
+        <p>La règle de la roadmap s'applique au marketing exactement comme au produit : <em>tout ce qui ne sert pas le core loop ou les premiers utilisateurs = pas ce trimestre.</em></p>
+      </section>
+
+      <!-- 13 -->
+      <section id="s13">
+        <span class="num">13</span>
+        <h2>Risques</h2>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th></th><th>Risque</th><th>Impact</th><th>Ce qu'on fait</th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="rank">1</td>
+                <td><strong>Meta App Review non obtenue</strong> — acquisition plafonnée à ~25 comptes testeurs, friction majeure au milieu du funnel</td>
+                <td><span class="pill pill--crit">Bloquant</span></td>
+                <td>Soumettre <strong>cette semaine</strong>. En attendant : dire la vérité dans le DM (« je t'ajoute à la main, 2 min ») et en faire un argument d'exclusivité plutôt qu'une excuse</td>
+              </tr>
+              <tr>
+                <td class="rank">2</td>
+                <td><strong>Feed pauvre à l'activation</strong> — 30 créateurs FR, 6 verticales, pas de fallback par design</td>
+                <td><span class="pill pill--crit">Élevé</span></td>
+                <td>Filtre de qualification strict · étendre à 120 créateurs · vérifier le feed <strong>avant</strong> d'envoyer l'invitation, jamais après</td>
+              </tr>
+              <tr>
+                <td class="rank">3</td>
+                <td><strong>Coût scraping et LLM par utilisateur</strong> non borné à mesure que les comptes arrivent</td>
+                <td><span class="pill">Moyen</span></td>
+                <td>Les cooldowns et batches existent déjà. Calculer le coût réel par créateur actif dès le 5ᵉ, avant d'ouvrir plus grand</td>
+              </tr>
+              <tr>
+                <td class="rank">4</td>
+                <td><strong>Rétention nulle après la nouveauté</strong> — le feed est consulté une fois puis oublié</td>
+                <td><span class="pill pill--crit">Élevé</span></td>
+                <td>Le Concierge du lundi crée le rituel à la main pendant que le produit apprend à le créer seul. Un envoi quotidien du feed est la vraie feature de rétention</td>
+              </tr>
+              <tr>
+                <td class="rank">5</td>
+                <td><strong>Le fondateur n'a pas d'audience</strong> — le build in public met 6 semaines à produire quoi que ce soit</td>
+                <td><span class="pill">Moyen</span></td>
+                <td>C'est précisément pourquoi le canal n°1 est le DM. Le contenu est un investissement à moyen terme, pas le plan de lancement</td>
+              </tr>
+              <tr>
+                <td class="rank">6</td>
+                <td><strong>Un concurrent financé copie les Moments</strong></td>
+                <td><span class="pill">Faible</span></td>
+                <td>Le moat est la donnée accumulée, pas la feature. Chaque semaine d'usage creuse l'écart — d'où la priorité absolue à la rétention plutôt qu'au volume</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- closer -->
+      <section id="s14" class="closer">
+        <span class="num">Si je ne devais retenir que</span>
+        <h2>Cinq choses</h2>
+
+        <ol>
+          <li><p><strong>Soumettre l'App Review Meta aujourd'hui.</strong> Tout le reste en dépend.</p></li>
+          <li><p><strong>Le catalogue n'est pas la liste de prospects.</strong> Trente créateurs pour remplir le feed, une liste différente pour trouver des utilisateurs.</p></li>
+          <li><p><strong>Ne jamais envoyer un DM sans avoir donné le résultat avant.</strong> L'audit personnalisé fait passer le taux de réponse de 4 % à 25 %.</p></li>
+          <li><p><strong>Dix activés valent mieux que mille visiteurs.</strong> Le mois se juge sur <code>draft_published</code>, pas sur les signups.</p></li>
+          <li><p><strong>Devenir le Cas n°1.</strong> Zéro abonné, une audience construite uniquement avec Personal, en public. C'est le seul actif marketing gratuit que personne ne peut copier.</p></li>
+        </ol>
+
+        <p class="colophon-end">Personal · Stratégie d'acquisition · v1 · 21 août 2026</p>
+      </section>
+
+    </main>
+  </div>
+</div>

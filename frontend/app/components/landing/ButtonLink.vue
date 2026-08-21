@@ -11,7 +11,7 @@ withDefaults(defineProps<{
 const VARIANTS = {
   primary: 'b-btn-red',
   dark: 'bg-[var(--b-black)] text-[var(--b-ivory)] hover:bg-black',
-  ghost: 'border border-[var(--b-line)] text-[var(--b-black)] hover:border-[var(--b-red-200)] hover:bg-[var(--b-red-50)] hover:text-[var(--b-red-700)]',
+  ghost: 'border border-[var(--b-line)] text-[var(--b-black)] hover:border-[#d6cfc0] hover:bg-[var(--b-surface)]',
   light: 'border border-white/15 bg-white/[.06] text-[var(--b-ivory)] backdrop-blur-sm hover:border-white/25 hover:bg-white/[.1]'
 }
 

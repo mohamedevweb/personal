@@ -89,9 +89,14 @@
           "note": "above its own creator's average"
         },
         "match": {
-          "label": "Moment matched",
-          "value": "94%",
-          "note": "fit with your note from Tuesday"
+          "label": "Posts read",
+          "value": "1,400",
+          "note": "scanned in your niche since midnight"
+        },
+        "speed": {
+          "label": "Draft ready",
+          "value": "10 min",
+          "note": "from a Moment to something postable"
         }
       },
       "brief": {
@@ -124,7 +129,7 @@
       }
     },
     "proof": {
-      "scanned": "1,400 posts read every morning",
+      "scanned": "Your last 40 posts, read once",
       "outliers": "Outliers, not top posts",
       "niches": "Your niche, not the internet",
       "voice": "Your voice, learned from your captions",
@@ -132,7 +137,8 @@
     },
     "stat": {
       "label": "Outlier detected",
-      "value": "8.4×",
+      "value": "8.4",
+      "unit": "×",
       "copy": "Not the biggest post on Instagram. The one beating the account that published it — in your niche, at your size, while it's still climbing.",
       "chart": {
         "title": "One account · last 14 posts",
