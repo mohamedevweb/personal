@@ -32,8 +32,10 @@ Schedule::call(function (): void {
 Schedule::call(function (): void {
     $stale = Creator::query()
         ->when(config('creator_catalog.curated_only'), fn ($query) => $query->where('curation_status', 'approved'))
+        ->where('safety_status', '!=', 'blocked')
         ->where(function ($query): void {
             $query->whereNull('last_measured_at')
+                ->orWhere('safety_status', 'pending')
                 ->orWhere('last_measured_at', '<', now()->subDays((int) config('services.discovery.measure_cooldown_days')));
         })
         ->orderByRaw('last_measured_at is not null, last_measured_at')

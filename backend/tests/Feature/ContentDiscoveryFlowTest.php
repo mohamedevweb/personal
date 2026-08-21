@@ -8,6 +8,7 @@ use App\Models\Creator;
 use App\Models\CreatorProfile;
 use App\Models\CreatorRelationship;
 use App\Models\User;
+use App\Services\Discovery\ContentSafetyPolicy;
 use App\Services\Discovery\CreatorNicheCatalog;
 use App\Services\Discovery\CreatorNicheService;
 use App\Services\Discovery\InstagramDataProvider;
@@ -66,6 +67,7 @@ class ContentDiscoveryFlowTest extends TestCase
             app(CreatorNicheService::class),
             app(CreatorNicheCatalog::class),
             app(OutlierScore::class),
+            app(ContentSafetyPolicy::class),
         );
 
         $feed = app(RecommendationService::class)->forUser($user);

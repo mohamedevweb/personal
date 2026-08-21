@@ -5,6 +5,8 @@ namespace App\Jobs;
 use App\Exceptions\ContentDiscoveryException;
 use App\Models\ContentPost;
 use App\Models\Creator;
+use App\Services\Discovery\ContentSafetyDecision;
+use App\Services\Discovery\ContentSafetyPolicy;
 use App\Services\Discovery\CreatorNicheCatalog;
 use App\Services\Discovery\CreatorNicheService;
 use App\Services\Discovery\DiscoveredPost;
@@ -43,6 +45,7 @@ class MeasureAccountEngagement implements ShouldQueue
         CreatorNicheService $niches,
         CreatorNicheCatalog $catalog,
         OutlierScore $performance,
+        ContentSafetyPolicy $safety,
     ): void {
         $due = $this->dueUsernames();
 
@@ -77,7 +80,7 @@ class MeasureAccountEngagement implements ShouldQueue
                 externalId: $profile->externalId,
                 isPrivate: $profile->isPrivate,
                 metadata: $profile->metadata,
-            ), $niches, $catalog, $performance);
+            ), $niches, $catalog, $performance, $safety);
         }
     }
 
@@ -96,15 +99,22 @@ class MeasureAccountEngagement implements ShouldQueue
             return [];
         }
 
+        $blocked = Creator::query()
+            ->whereIn('username', $usernames)
+            ->where('safety_status', ContentSafetyDecision::BLOCKED)
+            ->pluck('username')
+            ->all();
+
         $fresh = Creator::query()
             ->whereIn('username', $usernames)
+            ->where('safety_status', ContentSafetyDecision::ALLOWED)
             ->whereHas('posts')
             ->where('last_measured_at', '>', now()->subDays((int) config('services.discovery.measure_cooldown_days')))
             ->pluck('username')
             ->all();
 
         return array_slice(
-            array_values(array_diff($usernames, $fresh)),
+            array_values(array_diff($usernames, $fresh, $blocked)),
             0,
             (int) config('services.discovery.measure_batch'),
         );
@@ -115,18 +125,47 @@ class MeasureAccountEngagement implements ShouldQueue
         CreatorNicheService $niches,
         CreatorNicheCatalog $catalog,
         OutlierScore $performance,
+        ContentSafetyPolicy $safety,
     ): void {
         if ($profile->posts->isEmpty()) {
             return;
         }
 
-        $baselines = $performance->baselines($profile->posts);
-        $baseline = max(0, (int) round($baselines['engagement'] ?? 0));
         $existing = Creator::query()
             ->when($profile->externalId, fn ($query) => $query->where('instagram_user_id', $profile->externalId))
             ->orWhere('username', $profile->username)
             ->first();
+        $creatorSafety = $safety->creator($profile);
+
+        if (! $creatorSafety->isAllowed()) {
+            $this->blockCreator($profile, $existing, $creatorSafety);
+
+            return;
+        }
+
+        $decisions = $profile->posts->mapWithKeys(
+            fn (DiscoveredPost $post): array => [$post->sourceUrl => $safety->post($post)],
+        );
+        $safePosts = $profile->posts
+            ->filter(fn (DiscoveredPost $post): bool => $decisions[$post->sourceUrl]->isAllowed())
+            ->values();
+        $safeProfile = new DiscoveredProfile(
+            username: $profile->username,
+            displayName: $profile->displayName,
+            avatarUrl: $profile->avatarUrl,
+            followers: $profile->followers,
+            posts: $safePosts,
+            bio: $profile->bio,
+            externalId: $profile->externalId,
+            isPrivate: $profile->isPrivate,
+            metadata: $profile->metadata,
+        );
+        $baselines = $performance->baselines($safePosts);
+        $baseline = max(0, (int) round($baselines['engagement'] ?? 0));
         $qualified = $profile->followers >= (int) config('services.discovery.min_followers');
+        $hasPendingPosts = $decisions->contains(
+            fn (ContentSafetyDecision $decision): bool => $decision->status === ContentSafetyDecision::PENDING,
+        );
 
         $attributes = [
             'display_name' => $profile->displayName ?: $profile->username,
@@ -136,19 +175,22 @@ class MeasureAccountEngagement implements ShouldQueue
             'bio' => $profile->bio,
             'metadata' => array_replace_recursive($existing?->metadata ?? [], $profile->metadata),
             'followers' => $profile->followers,
-            'average_views' => (int) $profile->posts->map(fn (DiscoveredPost $p): int => $p->views)->avg(),
-            'average_likes' => (int) $profile->posts->map(fn (DiscoveredPost $p): int => $p->likes)->avg(),
+            'average_views' => (int) $safePosts->map(fn (DiscoveredPost $p): int => $p->views)->avg(),
+            'average_likes' => (int) $safePosts->map(fn (DiscoveredPost $p): int => $p->likes)->avg(),
             'baseline_engagement' => $baseline,
             'performance_baselines' => $baselines,
-            'avg_engagement_rate' => $profile->engagementRate(),
-            'last_measured_at' => now(),
+            'avg_engagement_rate' => $safeProfile->engagementRate(),
+            'last_measured_at' => $hasPendingPosts ? null : now(),
             'last_fetched_at' => now(),
             'metrics_updated_at' => now(),
             'discovered_at' => $existing?->discovered_at ?: now(),
+            'safety_status' => ContentSafetyDecision::ALLOWED,
+            'safety_reasons' => [],
+            'safety_checked_at' => now(),
         ];
 
         if ($qualified) {
-            $attributes += $this->niche($profile, $niches, $existing);
+            $attributes += $this->niche($safeProfile, $niches, $existing);
         } elseif (! $existing) {
             // Classifying costs a model call, and an account that cannot reach a feed
             // is not worth one. Its handle stands in until it clears the floor.
@@ -163,16 +205,48 @@ class MeasureAccountEngagement implements ShouldQueue
         }
 
         foreach ($profile->posts as $post) {
-            $this->storePost($creator, $post);
+            $decision = $decisions[$post->sourceUrl];
+
+            $decision->isAllowed()
+                ? $this->storePost($creator, $post, $decision)
+                : $this->blockExistingPost($post, $decision);
         }
 
         // An account under the follower floor is measured — so the cooldown stops us
         // re-scraping it daily — but never scored. Its posts stay unmeasured, which
         // is what keeps them out of every feed. A ratio over a two-like median is
         // arithmetic, not evidence, and that is what was reaching creators.
-        $qualified
+        $qualified && $safePosts->isNotEmpty()
             ? $this->score($creator, $baselines, $performance)
             : $this->disqualify($creator);
+    }
+
+    private function blockCreator(
+        DiscoveredProfile $profile,
+        ?Creator $existing,
+        ContentSafetyDecision $decision,
+    ): void {
+        $creator = $existing ?: new Creator;
+        $creator->fill([
+            'instagram_user_id' => $profile->externalId ?: $existing?->instagram_user_id,
+            'username' => $profile->username,
+            'display_name' => $profile->displayName ?: $profile->username,
+            'avatar_url' => $profile->avatarUrl,
+            'bio' => $profile->bio,
+            'metadata' => array_replace_recursive($existing?->metadata ?? [], $profile->metadata),
+            'followers' => $profile->followers,
+            'niche' => $existing?->niche ?: $profile->username,
+            'average_views' => $existing?->average_views ?: 0,
+            'average_likes' => $existing?->average_likes ?: 0,
+            'last_fetched_at' => now(),
+            'last_measured_at' => $decision->status === ContentSafetyDecision::BLOCKED ? now() : null,
+            'discovered_at' => $existing?->discovered_at ?: now(),
+            'safety_status' => $decision->status,
+            'safety_reasons' => $decision->reasons,
+            'safety_checked_at' => now(),
+        ])->save();
+
+        $this->disqualify($creator);
     }
 
     /**
@@ -207,8 +281,11 @@ class MeasureAccountEngagement implements ShouldQueue
         return ['niche' => $detected['niche'], 'niche_topics' => $detected['topics']];
     }
 
-    private function storePost(Creator $creator, DiscoveredPost $post): void
-    {
+    private function storePost(
+        Creator $creator,
+        DiscoveredPost $post,
+        ContentSafetyDecision $decision,
+    ): void {
         $existing = ContentPost::query()
             ->when($post->externalId, fn ($query) => $query->where('instagram_media_id', $post->externalId))
             ->orWhere('source_url', $post->sourceUrl)
@@ -232,6 +309,9 @@ class MeasureAccountEngagement implements ShouldQueue
             'metadata' => array_replace_recursive($existing?->metadata ?? [], $post->metadata),
             'last_fetched_at' => now(),
             'metrics_updated_at' => now(),
+            'safety_status' => $decision->status,
+            'safety_reasons' => $decision->reasons,
+            'safety_checked_at' => now(),
             // why_it_works is written by score() once the baseline is known;
             // the hook and structure breakdown is generated lazily the first
             // time a creator opens the post.
@@ -239,6 +319,24 @@ class MeasureAccountEngagement implements ShouldQueue
 
         $content = $existing ?: new ContentPost;
         $content->fill($attributes)->save();
+    }
+
+    private function blockExistingPost(DiscoveredPost $post, ContentSafetyDecision $decision): void
+    {
+        ContentPost::query()
+            ->where(function ($query) use ($post): void {
+                $query->when($post->externalId, fn ($query) => $query->where('instagram_media_id', $post->externalId))
+                    ->orWhere('source_url', $post->sourceUrl);
+            })
+            ->update([
+                'safety_status' => $decision->status,
+                'safety_reasons' => $decision->reasons,
+                'safety_checked_at' => now(),
+                'measured_at' => null,
+                'outlier_score' => 0,
+                'performance_ratio' => 0,
+                'engagement_rate' => 0,
+            ]);
     }
 
     /**
@@ -250,22 +348,24 @@ class MeasureAccountEngagement implements ShouldQueue
     /** @param array{views: ?float, engagement: ?float} $baselines */
     private function score(Creator $creator, array $baselines, OutlierScore $performance): void
     {
-        $creator->posts()->chunkById(200, function ($posts) use ($creator, $baselines, $performance): void {
-            foreach ($posts as $post) {
-                $engagement = $post->likes + $post->comments + $post->shares;
-                $outlier = $performance->score($post, $baselines);
+        $creator->posts()
+            ->where('safety_status', ContentSafetyDecision::ALLOWED)
+            ->chunkById(200, function ($posts) use ($creator, $baselines, $performance): void {
+                foreach ($posts as $post) {
+                    $engagement = $post->likes + $post->comments + $post->shares;
+                    $outlier = $performance->score($post, $baselines);
 
-                $post->forceFill([
-                    'outlier_score' => $outlier,
-                    // Kept in step for the clients still reading it. Its own column
-                    // is narrower, so a runaway outlier is clamped here only.
-                    'performance_ratio' => min(9999.99, $outlier),
-                    'engagement_rate' => $performance->engagementRate($engagement, $creator->followers),
-                    'why_it_works' => $this->whyItWorks($post, $outlier),
-                    'measured_at' => now(),
-                ])->save();
-            }
-        });
+                    $post->forceFill([
+                        'outlier_score' => $outlier,
+                        // Kept in step for the clients still reading it. Its own column
+                        // is narrower, so a runaway outlier is clamped here only.
+                        'performance_ratio' => min(9999.99, $outlier),
+                        'engagement_rate' => $performance->engagementRate($engagement, $creator->followers),
+                        'why_it_works' => $this->whyItWorks($post, $outlier),
+                        'measured_at' => now(),
+                    ])->save();
+                }
+            });
     }
 
     private function hook(DiscoveredPost $post, ?string $niche): string

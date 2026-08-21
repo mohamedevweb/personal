@@ -30,6 +30,7 @@ class FeedRankingTest extends TestCase
             'user_id' => $this->user->id,
             'niche' => 'vegan cooking',
             'topics' => ['vegan', 'meal prep', 'recipes'],
+            'primary_vertical' => 'food-cooking',
         ]);
     }
 
@@ -38,7 +39,7 @@ class FeedRankingTest extends TestCase
         return Creator::query()->create([
             'username' => $username,
             'display_name' => $username,
-            'niche' => 'vegan cooking',
+            'niche' => 'food-cooking',
             'niche_topics' => ['vegan', 'recipes'],
             'followers' => $followers,
             'average_views' => 0,
@@ -143,10 +144,28 @@ class FeedRankingTest extends TestCase
         $this->assertNotContains($stale->hook, $hooks);
     }
 
-    public function test_users_with_different_niches_receive_the_same_global_ranking(): void
+    public function test_blocked_creators_and_posts_never_reach_the_feed(): void
+    {
+        $blockedCreator = $this->creator('blocked.creator', 20_000, 900);
+        $blockedCreator->update(['safety_status' => 'blocked']);
+        $creatorPost = $this->storePost($blockedCreator, 3.0);
+
+        $blockedPost = $this->storePost(
+            $this->creator('safe.creator', 20_000, 900),
+            3.0,
+            ['safety_status' => 'blocked'],
+        );
+
+        $hooks = $this->feedHooks();
+
+        $this->assertNotContains($creatorPost->hook, $hooks);
+        $this->assertNotContains($blockedPost->hook, $hooks);
+    }
+
+    public function test_users_receive_their_primary_vertical_before_stronger_global_posts(): void
     {
         $offNiche = $this->creator('gym.bro', 20_000, 900);
-        $offNiche->update(['niche' => 'strength training', 'niche_topics' => ['powerlifting', 'gym']]);
+        $offNiche->update(['niche' => 'sport-fitness', 'niche_topics' => ['powerlifting', 'gym']]);
 
         $match = $this->storePost($this->creator('small.vegan', 20_000, 900), 2.0);
         $stranger = $this->storePost($offNiche, 2.2, ['tags' => ['powerlifting', 'gym']]);
@@ -156,15 +175,15 @@ class FeedRankingTest extends TestCase
             'user_id' => $otherUser->id,
             'niche' => 'strength training',
             'topics' => ['powerlifting', 'gym'],
+            'primary_vertical' => 'sport-fitness',
         ]);
 
         $veganFeed = app(RecommendationService::class)->forUser($this->user);
         $strengthFeed = app(RecommendationService::class)->forUser($otherUser);
 
-        $this->assertSame($veganFeed->pluck('hook')->all(), $strengthFeed->pluck('hook')->all());
-        $this->assertSame($veganFeed->pluck('recommendation_score')->all(), $strengthFeed->pluck('recommendation_score')->all());
-        $this->assertSame($stranger->hook, $veganFeed->first()['hook']);
-        $this->assertContains($match->hook, $veganFeed->pluck('hook')->all());
+        $this->assertSame($match->hook, $veganFeed->first()['hook']);
+        $this->assertSame($stranger->hook, $strengthFeed->first()['hook']);
+        $this->assertNotSame($veganFeed->pluck('hook')->all(), $strengthFeed->pluck('hook')->all());
         $this->assertFalse($veganFeed->pluck('signals')->flatten()->contains('Great fit for you'));
         $this->assertFalse($veganFeed->pluck('signals')->flatten()->contains('Similar creator'));
     }

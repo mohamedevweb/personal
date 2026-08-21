@@ -22,8 +22,10 @@ class ContentPost extends Model
             'shares' => 'integer',
             'metadata' => 'array',
             'analysis_translations' => 'array',
+            'safety_reasons' => 'array',
             'last_fetched_at' => 'datetime',
             'metrics_updated_at' => 'datetime',
+            'safety_checked_at' => 'datetime',
         ];
     }
 

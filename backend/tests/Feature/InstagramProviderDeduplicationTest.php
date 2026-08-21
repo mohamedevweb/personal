@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Jobs\MeasureAccountEngagement;
 use App\Models\ContentPost;
 use App\Models\Creator;
+use App\Services\Discovery\ContentSafetyPolicy;
 use App\Services\Discovery\CreatorNicheCatalog;
 use App\Services\Discovery\CreatorNicheService;
 use App\Services\Discovery\DiscoveredPost;
@@ -51,6 +52,7 @@ class InstagramProviderDeduplicationTest extends TestCase
             app(CreatorNicheService::class),
             app(CreatorNicheCatalog::class),
             app(OutlierScore::class),
+            app(ContentSafetyPolicy::class),
         );
     }
 

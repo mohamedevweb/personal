@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CreatorProfile;
+use App\Services\Discovery\CanonicalCreatorVerticals;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -19,7 +20,7 @@ class ProfileController extends Controller
         ]);
     }
 
-    public function update(Request $request): JsonResponse
+    public function update(Request $request, CanonicalCreatorVerticals $verticals): JsonResponse
     {
         $data = $request->validate([
             'display_name' => ['sometimes', 'nullable', 'string', 'max:120'],
@@ -41,6 +42,13 @@ class ProfileController extends Controller
 
         $profile = CreatorProfile::query()->firstOrNew(['user_id' => $request->user()->id]);
         $profile->fill($data);
+
+        if (array_intersect(array_keys($data), ['niche', 'topics'])) {
+            $profile->primary_vertical = $verticals->fromSignals([
+                $profile->niche,
+                ...($profile->topics ?? []),
+            ]);
+        }
 
         if (array_intersect(array_keys($data), ['niche', 'topics', 'audience_description', 'tone'])) {
             $dna = array_merge([

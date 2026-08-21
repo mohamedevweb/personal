@@ -107,6 +107,34 @@ return [
         // Nothing under these thresholds is evidence of anything.
         'min_followers' => (int) env('DISCOVERY_MIN_FOLLOWERS', 5000),
         'min_post_engagement' => (int) env('DISCOVERY_MIN_POST_ENGAGEMENT', 500),
+        'safety' => [
+            'enabled' => (bool) env('DISCOVERY_CONTENT_SAFETY_ENABLED', true),
+            'use_openai' => (bool) env('DISCOVERY_CONTENT_SAFETY_USE_OPENAI', true),
+            'fail_closed' => (bool) env('DISCOVERY_CONTENT_SAFETY_FAIL_CLOSED', true),
+            'model' => env('DISCOVERY_CONTENT_SAFETY_MODEL', 'omni-moderation-latest'),
+            'blocked_categories' => [
+                'harassment', 'harassment/threatening', 'hate', 'hate/threatening',
+                'illicit', 'illicit/violent', 'self-harm', 'self-harm/intent',
+                'self-harm/instructions', 'sexual', 'sexual/minors', 'violence',
+                'violence/graphic',
+            ],
+            'blocked_metadata_flags' => [
+                'adult', 'explicit', 'is_adult', 'is_explicit', 'is_nsfw',
+                'is_sensitive', 'mature', 'nsfw', 'sexual',
+            ],
+            // A deterministic first pass catches clear French and English policy
+            // violations before any provider or model-specific signal is needed.
+            'blocked_terms' => [
+                'adult content', 'contenu adulte', 'contenu explicite', 'explicit content',
+                'naked', 'nsfw', 'nude', 'nudes', 'nudite', 'onlyfans', 'porn',
+                'porno', 'pornographie', 'pornographic', 'sex tape', 'sexual content',
+                'topless',
+                'bitch', 'connard', 'connasse', 'encule', 'enculee', 'fuck',
+                'fils de pute', 'nique ta mere', 'pute', 'salope', 'shit', 'slut',
+                'whore',
+                'abruti', 'abrutie', 'debile', 'idiot', 'idiote', 'moron',
+            ],
+        ],
         'ranking' => [
             'weights' => [
                 'outlier' => (float) env('FEED_WEIGHT_OUTLIER', 0.60),

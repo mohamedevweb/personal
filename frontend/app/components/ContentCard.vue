@@ -17,6 +17,7 @@ const mediaKind = computed(() => {
 const caption = computed(() => [props.post.hook, props.post.caption].filter(Boolean).join(' '))
 const isLongCaption = computed(() => caption.value.length > 80)
 const visibleCaption = computed(() => (expanded.value || !isLongCaption.value ? caption.value : `${caption.value.slice(0, 80).trimEnd()}… `))
+const engagement = computed(() => (props.post.likes || 0) + (props.post.comments || 0) + (props.post.shares || 0))
 </script>
 
 <template>
@@ -67,7 +68,7 @@ const visibleCaption = computed(() => (expanded.value || !isLongCaption.value ? 
       </button>
     </div>
 
-    <div class="px-3 pb-2.5 text-[12px] leading-[17px]">
+    <div class="min-h-[82px] px-3 pb-2.5 text-[12px] leading-[17px]">
       <p class="font-semibold">{{ $t('contentCard.likes', { count: compactNumber(post.likes) }) }}</p>
       <p class="mt-1">
         <span class="font-semibold">{{ post.creator.username }}</span>
@@ -82,7 +83,9 @@ const visibleCaption = computed(() => (expanded.value || !isLongCaption.value ? 
         <span class="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-[var(--accent-soft)] px-1.5 py-1 text-[10px] font-semibold text-[var(--accent-ink)]">
           <AppIcon name="trend" :size="13" />{{ $t('contentCard.average', { ratio: post.performance_ratio.toFixed(1) }) }}
         </span>
-        <span class="shrink-0 whitespace-nowrap rounded-full border border-[var(--line)] px-1.5 py-1 text-[10px] text-[var(--muted)]">{{ $t('contentCard.views', { count: compactNumber(post.views) }) }}</span>
+        <span class="shrink-0 whitespace-nowrap rounded-full border border-[var(--line)] px-1.5 py-1 text-[10px] text-[var(--muted)]">
+          {{ mediaKind === 'reel' && post.views > 0 ? $t('contentCard.views', { count: compactNumber(post.views) }) : $t('contentCard.engagements', { count: compactNumber(engagement) }) }}
+        </span>
         <span v-for="signal in post.signals?.slice(-1)" :key="signal" class="hidden shrink-0 whitespace-nowrap rounded-full border border-[var(--line)] px-1.5 py-1 text-[10px] text-[var(--muted)] min-[360px]:inline">{{ signal }}</span>
       </div>
 

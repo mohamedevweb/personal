@@ -704,6 +704,7 @@
     "average": "{ratio}× sa moyenne",
     "followers": "{count} abonnés",
     "views": "{count} vues",
+    "engagements": "{count} interactions",
     "likes": "{count} j’aime",
     "saved": "Enregistré ✓",
     "save": "Enregistrer",

@@ -21,11 +21,13 @@ class Creator extends Model
             'niche_topics' => 'array',
             'metadata' => 'array',
             'performance_baselines' => 'array',
+            'safety_reasons' => 'array',
             'is_catalog_seed' => 'boolean',
             'discovered_at' => 'datetime',
             'last_fetched_at' => 'datetime',
             'metrics_updated_at' => 'datetime',
             'last_measured_at' => 'datetime',
+            'safety_checked_at' => 'datetime',
         ];
     }
 

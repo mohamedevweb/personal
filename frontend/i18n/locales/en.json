@@ -704,6 +704,7 @@
     "average": "{ratio}× creator average",
     "followers": "{count} followers",
     "views": "{count} views",
+    "engagements": "{count} interactions",
     "likes": "{count} likes",
     "saved": "Saved ✓",
     "save": "Save",

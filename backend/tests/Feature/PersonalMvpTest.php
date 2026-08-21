@@ -276,6 +276,7 @@ class PersonalMvpTest extends TestCase
 
         $this->actingAs($this->user)->patchJson('/api/me/profile', [
             'positioning' => 'I build calm tools for independent creators.',
+            'niche' => 'création de contenu',
             'topics' => ['Creator tools', 'Founder stories'],
         ])->assertOk()->assertJsonPath('profile.positioning', 'I build calm tools for independent creators.');
 
@@ -288,6 +289,7 @@ class PersonalMvpTest extends TestCase
         $this->assertSame(['Creator tools', 'Founder stories'], $profile->creator_dna['topics']);
         $this->assertSame('manual', $profile->creator_dna['analysis_method']);
         $this->assertEquals(1.0, $profile->creator_dna['confidence']);
+        $this->assertSame('personal-branding', $profile->primary_vertical);
         $this->assertNull($profile->discovery_queries);
         $this->assertNull($profile->discovery_refreshed_at);
     }

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\ContentPost;
 use App\Models\User;
+use App\Services\Discovery\CanonicalCreatorVerticals;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
@@ -29,19 +30,21 @@ class RecommendationService
         private readonly ContentPostView $view,
         private readonly FeedRanker $ranker,
         private readonly MarketFeedAllocator $markets,
+        private readonly CanonicalCreatorVerticals $verticals,
     ) {}
 
     /** @return Collection<int, array<string, mixed>> */
     public function forUser(User $user, int $limit = 12): Collection
     {
         $savedIds = $user->savedContent()->pluck('content_post_id')->flip();
+        $primaryVertical = $this->primaryVertical($user);
 
-        $ranked = $this->candidates($user, $limit)
+        $ranked = $this->candidates($user, $limit, $primaryVertical)
             ->map(fn (ContentPost $post): array => ['post' => $post, 'ranking' => $this->ranker->rank($post)])
             ->sortByDesc('ranking.score')
             ->values();
 
-        return $this->markets->allocate($ranked, $user->creatorProfile?->market, $limit)
+        return $this->markets->allocate($ranked, $user->creatorProfile?->market, $limit, $primaryVertical)
             ->map(function (array $item) use ($user, $savedIds): array {
                 $post = $item['post'];
                 $ranking = $item['ranking'];
@@ -71,7 +74,7 @@ class RecommendationService
      *
      * @return Collection<int, ContentPost>
      */
-    private function candidates(User $user, int $limit): Collection
+    private function candidates(User $user, int $limit, ?string $primaryVertical): Collection
     {
         $query = $this->pool($user)
             ->whereNotNull('measured_at')
@@ -79,18 +82,41 @@ class RecommendationService
 
         if (config('creator_catalog.curated_only')) {
             return collect(['FR', 'GB', 'US'])
-                ->flatMap(fn (string $market) => (clone $query)
-                    ->whereHas('creator', fn (Builder $creator): Builder => $creator->where('market', $market))
-                    ->orderByDesc('outlier_score')
-                    ->limit($limit * self::CANDIDATE_MULTIPLIER)
-                    ->get())
+                ->flatMap(function (string $market) use ($query, $limit, $primaryVertical): Collection {
+                    $marketQuery = (clone $query)
+                        ->whereHas('creator', fn (Builder $creator): Builder => $creator->where('market', $market));
+                    $matching = $primaryVertical
+                        ? (clone $marketQuery)
+                            ->whereHas('creator', fn (Builder $creator): Builder => $creator->where('niche', $primaryVertical))
+                            ->orderByDesc('outlier_score')
+                            ->limit($limit * self::CANDIDATE_MULTIPLIER)
+                            ->get()
+                        : collect();
+
+                    return $matching->concat(
+                        $marketQuery
+                            ->orderByDesc('outlier_score')
+                            ->limit($limit * self::CANDIDATE_MULTIPLIER)
+                            ->get(),
+                    );
+                })
                 ->unique('id')
                 ->values();
         }
 
-        return $query->orderByDesc('outlier_score')
-            ->limit($limit * self::CANDIDATE_MULTIPLIER)
-            ->get();
+        $matching = $primaryVertical
+            ? (clone $query)
+                ->whereHas('creator', fn (Builder $creator): Builder => $creator->where('niche', $primaryVertical))
+                ->orderByDesc('outlier_score')
+                ->limit($limit * self::CANDIDATE_MULTIPLIER)
+                ->get()
+            : collect();
+
+        return $matching->concat(
+            $query->orderByDesc('outlier_score')
+                ->limit($limit * self::CANDIDATE_MULTIPLIER)
+                ->get(),
+        )->unique('id')->values();
     }
 
     private function pool(User $user): Builder
@@ -99,13 +125,15 @@ class RecommendationService
 
         return ContentPost::query()
             ->with('creator')
+            ->where('safety_status', 'allowed')
             ->whereNotIn('id', $user->dismissedContent()->select('content_post_id'))
             ->where('published_at', '>=', $window)
             // The absolute floors. outlier_score is a ratio, so on its own it rates a
             // post going from two likes to three as a 1.5x breakout.
             ->whereRaw('likes + comments >= ?', [(int) config('services.discovery.min_post_engagement')])
             ->whereHas('creator', function (Builder $creator): void {
-                $creator->where('followers', '>=', (int) config('services.discovery.min_followers'));
+                $creator->where('followers', '>=', (int) config('services.discovery.min_followers'))
+                    ->where('safety_status', 'allowed');
 
                 if (config('creator_catalog.curated_only')) {
                     $creator->where('curation_status', 'approved');
@@ -122,5 +150,16 @@ class RecommendationService
         }
 
         return "Above average for {$post->creator->username} ({$lift}×), with enough engagement to make it a useful global benchmark.";
+    }
+
+    private function primaryVertical(User $user): ?string
+    {
+        $profile = $user->creatorProfile;
+
+        return $this->verticals->canonical($profile?->primary_vertical)
+            ?? $this->verticals->fromSignals([
+                $profile?->niche,
+                ...($profile?->topics ?? []),
+            ]);
     }
 }

@@ -65,12 +65,30 @@ class CuratedFeedTest extends TestCase
         $this->assertSame(['FR' => 4, 'GB' => 4, 'US' => 4], $markets);
     }
 
-    private function posts(string $market, int $count, string $status = 'approved'): void
+    public function test_primary_vertical_is_prioritized_without_breaking_the_feed_fallback(): void
     {
+        $this->user->creatorProfile()->update(['primary_vertical' => 'tech-ai']);
+        $this->posts('FR', 12, niche: 'sport-fitness', baseOutlier: 5);
+        $this->posts('FR', 8, niche: 'tech-ai', baseOutlier: 1.5);
+
+        $feed = app(RecommendationService::class)->forUser($this->user);
+
+        $this->assertSame(12, $feed->count());
+        $this->assertSame(8, $feed->take(8)->where('creator.niche', 'tech-ai')->count());
+        $this->assertSame(4, $feed->where('creator.niche', 'sport-fitness')->count());
+    }
+
+    private function posts(
+        string $market,
+        int $count,
+        string $status = 'approved',
+        string $niche = 'sport-fitness',
+        float $baseOutlier = 3,
+    ): void {
         $creator = Creator::query()->create([
             'username' => strtolower($market).'-'.$status.'-'.Creator::query()->count(),
             'display_name' => $market,
-            'niche' => 'sport-fitness',
+            'niche' => $niche,
             'market' => $market,
             'curation_status' => $status,
             'followers' => 100000,
@@ -80,6 +98,8 @@ class CuratedFeedTest extends TestCase
         ]);
 
         foreach (range(1, $count) as $index) {
+            $outlier = $baseOutlier - ($index / 100);
+
             ContentPost::query()->create([
                 'creator_id' => $creator->id,
                 'source_url' => "https://instagram.test/{$creator->username}/{$index}",
@@ -91,8 +111,8 @@ class CuratedFeedTest extends TestCase
                 'likes' => 1000,
                 'comments' => 100,
                 'published_at' => now()->subHours($index),
-                'outlier_score' => 3 - ($index / 100),
-                'performance_ratio' => 3 - ($index / 100),
+                'outlier_score' => $outlier,
+                'performance_ratio' => $outlier,
                 'engagement_rate' => 1.1,
                 'measured_at' => now(),
             ]);

@@ -28,6 +28,7 @@
         <env name="DB_URL" value=""/>
         <env name="DISCOVERY_DRIVER" value="mock"/>
         <env name="DISCOVERY_CURATED_CATALOG_ONLY" value="false"/>
+        <env name="DISCOVERY_CONTENT_SAFETY_USE_OPENAI" value="false"/>
         <!-- Without this the suite calls the real OpenAI API whenever a key is
              present in .env: billable, and red the moment the network blinks. -->
         <env name="CONTENT_GENERATION_DRIVER" value="mock"/>

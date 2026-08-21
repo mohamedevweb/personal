@@ -104,9 +104,11 @@ class DiscoverNicheContent implements ShouldQueue
         $measurementCutoff = now()->subDays((int) config('services.discovery.measure_cooldown_days'));
         $handles = Creator::query()
             ->where('curation_status', 'approved')
+            ->where('safety_status', '!=', 'blocked')
             ->where(function ($query) use ($measurementCutoff): void {
                 $query->whereDoesntHave('posts')
                     ->orWhereNull('last_measured_at')
+                    ->orWhere('safety_status', 'pending')
                     ->orWhere('last_measured_at', '<=', $measurementCutoff);
             })
             ->orderByRaw('CASE WHEN last_measured_at IS NULL THEN 0 ELSE 1 END')
@@ -128,8 +130,10 @@ class DiscoverNicheContent implements ShouldQueue
 
         return Creator::query()
             ->where('niche', $niche)
+            ->where('safety_status', '!=', 'blocked')
             ->where(function ($query) use ($measurementCutoff): void {
                 $query->whereNull('last_measured_at')
+                    ->orWhere('safety_status', 'pending')
                     ->orWhere('last_measured_at', '<=', $measurementCutoff);
             })
             ->orderByRaw('CASE WHEN last_measured_at IS NULL THEN 0 ELSE 1 END')
