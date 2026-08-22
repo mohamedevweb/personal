@@ -115,6 +115,19 @@ export interface Remix {
   life_moment?: LifeMoment | null
 }
 
+export interface RemixSummary {
+  id: number
+  format: Remix['format']
+  generated_content: Remix['generated_content']
+  status: Remix['status']
+  updated_at: string
+  source_content: {
+    id: number
+    hook: string
+    creator: Pick<Creator, 'username'>
+  }
+}
+
 export function compactNumber(value: number): string {
   return new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(value)
 }

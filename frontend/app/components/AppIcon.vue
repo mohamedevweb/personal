@@ -6,6 +6,7 @@ defineProps<{ name: string, size?: number, filled?: boolean, strokeWidth?: numbe
   <svg :width="size || 19" :height="size || 19" viewBox="0 0 24 24" :fill="filled ? 'currentColor' : 'none'" stroke="currentColor" :stroke-width="strokeWidth || 1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <template v-if="name === 'sparkles'"><path d="m12 3-1.3 3.7L7 8l3.7 1.3L12 13l1.3-3.7L17 8l-3.7-1.3L12 3Z"/><path d="m5 14-.8 2.2L2 17l2.2.8L5 20l.8-2.2L8 17l-2.2-.8L5 14Zm13-1-1 2.7-2.7 1 2.7 1 1 2.7 1-2.7 2.7-1-2.7-1L18 13Z"/></template>
     <template v-else-if="name === 'plus'"><path d="M12 5v14M5 12h14"/></template>
+    <template v-else-if="name === 'draft'"><path d="M6 3h8l4 4v14H6V3Z"/><path d="M14 3v5h5M9 12h6M9 16h6"/></template>
     <template v-else-if="name === 'moments'"><path d="M6 3h12v18l-6-3-6 3V3Z"/><path d="M9 8h6M9 12h4"/></template>
     <template v-else-if="name === 'user'"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></template>
     <template v-else-if="name === 'bookmark'"><path d="M6 3h12v18l-6-4-6 4V3Z"/></template>

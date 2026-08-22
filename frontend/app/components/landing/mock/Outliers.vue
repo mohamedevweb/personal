@@ -8,19 +8,29 @@
  */
 const { t } = useI18n()
 
-// Instagram's CDN refuses to be hotlinked, so a thumbnail is a wash rather
-// than a borrowed photograph: light falling across a frame, out of focus, with
-// the format mark on top of it.
-const WASHES = [
-  { angle: 146, kind: 'reel' },
-  { angle: 34, kind: 'carousel' },
-  { angle: 198, kind: null }
+/**
+ * Thumbnails. Instagram's CDN refuses to be hotlinked, so a post's picture has
+ * to be a file this site serves itself: drop a square image in
+ * `public/landing/feed/` and name it here, and the card shows a real post.
+ *
+ * Until one is named, the card falls back to a wash — light falling across a
+ * frame, out of focus — which holds the layout without pretending to be a
+ * photograph. A file that fails to load falls back the same way, so a missing
+ * asset can never leave a broken image on the launch page.
+ */
+const POSTS = [
+  { key: 'one', kind: 'reel', angle: 146, image: null },
+  { key: 'two', kind: 'carousel', angle: 34, image: null },
+  { key: 'three', kind: null, angle: 198, image: null }
 ] as const
 
-const posts = computed(() => (['one', 'two', 'three'] as const).map((key, index) => ({
+const broken = ref<Record<string, boolean>>({})
+
+const posts = computed(() => POSTS.map(({ key, kind, angle, image }) => ({
   key,
-  kind: WASHES[index]!.kind,
-  wash: `radial-gradient(78% 62% at 28% 18%, rgba(255, 255, 255, .72) 0%, rgba(255, 255, 255, 0) 62%), linear-gradient(${WASHES[index]!.angle}deg, rgba(233, 227, 214, .9) 0%, rgba(176, 166, 148, .75) 54%, rgba(104, 96, 82, .6) 100%)`,
+  kind,
+  image: broken.value[key] ? null : image,
+  wash: `radial-gradient(78% 62% at 28% 18%, rgba(255, 255, 255, .72) 0%, rgba(255, 255, 255, 0) 62%), linear-gradient(${angle}deg, rgba(233, 227, 214, .9) 0%, rgba(176, 166, 148, .75) 54%, rgba(104, 96, 82, .6) 100%)`,
   hook: t(`landing.how.outliers.items.${key}.hook`),
   views: t(`landing.how.outliers.items.${key}.views`),
   ratio: t(`landing.how.outliers.items.${key}.ratio`),
@@ -73,7 +83,15 @@ const posts = computed(() => (['one', 'two', 'three'] as const).map((key, index)
           <AppIcon name="dots" :size="15" class="shrink-0 text-[var(--b-stone)]" />
         </header>
 
-        <div class="relative aspect-[4/3] bg-[#cbc2b1]" :style="{ backgroundImage: post.wash }">
+        <div class="relative aspect-[4/3] overflow-hidden bg-[#cbc2b1]" :style="{ backgroundImage: post.wash }">
+          <img
+            v-if="post.image"
+            :src="post.image"
+            alt=""
+            loading="lazy"
+            class="h-full w-full object-cover"
+            @error="broken[post.key] = true"
+          >
           <AppIcon
             v-if="post.kind"
             :name="post.kind"

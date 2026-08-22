@@ -28,6 +28,7 @@
   "nav": {
     "forYou": "For You",
     "create": "Create",
+    "drafts": "Drafts",
     "moments": "Moments",
     "personal": "Personal",
     "saved": "Bookmark",
@@ -635,6 +636,26 @@
     "removed": "Removed from your library.",
     "loadError": "Personal could not load your library.",
     "removeError": "Personal could not remove this post. Please try again."
+  },
+  "drafts": {
+    "eyebrow": "Your studio",
+    "subtitle": "Every remix you are writing or have marked ready, kept in one place.",
+    "newDraft": "New draft",
+    "open": "Open",
+    "updated": "Updated {date}",
+    "preparing": "Personal is bringing your pattern, moment and voice together.",
+    "failedPreview": "This draft needs another try. Open it to restart the writing.",
+    "status": {
+      "generating": "Writing",
+      "failed": "Try again",
+      "draft": "Draft",
+      "ready": "Ready",
+      "archived": "Archived"
+    },
+    "emptyTitle": "No drafts yet.",
+    "emptyCopy": "Start from a moment or a strong pattern. Your work will stay here while you shape it.",
+    "createFirst": "Create your first draft",
+    "loadError": "Personal could not load your drafts. Please try again."
   },
   "settings": {
     "eyebrow": "Settings",

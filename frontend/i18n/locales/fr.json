@@ -28,6 +28,7 @@
   "nav": {
     "forYou": "Pour vous",
     "create": "Créer",
+    "drafts": "Brouillons",
     "moments": "Moments",
     "personal": "Personal",
     "saved": "Favoris",
@@ -635,6 +636,26 @@
     "removed": "Retiré de tes favoris.",
     "loadError": "Personal n’a pas pu charger tes favoris.",
     "removeError": "Personal n’a pas pu retirer ce post. Réessaie."
+  },
+  "drafts": {
+    "eyebrow": "Ton studio",
+    "subtitle": "Tous les remix que tu écris ou as marqués comme prêts, réunis au même endroit.",
+    "newDraft": "Nouveau brouillon",
+    "open": "Ouvrir",
+    "updated": "Mis à jour le {date}",
+    "preparing": "Personal réunit ton schéma, ton moment et ta voix.",
+    "failedPreview": "Ce brouillon a besoin d’un nouvel essai. Ouvre-le pour relancer la rédaction.",
+    "status": {
+      "generating": "Rédaction",
+      "failed": "À relancer",
+      "draft": "Brouillon",
+      "ready": "Prêt",
+      "archived": "Archivé"
+    },
+    "emptyTitle": "Aucun brouillon pour l’instant.",
+    "emptyCopy": "Pars d’un moment ou d’un schéma fort. Ton travail restera ici pendant que tu l’affines.",
+    "createFirst": "Créer ton premier brouillon",
+    "loadError": "Personal n’a pas pu charger tes brouillons. Réessaie."
   },
   "settings": {
     "eyebrow": "Réglages",
