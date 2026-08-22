@@ -67,7 +67,6 @@
     "nav": {
       "label": "Page sections",
       "how": "How it works",
-      "moments": "Moments",
       "faq": "FAQ",
       "signIn": "Sign in",
       "getAccess": "Get early access",
@@ -114,23 +113,23 @@
         },
         "panels": {
           "understand": {
-            "eyebrow": "Your account, read back",
-            "count": "3 things learned",
+            "eyebrow": "What Personal reads of you",
+            "count": "3 sources read",
             "rows": {
               "one": {
                 "metric": "40",
-                "title": "posts read, once",
-                "body": "Your captions, your formats, the hours you post. Personal reads you before it writes as you."
+                "title": "posts read on your account",
+                "body": "Your captions, your formats, the hours you post, your numbers. Personal reads you before it writes as you."
               },
               "two": {
-                "metric": "3",
-                "title": "formats that sound like you",
-                "body": "Personal story, behind the scenes, lesson learned. That is where you are most yourself."
+                "metric": "5",
+                "title": "creators you picked yourself",
+                "body": "The ones you actually watch to create. Personal learns what works for them, at your size."
               },
               "three": {
-                "metric": "Tuesday",
-                "title": "your last Moment",
-                "body": "The day you decided to stop posting advice carousels."
+                "metric": "12",
+                "title": "Moments you wrote down",
+                "body": "Your failures, your lessons, your behind the scenes. The material only your life can give."
               }
             }
           },
@@ -319,35 +318,6 @@
           }
         }
       }
-    },
-    "moments": {
-      "eyebrow": "Moments",
-      "title": "You live. Personal <em>takes notes</em>.",
-      "lede": "A client call, a bad week, a 1am realization. Write it down and forget it. Personal remembers it at the right moment.",
-      "cards": {
-        "one": {
-          "text": "A client asked why I charge more than an agency. For once I had a good answer.",
-          "meta": "Tuesday · Conversation"
-        },
-        "two": {
-          "text": "I almost turned down my first €10k client because I didn't feel ready.",
-          "meta": "6 days ago · Turning point"
-        },
-        "three": {
-          "text": "Nobody warns you about the silence right after a launch.",
-          "meta": "Last week · Realization"
-        },
-        "four": {
-          "text": "Voice note, 40s, on the way home",
-          "meta": "Sunday · Voice"
-        },
-        "five": {
-          "text": "Screenshot of the unsubscribe email that actually stung.",
-          "meta": "Monday · Screenshot"
-        }
-      },
-      "used": "Became a Reel on Nov 12",
-      "note": "Nothing is content until you say it is."
     },
     "faq": {
       "eyebrow": "FAQ",

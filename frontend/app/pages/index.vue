@@ -20,14 +20,12 @@ useHead({
     <LandingNav />
 
     <main>
-      <!-- The claim, the proof, the number, the mechanism, the thing nobody else
-           has, the objections, the door. Seven blocks, and every one of them
-           earns its scroll. -->
+      <!-- The claim, the proof, the number, the mechanism, the objections, the
+           door. Six blocks, and every one of them earns its scroll. -->
       <LandingHero />
       <LandingProof />
       <LandingStat />
       <LandingHow />
-      <LandingMoments />
       <LandingFaq />
       <LandingCta />
     </main>

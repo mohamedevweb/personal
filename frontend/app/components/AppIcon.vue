@@ -29,9 +29,7 @@ defineProps<{ name: string, size?: number, filled?: boolean, strokeWidth?: numbe
     <template v-else-if="name === 'refresh'"><path d="M20 11a8 8 0 1 0-.6 4"/><path d="M20 4.5V11h-6.5"/></template>
     <template v-else-if="name === 'trash'"><path d="M4 7h16M9.5 7V4.8h5V7M6.5 7l.8 12.2a1.6 1.6 0 0 0 1.6 1.5h6.2a1.6 1.6 0 0 0 1.6-1.5L17.5 7"/></template>
     <template v-else-if="name === 'arrow-up'"><path d="M12 19V5m0 0-6.5 6.5M12 5l6.5 6.5"/></template>
-    <template v-else-if="name === 'clock'"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.3l3.4 2"/></template>
-    <template v-else-if="name === 'mic'"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></template>
-    <template v-else-if="name === 'mail'"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/></template>
+    <template v-else-if="name === 'clock'"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.3l3.4 2"/></template>    <template v-else-if="name === 'mail'"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/></template>
     <template v-else-if="name === 'check'"><path d="m5 12.5 4.2 4.2L19 7"/></template>
     <template v-else-if="name === 'alert'"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.2M12 16.5h.01"/></template>
     <template v-else><circle cx="12" cy="12" r="9"/><path d="m9.5 12 1.7 1.7 3.8-4"/></template>

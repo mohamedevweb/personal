@@ -67,7 +67,6 @@
     "nav": {
       "label": "Sections de la page",
       "how": "Comment ça marche",
-      "moments": "Moments",
       "faq": "FAQ",
       "signIn": "Se connecter",
       "getAccess": "Accès anticipé",
@@ -114,23 +113,23 @@
         },
         "panels": {
           "understand": {
-            "eyebrow": "Votre compte, relu",
-            "count": "3 choses apprises",
+            "eyebrow": "Ce que Personal lit de vous",
+            "count": "3 sources lues",
             "rows": {
               "one": {
                 "metric": "40",
-                "title": "posts lus, une fois",
-                "body": "Vos légendes, vos formats, vos horaires. Personal vous relit avant de vous écrire."
+                "title": "posts analysés sur votre compte",
+                "body": "Vos légendes, vos formats, vos horaires, vos chiffres. Personal vous relit avant de vous écrire."
               },
               "two": {
-                "metric": "3",
-                "title": "formats qui vous ressemblent",
-                "body": "Récit personnel, coulisses, leçon apprise. C’est là que vous êtes le plus vous."
+                "metric": "5",
+                "title": "créateurs que vous avez choisis",
+                "body": "Ceux que vous regardez vraiment pour créer. Personal apprend ce qui marche chez eux, à votre taille."
               },
               "three": {
-                "metric": "Mardi",
-                "title": "votre dernier Moment",
-                "body": "Le jour où vous avez décidé d’arrêter les carrousels de conseils."
+                "metric": "12",
+                "title": "Moments que vous avez notés",
+                "body": "Vos échecs, vos leçons, vos coulisses. La matière que seule votre vie peut donner."
               }
             }
           },
@@ -319,35 +318,6 @@
           }
         }
       }
-    },
-    "moments": {
-      "eyebrow": "Moments",
-      "title": "Vous vivez. Personal <em>prend des notes</em>.",
-      "lede": "Un appel client, une mauvaise semaine, une prise de conscience à 1 h du matin. Notez-le et oubliez-le. Personal s'en souvient au bon moment.",
-      "cards": {
-        "one": {
-          "text": "Un client m'a demandé pourquoi je facture plus qu'une agence. Pour une fois, j'avais une bonne réponse.",
-          "meta": "Mardi · Conversation"
-        },
-        "two": {
-          "text": "J'ai failli refuser mon premier client à 10 k€ parce que je ne me sentais pas prêt.",
-          "meta": "Il y a 6 jours · Tournant"
-        },
-        "three": {
-          "text": "Personne ne vous prévient du silence juste après un lancement.",
-          "meta": "La semaine dernière · Prise de conscience"
-        },
-        "four": {
-          "text": "Note vocale, 40 s, sur le trajet du retour",
-          "meta": "Dimanche · Vocal"
-        },
-        "five": {
-          "text": "Capture de l'e-mail de désabonnement qui m'a vraiment piqué.",
-          "meta": "Lundi · Capture"
-        }
-      },
-      "used": "Devenu un Reel le 12 nov.",
-      "note": "Rien n'est du contenu tant que vous ne l'avez pas décidé."
     },
     "faq": {
       "eyebrow": "FAQ",
