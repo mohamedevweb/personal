@@ -83,6 +83,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function (): void {
     Route::delete('/moments/{moment}', [MomentController::class, 'destroy']);
     Route::get('/opportunities', OpportunityController::class);
     Route::get('/saved', SavedContentController::class);
+    Route::get('/remixes', [RemixController::class, 'index']);
     Route::get('/remixes/{remix}', [RemixController::class, 'show']);
     Route::patch('/remixes/{remix}', [RemixController::class, 'update']);
     Route::get('/creator-inspirations', [CreatorInspirationController::class, 'index']);

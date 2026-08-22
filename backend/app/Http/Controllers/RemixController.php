@@ -11,6 +11,35 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RemixController extends Controller
 {
+    public function index(Request $request, RemixDraftService $drafts): JsonResponse
+    {
+        $remixes = $request->user()->remixes()
+            ->where('status', '!=', 'archived')
+            ->with(['sourceContent.creator'])
+            ->latest('updated_at')
+            ->get()
+            ->map(function (Remix $remix) use ($drafts): array {
+                $remix = $drafts->failIfStale($remix);
+
+                return [
+                    'id' => $remix->id,
+                    'format' => $remix->format,
+                    'generated_content' => $remix->generated_content,
+                    'status' => $remix->status,
+                    'updated_at' => $remix->updated_at,
+                    'source_content' => [
+                        'id' => $remix->sourceContent->id,
+                        'hook' => $remix->sourceContent->hook,
+                        'creator' => [
+                            'username' => $remix->sourceContent->creator->username,
+                        ],
+                    ],
+                ];
+            });
+
+        return response()->json(['remixes' => $remixes]);
+    }
+
     public function show(
         Request $request,
         Remix $remix,

@@ -231,6 +231,56 @@ class PersonalMvpTest extends TestCase
         $this->assertSame($moment->content, $remix->generated_content['your_context']);
     }
 
+    public function test_drafts_are_returned_for_the_authenticated_user_most_recently_updated_first(): void
+    {
+        $post = ContentPost::query()->firstOrFail();
+        $older = Remix::query()->create([
+            'user_id' => $this->user->id,
+            'source_content_id' => $post->id,
+            'life_moment_id' => null,
+            'format' => 'caption',
+            'generated_content' => ['caption' => 'An older draft.'],
+            'status' => 'draft',
+            'updated_at' => now()->subHour(),
+        ]);
+        $newer = Remix::query()->create([
+            'user_id' => $this->user->id,
+            'source_content_id' => $post->id,
+            'life_moment_id' => null,
+            'format' => 'reel',
+            'generated_content' => ['hook' => 'A newer draft.'],
+            'status' => 'ready',
+        ]);
+        Remix::query()->create([
+            'user_id' => $this->user->id,
+            'source_content_id' => $post->id,
+            'life_moment_id' => null,
+            'format' => 'carousel',
+            'generated_content' => [],
+            'status' => 'archived',
+        ]);
+        $otherUser = User::factory()->create();
+        Remix::query()->create([
+            'user_id' => $otherUser->id,
+            'source_content_id' => $post->id,
+            'life_moment_id' => null,
+            'format' => 'caption',
+            'generated_content' => ['caption' => 'Not yours.'],
+            'status' => 'draft',
+        ]);
+
+        $response = $this->actingAs($this->user)->getJson('/api/remixes')->assertOk();
+
+        $response->assertJsonCount(2, 'remixes')
+            ->assertJsonPath('remixes.0.id', $newer->id)
+            ->assertJsonPath('remixes.1.id', $older->id)
+            ->assertJsonMissingPath('remixes.0.user_id')
+            ->assertJsonStructure(['remixes' => [[
+                'id', 'format', 'generated_content', 'status', 'updated_at',
+                'source_content' => ['id', 'hook', 'creator' => ['username']],
+            ]]]);
+    }
+
     public function test_a_failed_remix_can_be_retried_without_losing_its_selection(): void
     {
         Queue::fake();
