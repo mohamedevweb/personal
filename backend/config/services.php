@@ -37,6 +37,9 @@ return [
 
     'content_generation' => [
         'driver' => env('CONTENT_GENERATION_DRIVER', 'openai'),
+        // A worker or provider can disappear without running the job's failure
+        // callback. Polling turns that abandoned state into a retryable failure.
+        'stale_after_seconds' => (int) env('CONTENT_GENERATION_STALE_AFTER_SECONDS', 180),
     ],
 
     'discovery' => [

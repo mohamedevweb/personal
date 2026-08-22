@@ -10,12 +10,12 @@ const { apiFetch } = usePersonalApi()
 const toast = useToast()
 const inspirationData = ref<CreatorInspirationResponse | null>(null)
 const inspirationLoading = ref(false)
-const searchQuery = ref('')
 const searchResults = ref<CreatorInspiration[]>([])
 const searching = ref(false)
 const saving = ref(false)
 const selected = ref<CreatorInspiration[]>([])
 const inspirationsLoaded = ref(false)
+const handleInput = ref('')
 
 const stages = computed<{ key: InstagramSyncStatus; label: string }[]>(() => [
   { key: 'connecting', label: t('onboarding.stages.connecting') },
@@ -41,29 +41,90 @@ watch(connectionError, (message) => {
 
 const onboarded = useState('personal-onboarded', () => false)
 
+const minimum = computed(() => inspirationData.value?.minimum ?? 3)
+const maximum = computed(() => inspirationData.value?.maximum ?? 6)
+
+// Suggestions and search hits already picked live in the favorites card, so the
+// browsable grid only offers what is still addable.
 const availableCreators = computed(() => {
-  const creators = [...selected.value, ...(inspirationData.value?.suggestions || []), ...searchResults.value]
+  const creators = [...searchResults.value, ...(inspirationData.value?.suggestions || [])]
   return Array.from(new Map(creators.map(creator => [creator.username.toLowerCase(), creator])).values())
+    .filter(creator => !isSelected(creator.username))
 })
 
-const canContinue = computed(() => selected.value.length >= 3 && selected.value.length <= 5)
+const canContinue = computed(() => selected.value.length >= minimum.value && selected.value.length <= maximum.value)
+const parsedHandle = computed(() => parseHandle(handleInput.value))
 
 function isSelected(username: string) {
   return selected.value.some(creator => creator.username.toLowerCase() === username.toLowerCase())
 }
 
-function toggleCreator(creator: CreatorInspiration) {
-  if (isSelected(creator.username)) {
-    selected.value = selected.value.filter(item => item.username.toLowerCase() !== creator.username.toLowerCase())
-    return
+// Accepts a bare handle, an @handle, or an instagram.com profile link, mirroring
+// what the API resolves when the selection is saved.
+function parseHandle(input: string): string | null {
+  let candidate = input.trim()
+
+  if (/^https?:\/\//i.test(candidate)) {
+    try {
+      const url = new URL(candidate)
+      if (!/^(www\.)?instagram\.com$/i.test(url.hostname)) return null
+      candidate = url.pathname.split('/').filter(Boolean)[0] || ''
+    } catch {
+      return null
+    }
   }
 
-  if (selected.value.length >= 5) {
-    toast.error(t('onboarding.inspirations.maximumError'))
+  candidate = candidate.replace(/^@/, '')
+  return /^[A-Za-z0-9._]{1,30}$/.test(candidate) ? candidate : null
+}
+
+function addCreator(creator: CreatorInspiration) {
+  if (isSelected(creator.username)) return
+
+  if (selected.value.length >= maximum.value) {
+    toast.error(t('onboarding.inspirations.maximumError', { count: maximum.value }))
     return
   }
 
   selected.value = [...selected.value, { ...creator, is_selected: true }]
+}
+
+function removeCreator(username: string) {
+  selected.value = selected.value.filter(item => item.username.toLowerCase() !== username.toLowerCase())
+}
+
+function toggleCreator(creator: CreatorInspiration) {
+  if (isSelected(creator.username)) {
+    removeCreator(creator.username)
+    return
+  }
+
+  addCreator(creator)
+}
+
+function addHandle() {
+  const handle = parsedHandle.value
+  if (!handle) {
+    if (handleInput.value.trim()) toast.error(t('onboarding.inspirations.handleError'))
+    return
+  }
+
+  if (isSelected(handle)) {
+    handleInput.value = ''
+    return
+  }
+
+  const known = availableCreators.value.find(creator => creator.username.toLowerCase() === handle.toLowerCase())
+  addCreator(known || {
+    username: handle,
+    display_name: `@${handle}`,
+    avatar_url: null,
+    followers: 0,
+    niche: null,
+    is_selected: true,
+    is_measured: false
+  })
+  handleInput.value = ''
 }
 
 function initials(creator: CreatorInspiration) {
@@ -86,7 +147,7 @@ async function loadInspirations() {
 }
 
 async function searchCreators() {
-  const query = searchQuery.value.trim()
+  const query = handleInput.value.trim()
   if (query.length < 2 || searching.value) return
   searching.value = true
 
@@ -211,53 +272,97 @@ onMounted(async () => {
               {{ $t('onboarding.inspirations.copy') }}
             </p>
 
-            <div class="mt-7 flex items-center justify-between text-sm">
-              <span class="font-medium">{{ $t('onboarding.inspirations.selected', { count: selected.length }) }}</span>
-              <span class="text-[var(--faint)]">{{ $t('onboarding.inspirations.range') }}</span>
-            </div>
-
-            <form class="mt-4 flex gap-2" @submit.prevent="searchCreators">
-              <label for="creator-search" class="sr-only">{{ $t('onboarding.inspirations.searchLabel') }}</label>
-              <input
-                id="creator-search"
-                v-model="searchQuery"
-                type="text"
-                autocomplete="off"
-                class="min-w-0 flex-1 rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 py-3 text-sm outline-none transition focus:border-[var(--ink)]"
-                :placeholder="$t('onboarding.inspirations.searchPlaceholder')"
-              >
-              <button
-                type="submit"
-                class="rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 py-3 text-sm font-medium transition hover:bg-white disabled:cursor-wait disabled:opacity-50"
-                :disabled="searching || searchQuery.trim().length < 2"
-              >
-                {{ searching ? $t('onboarding.inspirations.searching') : $t('onboarding.inspirations.search') }}
-              </button>
-            </form>
-
-            <div v-if="inspirationLoading" class="mt-5 grid grid-cols-2 gap-3">
-              <div v-for="i in 4" :key="i" class="h-16 animate-pulse rounded-[16px] bg-[var(--line-soft)]" />
-            </div>
-            <div v-else class="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <button
-                v-for="creator in availableCreators"
-                :key="creator.username"
-                type="button"
-                class="flex min-w-0 items-center gap-3 rounded-[16px] border bg-[var(--surface)] p-3 text-left transition hover:border-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
-                :class="isSelected(creator.username) ? 'border-[var(--accent)] ring-1 ring-[var(--accent)]' : 'border-[var(--line)]'"
-                @click="toggleCreator(creator)"
-              >
-                <img v-if="creator.avatar_url" :src="creator.avatar_url" :alt="creator.display_name" class="h-10 w-10 shrink-0 rounded-full object-cover">
-                <span v-else class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[var(--paper)] text-xs font-semibold">{{ initials(creator) }}</span>
-                <span class="min-w-0 flex-1">
-                  <span class="block truncate text-sm font-medium">{{ creator.display_name }}</span>
-                  <span class="block truncate text-xs text-[var(--faint)]">@{{ creator.username }}</span>
+            <section class="mt-7 rounded-[24px] border border-[var(--line)] bg-[var(--surface)] p-5 md:p-6">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <h2 class="text-sm font-semibold">{{ $t('onboarding.inspirations.cardTitle') }}</h2>
+                <span class="text-xs text-[var(--faint)]">
+                  {{ $t('onboarding.inspirations.counter', { count: selected.length, max: maximum }) }}
                 </span>
-                <span class="grid h-6 w-6 shrink-0 place-items-center rounded-full border text-xs" :class="isSelected(creator.username) ? 'border-[var(--accent)] bg-[var(--accent)] text-white' : 'border-[var(--line)] text-[var(--faint)]'">
-                  {{ isSelected(creator.username) ? '✓' : '+' }}
-                </span>
-              </button>
-            </div>
+              </div>
+              <p class="mt-1.5 text-[13px] leading-5 text-[var(--muted)]">
+                {{ $t('onboarding.inspirations.cardCopy', { min: minimum, max: maximum }) }}
+              </p>
+
+              <form class="mt-4 flex flex-wrap gap-2" @submit.prevent="addHandle">
+                <label for="creator-search" class="sr-only">{{ $t('onboarding.inspirations.searchLabel') }}</label>
+                <input
+                  id="creator-search"
+                  v-model="handleInput"
+                  type="text"
+                  autocomplete="off"
+                  spellcheck="false"
+                  class="min-w-0 flex-1 rounded-full border border-[var(--line)] bg-[var(--paper)] px-5 py-3 text-sm outline-none transition focus:border-[var(--ink)]"
+                  :placeholder="$t('onboarding.inspirations.searchPlaceholder')"
+                >
+                <button
+                  type="button"
+                  class="rounded-full border border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-sm font-medium transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
+                  :disabled="searching || handleInput.trim().length < 2"
+                  @click="searchCreators"
+                >
+                  {{ searching ? $t('onboarding.inspirations.searching') : $t('onboarding.inspirations.search') }}
+                </button>
+                <button
+                  type="submit"
+                  class="rounded-full border border-[var(--ink)] bg-[var(--ink)] px-4 py-3 text-sm font-medium text-[var(--paper)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40"
+                  :disabled="!parsedHandle || selected.length >= maximum"
+                >
+                  {{ $t('onboarding.inspirations.add') }}
+                </button>
+              </form>
+
+              <ul v-if="selected.length" class="mt-4 flex flex-wrap gap-2">
+                <li
+                  v-for="creator in selected"
+                  :key="creator.username"
+                  class="flex max-w-full items-center gap-2 rounded-full border border-[var(--accent)] bg-[var(--paper)] py-1 pl-1 pr-2 text-sm"
+                >
+                  <img v-if="creator.avatar_url" :src="creator.avatar_url" :alt="creator.display_name" class="h-7 w-7 shrink-0 rounded-full object-cover">
+                  <span v-else class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[var(--surface)] text-[10px] font-semibold">{{ initials(creator) }}</span>
+                  <span class="truncate">@{{ creator.username }}</span>
+                  <button
+                    type="button"
+                    class="grid h-5 w-5 shrink-0 place-items-center rounded-full text-[var(--faint)] transition hover:bg-[var(--surface)] hover:text-[var(--ink)]"
+                    :aria-label="$t('onboarding.inspirations.remove', { handle: creator.username })"
+                    @click="removeCreator(creator.username)"
+                  >
+                    ×
+                  </button>
+                </li>
+              </ul>
+              <p v-else class="mt-4 text-[13px] text-[var(--faint)]">
+                {{ $t('onboarding.inspirations.empty') }}
+              </p>
+
+              <p class="mt-5 text-xs font-medium uppercase tracking-[0.14em] text-[var(--faint)]">
+                {{ searchResults.length ? $t('onboarding.inspirations.resultsLabel') : $t('onboarding.inspirations.suggestionsLabel') }}
+              </p>
+
+              <div v-if="inspirationLoading" class="mt-3 grid grid-cols-2 gap-2">
+                <div v-for="i in 4" :key="i" class="h-16 animate-pulse rounded-[16px] bg-[var(--line-soft)]" />
+              </div>
+              <div v-else-if="availableCreators.length" class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <button
+                  v-for="creator in availableCreators"
+                  :key="creator.username"
+                  type="button"
+                  class="flex min-w-0 items-center gap-3 rounded-[16px] border border-[var(--line)] bg-[var(--paper)] p-3 text-left transition hover:border-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"
+                  :disabled="selected.length >= maximum"
+                  @click="toggleCreator(creator)"
+                >
+                  <img v-if="creator.avatar_url" :src="creator.avatar_url" :alt="creator.display_name" class="h-10 w-10 shrink-0 rounded-full object-cover">
+                  <span v-else class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[var(--surface)] text-xs font-semibold">{{ initials(creator) }}</span>
+                  <span class="min-w-0 flex-1">
+                    <span class="block truncate text-sm font-medium">{{ creator.display_name }}</span>
+                    <span class="block truncate text-xs text-[var(--faint)]">@{{ creator.username }}</span>
+                  </span>
+                  <span class="grid h-6 w-6 shrink-0 place-items-center rounded-full border border-[var(--line)] text-xs text-[var(--faint)]">+</span>
+                </button>
+              </div>
+              <p v-else class="mt-3 text-[13px] text-[var(--faint)]">
+                {{ $t('onboarding.inspirations.noResults') }}
+              </p>
+            </section>
 
             <button
               type="button"

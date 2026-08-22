@@ -187,9 +187,12 @@ class RecommendationService
             // The absolute floors. outlier_score is a ratio, so on its own it rates a
             // post going from two likes to three as a 1.5x breakout.
             ->whereRaw('likes + comments >= ?', [(int) config('services.discovery.min_post_engagement')])
-            ->whereHas('creator', function (Builder $creator) use ($inspirationIds): void {
+            ->whereHas('creator', function (Builder $creator) use ($inspirationIds, $user): void {
                 $creator->where('followers', '>=', (int) config('services.discovery.min_followers'))
-                    ->where('safety_status', 'allowed');
+                    ->where('safety_status', 'allowed')
+                    ->where(function (Builder $owner) use ($user): void {
+                        $owner->whereNull('user_id')->orWhere('user_id', '!=', $user->id);
+                    });
 
                 if (config('creator_catalog.curated_only')) {
                     $creator->where(function (Builder $curation) use ($inspirationIds): void {

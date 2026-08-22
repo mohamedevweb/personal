@@ -25,7 +25,12 @@ class CreatorInspirationController extends Controller
     public function update(Request $request, CreatorInspirationService $inspirations): JsonResponse
     {
         $data = $request->validate([
-            'handles' => ['required', 'array', 'min:3', 'max:5'],
+            'handles' => [
+                'required',
+                'array',
+                'min:'.CreatorInspirationService::MINIMUM_SELECTION,
+                'max:'.CreatorInspirationService::MAXIMUM_SELECTION,
+            ],
             'handles.*' => ['required', 'string', 'max:255'],
         ]);
 
@@ -34,7 +39,7 @@ class CreatorInspirationController extends Controller
 
         return response()->json([
             'selected' => $selected,
-            'onboarding_complete' => $account?->sync_status === 'completed' && count($selected) >= 3,
+            'onboarding_complete' => $account?->sync_status === 'completed' && count($selected) >= CreatorInspirationService::MINIMUM_SELECTION,
         ]);
     }
 }

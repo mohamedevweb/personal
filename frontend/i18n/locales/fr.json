@@ -461,6 +461,11 @@
     "drafting": "Rédaction à partir de votre matière…",
     "draftError": "Personal n’a pas pu rédiger ceci pour l’instant. Veuillez réessayer.",
     "loadError": "Personal n’a pas pu charger ta matière créative.",
+    "empty": {
+      "title": "Pas encore de matière.",
+      "copy": "Personal écrit à partir de ce que vous avez vraiment vécu. Ajoutez un premier moment — une décision, un échec, une leçon — et tous les formats ci-dessous deviennent disponibles.",
+      "action": "Ajouter un moment"
+    },
     "personalsPick": "Le choix de Personal",
     "pickTitleFallback": "Racontez l’histoire derrière votre dernière décision produit.",
     "pickCopyFallback": "Une décision concrète crée de la tension, de l’insight et un enseignement utile.",

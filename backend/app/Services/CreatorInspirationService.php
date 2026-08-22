@@ -20,6 +20,10 @@ class CreatorInspirationService
 {
     private const SUGGESTION_LIMIT = 6;
 
+    public const MINIMUM_SELECTION = 3;
+
+    public const MAXIMUM_SELECTION = 6;
+
     public function __construct(
         private readonly InstagramDataProviderManager $providers,
         private readonly CanonicalCreatorVerticals $verticals,
@@ -29,7 +33,11 @@ class CreatorInspirationService
     /** @return array{selected: list<array<string, mixed>>, suggestions: list<array<string, mixed>>, minimum: int, maximum: int} */
     public function forUser(User $user): array
     {
-        $selected = $user->inspirationCreators()->get();
+        $selected = $user->inspirationCreators()
+            ->where(function ($query) use ($user): void {
+                $query->whereNull('creators.user_id')->orWhere('creators.user_id', '!=', $user->id);
+            })
+            ->get();
         $selectedIds = $selected->pluck('id');
         $vertical = $this->primaryVertical($user);
         $market = $user->creatorProfile?->market;
@@ -37,6 +45,9 @@ class CreatorInspirationService
         $pool = Creator::query()
             ->where('curation_status', 'approved')
             ->where('safety_status', ContentSafetyDecision::ALLOWED)
+            ->where(function ($query) use ($user): void {
+                $query->whereNull('user_id')->orWhere('user_id', '!=', $user->id);
+            })
             ->whereNotIn('id', $selectedIds)
             ->orderByDesc('followers')
             ->get();
@@ -52,8 +63,8 @@ class CreatorInspirationService
         return [
             'selected' => $selected->map(fn (Creator $creator): array => $this->render($creator, true))->all(),
             'suggestions' => $suggestions->map(fn (Creator $creator): array => $this->render($creator, false))->all(),
-            'minimum' => 3,
-            'maximum' => 5,
+            'minimum' => self::MINIMUM_SELECTION,
+            'maximum' => self::MAXIMUM_SELECTION,
         ];
     }
 
@@ -69,6 +80,9 @@ class CreatorInspirationService
 
         $local = Creator::query()
             ->where('safety_status', '!=', ContentSafetyDecision::BLOCKED)
+            ->where(function ($builder) use ($user): void {
+                $builder->whereNull('user_id')->orWhere('user_id', '!=', $user->id);
+            })
             ->where(function ($builder) use ($needle): void {
                 $like = "%{$needle}%";
                 $builder->whereRaw('LOWER(username) LIKE ?', [$like])
@@ -94,6 +108,7 @@ class CreatorInspirationService
 
         $remoteResults = $remote
             ->reject(fn (DiscoveredProfile $profile): bool => $profile->isPrivate)
+            ->reject(fn (DiscoveredProfile $profile): bool => Str::lower($profile->username) === Str::lower((string) $user->instagramAccount?->username))
             ->map(fn (DiscoveredProfile $profile): array => $this->renderProfile($profile))
             ->values();
 
@@ -115,9 +130,9 @@ class CreatorInspirationService
             ->unique(fn (string $handle): string => Str::lower($handle))
             ->values();
 
-        if ($handles->count() < 3 || $handles->count() > 5) {
+        if ($handles->count() < self::MINIMUM_SELECTION || $handles->count() > self::MAXIMUM_SELECTION) {
             throw ValidationException::withMessages([
-                'handles' => ['Choose between 3 and 5 Instagram creators.'],
+                'handles' => ['Choose between '.self::MINIMUM_SELECTION.' and '.self::MAXIMUM_SELECTION.' Instagram creators.'],
             ]);
         }
 
@@ -147,9 +162,13 @@ class CreatorInspirationService
 
     private function resolveCreator(User $user, string $handle): Creator
     {
+        if (Str::lower($handle) === Str::lower((string) $user->instagramAccount?->username)) {
+            throw ValidationException::withMessages(['handles' => ['Your own Instagram account cannot be selected.']]);
+        }
+
         $existing = Creator::query()->whereRaw('LOWER(username) = ?', [Str::lower($handle)])->first();
 
-        if ($existing?->safety_status === ContentSafetyDecision::BLOCKED) {
+        if ($existing?->user_id === $user->id || $existing?->safety_status === ContentSafetyDecision::BLOCKED) {
             throw ValidationException::withMessages(['handles' => ["@{$handle} cannot be selected."]]);
         }
 

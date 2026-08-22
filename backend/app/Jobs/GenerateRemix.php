@@ -14,12 +14,11 @@ class GenerateRemix implements ShouldQueue
 {
     use Queueable;
 
-    public int $tries = 3;
+    public int $tries = 1;
 
-    public int $timeout = 180;
+    public int $timeout = 150;
 
-    /** @var list<int> */
-    public array $backoff = [10, 30, 90];
+    public bool $failOnTimeout = true;
 
     public function __construct(
         public readonly int $remixId,
@@ -34,6 +33,14 @@ class GenerateRemix implements ShouldQueue
 
         $remix = Remix::query()->with(['sourceContent.creator', 'lifeMoment', 'user.creatorProfile'])
             ->findOrFail($this->remixId);
+
+        if ($remix->status !== 'generating') {
+            return;
+        }
+
+        // Refresh the stale-generation clock once the worker actually starts.
+        // A queued remix and a provider request are two distinct wait states.
+        $remix->touch();
         $insights->present($remix->sourceContent);
 
         try {
@@ -60,6 +67,9 @@ class GenerateRemix implements ShouldQueue
 
     public function failed(?Throwable $exception): void
     {
-        Remix::query()->whereKey($this->remixId)->update(['status' => 'failed']);
+        Remix::query()
+            ->whereKey($this->remixId)
+            ->where('status', 'generating')
+            ->update(['status' => 'failed']);
     }
 }

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Jobs\DiscoverNicheContent;
 use App\Jobs\SyncInstagramAccount;
+use App\Models\Creator;
 use App\Models\CreatorProfile;
 use App\Models\InstagramAccount;
 use App\Models\User;
@@ -92,6 +93,11 @@ class SyncInstagramAccountTest extends TestCase
         $this->assertSame('partial', $creatorProfile->creator_dna['analysis_status']);
         $this->assertSame('heuristic', $creatorProfile->creator_dna['analysis_method']);
         $this->assertNotNull($creatorProfile->dna_analyzed_at);
+        $creator = Creator::query()->where('instagram_user_id', '123')->firstOrFail();
+        $this->assertSame($user->id, $creator->user_id);
+        $this->assertSame('founder_creator', $creator->username);
+        $this->assertSame('discovered', $creator->curation_status);
+        $this->assertSame('pending', $creator->safety_status);
     }
 
     public function test_unavailable_insights_do_not_fan_out_one_request_per_metric(): void

@@ -461,6 +461,11 @@
     "drafting": "Drafting from your material…",
     "draftError": "Personal could not draft this right now. Please try again.",
     "loadError": "Personal could not load your creative material.",
+    "empty": {
+      "title": "Nothing to work from yet.",
+      "copy": "Personal writes from what actually happened to you. Add a first moment — a decision, a failure, a lesson — and every format below becomes available.",
+      "action": "Add a moment"
+    },
     "personalsPick": "Personal’s pick",
     "pickTitleFallback": "Tell the story behind your latest product decision.",
     "pickCopyFallback": "A concrete decision creates tension, insight and a useful takeaway.",

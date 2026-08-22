@@ -81,6 +81,10 @@ async function turnIntoContent(moment: LifeMoment) {
     toast.error(apiErrorMessage(exception, t('create.draftError')))
   }
 }
+// The create page sends creators here when they have no material yet, so the
+// composer opens straight away instead of asking for one more click.
+if (useRoute().query.new !== undefined) modalOpen.value = true
+
 onMounted(load)
 </script>
 

@@ -167,7 +167,7 @@ onUnmounted(() => {
                 <!-- Empty state: centered greeting, in the command-bar spirit -->
                 <div v-if="!messages.length" class="flex min-h-[250px] flex-col items-center justify-center px-2 py-6 text-center sm:min-h-[290px]">
                   <div class="grid h-12 w-12 place-items-center rounded-2xl bg-[var(--ink)] text-[var(--paper)] shadow-[0_8px_24px_rgba(23,23,26,.22)]">
-                    <PersonalMark :size="27" />
+                    <PersonalMark :size="27" tone="signature-lit" />
                   </div>
                   <h2 class="mt-5 font-serif text-[30px] leading-tight tracking-[-.02em] md:text-[36px]">{{ emptyTitle }}</h2>
                   <p class="mt-2 max-w-sm text-[13px] leading-6 text-[var(--faint)]">{{ $t('chat.emptyCopy') }}</p>

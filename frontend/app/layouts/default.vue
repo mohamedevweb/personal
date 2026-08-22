@@ -105,7 +105,7 @@ const pageTitle = computed(() => {
 
       <header class="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-[var(--line)] bg-[var(--paper)]/95 px-5 backdrop-blur md:hidden">
         <NuxtLink to="/feed" class="b-focus flex items-center gap-2.5">
-          <PersonalMark :size="19" />
+          <PersonalMark :size="19" tone="signature" />
           <span class="font-serif text-[19px] tracking-[-.02em]">{{ $t(pageTitle) }}</span>
         </NuxtLink>
         <NuxtLink to="/create" class="grid h-9 w-9 place-items-center rounded-full b-btn-red" :aria-label="$t('nav.create')"><AppIcon name="plus" /></NuxtLink>

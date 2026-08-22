@@ -15,6 +15,7 @@ x-backend: &backend
     DB_USERNAME: ${DB_USERNAME:-personal}
     DB_PASSWORD: ${DB_PASSWORD:-personal}
     QUEUE_CONNECTION: database
+    DB_QUEUE_RETRY_AFTER: 210
     CACHE_STORE: database
     SESSION_DRIVER: database
   depends_on:
@@ -61,10 +62,11 @@ services:
       - app
     restart: unless-stopped
 
-  # Runs imports and discovery work, which can take several minutes.
+  # Runs imports and discovery work, and acts as a fallback for creator-facing
+  # jobs if the dedicated interactive worker is unavailable.
   queue:
     <<: *backend
-    command: ["php", "artisan", "queue:work", "--queue=default", "--tries=3", "--max-time=3600"]
+    command: ["php", "artisan", "queue:work", "--queue=interactive,default", "--tries=3", "--timeout=150", "--max-time=3600"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -75,7 +77,7 @@ services:
   # analysis or starting a remix always reaches a worker promptly.
   interactive-queue:
     <<: *backend
-    command: ["php", "artisan", "queue:work", "--queue=interactive", "--tries=3", "--max-time=3600"]
+    command: ["php", "artisan", "queue:work", "--queue=interactive", "--tries=3", "--timeout=150", "--max-time=3600"]
     depends_on:
       postgres:
         condition: service_healthy

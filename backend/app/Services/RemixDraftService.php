@@ -10,6 +10,20 @@ use App\Models\User;
 
 class RemixDraftService
 {
+    public function failIfStale(Remix $remix): Remix
+    {
+        $staleAfter = (int) config('services.content_generation.stale_after_seconds');
+
+        if (
+            $remix->status === 'generating'
+            && $remix->updated_at?->lte(now()->subSeconds($staleAfter))
+        ) {
+            $remix->update(['status' => 'failed']);
+        }
+
+        return $remix;
+    }
+
     public function start(
         ContentPost $source,
         User $user,

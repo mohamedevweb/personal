@@ -265,6 +265,55 @@ class PersonalMvpTest extends TestCase
         $this->assertDatabaseHas('remixes', ['id' => $remix->id, 'status' => 'failed']);
     }
 
+    public function test_an_abandoned_generating_remix_becomes_retryable(): void
+    {
+        Queue::fake();
+        config()->set('services.content_generation.stale_after_seconds', 180);
+        $post = ContentPost::query()->firstOrFail();
+        $remix = Remix::query()->create([
+            'user_id' => $this->user->id,
+            'source_content_id' => $post->id,
+            'life_moment_id' => null,
+            'format' => 'reel',
+            'generated_content' => [],
+            'status' => 'generating',
+        ]);
+        Remix::query()->whereKey($remix->id)->update([
+            'updated_at' => now()->subSeconds(181),
+        ]);
+
+        $this->actingAs($this->user)
+            ->getJson("/api/remixes/{$remix->id}")
+            ->assertOk()
+            ->assertJsonPath('remix.status', 'failed');
+
+        $this->actingAs($this->user)
+            ->postJson("/api/remixes/{$remix->id}/retry")
+            ->assertAccepted()
+            ->assertJsonPath('remix.status', 'generating');
+
+        Queue::assertPushed(GenerateRemix::class, fn (GenerateRemix $job): bool => $job->remixId === $remix->id);
+    }
+
+    public function test_a_recent_generating_remix_keeps_polling(): void
+    {
+        config()->set('services.content_generation.stale_after_seconds', 180);
+        $post = ContentPost::query()->firstOrFail();
+        $remix = Remix::query()->create([
+            'user_id' => $this->user->id,
+            'source_content_id' => $post->id,
+            'life_moment_id' => null,
+            'format' => 'reel',
+            'generated_content' => [],
+            'status' => 'generating',
+        ]);
+
+        $this->actingAs($this->user)
+            ->getJson("/api/remixes/{$remix->id}")
+            ->assertOk()
+            ->assertJsonPath('remix.status', 'generating');
+    }
+
     public function test_personal_memory_is_editable(): void
     {
         $this->user->creatorProfile->update([

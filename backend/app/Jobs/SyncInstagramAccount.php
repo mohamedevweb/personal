@@ -9,6 +9,7 @@ use App\Services\Discovery\CreatorMarketDetector;
 use App\Services\Instagram\InstagramApiService;
 use App\Services\Instagram\InstagramAuthService;
 use App\Services\Instagram\NicheDetectionService;
+use App\Services\RegisteredCreatorService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Str;
@@ -38,9 +39,11 @@ class SyncInstagramAccount implements ShouldQueue
         NicheDetectionService $niche,
         ?CreatorMarketDetector $markets = null,
         ?CanonicalCreatorVerticals $verticals = null,
+        ?RegisteredCreatorService $registeredCreators = null,
     ): void {
         $markets ??= app(CreatorMarketDetector::class);
         $verticals ??= app(CanonicalCreatorVerticals::class);
+        $registeredCreators ??= app(RegisteredCreatorService::class);
         $account = InstagramAccount::query()->findOrFail($this->instagramAccountId);
 
         try {
@@ -106,6 +109,7 @@ class SyncInstagramAccount implements ShouldQueue
             }
 
             $creatorProfile->save();
+            $registeredCreators->sync($account->fresh('media'), $creatorProfile);
 
             $account->update(['sync_status' => 'finding_patterns']);
 

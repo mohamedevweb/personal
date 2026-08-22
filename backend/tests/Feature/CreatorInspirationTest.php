@@ -35,6 +35,8 @@ class CreatorInspirationTest extends TestCase
     public function test_suggestions_prioritize_approved_safe_creators_in_the_users_vertical(): void
     {
         $tech = $this->creator('tech_creator', 'tech-ai', 'approved', 'allowed', 100000);
+        $self = $this->creator('self_creator', 'tech-ai', 'approved', 'allowed', 2000000);
+        $self->update(['user_id' => $this->user->id]);
         $this->creator('fitness_creator', 'sport-fitness', 'approved', 'allowed', 900000);
         $this->creator('pending_creator', 'tech-ai', 'discovered', 'pending', 800000);
         $this->creator('blocked_creator', 'tech-ai', 'approved', 'blocked', 700000);

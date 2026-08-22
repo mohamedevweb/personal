@@ -63,6 +63,14 @@ After the first Instagram import, onboarding asks the user to choose three to fi
 
 The feed has two views. `GET /api/feed` powers **For You**, combining private inspirations with approved creators close to the user's vertical and market. `GET /api/feed/global` powers **Global**, ranking all recent, measured and safe posts from approved creators with the same outlier and freshness model, but without niche or market quotas.
 
+Every member who completes Instagram sync also has one public identity in `creators`, linked through nullable `creators.user_id`. Sync reuses an existing public creator by Instagram ID and then username, so a discovered creator who later joins Personal is never duplicated or stripped of editorial approval. Their own posts are excluded from both of their feeds and their account is never suggested back to them as an inspiration. Other users may see that creator only through the normal measurement, safety and catalogue rules.
+
+After deploying the creator identity migration, link members who completed Instagram sync before this feature without making any provider request:
+
+```bash
+docker compose exec app php artisan personal:link-registered-creators
+```
+
 Set `DISCOVERY_DRIVER=scrapecreators` and `SCRAPECREATORS_API_KEY` to run the normal creator discovery and account measurement jobs through ScrapeCreators. Profile responses use ScrapeCreators' provider-side cache for the same three-day window as account measurement by default. Change `SCRAPECREATORS_CACHE_MAX_AGE` when testing freshness versus cost.
 
 To compare HikerAPI and ScrapeCreators on the same niche without writing to the database, run:

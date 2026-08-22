@@ -72,6 +72,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(CreatorProfile::class);
     }
 
+    public function creatorIdentity(): HasOne
+    {
+        return $this->hasOne(Creator::class);
+    }
+
     public function moments(): HasMany
     {
         return $this->hasMany(LifeMoment::class);

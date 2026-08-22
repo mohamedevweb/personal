@@ -114,13 +114,28 @@ class CuratedFeedTest extends TestCase
             ->assertJsonCount(12, 'items');
     }
 
+    public function test_a_registered_creator_never_sees_their_own_posts_in_either_feed(): void
+    {
+        $self = $this->posts('FR', 4, niche: 'tech-ai', baseOutlier: 8);
+        $self->update(['user_id' => $this->user->id]);
+        $this->posts('FR', 12, niche: 'sport-fitness', baseOutlier: 3);
+
+        foreach ([
+            app(RecommendationService::class)->forUser($this->user),
+            app(RecommendationService::class)->globalForUser($this->user),
+        ] as $feed) {
+            $this->assertSame(12, $feed->count());
+            $this->assertFalse($feed->pluck('creator.username')->contains($self->username));
+        }
+    }
+
     private function posts(
         string $market,
         int $count,
         string $status = 'approved',
         string $niche = 'sport-fitness',
         float $baseOutlier = 3,
-    ): void {
+    ): Creator {
         $creator = Creator::query()->create([
             'username' => strtolower($market).'-'.$status.'-'.Creator::query()->count(),
             'display_name' => $market,
@@ -153,5 +168,7 @@ class CuratedFeedTest extends TestCase
                 'measured_at' => now(),
             ]);
         }
+
+        return $creator;
     }
 }

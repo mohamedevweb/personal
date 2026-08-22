@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\SyncInstagramAccount;
+use App\Services\CreatorInspirationService;
 use App\Services\Instagram\InstagramAuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -35,7 +36,7 @@ class InstagramConnectionController extends Controller
         return response()->json([
             'connected' => true,
             'inspiration_count' => $inspirationCount,
-            'onboarding_complete' => $account->sync_status === 'completed' && $inspirationCount >= 3,
+            'onboarding_complete' => $account->sync_status === 'completed' && $inspirationCount >= CreatorInspirationService::MINIMUM_SELECTION,
             'account' => [
                 'username' => $account->username,
                 'display_name' => $account->display_name,

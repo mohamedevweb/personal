@@ -10,9 +10,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RemixController extends Controller
 {
-    public function show(Request $request, Remix $remix): JsonResponse
+    public function show(Request $request, Remix $remix, RemixDraftService $drafts): JsonResponse
     {
         $this->ensureOwner($request, $remix);
+        $remix = $drafts->failIfStale($remix);
 
         return response()->json([
             'remix' => $remix->load(['sourceContent.creator', 'lifeMoment']),

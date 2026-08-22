@@ -51,7 +51,7 @@ function toggleMode() {
 
         <div class="mx-auto w-full max-w-[360px]">
           <NuxtLink to="/" class="b-focus mx-auto block w-fit" :aria-label="$t('login.home')">
-            <PersonalMark :size="30" />
+            <PersonalMark :size="30" tone="signature" />
           </NuxtLink>
 
           <h1 class="mt-7 text-center font-display text-[44px] leading-[1.05] tracking-[-.03em]">
