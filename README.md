@@ -193,7 +193,13 @@ This implementation uses **Instagram API with Instagram Login**, not Instagram B
 
 The direct Instagram Login flow targets professional Creator and Business accounts and uses `graph.instagram.com`; it does not require a Facebook Page association.
 
-## Run with Docker
+## Running it
+
+Compose carries the backing services; the frontend runs from the source tree, so
+a change to a component is on screen immediately instead of waiting on an image
+rebuild.
+
+Start the backend:
 
 ```bash
 cp backend/.env.example backend/.env
@@ -202,17 +208,25 @@ docker compose up -d --build
 docker compose exec app php artisan db:seed
 ```
 
-The app is then on http://localhost:3000 and the API on http://localhost:8000. Override `API_PORT`, `FRONTEND_PORT`, `NUXT_PUBLIC_API_BASE` and the `DB_*` values from the shell or a root `.env` if those ports are taken.
+Then the frontend, in a second shell:
+
+```bash
+cd frontend
+cp .env.example .env
+npm install
+npm run dev
+```
+
+The app is then on http://localhost:3000 and the API on http://localhost:8000. Override `API_PORT`, `NUXT_PUBLIC_API_BASE` and the `DB_*` values from the shell or a root `.env` if those ports are taken.
 
 Composition:
 
 - `app` — php-fpm, and the only service that runs migrations (`RUN_MIGRATIONS=true`)
 - `web` — nginx, serving `public/` and proxying PHP to `app`
 - `queue` / `interactive-queue` / `scheduler` — the same image running discovery work, analysis, isolated remix generation and scheduled tasks
-- `frontend` — the Nuxt Nitro server
 - `postgres` — with a health check the backend services wait on
 
-`NUXT_PUBLIC_API_BASE` is read by the browser, so it must be a URL the browser can reach rather than a compose service name. Product data is fetched client-side, so server-side rendering never needs an internal API address.
+`NUXT_PUBLIC_API_BASE` is read by the browser, so it must be a URL the browser can reach. Product data is fetched client-side, so server-side rendering never needs an internal API address.
 
 ## Browsing the database locally
 

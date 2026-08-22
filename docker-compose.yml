@@ -1,5 +1,10 @@
 name: personal
 
+# Compose runs what the app needs behind it: the API, its workers and the
+# database. The Nuxt frontend is not here on purpose — it runs from the source
+# tree with `npm run dev`, so a change to a component is on screen immediately
+# instead of waiting on an image rebuild.
+
 # The API, the queue worker and the scheduler are the same image with different
 # commands, so they share one definition.
 x-backend: &backend
@@ -106,24 +111,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    restart: unless-stopped
-
-  frontend:
-    build:
-      context: ./frontend
-    environment:
-      # Read by the browser as well as by SSR, so it has to be the URL the
-      # browser can reach — not the compose service name.
-      NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-http://localhost:8000}
-      NUXT_PUBLIC_DEMO_BOOKING_URL: ${NUXT_PUBLIC_DEMO_BOOKING_URL:-https://cal.com/mc-studio/demo-personal-app}
-      NUXT_PUBLIC_SENTRY_DSN: ${NUXT_PUBLIC_SENTRY_DSN:-}
-      NUXT_PUBLIC_SENTRY_ENVIRONMENT: ${NUXT_PUBLIC_SENTRY_ENVIRONMENT:-local}
-      NUXT_PUBLIC_SENTRY_RELEASE: ${NUXT_PUBLIC_SENTRY_RELEASE:-}
-      NUXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE: ${NUXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE:-0.1}
-    ports:
-      - "${FRONTEND_PORT:-3000}:3000"
-    depends_on:
-      - web
     restart: unless-stopped
 
 volumes:
