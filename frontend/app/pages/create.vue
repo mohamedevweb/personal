@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import type { LifeMoment, Opportunity } from '~/types/product'
+import type { LifeMoment, Opportunity, Remix } from '~/types/product'
 
 const { apiFetch } = usePersonalApi()
 const { t } = useI18n()
 const toast = useToast()
+const { begin: beginRemix, attach: attachRemix, clear: clearRemix } = useRemixLaunch()
 const opportunities = ref<Opportunity[]>([])
 const moments = ref<LifeMoment[]>([])
 const loading = ref(true)
@@ -33,19 +34,22 @@ const quickCards = computed(() => [
   { title: t('create.cards.story.title'), copy: t('create.cards.story.copy'), format: 'carousel' },
   { title: t('create.cards.teach.title'), copy: t('create.cards.teach.copy'), format: 'carousel' },
   { title: t('create.cards.opinion.title'), copy: t('create.cards.opinion.copy'), format: 'reel' }
-])
+] as const)
 
 function addMoment() {
   return navigateTo('/moments?new=1')
 }
 
-async function createFromMoment(moment: LifeMoment, format: string = 'carousel') {
+async function createFromMoment(moment: LifeMoment, format: Remix['format'] = 'carousel') {
   if (drafting.value) return
   drafting.value = true
+  beginRemix({ format, sourceHook: null, moment: moment.content })
   try {
     const response = await apiFetch<{ remix: { id: number } }>(`/api/moments/${moment.id}/create-content`, { method: 'POST', body: { format } })
+    attachRemix(response.remix.id)
     await navigateTo(`/remix/${response.remix.id}`)
   } catch (exception: unknown) {
+    clearRemix()
     toast.error(apiErrorMessage(exception, t('create.draftError')))
   } finally {
     drafting.value = false
@@ -54,7 +58,7 @@ async function createFromMoment(moment: LifeMoment, format: string = 'carousel')
 
 // Without material every card would be a no-op, so the same click becomes an
 // invitation to write the first moment instead of doing nothing at all.
-function startCard(index: number, format: string) {
+function startCard(index: number, format: Remix['format']) {
   if (!hasMaterial.value) return addMoment()
   return createFromMoment(moments.value[index % moments.value.length]!, format)
 }

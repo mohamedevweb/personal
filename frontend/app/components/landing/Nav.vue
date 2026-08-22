@@ -1,8 +1,15 @@
 <script setup lang="ts">
+const route = useRoute()
+
+// Routes, not anchors: the bar is carried by every page of the public site, so
+// a link that only resolves on the launch page would be dead four pages out.
 const links = [
-  { hash: '#how', key: 'landing.nav.how' },
-  { hash: '#faq', key: 'landing.nav.faq' }
+  { to: '/', key: 'landing.nav.homeLink' },
+  { to: '/blog', key: 'landing.nav.blog' },
+  { to: '/story', key: 'landing.nav.story' }
 ]
+
+const isCurrent = (to: string) => to === '/' ? route.path === '/' : route.path.startsWith(to)
 
 // The bar floats rather than spanning the page: it is a pill sitting on the
 // composition, so the hero reads edge to edge underneath it. Off the top of the
@@ -62,13 +69,16 @@ onUnmounted(() => {
         </NuxtLink>
 
         <nav class="absolute left-1/2 hidden -translate-x-1/2 items-center gap-8 md:flex" :aria-label="$t('landing.nav.label')">
-          <a
+          <NuxtLink
             v-for="link in links"
-            :key="link.hash"
-            :href="link.hash"
+            :key="link.to"
+            :to="link.to"
             class="b-focus relative text-[13.5px] transition-colors"
-            :class="onNight ? 'text-white/55 hover:text-white' : 'text-[var(--b-stone)] hover:text-[var(--b-black)]'"
-          >{{ $t(link.key) }}</a>
+            :class="isCurrent(link.to)
+              ? (onNight ? 'text-white' : 'text-[var(--b-black)]')
+              : (onNight ? 'text-white/55 hover:text-white' : 'text-[var(--b-stone)] hover:text-[var(--b-black)]')"
+            :aria-current="isCurrent(link.to) ? 'page' : undefined"
+          >{{ $t(link.key) }}</NuxtLink>
         </nav>
 
         <div class="flex shrink-0 items-center gap-1.5">

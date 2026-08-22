@@ -67,8 +67,9 @@
     },
     "nav": {
       "label": "Page sections",
-      "how": "How it works",
-      "faq": "FAQ",
+      "homeLink": "Home",
+      "blog": "Blog",
+      "story": "Story",
       "signIn": "Sign in",
       "getAccess": "Get early access",
       "skip": "Skip to content",
@@ -86,23 +87,6 @@
       "reassuranceOne": "Free during early access",
       "reassuranceTwo": "Personal never posts for you",
       "mediaLabel": "Personal, one morning",
-      "readouts": {
-        "creators": {
-          "label": "Creators in early access",
-          "value": "40",
-          "note": "writing with Personal every week"
-        },
-        "published": {
-          "label": "Posts published",
-          "value": "320",
-          "note": "written with Personal, in their own voice"
-        },
-        "speed": {
-          "label": "From Moment to post",
-          "value": "10 min",
-          "note": "what it takes them, on average"
-        }
-      },
       "brief": {
         "greeting": "Morning, Mohamed.",
         "updated": "Updated 6 min ago",
@@ -354,6 +338,49 @@
       "brandline": "Human clarity. Artificial intelligence.",
       "copyright": "© 2026 Personal"
     }
+  },
+  "blog": {
+    "head": {
+      "title": "Blog — Personal",
+      "description": "Notes on making content, AI applied to a voice, and building Personal."
+    },
+    "hero": {
+      "eyebrow": "Blog",
+      "title": "What I learn while building",
+      "lede": "Short notes on making content, on AI applied to a single voice, and on the calls made while building Personal."
+    },
+    "empty": {
+      "eyebrow": "Soon",
+      "title": "The first post is on its way",
+      "body": "Nothing published yet. The first pieces are coming, and until then the running log lives on the Story page and on Instagram.",
+      "story": "Read the story"
+    }
+  },
+  "story": {
+    "head": {
+      "title": "Story — Personal",
+      "description": "Who is building Personal, why the tool exists, and the build in public along the way."
+    },
+    "hero": {
+      "eyebrow": "Story",
+      "title": "Me, the tool, and everything in between",
+      "lede": "Why Personal exists, how it is being built, and where to follow the work as it happens."
+    },
+    "chapters": {
+      "me": {
+        "title": "Me",
+        "body": "To be written."
+      },
+      "tool": {
+        "title": "The tool",
+        "body": "To be written."
+      },
+      "public": {
+        "title": "Build in public",
+        "body": "To be written."
+      }
+    },
+    "back": "Back to home"
   },
   "login": {
     "headingLogin": "Welcome back.",
@@ -746,6 +773,26 @@
   },
   "remix": {
     "backToAnalysis": "Back to the pattern",
+    "generation": {
+      "eyebrow": "Building your remix",
+      "title": "The pattern stays. Everything else becomes yours.",
+      "copy": "Personal is connecting what worked with what you have actually lived, then shaping it for your voice and format.",
+      "completeEyebrow": "Draft ready",
+      "completeTitle": "There it is.",
+      "completeCopy": "Your first version is ready. Every word is yours to keep, move or rewrite.",
+      "patternLabel": "The pattern we keep",
+      "materialLabel": "What makes it yours",
+      "patternFallback": "A structure that has already earned attention",
+      "profileFallback": "Your positioning, your subjects and your voice",
+      "previewLabel": "Your draft",
+      "previewWriting": "Taking shape",
+      "previewReady": "Ready to edit",
+      "steps": {
+        "pattern": "Pattern captured",
+        "story": "Your material connected",
+        "voice": "Writing in your voice"
+      }
+    },
     "generatingEyebrow": "Draft in progress",
     "generatingTitle": "Your page is ready. Personal is writing now.",
     "generatingCopy": "The pattern, your moment and your voice are being brought together in the background.",

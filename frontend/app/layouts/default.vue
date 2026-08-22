@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const route = useRoute()
 const { user, loadUser, logout } = useAuth()
+const { launch } = useRemixLaunch()
 const initials = computed(() => (user.value?.name || '')
   .split(' ')
   .filter(Boolean)
@@ -51,6 +52,15 @@ const pageTitle = computed(() => {
 
 <template>
   <div class="min-h-screen bg-[var(--paper)] text-[var(--ink)]">
+    <RemixGenerationStage
+      v-if="launch && !route.path.startsWith('/remix/')"
+      :format="launch.format"
+      :source-hook="launch.sourceHook"
+      :moment="launch.moment"
+      :started-at="launch.startedAt"
+      overlay
+    />
+
     <aside class="fixed inset-y-0 left-0 z-30 hidden w-[264px] flex-col border-r border-[var(--line)] bg-[var(--rail)] px-3 py-5 md:flex">
       <NuxtLink to="/feed" class="b-focus block w-fit px-2 py-1">
         <PersonalLogo :size="22" />

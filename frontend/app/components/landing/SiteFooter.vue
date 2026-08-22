@@ -1,7 +1,8 @@
 <script setup lang="ts">
 const links = [
-  { hash: '#how', key: 'landing.nav.how' },
-  { hash: '#faq', key: 'landing.nav.faq' }
+  { to: '/', key: 'landing.nav.homeLink' },
+  { to: '/blog', key: 'landing.nav.blog' },
+  { to: '/story', key: 'landing.nav.story' }
 ]
 </script>
 
@@ -15,7 +16,7 @@ const links = [
 
       <div class="flex flex-col gap-6 md:items-end">
         <nav class="flex flex-wrap items-center gap-x-7 gap-y-3 text-[14px] text-[var(--b-stone)]">
-          <a v-for="link in links" :key="link.hash" :href="link.hash" class="b-focus transition-colors hover:text-[var(--b-black)]">{{ $t(link.key) }}</a>
+          <NuxtLink v-for="link in links" :key="link.to" :to="link.to" class="b-focus transition-colors hover:text-[var(--b-black)]">{{ $t(link.key) }}</NuxtLink>
           <NuxtLink to="/login" class="b-focus transition-colors hover:text-[var(--b-black)]">{{ $t('landing.nav.signIn') }}</NuxtLink>
           <NuxtLink to="/terms" class="b-focus transition-colors hover:text-[var(--b-black)]">{{ $t('landing.nav.terms') }}</NuxtLink>
           <NuxtLink to="/privacy" class="b-focus transition-colors hover:text-[var(--b-black)]">{{ $t('landing.nav.privacy') }}</NuxtLink>

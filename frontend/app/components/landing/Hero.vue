@@ -5,19 +5,10 @@
  * posts Personal read overnight drifting past, with the outliers lit in the
  * signature, and the brief under the claim is what the product made of them.
  *
- * The composition is the page's original one — one claim centred, one frame of
- * the product below it, the numbers read off that frame — moved onto the field.
- * Only the field moves: the copy stays exactly where it was set.
+ * The composition is the page's original one, one claim centred and one frame
+ * of the product below it, moved onto the field. Only the field moves: the
+ * copy stays exactly where it was set.
  */
-
-// The three facts above the fold. They are the people, not the machinery: how
-// many creators are on it, what they published with it, and what it costs them
-// in time. The mechanism has the whole rest of the page to explain itself.
-const STATS = [
-  { key: 'creators', icon: 'user' },
-  { key: 'published', icon: 'paper-plane' },
-  { key: 'speed', icon: 'clock' }
-] as const
 </script>
 
 <template>
@@ -107,23 +98,6 @@ const STATS = [
         >
           <PersonalMark :size="19" />
         </a>
-      </div>
-
-      <!-- What the frame above actually found, read off it. Three facts on one
-           rail: the strip is the caption the screenshot cannot carry itself. -->
-      <div
-        data-reveal
-        class="mx-auto mt-14 grid max-w-[960px] gap-8 sm:grid-cols-3"
-        style="--reveal-delay:360ms"
-      >
-        <LandingHeroStat
-          v-for="stat in STATS"
-          :key="stat.key"
-          :icon="stat.icon"
-          :label="$t(`landing.hero.readouts.${stat.key}.label`)"
-          :value="$t(`landing.hero.readouts.${stat.key}.value`)"
-          :note="$t(`landing.hero.readouts.${stat.key}.note`)"
-        />
       </div>
     </div>
   </section>

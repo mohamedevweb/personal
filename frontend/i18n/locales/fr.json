@@ -67,8 +67,9 @@
     },
     "nav": {
       "label": "Sections de la page",
-      "how": "Comment ça marche",
-      "faq": "FAQ",
+      "homeLink": "Accueil",
+      "blog": "Blog",
+      "story": "Story",
       "signIn": "Se connecter",
       "getAccess": "Accès anticipé",
       "skip": "Aller au contenu",
@@ -86,23 +87,6 @@
       "reassuranceOne": "Gratuit en accès anticipé",
       "reassuranceTwo": "Personal ne publie jamais à votre place",
       "mediaLabel": "Personal, un matin",
-      "readouts": {
-        "creators": {
-          "label": "Créateurs en accès anticipé",
-          "value": "40",
-          "note": "qui écrivent avec Personal chaque semaine"
-        },
-        "published": {
-          "label": "Posts publiés",
-          "value": "320",
-          "note": "écrits avec Personal, dans leur voix"
-        },
-        "speed": {
-          "label": "Du Moment au post",
-          "value": "10 min",
-          "note": "le temps qu’ils y passent, en moyenne"
-        }
-      },
       "brief": {
         "greeting": "Bonjour Mohamed.",
         "updated": "Mis à jour il y a 6 min",
@@ -354,6 +338,49 @@
       "brandline": "Clarté humaine. Intelligence artificielle.",
       "copyright": "© 2026 Personal"
     }
+  },
+  "blog": {
+    "head": {
+      "title": "Blog — Personal",
+      "description": "Notes sur la création de contenu, l'IA appliquée à la voix, et la construction de Personal."
+    },
+    "hero": {
+      "eyebrow": "Blog",
+      "title": "Ce que j’apprends en construisant",
+      "lede": "Des notes courtes sur la création de contenu, l'IA appliquée à une voix, et les décisions prises en construisant Personal."
+    },
+    "empty": {
+      "eyebrow": "Bientôt",
+      "title": "Le premier article arrive",
+      "body": "Rien de publié pour l'instant. Les premiers textes arrivent, et d'ici là le journal de bord se lit sur la page Story et sur Instagram.",
+      "story": "Lire la Story"
+    }
+  },
+  "story": {
+    "head": {
+      "title": "Story — Personal",
+      "description": "Qui construit Personal, pourquoi cet outil existe, et le build in public au jour le jour."
+    },
+    "hero": {
+      "eyebrow": "Story",
+      "title": "Moi, l’outil, et tout ce qui se passe entre les deux",
+      "lede": "Pourquoi Personal existe, comment il se construit, et où suivre le chantier en direct."
+    },
+    "chapters": {
+      "me": {
+        "title": "Moi",
+        "body": "À écrire."
+      },
+      "tool": {
+        "title": "L’outil",
+        "body": "À écrire."
+      },
+      "public": {
+        "title": "Build in public",
+        "body": "À écrire."
+      }
+    },
+    "back": "Retour à l’accueil"
   },
   "login": {
     "headingLogin": "Content de vous revoir.",
@@ -746,6 +773,26 @@
   },
   "remix": {
     "backToAnalysis": "Retour au schéma",
+    "generation": {
+      "eyebrow": "Création de ton remix",
+      "title": "Le schéma reste. Tout le reste devient le tien.",
+      "copy": "Personal relie ce qui a marché à ce que tu as vraiment vécu, puis l’adapte à ta voix et au format choisi.",
+      "completeEyebrow": "Brouillon prêt",
+      "completeTitle": "Ça y est.",
+      "completeCopy": "Ta première version est prête. Tu peux garder, déplacer ou réécrire chaque mot.",
+      "patternLabel": "Le schéma conservé",
+      "materialLabel": "Ce qui le rend unique",
+      "patternFallback": "Une structure qui a déjà capté l’attention",
+      "profileFallback": "Ton positionnement, tes sujets et ta voix",
+      "previewLabel": "Ton brouillon",
+      "previewWriting": "Prend forme",
+      "previewReady": "Prêt à modifier",
+      "steps": {
+        "pattern": "Schéma capté",
+        "story": "Ta matière intégrée",
+        "voice": "Écriture dans ta voix"
+      }
+    },
     "generatingEyebrow": "Brouillon en préparation",
     "generatingTitle": "Ta page est prête. Personal écrit maintenant.",
     "generatingCopy": "Le schéma, ton moment et ta voix sont réunis en arrière-plan.",

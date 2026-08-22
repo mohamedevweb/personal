@@ -4,6 +4,7 @@ import type { LifeMoment } from '~/types/product'
 const { apiFetch } = usePersonalApi()
 const { locale, t } = useI18n()
 const toast = useToast()
+const { begin: beginRemix, attach: attachRemix, clear: clearRemix } = useRemixLaunch()
 const moments = ref<LifeMoment[]>([])
 const loading = ref(true)
 const modalOpen = ref(false)
@@ -74,10 +75,13 @@ async function removeMoment(moment: LifeMoment) {
 }
 
 async function turnIntoContent(moment: LifeMoment) {
+  beginRemix({ format: 'carousel', sourceHook: null, moment: moment.content })
   try {
     const response = await apiFetch<{ remix: { id: number } }>(`/api/moments/${moment.id}/create-content`, { method: 'POST', body: { format: 'carousel' } })
+    attachRemix(response.remix.id)
     await navigateTo(`/remix/${response.remix.id}`)
   } catch (exception: unknown) {
+    clearRemix()
     toast.error(apiErrorMessage(exception, t('create.draftError')))
   }
 }
