@@ -7,10 +7,16 @@ on:
     branches: [main]
     paths:
       - "backend/**"
+      - "deploy.sh"
+      - "docker-compose.yml"
+      - "docker-compose.prod.yml"
       - ".github/workflows/backend.yml"
   pull_request:
     paths:
       - "backend/**"
+      - "deploy.sh"
+      - "docker-compose.yml"
+      - "docker-compose.prod.yml"
       - ".github/workflows/backend.yml"
 
 # A newer push to the same ref cancels an in-flight run so deploys never overlap.
