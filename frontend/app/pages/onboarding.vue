@@ -4,7 +4,7 @@ import type { CreatorInspiration, CreatorInspirationResponse, InstagramSyncStatu
 definePageMeta({ layout: false })
 
 const route = useRoute()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { status, loading, error, connect, loadStatus, startPolling } = useInstagram()
 const { apiFetch } = usePersonalApi()
 const toast = useToast()
@@ -16,6 +16,43 @@ const saving = ref(false)
 const selected = ref<CreatorInspiration[]>([])
 const inspirationsLoaded = ref(false)
 const handleInput = ref('')
+
+// The card on the right stands in for the thing being connected: an Instagram
+// profile with no face on it, because the only part Personal reads is what the
+// posts did. The figures illustrate the shape of a profile — the card is
+// labelled an aperçu, never presented as the visitor's own account.
+const PREVIEW_TILES = [
+  { id: 1, kind: 'carousel', angle: 148, light: .085 },
+  { id: 2, kind: null, angle: 32, light: .05 },
+  { id: 3, kind: 'reel', outlier: true, angle: 200, light: .07 },
+  { id: 4, kind: null, angle: 210, light: .065 },
+  { id: 5, kind: 'reel', angle: 118, light: .045 },
+  { id: 6, kind: 'carousel', angle: 60, light: .075 }
+] as const
+
+// Each tile gets its own wash so the grid reads as six thumbnails rather than
+// six empty boxes. The angle and the amount of light are all that separate
+// them: enough at this size, and abstract enough that the card never pretends
+// to be showing anyone's actual photos.
+function tileWash(tile: (typeof PREVIEW_TILES)[number]) {
+  return `linear-gradient(${tile.angle}deg, rgba(255, 255, 255, ${tile.light}) 0%, rgba(255, 255, 255, .012) 70%)`
+}
+
+const PREVIEW_RATIO = 6.2
+
+const previewStats = computed(() => {
+  const format = new Intl.NumberFormat(locale.value)
+  return [
+    { key: 'posts', value: format.format(128) },
+    { key: 'followers', value: format.format(4820) },
+    { key: 'following', value: format.format(310) }
+  ]
+})
+
+const previewRatio = computed(() => new Intl.NumberFormat(locale.value, {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1
+}).format(PREVIEW_RATIO))
 
 const stages = computed<{ key: InstagramSyncStatus; label: string }[]>(() => [
   { key: 'connecting', label: t('onboarding.stages.connecting') },
@@ -117,7 +154,7 @@ function addHandle() {
   const known = availableCreators.value.find(creator => creator.username.toLowerCase() === handle.toLowerCase())
   addCreator(known || {
     username: handle,
-    display_name: `@${handle}`,
+    display_name: handle,
     avatar_url: null,
     followers: 0,
     niche: null,
@@ -400,7 +437,10 @@ onMounted(async () => {
           <span v-for="i in 3" :key="i" class="h-1.5 w-1.5 rounded-full bg-white/25" />
         </div>
 
-        <p class="text-[10px] font-semibold uppercase tracking-[.22em] text-[var(--gold)]">{{ $t('onboarding.profileLive') }}</p>
+        <p class="text-[10px] font-semibold uppercase tracking-[.22em] text-[var(--b-red-lit)]">
+          {{ status.connected ? $t('onboarding.profileLive') : $t('onboarding.preview.label') }}
+        </p>
+
         <div v-if="status.connected" class="mt-12 space-y-1">
           <div
             v-for="(stage, index) in stages"
@@ -409,23 +449,56 @@ onMounted(async () => {
             :class="index === activeStage ? 'panel-night' : ''"
           >
             <span class="grid h-7 w-7 place-items-center rounded-full border text-xs transition-all"
-              :class="index < activeStage ? 'border-[var(--gold)] bg-[var(--gold)] text-[var(--night)]' : index === activeStage ? 'animate-breathe border-[var(--gold)] bg-[var(--gold)] text-[var(--night)]' : 'border-white/20 text-white/40'">
+              :class="index < activeStage ? 'border-[var(--b-red-lit)] bg-[var(--b-red-lit)] text-[var(--night)]' : index === activeStage ? 'animate-breathe border-[var(--b-red-lit)] bg-[var(--b-red-lit)] text-[var(--night)]' : 'border-white/20 text-white/40'">
               {{ index < activeStage ? '✓' : index + 1 }}
             </span>
             <span class="text-sm" :class="index <= activeStage ? 'text-white' : 'text-white/40'">{{ stage.label }}</span>
           </div>
         </div>
 
-        <div v-else class="mt-14 space-y-7">
-          <div class="h-3 w-28 rounded-full bg-white/15" />
-          <div class="space-y-3">
-            <div class="h-10 w-4/5 rounded-xl bg-white/10" />
-            <div class="h-10 w-3/5 rounded-xl bg-white/10" />
+        <!-- The profile, without the face: a handle, the three counters every
+             Instagram profile carries, and the grid underneath them. One tile
+             is the reason the grid is drawn at all — the post that beat the
+             account's own average, which is the first thing Personal looks
+             for once the connection is made. -->
+        <div v-else class="mt-10">
+          <p class="font-display text-[26px] leading-none tracking-[-.02em]">{{ $t('onboarding.preview.handle') }}</p>
+          <p class="mt-3 max-w-[19rem] text-[12.5px] leading-[1.6] text-white/45">{{ $t('onboarding.preview.bio') }}</p>
+
+          <dl class="mt-7 flex gap-8 border-y border-white/10 py-4">
+            <div v-for="stat in previewStats" :key="stat.key">
+              <dd class="font-display text-[21px] leading-none tabular-nums">{{ stat.value }}</dd>
+              <dt class="b-mono mt-2 text-white/35">{{ $t(`onboarding.preview.${stat.key}`) }}</dt>
+            </div>
+          </dl>
+
+          <p class="b-mono mt-6 text-white/35">{{ $t('onboarding.preview.grid') }}</p>
+
+          <div class="mt-3 grid grid-cols-3 gap-2">
+            <div
+              v-for="tile in PREVIEW_TILES"
+              :key="tile.id"
+              class="relative aspect-square overflow-hidden rounded-[10px] border"
+              :class="tile.outlier ? 'border-[rgba(255,106,77,.45)] bg-[rgba(224,79,54,.13)]' : 'border-white/[.08] bg-white/[.045]'"
+              :style="{ backgroundImage: tileWash(tile) }"
+            >
+              <AppIcon
+                v-if="tile.kind"
+                :name="tile.kind"
+                :size="13"
+                class="absolute right-2 top-2"
+                :class="tile.outlier ? 'text-[var(--b-red-lit)]' : 'text-white/25'"
+              />
+              <span
+                v-if="tile.outlier"
+                class="absolute inset-x-1.5 bottom-1.5 rounded-[6px] bg-[rgba(11,10,9,.55)] px-1.5 py-1 text-center text-[9.5px] font-semibold tabular-nums text-[var(--b-red-lit)]"
+              >
+                {{ $t('contentCard.average', { ratio: previewRatio }) }}
+              </span>
+            </div>
           </div>
-          <div class="grid grid-cols-3 gap-3 pt-4">
-            <div v-for="i in 3" :key="i" class="h-24 rounded-[14px] border border-white/10 bg-white/5" />
-          </div>
-          <p class="pt-3 font-serif text-xl leading-7 text-white/45">{{ $t('onboarding.placeholderQuote') }}</p>
+
+          <p class="mt-7 font-serif text-xl leading-7 text-white/45">{{ $t('onboarding.placeholderQuote') }}</p>
         </div>
       </aside>
     </section>

@@ -422,22 +422,39 @@
       "finding_patterns": "Recherche de schémas"
     },
     "placeholderQuote": "Votre contenu devient du contexte — pas un tableau de bord.",
+    "preview": {
+      "label": "Aperçu · votre profil après connexion",
+      "handle": "{'@'}votrecompte",
+      "bio": "Vos quarante derniers posts, vos formats, vos chiffres. Rien d’autre à remplir.",
+      "posts": "publications",
+      "followers": "abonnés",
+      "following": "abonnements",
+      "grid": "Grille · 6 derniers posts"
+    },
     "skip": "Continuer sans connecter Instagram",
     "inspirations": {
       "title": "Qui t’inspire sur Instagram ?",
-      "copy": "Choisis 3 à 5 créateurs que tu regardes vraiment pour créer. Personal donnera la priorité à leurs meilleurs contenus et complétera avec ton univers.",
-      "selected": "{count} sélectionné(s)",
-      "range": "3 minimum, 5 maximum",
-      "searchLabel": "Rechercher un créateur Instagram",
+      "copy": "Choisis 3 à 6 créateurs que tu regardes vraiment pour créer. Personal donnera la priorité à leurs meilleurs contenus et complétera avec ton univers.",
+      "searchLabel": "Handle Instagram ou lien de profil",
       "searchPlaceholder": "{'@'}handle ou lien Instagram",
       "search": "Rechercher",
       "searching": "Recherche…",
       "continue": "Créer mon feed",
       "saving": "Création du feed…",
-      "maximumError": "Tu peux choisir jusqu’à 5 créateurs.",
+      "maximumError": "Tu peux choisir jusqu’à {count} créateurs.",
       "loadError": "Personal n’a pas pu charger les créateurs proposés.",
       "searchError": "Personal n’a pas pu rechercher ce compte Instagram.",
-      "saveError": "Personal n’a pas pu enregistrer tes inspirations. Réessaie."
+      "saveError": "Personal n’a pas pu enregistrer tes inspirations. Réessaie.",
+      "cardTitle": "Tes créateurs favoris",
+      "cardCopy": "Ajoute-les via leur {'@'}handle ou un lien Instagram, ou choisis parmi les suggestions ci-dessous. {min} minimum, {max} maximum.",
+      "counter": "{count} sur {max} sélectionné(s)",
+      "add": "Ajouter",
+      "remove": "Retirer {'@'}{handle}",
+      "empty": "Aucun créateur favori pour l’instant — ajoute les comptes qui t’inspirent.",
+      "suggestionsLabel": "Suggérés pour toi",
+      "resultsLabel": "Résultats de recherche",
+      "noResults": "Aucun créateur à ajouter ici. Recherche un handle pour en trouver.",
+      "handleError": "Saisis un handle Instagram ou un lien de profil valide."
     }
   },
   "feed": {

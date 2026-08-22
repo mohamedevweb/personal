@@ -45,7 +45,7 @@ class CreatorInspirationTest extends TestCase
 
         $response->assertOk()
             ->assertJsonPath('minimum', 3)
-            ->assertJsonPath('maximum', 5)
+            ->assertJsonPath('maximum', 6)
             ->assertJsonPath('suggestions.0.username', $tech->username)
             ->assertJsonCount(2, 'suggestions');
     }
@@ -142,6 +142,17 @@ class CreatorInspirationTest extends TestCase
         $this->actingAs($this->user)->putJson('/api/creator-inspirations', [
             'handles' => ['same_creator', '@same_creator', 'invalid handle'],
         ])->assertUnprocessable()->assertJsonValidationErrors('handles');
+
+        $this->assertDatabaseCount('user_creator_inspirations', 0);
+    }
+
+    public function test_selection_rejects_more_than_six_handles(): void
+    {
+        $handles = ['one', 'two', 'three', 'four', 'five', 'six', 'seven'];
+
+        $this->actingAs($this->user)->putJson('/api/creator-inspirations', ['handles' => $handles])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('handles');
 
         $this->assertDatabaseCount('user_creator_inspirations', 0);
     }
