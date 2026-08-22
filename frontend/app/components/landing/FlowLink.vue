@@ -84,7 +84,7 @@ const labelLeft = computed(() => `${((props.from + props.to) / 2 / COLUMN) * 100
          it: the label belongs to the circuit, not beside it. -->
     <p
       v-if="label"
-      class="b-mono absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap bg-[#f2efe8] px-3 text-[var(--b-stone)] md:left-[var(--label-x)]"
+      class="b-mono absolute left-1/2 top-1/2 max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 bg-[#f2efe8] px-3 text-center text-[var(--b-stone)] md:left-[var(--label-x)] md:max-w-none md:whitespace-nowrap"
     >
       {{ label }}
     </p>

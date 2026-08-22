@@ -61,7 +61,7 @@
   },
   "landing": {
     "head": {
-      "title": "Personal — content only you could post",
+      "title": "Personal, content only you could post",
       "description": "Personal finds the posts outperforming in your niche, connects them to what actually happened to you, and writes them in your voice."
     },
     "nav": {
@@ -151,7 +151,7 @@
               "three": {
                 "metric": "12",
                 "title": "outliers found overnight",
-                "body": "Posts beating their own creator's average — at your size, not at 2M followers."
+                "body": "Posts beating their own creator's average, at your size, not at 2M followers."
               }
             }
           },
@@ -190,7 +190,7 @@
       "label": "Outlier detected",
       "value": "8.4",
       "unit": "×",
-      "copy": "Not the biggest post on Instagram. The one beating the account that published it — in your niche, at your size, while it's still climbing.",
+      "copy": "Not the biggest post on Instagram. The one beating the account that published it, in your niche, at your size, while it's still climbing.",
       "chart": {
         "title": "One account · last 14 posts",
         "window": "Indexed to its own average",
@@ -216,7 +216,7 @@
         },
         "discover": {
           "title": "Discover",
-          "body": "Every morning, the posts beating their own creator's average — filtered to your niche and your size.",
+          "body": "Every morning, the posts beating their own creator's average, filtered to your niche and your size.",
           "caption": "Refreshed every morning"
         },
         "connect": {
@@ -236,7 +236,7 @@
         "niche": "Niche",
         "nicheValue": "Independent product building",
         "audience": "Audience",
-        "audienceValue": "Solo founders, 22–34",
+        "audienceValue": "Solo founders, ages 22 to 34",
         "tone": "Tone",
         "toneValue": "Direct · honest · deadpan",
         "positioning": "Positioning",
@@ -251,33 +251,34 @@
         "strengthsValue": "Your best posts all start from a decision you almost didn’t make."
       },
       "outliers": {
-        "label": "Outliers in your niche",
-        "window": "Last 7 days",
-        "more": "9 more",
-        "views": "{count} views",
-        "baseline": "Creator average ~42K",
         "items": {
           "one": {
             "hook": "The pricing mistake that cost me 8 months",
             "views": "352K",
-            "ratio": "8.4"
+            "ratio": "8.4",
+            "handle": "founderframes",
+            "date": "2d ago",
+            "followers": "61.2K",
+            "likes": "23.9K"
           },
           "two": {
             "hook": "Nobody tells you this about your first 1,000",
             "views": "180K",
-            "ratio": "5.1"
+            "ratio": "5.1",
+            "handle": "lena.builds",
+            "date": "4d ago",
+            "followers": "18.4K",
+            "likes": "11.2K"
           },
           "three": {
             "hook": "I rebuilt my whole onboarding in a weekend",
             "views": "121K",
-            "ratio": "3.7"
+            "ratio": "3.7",
+            "handle": "marc.oss",
+            "date": "5d ago",
+            "followers": "9.7K",
+            "likes": "6.1K"
           }
-        },
-        "card": {
-          "handle": "founderframes",
-          "date": "2d ago",
-          "followers": "61.2K",
-          "likes": "23.9K"
         }
       },
       "connect": {
@@ -322,7 +323,7 @@
     "moments": {
       "eyebrow": "Moments",
       "title": "You live. Personal <em>takes notes</em>.",
-      "lede": "A client call, a bad week, a 1am realization. Write it down and forget it — Personal remembers it at the right moment.",
+      "lede": "A client call, a bad week, a 1am realization. Write it down and forget it. Personal remembers it at the right moment.",
       "cards": {
         "one": {
           "text": "A client asked why I charge more than an agency. For once I had a good answer.",
@@ -351,7 +352,7 @@
     "faq": {
       "eyebrow": "FAQ",
       "title": "The questions creators ask first.",
-      "lede": "Anything else, ask us directly — we're onboarding every creator by hand right now.",
+      "lede": "Anything else, ask us directly. We're onboarding every creator by hand right now.",
       "items": {
         "sound": {
           "q": "Will it sound like me?",
@@ -472,7 +473,7 @@
       "learning_style": "Learning your style",
       "finding_patterns": "Finding patterns"
     },
-    "placeholderQuote": "Your content becomes context—not a dashboard.",
+    "placeholderQuote": "Your content becomes context, not a dashboard.",
     "preview": {
       "label": "Preview · your profile once connected",
       "handle": "{'@'}yourhandle",
@@ -501,7 +502,7 @@
       "counter": "{count} of {max} selected",
       "add": "Add",
       "remove": "Remove {'@'}{handle}",
-      "empty": "No favorite creator yet — add the accounts that inspire you.",
+      "empty": "No favorite creator yet. Add the accounts that inspire you.",
       "suggestionsLabel": "Suggested for you",
       "resultsLabel": "Search results",
       "noResults": "No creator to add here. Search a handle to find one.",
@@ -532,7 +533,7 @@
     "loadError": "Personal could not load your creative material.",
     "empty": {
       "title": "Nothing to work from yet.",
-      "copy": "Personal writes from what actually happened to you. Add a first moment — a decision, a failure, a lesson — and every format below becomes available.",
+      "copy": "Personal writes from what actually happened to you. Add a first moment: a decision, a failure, a lesson. Every format below then becomes available.",
       "action": "Add a moment"
     },
     "personalsPick": "Personal’s pick",
@@ -659,7 +660,7 @@
     "title": "Saved for later.",
     "subtitle": "The patterns and stories you want to return to.",
     "emptyTitle": "Nothing saved yet.",
-    "emptyCopy": "Save a strong pattern when it feels useful—not just interesting.",
+    "emptyCopy": "Save a strong pattern when it feels useful, not just interesting.",
     "exploreFeed": "Explore your feed",
     "removed": "Removed from your library.",
     "loadError": "Personal could not load your library.",
@@ -736,7 +737,7 @@
     "whyFitsYou": "Why it fits you",
     "whyFitsYouCopy": "You frequently talk about building products, customer insight and honest founder lessons.",
     "makeItYours": "Make it yours",
-    "makeItYoursCopy": "Choose the form. Personal will adapt the pattern to your context—not copy it.",
+    "makeItYoursCopy": "Choose the form. Personal will adapt the pattern to your context, not copy it.",
     "groundInMoment": "Ground it in a life moment",
     "letPersonalChoose": "Let Personal choose",
     "creating": "Creating your version…",

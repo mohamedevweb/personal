@@ -7,8 +7,7 @@ const publicRoutes = new Set([
   '/reset-password',
   '/verify-email',
   '/privacy',
-  '/terms',
-  '/mock-preview'
+  '/terms'
 ])
 
 export default defineNuxtRouteMiddleware(async (to) => {

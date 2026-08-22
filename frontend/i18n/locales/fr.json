@@ -61,7 +61,7 @@
   },
   "landing": {
     "head": {
-      "title": "Personal — des contenus que vous seul pouviez publier",
+      "title": "Personal, des contenus que vous seul pouviez publier",
       "description": "Personal trouve les posts qui surperforment dans votre niche, les relie à ce que vous avez vraiment vécu, et les écrit dans votre voix."
     },
     "nav": {
@@ -151,7 +151,7 @@
               "three": {
                 "metric": "12",
                 "title": "outliers trouvés cette nuit",
-                "body": "Des posts qui battent la moyenne de leur propre créateur — à votre taille, pas à 2M d'abonnés."
+                "body": "Des posts qui battent la moyenne de leur propre créateur, à votre taille, pas à 2M d'abonnés."
               }
             }
           },
@@ -190,7 +190,7 @@
       "label": "Outlier détecté",
       "value": "8,4",
       "unit": "×",
-      "copy": "Pas le plus gros post d'Instagram. Celui qui bat le compte qui l'a publié — dans votre niche, à votre taille, pendant qu'il monte encore.",
+      "copy": "Pas le plus gros post d'Instagram. Celui qui bat le compte qui l'a publié, dans votre niche, à votre taille, pendant qu'il monte encore.",
       "chart": {
         "title": "Un compte · 14 derniers posts",
         "window": "Indexé sur sa propre moyenne",
@@ -216,7 +216,7 @@
         },
         "discover": {
           "title": "Trouver",
-          "body": "Chaque matin, les posts qui battent la moyenne de leur propre créateur — filtrés à votre niche et à votre taille.",
+          "body": "Chaque matin, les posts qui battent la moyenne de leur propre créateur, filtrés à votre niche et à votre taille.",
           "caption": "Actualisé chaque matin"
         },
         "connect": {
@@ -236,7 +236,7 @@
         "niche": "Niche",
         "nicheValue": "Création de produits en indépendant",
         "audience": "Audience",
-        "audienceValue": "Fondateurs solo, 22–34 ans",
+        "audienceValue": "Fondateurs solo, 22 à 34 ans",
         "tone": "Ton",
         "toneValue": "Direct · honnête · pince-sans-rire",
         "positioning": "Positionnement",
@@ -251,33 +251,34 @@
         "strengthsValue": "Vos meilleurs posts partent tous d’une décision que vous avez failli ne pas prendre."
       },
       "outliers": {
-        "label": "Outliers dans votre niche",
-        "window": "7 derniers jours",
-        "more": "9 de plus",
-        "views": "{count} vues",
-        "baseline": "Moyenne du créateur ~42K",
         "items": {
           "one": {
             "hook": "L'erreur de prix qui m'a coûté 8 mois",
             "views": "352K",
-            "ratio": "8,4"
+            "ratio": "8,4",
+            "handle": "founderframes",
+            "date": "il y a 2 j",
+            "followers": "61,2 k",
+            "likes": "23,9 k"
           },
           "two": {
             "hook": "Personne ne vous dit ça sur vos 1 000 premiers",
             "views": "180K",
-            "ratio": "5,1"
+            "ratio": "5,1",
+            "handle": "lena.builds",
+            "date": "il y a 4 j",
+            "followers": "18,4 k",
+            "likes": "11,2 k"
           },
           "three": {
             "hook": "J'ai refait tout mon onboarding en un week-end",
             "views": "121K",
-            "ratio": "3,7"
+            "ratio": "3,7",
+            "handle": "marc.oss",
+            "date": "il y a 5 j",
+            "followers": "9,7 k",
+            "likes": "6,1 k"
           }
-        },
-        "card": {
-          "handle": "founderframes",
-          "date": "il y a 2 j",
-          "followers": "61,2 k",
-          "likes": "23,9 k"
         }
       },
       "connect": {
@@ -322,7 +323,7 @@
     "moments": {
       "eyebrow": "Moments",
       "title": "Vous vivez. Personal <em>prend des notes</em>.",
-      "lede": "Un appel client, une mauvaise semaine, une prise de conscience à 1 h du matin. Notez-le et oubliez-le — Personal s'en souvient au bon moment.",
+      "lede": "Un appel client, une mauvaise semaine, une prise de conscience à 1 h du matin. Notez-le et oubliez-le. Personal s'en souvient au bon moment.",
       "cards": {
         "one": {
           "text": "Un client m'a demandé pourquoi je facture plus qu'une agence. Pour une fois, j'avais une bonne réponse.",
@@ -351,7 +352,7 @@
     "faq": {
       "eyebrow": "FAQ",
       "title": "Les questions que les créateurs posent en premier.",
-      "lede": "Pour le reste, écrivez-nous — on accompagne chaque créateur à la main en ce moment.",
+      "lede": "Pour le reste, écrivez-nous. On accompagne chaque créateur à la main en ce moment.",
       "items": {
         "sound": {
           "q": "Est-ce que ça va me ressembler ?",
@@ -472,7 +473,7 @@
       "learning_style": "Apprentissage de votre style",
       "finding_patterns": "Recherche de schémas"
     },
-    "placeholderQuote": "Votre contenu devient du contexte — pas un tableau de bord.",
+    "placeholderQuote": "Votre contenu devient du contexte, pas un tableau de bord.",
     "preview": {
       "label": "Aperçu · votre profil après connexion",
       "handle": "{'@'}votrecompte",
@@ -501,7 +502,7 @@
       "counter": "{count} sur {max} sélectionné(s)",
       "add": "Ajouter",
       "remove": "Retirer {'@'}{handle}",
-      "empty": "Aucun créateur favori pour l’instant — ajoute les comptes qui t’inspirent.",
+      "empty": "Aucun créateur favori pour l’instant. Ajoute les comptes qui t’inspirent.",
       "suggestionsLabel": "Suggérés pour toi",
       "resultsLabel": "Résultats de recherche",
       "noResults": "Aucun créateur à ajouter ici. Recherche un handle pour en trouver.",
@@ -532,7 +533,7 @@
     "loadError": "Personal n’a pas pu charger ta matière créative.",
     "empty": {
       "title": "Pas encore de matière.",
-      "copy": "Personal écrit à partir de ce que vous avez vraiment vécu. Ajoutez un premier moment — une décision, un échec, une leçon — et tous les formats ci-dessous deviennent disponibles.",
+      "copy": "Personal écrit à partir de ce que vous avez vraiment vécu. Ajoutez un premier moment : une décision, un échec, une leçon. Tous les formats ci-dessous deviennent alors disponibles.",
       "action": "Ajouter un moment"
     },
     "personalsPick": "Le choix de Personal",
@@ -659,7 +660,7 @@
     "title": "Enregistré pour plus tard.",
     "subtitle": "Les schémas et les histoires sur lesquels vous voulez revenir.",
     "emptyTitle": "Rien d’enregistré pour l’instant.",
-    "emptyCopy": "Enregistrez un schéma solide quand il vous paraît utile — pas seulement intéressant.",
+    "emptyCopy": "Enregistrez un schéma solide quand il vous paraît utile, pas seulement intéressant.",
     "exploreFeed": "Explorer votre feed",
     "removed": "Retiré de tes favoris.",
     "loadError": "Personal n’a pas pu charger tes favoris.",
@@ -736,7 +737,7 @@
     "whyFitsYou": "Pourquoi il vous correspond",
     "whyFitsYouCopy": "Vous parlez souvent de création de produits, d’insight client et de leçons honnêtes de fondateur.",
     "makeItYours": "Rendez-le vôtre",
-    "makeItYoursCopy": "Choisissez la forme. Personal adaptera le schéma à votre contexte — sans le copier.",
+    "makeItYoursCopy": "Choisissez la forme. Personal adaptera le schéma à votre contexte, sans le copier.",
     "groundInMoment": "Ancrez-le dans un moment de vie",
     "letPersonalChoose": "Laisser Personal choisir",
     "creating": "Création de votre version…",
