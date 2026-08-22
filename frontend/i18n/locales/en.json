@@ -202,6 +202,12 @@
       "eyebrow": "How it works",
       "title": "We learn you <em>by heart</em>. Then we write.",
       "mediaLabel": "Personal, step by step",
+      "screens": {
+        "personal": "Personal",
+        "feed": "For You",
+        "moments": "Moments",
+        "remix": "Remix"
+      },
       "steps": {
         "understand": {
           "title": "Understand",
@@ -235,7 +241,8 @@
         "toneValue": "Direct · honest · deadpan",
         "positioning": "Positioning",
         "positioningValue": "Builds in public, shows the mess",
-        "correct": "Wrong about something? Say so in one sentence and Personal rewrites the read."
+        "correct": "Wrong about something? Say so in one sentence and Personal rewrites the read.",
+        "edit": "Edit memory"
       },
       "outliers": {
         "label": "Outliers in your niche",
@@ -259,17 +266,27 @@
             "views": "121K",
             "ratio": "3.7"
           }
+        },
+        "card": {
+          "handle": "founderframes",
+          "date": "2d ago",
+          "followers": "61.2K",
+          "likes": "23.9K"
         }
       },
       "connect": {
         "patternLabel": "Pattern in your niche",
         "patternQuote": "“The decision I almost didn't make…”",
-        "momentLabel": "Your moment · Tuesday",
         "momentQuote": "“I almost turned down my first €10k client because I didn't feel ready.”",
-        "verdict": "This format is working right now, and something that happened to you this week fits it unusually well."
+        "verdict": "This format is working right now, and something that happened to you this week fits it unusually well.",
+        "momentDate": "Tuesday",
+        "reasons": {
+          "one": "strong transformation",
+          "two": "personal",
+          "three": "builds your credibility"
+        }
       },
       "draft": {
-        "label": "Reel · 40 seconds",
         "voice": "Your voice",
         "source": "Built from your Tuesday Moment and a format outperforming in your niche right now.",
         "beats": {
@@ -454,7 +471,8 @@
       "suggestionsLabel": "Suggested for you",
       "resultsLabel": "Search results",
       "noResults": "No creator to add here. Search a handle to find one.",
-      "handleError": "Enter a valid Instagram handle or profile link."
+      "handleError": "Enter a valid Instagram handle or profile link.",
+      "skip": "Skip for now"
     }
   },
   "feed": {

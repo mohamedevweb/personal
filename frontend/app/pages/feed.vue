@@ -7,15 +7,13 @@ const toast = useToast()
 const loading = ref(true)
 const refreshing = ref(false)
 const data = ref<{ items: ContentPost[] } | null>(null)
-const activeFeed = ref<'personal' | 'global'>('personal')
 let requestId = 0
 
 async function loadFeed(showError = true): Promise<boolean> {
   const currentRequest = ++requestId
-  const endpoint = activeFeed.value === 'global' ? '/api/feed/global' : '/api/feed'
 
   try {
-    const response = await apiFetch<{ items: ContentPost[] }>(endpoint)
+    const response = await apiFetch<{ items: ContentPost[] }>('/api/feed')
     if (currentRequest === requestId) data.value = response
     return true
   } catch (exception: unknown) {
@@ -26,23 +24,10 @@ async function loadFeed(showError = true): Promise<boolean> {
   }
 }
 
-async function selectFeed(feed: 'personal' | 'global') {
-  if (feed === activeFeed.value) return
-  activeFeed.value = feed
-  data.value = null
-  loading.value = true
-  await loadFeed()
-}
-
 async function refresh() {
   if (refreshing.value) return
   refreshing.value = true
   try {
-    if (activeFeed.value === 'global') {
-      if (await loadFeed()) toast.success(t('feed.refreshed'))
-      return
-    }
-
     await apiFetch('/api/feed/refresh', { method: 'POST' })
     // Discovery scrapes in the background and a real Apify run can take up to a
     // minute, so poll rather than reload once — stop as soon as posts appear.
@@ -91,27 +76,7 @@ onMounted(loadFeed)
 
 <template>
   <main class="page-shell pb-16 pt-2">
-    <div class="flex items-center justify-between gap-4 border-b border-[var(--line)] pb-4">
-      <div class="flex items-center gap-1 rounded-full border border-[var(--line)] bg-[var(--surface)] p-1">
-        <button
-          type="button"
-          class="rounded-full px-4 py-2 text-[12.5px] font-medium transition"
-          :class="activeFeed === 'personal' ? 'bg-[var(--ink)] text-white' : 'text-[var(--muted)] hover:text-[var(--ink)]'"
-          :aria-pressed="activeFeed === 'personal'"
-          @click="selectFeed('personal')"
-        >
-          {{ $t('feed.forYou') }}
-        </button>
-        <button
-          type="button"
-          class="rounded-full px-4 py-2 text-[12.5px] font-medium transition"
-          :class="activeFeed === 'global' ? 'bg-[var(--ink)] text-white' : 'text-[var(--muted)] hover:text-[var(--ink)]'"
-          :aria-pressed="activeFeed === 'global'"
-          @click="selectFeed('global')"
-        >
-          {{ $t('feed.global') }}
-        </button>
-      </div>
+    <div class="flex items-center justify-end border-b border-[var(--line)] pb-4">
       <button
         class="inline-flex h-9 items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3 text-[12.5px] text-[var(--muted)] transition hover:text-[var(--ink)] disabled:opacity-60 sm:px-4"
         :aria-label="refreshing ? $t('feed.refreshing') : $t('feed.refresh')"

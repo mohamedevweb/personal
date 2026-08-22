@@ -16,6 +16,9 @@ const saving = ref(false)
 const selected = ref<CreatorInspiration[]>([])
 const inspirationsLoaded = ref(false)
 const handleInput = ref('')
+// Choosing inspirations does not need Instagram: a creator who skips the
+// connection still gets this step, so the first feed has something to build on.
+const connectionSkipped = ref(false)
 
 // The card on the right stands in for the thing being connected: an Instagram
 // profile with no face on it, because the only part Personal reads is what the
@@ -77,6 +80,11 @@ watch(connectionError, (message) => {
 }, { immediate: true })
 
 const onboarded = useState('personal-onboarded', () => false)
+
+// The favorites step opens once the import is done, or right away for a creator
+// who chose not to connect Instagram.
+const showInspirations = computed(() => (status.value.connected && status.value.account?.sync_status === 'completed')
+  || (!status.value.connected && connectionSkipped.value))
 
 const minimum = computed(() => inspirationData.value?.minimum ?? 3)
 const maximum = computed(() => inspirationData.value?.maximum ?? 6)
@@ -207,8 +215,7 @@ async function saveInspirations() {
       method: 'PUT',
       body: { handles: selected.value.map(creator => creator.username) }
     })
-    onboarded.value = true
-    await navigateTo('/feed')
+    await enterApp()
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('onboarding.inspirations.saveError')))
   } finally {
@@ -221,12 +228,23 @@ watch(() => status.value.account?.sync_status, (syncStatus) => {
 })
 
 // Let the user into the app without connecting Instagram. The cookie makes the
-// choice survive reloads so the auth gate stops sending them back here.
+// choice survive reloads so the auth gate stops sending them back here, and is
+// only written once they leave onboarding for the feed.
 const skipped = useCookie<boolean>('personal-onboarding-skipped', { maxAge: 60 * 60 * 24 * 365 })
+
 function skipConnection() {
-  skipped.value = true
+  connectionSkipped.value = true
+  void loadInspirations()
+}
+
+function enterApp() {
+  if (connectionSkipped.value) skipped.value = true
   onboarded.value = true
-  navigateTo('/feed')
+  return navigateTo('/feed')
+}
+
+function skipInspirations() {
+  void enterApp()
 }
 
 onMounted(async () => {
@@ -259,7 +277,7 @@ onMounted(async () => {
           {{ $t('onboarding.eyebrow') }}
         </div>
 
-        <template v-if="!status.connected">
+        <template v-if="!status.connected && !connectionSkipped">
           <h1 class="font-serif text-5xl leading-[1.02] tracking-[-0.045em] md:text-7xl" v-html="$t('onboarding.connectTitle')" />
           <p class="mt-7 max-w-lg text-[17px] leading-7 text-[var(--muted)]">
             {{ $t('onboarding.connectCopy') }}
@@ -294,14 +312,14 @@ onMounted(async () => {
         </template>
 
         <template v-else>
-          <div class="mb-8 inline-flex items-center gap-3 rounded-full border border-[var(--line)] bg-[var(--surface)] py-2 pl-2 pr-4">
+          <div v-if="status.connected" class="mb-8 inline-flex items-center gap-3 rounded-full border border-[var(--line)] bg-[var(--surface)] py-2 pl-2 pr-4">
             <img v-if="status.account?.profile_picture_url" :src="status.account.profile_picture_url" alt="" class="h-8 w-8 rounded-full object-cover">
             <span v-else class="grid h-8 w-8 place-items-center rounded-full bg-[var(--paper)] text-xs">IG</span>
             <span class="text-sm font-medium">@{{ status.account?.username }} {{ $t('onboarding.connectedSuffix') }}</span>
             <span class="text-[var(--positive)]">✓</span>
           </div>
 
-          <template v-if="status.account?.sync_status === 'completed'">
+          <template v-if="showInspirations">
             <h1 class="font-serif text-4xl leading-[1.02] tracking-[-0.045em] md:text-6xl">
               {{ $t('onboarding.inspirations.title') }}
             </h1>
@@ -408,6 +426,15 @@ onMounted(async () => {
               @click="saveInspirations"
             >
               {{ saving ? $t('onboarding.inspirations.saving') : $t('onboarding.inspirations.continue') }}&nbsp; →
+            </button>
+
+            <button
+              v-if="connectionSkipped"
+              type="button"
+              class="mt-6 block text-sm text-[var(--faint)] underline decoration-[var(--line)] underline-offset-4 transition hover:text-[var(--ink)]"
+              @click="skipInspirations"
+            >
+              {{ $t('onboarding.inspirations.skip') }} →
             </button>
           </template>
 

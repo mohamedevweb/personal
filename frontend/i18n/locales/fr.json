@@ -202,6 +202,12 @@
       "eyebrow": "Comment ça marche",
       "title": "On vous apprend <em>par cœur</em>. Puis on écrit.",
       "mediaLabel": "Personal, étape par étape",
+      "screens": {
+        "personal": "Personal",
+        "feed": "Pour vous",
+        "moments": "Moments",
+        "remix": "Remix"
+      },
       "steps": {
         "understand": {
           "title": "Comprendre",
@@ -235,7 +241,8 @@
         "toneValue": "Direct · honnête · pince-sans-rire",
         "positioning": "Positionnement",
         "positioningValue": "Construit en public, montre le bazar",
-        "correct": "Une erreur ? Dites-le en une phrase et Personal réécrit sa lecture."
+        "correct": "Une erreur ? Dites-le en une phrase et Personal réécrit sa lecture.",
+        "edit": "Modifier la mémoire"
       },
       "outliers": {
         "label": "Outliers dans votre niche",
@@ -259,17 +266,27 @@
             "views": "121K",
             "ratio": "3,7"
           }
+        },
+        "card": {
+          "handle": "founderframes",
+          "date": "il y a 2 j",
+          "followers": "61,2 k",
+          "likes": "23,9 k"
         }
       },
       "connect": {
         "patternLabel": "Motif dans votre niche",
         "patternQuote": "« La décision que j'ai failli ne pas prendre… »",
-        "momentLabel": "Votre moment · mardi",
         "momentQuote": "« J'ai failli refuser mon premier client à 10 k€ parce que je ne me sentais pas prêt. »",
-        "verdict": "Ce format marche en ce moment, et quelque chose qui vous est arrivé cette semaine y colle particulièrement bien."
+        "verdict": "Ce format marche en ce moment, et quelque chose qui vous est arrivé cette semaine y colle particulièrement bien.",
+        "momentDate": "mardi",
+        "reasons": {
+          "one": "transformation forte",
+          "two": "personnel",
+          "three": "renforce votre crédibilité"
+        }
       },
       "draft": {
-        "label": "Reel · 40 secondes",
         "voice": "Votre voix",
         "source": "Construit à partir de votre Moment de mardi et d'un format qui surperforme dans votre niche en ce moment.",
         "beats": {
@@ -454,7 +471,8 @@
       "suggestionsLabel": "Suggérés pour toi",
       "resultsLabel": "Résultats de recherche",
       "noResults": "Aucun créateur à ajouter ici. Recherche un handle pour en trouver.",
-      "handleError": "Saisis un handle Instagram ou un lien de profil valide."
+      "handleError": "Saisis un handle Instagram ou un lien de profil valide.",
+      "skip": "Passer pour l’instant"
     }
   },
   "feed": {
