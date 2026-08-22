@@ -114,7 +114,7 @@ class PersonalMvpTest extends TestCase
             ->assertAccepted();
         Queue::assertPushed(AnalyzeContentPost::class, fn (AnalyzeContentPost $job): bool => $job->contentPostId === $post->id
             && $job->locale === 'fr'
-            && $job->queue === 'interactive');
+            && $job->queue === 'analysis');
 
         (new AnalyzeContentPost($post->id, 'fr'))->handle(app(PostInsightService::class));
         $this->assertDatabaseHas('content_posts', ['id' => $post->id, 'analysis_locale' => 'fr']);
@@ -217,7 +217,7 @@ class PersonalMvpTest extends TestCase
 
         $remixId = $response->json('remix.id');
         Queue::assertPushed(GenerateRemix::class, fn (GenerateRemix $job): bool => $job->remixId === $remixId
-            && $job->queue === 'interactive');
+            && $job->queue === 'remix');
 
         (new GenerateRemix($remixId, 'en'))->handle(
             app(ContentGenerationService::class),

@@ -62,22 +62,21 @@ services:
       - app
     restart: unless-stopped
 
-  # Runs imports and discovery work, and acts as a fallback for creator-facing
-  # jobs if the dedicated interactive worker is unavailable.
+  # Runs analysis, imports and discovery work, and acts as a fallback for remix
+  # jobs if the dedicated worker is unavailable.
   queue:
     <<: *backend
-    command: ["php", "artisan", "queue:work", "--queue=interactive,default", "--tries=3", "--timeout=150", "--max-time=3600"]
+    command: ["php", "artisan", "queue:work", "--queue=remix,analysis,interactive,default", "--tries=3", "--timeout=150", "--sleep=1", "--max-time=3600"]
     depends_on:
       postgres:
         condition: service_healthy
       app:
         condition: service_started
 
-  # Keeps creator-facing AI work away from long Instagram jobs so opening an
-  # analysis or starting a remix always reaches a worker promptly.
+  # A remix never waits behind post analysis or long Instagram jobs.
   interactive-queue:
     <<: *backend
-    command: ["php", "artisan", "queue:work", "--queue=interactive", "--tries=3", "--timeout=150", "--max-time=3600"]
+    command: ["php", "artisan", "queue:work", "--queue=remix", "--tries=3", "--timeout=150", "--sleep=1", "--max-time=3600"]
     depends_on:
       postgres:
         condition: service_healthy

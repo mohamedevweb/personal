@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Remix;
+use App\Services\ContentPostView;
 use App\Services\RemixDraftService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -10,13 +11,20 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RemixController extends Controller
 {
-    public function show(Request $request, Remix $remix, RemixDraftService $drafts): JsonResponse
-    {
+    public function show(
+        Request $request,
+        Remix $remix,
+        RemixDraftService $drafts,
+        ContentPostView $contentView,
+    ): JsonResponse {
         $this->ensureOwner($request, $remix);
         $remix = $drafts->failIfStale($remix);
+        $remix->load(['sourceContent.creator', 'lifeMoment']);
+        $payload = $remix->toArray();
+        $payload['source_content'] = $contentView->make($remix->sourceContent, $request->user());
 
         return response()->json([
-            'remix' => $remix->load(['sourceContent.creator', 'lifeMoment']),
+            'remix' => $payload,
         ]);
     }
 

@@ -29,6 +29,14 @@ export function useAuth() {
     return response.user
   }
 
+  async function requestPasswordReset(email: string) {
+    await apiFetch('/api/auth/forgot-password', { method: 'POST', body: { email } })
+  }
+
+  async function resetPassword(payload: { token: string, email: string, password: string, password_confirmation: string }) {
+    await apiFetch('/api/auth/reset-password', { method: 'POST', body: payload })
+  }
+
   async function logout() {
     try {
       await apiFetch('/api/auth/logout', { method: 'POST' })
@@ -62,5 +70,17 @@ export function useAuth() {
     await apiFetch('/api/email/verification-notification', { method: 'POST' })
   }
 
-  return { user, token, register, login, logout, loadUser, updateAccount, updatePassword, resendVerification }
+  return {
+    user,
+    token,
+    register,
+    login,
+    requestPasswordReset,
+    resetPassword,
+    logout,
+    loadUser,
+    updateAccount,
+    updatePassword,
+    resendVerification
+  }
 }

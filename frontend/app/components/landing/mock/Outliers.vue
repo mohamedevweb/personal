@@ -35,7 +35,25 @@ function trace(points: readonly number[]) {
 
 <template>
   <LandingMockScreen :title="$t('landing.how.screens.feed')">
-    <div class="grid gap-4 sm:grid-cols-[minmax(0,15.5rem)_1fr]">
+    <!-- The feed's own toolbar: which feed you are reading, and the one button
+         that goes looking again. -->
+    <div class="flex items-center justify-between gap-3">
+      <div class="inline-flex items-center gap-1 rounded-full border border-[var(--b-line)] bg-[var(--b-surface)] p-1">
+        <span class="inline-flex h-7 items-center rounded-full bg-[var(--b-black)] px-3.5 text-[12px] font-medium text-[var(--b-ivory)]">
+          {{ $t('feed.forYou') }}
+        </span>
+        <span class="inline-flex h-7 items-center rounded-full px-3.5 text-[12px] text-[var(--b-stone)]">
+          {{ $t('feed.global') }}
+        </span>
+      </div>
+
+      <span class="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-[var(--b-line)] bg-[var(--b-surface)] px-3.5 text-[12px]">
+        <AppIcon name="sparkles" :size="13" />
+        <span class="hidden sm:inline">{{ $t('feed.refresh') }}</span>
+      </span>
+    </div>
+
+    <div class="mt-4 grid gap-4 sm:grid-cols-[minmax(0,15.5rem)_1fr]">
       <!-- The card, reproduced: Instagram's own header, media, action bar and
            caption, then the fold line and the part that is Personal's. -->
       <article class="overflow-hidden rounded-[16px] border border-[var(--b-line)] bg-[var(--b-surface)] shadow-[0_1px_2px_rgba(23,23,21,.04)]">
@@ -55,7 +73,10 @@ function trace(points: readonly number[]) {
           <AppIcon name="dots" :size="15" class="shrink-0 text-[var(--b-stone)]" />
         </header>
 
-        <div class="relative aspect-[4/3] bg-[#e6e1d6] [background-image:linear-gradient(146deg,rgba(255,255,255,.85)_0%,rgba(214,206,192,.5)_58%,rgba(160,150,133,.35)_100%)]">
+        <!-- Instagram's CDN refuses to be hotlinked, so the thumbnail is a
+             wash rather than a borrowed photograph: light falling across a
+             frame, out of focus, with the format mark on top of it. -->
+        <div class="relative aspect-[4/3] bg-[#cbc2b1] [background-image:radial-gradient(78%_62%_at_28%_18%,rgba(255,255,255,.72)_0%,rgba(255,255,255,0)_62%),linear-gradient(146deg,rgba(233,227,214,.9)_0%,rgba(176,166,148,.75)_54%,rgba(104,96,82,.6)_100%)]">
           <AppIcon name="reel" :size="20" :stroke-width="1.9" class="absolute right-3 top-3 text-white drop-shadow-[0_1px_3px_rgba(0,0,0,.45)]" />
         </div>
 

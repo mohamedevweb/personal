@@ -242,7 +242,13 @@
         "positioning": "Positioning",
         "positioningValue": "Builds in public, shows the mess",
         "correct": "Wrong about something? Say so in one sentence and Personal rewrites the read.",
-        "edit": "Edit memory"
+        "edit": "Edit memory",
+        "topics": "Topics",
+        "topicsValue": "Pricing, first clients, setbacks",
+        "goals": "Goals",
+        "goalsValue": "Sell without playing a part",
+        "strengths": "Content strengths",
+        "strengthsValue": "Your best posts all start from a decision you almost didn’t make."
       },
       "outliers": {
         "label": "Outliers in your niche",
@@ -284,6 +290,10 @@
           "one": "strong transformation",
           "two": "personal",
           "three": "builds your credibility"
+        },
+        "second": {
+          "date": "Thursday",
+          "quote": "“First five-figure month, and I told nobody.”"
         }
       },
       "draft": {
@@ -398,6 +408,7 @@
     "haveAccount": "Already have an account?",
     "goToRegister": "Sign up",
     "goToLogin": "Sign in",
+    "forgotPassword": "Forgot your password?",
     "legal": "By continuing, you agree to our",
     "legalTermsLink": "terms of service",
     "legalAnd": "and our",
@@ -414,6 +425,29 @@
         "label": "Your engagement curve since Personal started watching your niche."
       }
     }
+  },
+  "passwordRecovery": {
+    "requestTitle": "Find your way back in.",
+    "requestCopy": "Enter your email address. If it matches a Personal account, you will receive a secure link.",
+    "sendLink": "Send me the link",
+    "sending": "Sending…",
+    "sentTitle": "Check your inbox.",
+    "sentCopy": "If this address matches a Personal account, the link is on its way. It will remain valid for 60 minutes.",
+    "backToLogin": "Back to sign in",
+    "requestError": "Personal could not send the link. Please try again.",
+    "resetTitle": "Choose a new password.",
+    "resetCopy": "Your new password will be applied to the account for {email}.",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password",
+    "resetAction": "Change my password",
+    "resetting": "Updating…",
+    "resetError": "This link is invalid or has expired. Request a new one.",
+    "completeTitle": "Password updated.",
+    "completeCopy": "Your account is secure. You can now sign in again.",
+    "signIn": "Sign in",
+    "invalidTitle": "This link is no longer valid.",
+    "invalidCopy": "It is incomplete or has expired. Request a new link to continue.",
+    "requestAnother": "Send me a new link"
   },
   "onboarding": {
     "eyebrow": "First, let’s understand you",

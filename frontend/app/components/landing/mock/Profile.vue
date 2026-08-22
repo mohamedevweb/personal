@@ -7,7 +7,7 @@
  * and fill in as the account is read; here they are filled, because the step
  * being illustrated is the moment they arrive.
  */
-const FIELDS = ['positioning', 'audience', 'niche', 'tone'] as const
+const FIELDS = ['positioning', 'audience', 'niche', 'tone', 'topics', 'goals'] as const
 </script>
 
 <template>
@@ -31,15 +31,22 @@ const FIELDS = ['positioning', 'audience', 'niche', 'tone'] as const
 
     <!-- The field grid, drawn the way the app draws it: one bordered card,
          hairlines between the cells, the label above the value. -->
-    <dl class="mt-4 grid grid-cols-2 overflow-hidden rounded-[14px] border border-[var(--b-line)] bg-[var(--b-surface)]">
+    <dl class="mt-4 grid overflow-hidden rounded-[14px] border border-[var(--b-line)] bg-[var(--b-surface)] sm:grid-cols-2">
       <div
         v-for="(field, index) in FIELDS"
         :key="field"
-        class="p-4"
-        :class="[index % 2 === 0 ? 'border-r border-[var(--b-line-soft)]' : '', index < 2 ? 'border-b border-[var(--b-line-soft)]' : '']"
+        class="border-b border-[var(--b-line-soft)] p-4"
+        :class="index % 2 === 0 ? 'sm:border-r sm:border-[var(--b-line-soft)]' : ''"
       >
         <dt class="b-mono text-[var(--b-stone)]">{{ $t(`landing.how.profile.${field}`) }}</dt>
         <dd class="mt-2.5 text-[14px] leading-[1.45] tracking-[-.01em]">{{ $t(`landing.how.profile.${field}Value`) }}</dd>
+      </div>
+
+      <!-- The last read runs the full width in the app too: it is a sentence
+           rather than a field. -->
+      <div class="p-4 sm:col-span-2">
+        <dt class="b-mono text-[var(--b-stone)]">{{ $t('landing.how.profile.strengths') }}</dt>
+        <dd class="mt-2.5 text-[14px] leading-[1.45] tracking-[-.01em]">{{ $t('landing.how.profile.strengthsValue') }}</dd>
       </div>
     </dl>
 

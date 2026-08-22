@@ -14,7 +14,7 @@ use Throwable;
 
 class HikerInstagramProvider implements InstagramDataProvider
 {
-    public function getProfile(string $username): ?DiscoveredProfile
+    public function getProfile(string $username, bool $fresh = false): ?DiscoveredProfile
     {
         $payload = $this->get('/v1/user/by/username', ['username' => ltrim($username, '@')]);
         $user = is_array($payload['user'] ?? null) ? $payload['user'] : $payload;

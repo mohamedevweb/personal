@@ -49,6 +49,9 @@ class MeasureAccountEngagementTest extends TestCase
         $this->assertGreaterThan(0, $creator->avg_engagement_rate);
         $this->assertGreaterThan(0, $creator->baseline_engagement);
         $this->assertNotNull($creator->last_measured_at);
+        $this->assertNotNull($creator->last_scraped_at);
+        $this->assertNotNull($creator->next_scrape_at);
+        $this->assertNotNull($creator->last_post_at);
 
         // The niche is read from the account itself, not inherited from whoever
         // happened to discover it.
@@ -56,6 +59,10 @@ class MeasureAccountEngagementTest extends TestCase
         $this->assertGreaterThan(0, $creator->niches()->count());
 
         $this->assertGreaterThan(0, $creator->posts()->count());
+        $this->assertSame(
+            $creator->posts()->count(),
+            $creator->posts()->withCount('metricSnapshots')->get()->sum('metric_snapshots_count'),
+        );
     }
 
     public function test_posts_are_scored_against_their_own_creator(): void
@@ -180,7 +187,10 @@ class MeasureAccountEngagementTest extends TestCase
 
         // Re-measured later against a floor it no longer clears.
         config(['services.discovery.min_followers' => 10_000_000]);
-        $creator->update(['last_measured_at' => now()->subYear()]);
+        $creator->update([
+            'last_measured_at' => now()->subYear(),
+            'next_scrape_at' => now()->subMinute(),
+        ]);
 
         $this->measure('pasta.daily');
 

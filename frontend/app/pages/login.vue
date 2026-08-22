@@ -93,6 +93,12 @@ function toggleMode() {
               </button>
             </label>
 
+            <div v-if="isLogin" class="text-right">
+              <NuxtLink to="/forgot-password" class="b-focus text-[13px] text-[var(--b-stone)] underline underline-offset-4 transition-colors hover:text-[var(--b-black)]">
+                {{ $t('login.forgotPassword') }}
+              </NuxtLink>
+            </div>
+
             <label v-if="!isLogin" class="block">
               <span class="sr-only">{{ $t('login.confirmPassword') }}</span>
               <input v-model="form.password_confirmation" type="password" autocomplete="new-password" required class="auth-input" :placeholder="$t('login.confirmPasswordPlaceholder')">

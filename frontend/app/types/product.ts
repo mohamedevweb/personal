@@ -111,7 +111,7 @@ export interface Remix {
     caption?: string
   }
   status: 'generating' | 'failed' | 'draft' | 'ready' | 'archived'
-  source_content?: any
+  source_content?: ContentPost
   life_moment?: LifeMoment | null
 }
 

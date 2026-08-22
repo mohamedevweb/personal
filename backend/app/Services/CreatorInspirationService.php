@@ -7,6 +7,7 @@ use App\Models\Creator;
 use App\Models\User;
 use App\Services\Discovery\CanonicalCreatorVerticals;
 use App\Services\Discovery\ContentSafetyDecision;
+use App\Services\Discovery\CreatorScrapeSchedule;
 use App\Services\Discovery\DiscoveredProfile;
 use App\Services\Discovery\InstagramDataProviderManager;
 use Illuminate\Support\Collection;
@@ -28,6 +29,7 @@ class CreatorInspirationService
         private readonly InstagramDataProviderManager $providers,
         private readonly CanonicalCreatorVerticals $verticals,
         private readonly InstagramMediaProxy $media,
+        private readonly CreatorScrapeSchedule $scrapeSchedule,
     ) {}
 
     /** @return array{selected: list<array<string, mixed>>, suggestions: list<array<string, mixed>>, minimum: int, maximum: int} */
@@ -138,6 +140,8 @@ class CreatorInspirationService
 
         $creators = $handles->map(fn (string $handle): Creator => $this->resolveCreator($user, $handle));
 
+        $previousCreatorIds = $user->inspirationCreators()->pluck('creators.id');
+
         DB::transaction(function () use ($user, $creators): void {
             $sync = $creators->values()->mapWithKeys(
                 fn (Creator $creator, int $priority): array => [$creator->id => ['priority' => $priority]],
@@ -145,6 +149,11 @@ class CreatorInspirationService
 
             $user->inspirationCreators()->sync($sync);
         });
+
+        Creator::query()
+            ->whereIn('id', $previousCreatorIds->merge($creators->pluck('id'))->unique())
+            ->get()
+            ->each(fn (Creator $creator) => $this->scrapeSchedule->reprioritize($creator, now()));
 
         $due = $creators
             ->filter(fn (Creator $creator): bool => $creator->safety_status !== ContentSafetyDecision::BLOCKED

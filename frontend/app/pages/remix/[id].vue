@@ -25,6 +25,7 @@ const saving = ref(false)
 const switching = ref<Format | null>(null)
 const copied = ref(false)
 const retrying = ref(false)
+const sourceAvatarFailed = ref(false)
 /** The last payload the server acknowledged, used to tell edited from saved. */
 const pristine = ref('')
 let remixTimer: ReturnType<typeof setTimeout> | undefined
@@ -35,6 +36,7 @@ const slideInputs = ref<HTMLTextAreaElement[]>([])
 const slides = computed(() => remix.value?.generated_content.slides ?? [])
 const caption = computed(() => remix.value?.generated_content.caption ?? '')
 const isReady = computed(() => remix.value?.status === 'ready')
+const sourceCreatorInitial = computed(() => remix.value?.source_content?.creator.username.charAt(0).toUpperCase() || '')
 const dirty = computed(() => {
   if (!remix.value || !['draft', 'ready'].includes(remix.value.status)) return false
   return JSON.stringify(remix.value.generated_content) !== pristine.value
@@ -198,7 +200,7 @@ function guardUnload(event: BeforeUnloadEvent) {
   event.returnValue = ''
 }
 
-function scheduleRemixPoll(delay = 2000) {
+function scheduleRemixPoll(delay = 1000) {
   clearTimeout(remixTimer)
   remixTimer = setTimeout(() => loadRemix(false), delay)
 }
@@ -207,6 +209,7 @@ async function loadRemix(initial = true) {
   try {
     const response = await apiFetch<{ remix: Remix }>(`/api/remixes/${route.params.id}`)
     remix.value = response.remix
+    sourceAvatarFailed.value = false
     if (response.remix.status === 'generating') {
       scheduleRemixPoll()
     } else if (response.remix.status !== 'failed') {
@@ -547,7 +550,16 @@ onBeforeUnmount(() => {
                 rel="noopener noreferrer"
                 class="flex items-center gap-3 border-b border-[var(--line-soft)] p-4 transition hover:bg-[var(--paper)]"
               >
-                <img v-if="remix.source_content.thumbnail_url" :src="remix.source_content.thumbnail_url" alt="" class="h-12 w-10 shrink-0 rounded-[8px] bg-[var(--sand)] object-cover">
+                <img
+                  v-if="remix.source_content.creator.avatar_url && !sourceAvatarFailed"
+                  :src="remix.source_content.creator.avatar_url"
+                  alt=""
+                  class="h-10 w-10 shrink-0 rounded-full bg-[var(--sand)] object-cover"
+                  @error="sourceAvatarFailed = true"
+                >
+                <span v-else class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[var(--sand)] text-xs font-semibold uppercase text-[var(--muted)]">
+                  {{ sourceCreatorInitial }}
+                </span>
                 <span class="min-w-0 flex-1">
                   <span class="remix-label block">{{ $t('remix.borrowedFrom') }}</span>
                   <span class="mt-1 block truncate text-[13.5px]">@{{ remix.source_content.creator.username }}</span>

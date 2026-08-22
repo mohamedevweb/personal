@@ -29,6 +29,11 @@ class Creator extends Model
             'metrics_updated_at' => 'datetime',
             'last_measured_at' => 'datetime',
             'safety_checked_at' => 'datetime',
+            'last_scraped_at' => 'datetime',
+            'next_scrape_at' => 'datetime',
+            'last_post_at' => 'datetime',
+            'scrape_priority' => 'float',
+            'scrape_failures' => 'integer',
         ];
     }
 
@@ -57,5 +62,12 @@ class Creator extends Model
             'source_creator_id',
             'related_creator_id',
         )->withPivot(['relationship_type', 'relevance_score', 'discovered_at', 'last_seen_at']);
+    }
+
+    public function inspiredByUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'user_creator_inspirations')
+            ->withPivot('priority')
+            ->withTimestamps();
     }
 }

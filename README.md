@@ -37,7 +37,7 @@ Local development can still mint a demo token from `/api/development/session`. T
 
 ## Content generation
 
-Drafting runs on **OpenAI**, through the Responses API with a strict per-format JSON schema. Set `OPENAI_API_KEY` and, if you want a model other than the default, `OPENAI_MODEL`.
+Drafting runs on **OpenAI**, through the Responses API with a strict per-format JSON schema. Set `OPENAI_API_KEY`. Remixes use the low-latency `gpt-5.6-luna` model by default, independently from the model used by chat and analysis.
 
 The provider is one line of configuration. `CONTENT_GENERATION_DRIVER` selects an implementation of `ContentGenerationService`:
 
@@ -53,7 +53,7 @@ Only the transport differs between drivers. The prompt, the JSON schema and the 
 
 The model writes only the creative half of a draft. The source hook, the selected life moment and the creator profile are attached from our own records, so the response cannot invent them, and prompts instruct the model to borrow structure and never subject matter. Refusals, truncated answers and API errors all surface to the creator as a `503` with a readable message instead of a stack trace.
 
-Cost and depth are tunable with `OPENAI_MODEL`, `OPENAI_MAX_OUTPUT_TOKENS`, and `OPENAI_REASONING_EFFORT` — the last one applies to reasoning models only and must stay empty for the others.
+Remix latency, cost and depth are tunable with `OPENAI_REMIX_MODEL`, `OPENAI_REMIX_MAX_OUTPUT_TOKENS`, and `OPENAI_REMIX_REASONING_EFFORT`. The defaults use no reasoning and a 2,500-token ceiling because the per-format schemas describe a short, bounded draft. `OPENAI_MODEL` remains the model used by chat and auxiliary analysis.
 
 ## How the For You feed ranks
 
@@ -114,7 +114,25 @@ Instagram CDN images are exposed to the frontend through signed API URLs. The AP
 
 Docker stores that cache in the shared `instagram-media-cache` volume. The API and queue workers therefore reuse the same files, and rebuilding a container does not discard the only usable copy after an Instagram CDN URL expires.
 
-Discovery cost is capped on every axis: search queries have a cooldown (`DISCOVERY_COOLDOWN_DAYS`), accounts have their own (`DISCOVERY_MEASURE_COOLDOWN_DAYS`), and one run measures at most `DISCOVERY_MEASURE_BATCH` accounts. A daily scheduled pass re-measures the stalest tracked accounts within those same limits, which is also how the feed learns about new posts.
+Discovery search cost is capped on every axis: search queries have a cooldown (`DISCOVERY_COOLDOWN_DAYS`), recovery passes retain the legacy measurement cutoff (`DISCOVERY_MEASURE_COOLDOWN_DAYS`), and one discovery run measures at most `DISCOVERY_MEASURE_BATCH` accounts. Ongoing account refreshes use the adaptive schedule below.
+
+### Adaptive Instagram scraping
+
+Tracked creators now carry `last_scraped_at`, `next_scrape_at`, `last_post_at`, `scrape_priority` and `scrape_status`. The hourly scheduler queries only creators whose `next_scrape_at` is due, then recalculates their priority from inspiration selections, matching For You verticals, catalogue importance, posting frequency, recent activity and recent outliers. Configured HOT, ACTIVE, WARM and COLD windows range from 6 hours to 7 days. Provider failures use exponential backoff instead of retrying every scheduler pass.
+
+The same creator and Instagram media IDs remain global, so one provider refresh serves every user who selected that account. Feed requests never call a discovery provider. A full creator refresh upserts only unseen publications and updates metrics already present in the provider response. ScrapeCreators' cache remains enabled for interactive search, while scheduled refreshes bypass it because `next_scrape_at` is the application cache boundary.
+
+Recent post metrics have their own lifecycle. Due posts are grouped by creator, so one recent-post request updates every due post returned for that account. Fresh content is checked on the configured 0 to 24 hour, 1 to 3 day and 4 to 7 day cadence. Posts from 8 to 30 days remain active only while outlier score, velocity, growth or ranking importance justifies the cost. Older posts stop automatically unless they are exceptional and protected by a save or remix. Promising posts move through HOT, WARM and COLD as growth decelerates.
+
+Every real metric refresh writes one `content_post_metric_snapshots` row with views, likes, comments, shares, elapsed time, view delta, velocity and acceleration. The daily retention command keeps raw points for 30 days, downsamples older history to one point per UTC day and expires it after 365 days. All cadence, thresholds, batch sizes and retention windows live in `config/instagram_scraping.php` and can be overridden through the documented environment values.
+
+The scheduler invokes these commands automatically; they are also safe to run manually:
+
+```bash
+cd backend
+php artisan personal:dispatch-instagram-scrapes
+php artisan personal:prune-post-metric-snapshots
+```
 
 ## Curated creator catalog
 
@@ -190,7 +208,7 @@ Composition:
 
 - `app` — php-fpm, and the only service that runs migrations (`RUN_MIGRATIONS=true`)
 - `web` — nginx, serving `public/` and proxying PHP to `app`
-- `queue` / `interactive-queue` / `scheduler` — the same image running discovery work, creator-facing AI work and scheduled tasks
+- `queue` / `interactive-queue` / `scheduler` — the same image running discovery work, analysis, isolated remix generation and scheduled tasks
 - `frontend` — the Nuxt Nitro server
 - `postgres` — with a health check the backend services wait on
 

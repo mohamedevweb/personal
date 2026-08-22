@@ -19,8 +19,11 @@ const slides = computed(() => (['hook', 'two', 'three', 'close'] as const)
 
 <template>
   <LandingMockScreen :title="$t('landing.how.screens.remix')">
+    <h3 class="font-display text-[24px] leading-none tracking-[-.025em]">{{ $t('remix.madeFromStory') }}</h3>
+    <p class="mt-2.5 max-w-[46ch] text-[13px] leading-[1.5] text-[var(--b-stone)]">{{ $t('remix.madeFromStoryCopy') }}</p>
+
     <!-- The format switch, as it sits in the app. -->
-    <div class="flex flex-wrap items-center gap-3">
+    <div class="mt-4 flex flex-wrap items-center gap-3">
       <div class="inline-flex items-center gap-1 rounded-full border border-[var(--b-line)] bg-[var(--b-surface)] p-1">
         <span
           v-for="format in FORMATS"
@@ -36,9 +39,14 @@ const slides = computed(() => (['hook', 'two', 'three', 'close'] as const)
       <p class="b-mono text-[var(--b-stone)]">{{ $t('landing.how.draft.voice') }}</p>
     </div>
 
+    <div class="mt-5 flex items-baseline justify-between">
+      <p class="b-mono text-[var(--b-stone)]">{{ $t('remix.slideDeck') }}</p>
+      <p class="text-[12px] text-[var(--b-stone)]">{{ $t('remix.slideCount', { count: slides.length }) }}</p>
+    </div>
+
     <!-- The deck. The cover is the only slide that decides whether the rest
          gets swiped, so it is the one on the night ground. -->
-    <div class="mt-5 flex gap-3">
+    <div class="mt-3 flex gap-3">
       <article
         v-for="(text, index) in slides"
         :key="index"

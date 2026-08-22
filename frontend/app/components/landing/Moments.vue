@@ -5,10 +5,16 @@ const { t } = useI18n()
 // server and the client render byte-identical markup.
 const WAVEFORM = [22, 40, 31, 58, 74, 46, 35, 62, 88, 71, 49, 33, 55, 80, 96, 68, 42, 29, 51, 77, 63, 38, 26, 47, 70, 44, 30, 20]
 
+// Moments arrive by whatever route was to hand — a line typed after a call, a
+// voice note in the car, a screenshot. The icon in the meta line says which,
+// so the wall can be read at a glance rather than word by word.
+const ICONS = ['chat', 'trend', 'sparkles', 'mic', 'copy'] as const
+
 const cards = computed(() => (['one', 'two', 'three', 'four', 'five'] as const).map((key, index) => ({
   key,
   text: t(`landing.moments.cards.${key}.text`),
   meta: t(`landing.moments.cards.${key}.meta`),
+  icon: ICONS[index]!,
   isVoice: index === 3,
   // One Moment already came back as a Reel: proof that saving them pays off.
   used: index === 1
@@ -43,33 +49,38 @@ const cards = computed(() => (['one', 'two', 'three', 'four', 'five'] as const).
           :key="card.key"
           data-reveal
           :style="{ '--reveal-delay': `${index * 90}ms` }"
-          class="b-panel relative mb-5 break-inside-avoid p-6 transition-shadow duration-500 hover:shadow-[0_24px_50px_-40px_rgba(23,23,21,.55)]"
-          :class="card.used ? 'border-[#dcd5c6]' : ''"
+          class="b-panel relative mb-5 break-inside-avoid overflow-hidden p-6 transition-shadow duration-500 hover:shadow-[0_24px_50px_-40px_rgba(23,23,21,.55)]"
+          :class="card.used ? 'b-lift border-[#dcd5c6]' : ''"
         >
           <!-- The one Moment that shipped carries a spine, so the wall has a
                single point of arrival rather than five equal notes. -->
           <span
             v-if="card.used"
-            class="absolute inset-y-6 left-0 w-[2px] rounded-full bg-[var(--b-red-500)]"
+            class="absolute inset-y-0 left-0 w-[3px] bg-[var(--b-red-500)]"
             aria-hidden="true"
           />
 
-          <p class="b-mono text-[var(--b-stone)]">{{ card.meta }}</p>
+          <p class="b-mono flex items-start gap-2.5 text-[var(--b-stone)]">
+            <AppIcon :name="card.icon" :size="13" class="mt-[-1px] shrink-0" :class="card.used ? 'text-[var(--b-red-500)]' : ''" />
+            {{ card.meta }}
+          </p>
 
           <p class="mt-4 text-[16px] leading-[1.6]">{{ card.text }}</p>
 
+          <!-- The note as it was actually left: the part already listened to in
+               the signature, the rest still waiting. -->
           <span v-if="card.isVoice" class="mt-5 flex h-7 items-end gap-[3px]" aria-hidden="true">
             <i
               v-for="(bar, barIndex) in WAVEFORM"
               :key="barIndex"
               class="w-[2px] rounded-full"
-              :class="barIndex < 11 ? 'bg-[#a9a294]' : 'bg-[#ddd7ca]'"
+              :class="barIndex < 11 ? 'bg-[var(--b-red-400)]' : 'bg-[#ddd7ca]'"
               :style="{ height: `${bar}%` }"
             />
           </span>
 
-          <p v-if="card.used" class="b-chip mt-5">
-            <PersonalMark :size="11" />
+          <p v-if="card.used" class="b-chip mt-5 border-[var(--b-red-200)] bg-[var(--b-red-50)] text-[var(--b-red-700)]">
+            <PersonalMark :size="11" tone="signature" />
             {{ $t('landing.moments.used') }}
           </p>
         </article>

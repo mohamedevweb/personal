@@ -101,7 +101,7 @@ class CreatorCatalogTest extends TestCase
         $this->assertSame(['Set recognition_tier to established.'], $tierSuggestion['suggestions']);
     }
 
-    public function test_repeated_import_upserts_creator_preserves_provenance_and_dispatches_chunks(): void
+    public function test_repeated_import_upserts_creator_preserves_provenance_and_deduplicates_measurement(): void
     {
         Queue::fake();
         $profile = $this->profile();
@@ -135,7 +135,7 @@ class CreatorCatalogTest extends TestCase
         $this->assertTrue(data_get($creator->metadata, 'providers.hiker.seen'));
         $this->assertSame('scrapecreators', data_get($creator->metadata, 'providers.scrapecreators.provider'));
         $this->assertEqualsCanonicalizing(['sport-fitness', 'running', 'coaching'], $creator->niches()->pluck('slug')->all());
-        Queue::assertPushed(MeasureAccountEngagement::class, 2);
+        Queue::assertPushed(MeasureAccountEngagement::class, 1);
     }
 
     public function test_audit_command_uses_mocked_http_boundary_and_never_writes_database_rows(): void

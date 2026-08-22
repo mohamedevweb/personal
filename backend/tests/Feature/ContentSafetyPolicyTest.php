@@ -235,7 +235,7 @@ class ContentSafetyPolicyTest extends TestCase
     private function measureProfile(DiscoveredProfile $profile): void
     {
         $provider = Mockery::mock(InstagramDataProvider::class);
-        $provider->shouldReceive('getProfile')->once()->with($profile->username)->andReturn($profile);
+        $provider->shouldReceive('getProfile')->once()->with($profile->username, true)->andReturn($profile);
 
         (new MeasureAccountEngagement([$profile->username]))->handle(
             $provider,

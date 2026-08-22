@@ -12,7 +12,7 @@ class ApifyInstagramDataProvider implements InstagramDataProvider
         private readonly ApifyProfileScraperService $profiles,
     ) {}
 
-    public function getProfile(string $username): ?DiscoveredProfile
+    public function getProfile(string $username, bool $fresh = false): ?DiscoveredProfile
     {
         return $this->profiles->profiles([$username], (int) config('services.discovery.profile_posts'))->first();
     }

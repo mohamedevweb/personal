@@ -2,9 +2,14 @@
 import { LandingMockProfile, LandingMockOutliers, LandingMockConnect, LandingMockDraft } from '#components'
 
 /**
- * The whole mechanism in one section. It used to be four, each with its own
- * headline and lede; the scroll now carries what the prose was carrying, and a
- * single frame on the right shows the step you are reading.
+ * The whole mechanism, drawn as one circuit running down the page.
+ *
+ * Each step is a node — a pill naming the move, the sentence that explains it —
+ * wired by a hairline into the screen where that move actually happens. The
+ * node sits left, then right, then left again, so the line has somewhere to go
+ * and the eye has a reason to follow it. The signature unrolls along the wire
+ * as you arrive at each step: the diagram is complete from the first glance,
+ * but only lit as far as you have read.
  */
 const STEPS = [
   { key: 'understand', mock: LandingMockProfile },
@@ -13,49 +18,50 @@ const STEPS = [
   { key: 'write', mock: LandingMockDraft }
 ] as const
 
+// The two columns the nodes alternate between, and the middle the screens sit
+// in. They are viewBox units of the 1200-wide column, and they are also where
+// a 440-wide block pinned to either edge puts its own centre.
+const LEFT = 220
+const RIGHT = 980
+const CENTER = 600
+
+const nodeX = (index: number) => (index % 2 === 0 ? LEFT : RIGHT)
+
 const active = ref(0)
 
-// Indexed by hand rather than through `ref="beats"`: Vue makes no promise that a
-// v-for ref array keeps source order, and here the order is the meaning.
-const beats: HTMLElement[] = []
-function registerBeat(el: Element | null, index: number) {
-  if (el) beats[index] = el as HTMLElement
+// Indexed by hand rather than through `ref="stages"`: Vue makes no promise that
+// a v-for ref array keeps source order, and here the order is the meaning.
+const stages: HTMLElement[] = []
+function registerStage(el: Element | null, index: number) {
+  if (el) stages[index] = el as HTMLElement
 }
 
 let observer: IntersectionObserver | null = null
 
 onMounted(() => {
-  if (!beats.length) return
+  if (!stages.length) return
 
-  // The beat crossing the middle of the viewport is the one being read.
+  // The stage crossing the middle of the viewport is the one being read.
   observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (!entry.isIntersecting) return
-      const index = beats.indexOf(entry.target as HTMLElement)
+      const index = stages.indexOf(entry.target as HTMLElement)
       if (index >= 0) active.value = index
     })
-  }, { rootMargin: '-50% 0px -50% 0px', threshold: 0 })
+  }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 })
 
-  beats.forEach(node => observer!.observe(node))
+  stages.forEach(node => observer!.observe(node))
 })
 
 onUnmounted(() => observer?.disconnect())
-
-const current = computed(() => STEPS[active.value] ?? STEPS[0]!)
-// The rail fills to the middle of the active step, so it reads as a position
-// rather than as a completed count.
-const progress = computed(() => `${((active.value + 0.5) / STEPS.length) * 100}%`)
 </script>
 
 <template>
-  <!-- No overflow clipping on this section: it would make itself the scrollport
-       for the pinned frame below and stop it sticking. The texture is inset
-       instead, so there is nothing to clip. -->
-  <section id="how" class="relative scroll-mt-24 border-y border-[var(--b-line)] bg-[#f2efe8] px-5 py-24 md:px-10 md:py-32">
+  <section id="how" class="relative scroll-mt-24 overflow-hidden border-y border-[var(--b-line)] bg-[#f2efe8] px-5 py-24 md:px-10 md:py-32">
     <div class="b-graph b-fade-b pointer-events-none absolute inset-0 opacity-70" aria-hidden="true" />
 
     <div class="relative mx-auto max-w-[1200px]">
-      <div data-reveal class="max-w-2xl">
+      <div data-reveal class="mx-auto max-w-2xl text-center">
         <p class="b-mono text-[var(--b-stone)]">{{ $t('landing.how.eyebrow') }}</p>
         <h2
           class="mt-6 font-display text-[36px] leading-[1.04] tracking-[-.025em] sm:text-[46px] md:text-[56px]"
@@ -63,85 +69,61 @@ const progress = computed(() => `${((active.value + 0.5) / STEPS.length) * 100}%
         />
       </div>
 
-      <div class="mt-14 md:mt-20 md:grid md:grid-cols-[minmax(0,27rem)_1fr] md:items-start md:gap-20">
-        <ol class="relative border-t border-[var(--b-line)] md:border-t-0 md:pl-9">
-          <!-- The rail only exists on a desktop, where the steps are tall enough
-               for a position along it to mean anything. -->
-          <div class="absolute bottom-0 left-0 top-0 hidden w-px bg-[var(--b-line)] md:block" aria-hidden="true">
-            <div
-              class="w-px bg-[#c4bcae] transition-[height] duration-700 ease-out"
-              :style="{ height: progress }"
-            />
+      <div class="mt-14 md:mt-16">
+        <template v-for="(step, index) in STEPS" :key="step.key">
+          <!-- The wire arriving from the screen above, swinging across to the
+               column this node stands in. -->
+          <LandingFlowLink
+            v-if="index > 0"
+            :from="CENTER"
+            :to="nodeX(index)"
+            :height="112"
+            :active="index <= active"
+          />
+
+          <!-- The node. A 440 block pinned to its edge puts its own centre on
+               the column the wire leaves from. -->
+          <div :ref="(el) => registerStage(el as Element | null, index)" class="flex" :class="index % 2 === 0 ? 'justify-start' : 'justify-end'">
+            <div class="w-full text-center md:w-[440px]" :class="index % 2 === 0 ? 'md:text-left' : 'md:text-right'">
+              <span
+                class="inline-flex items-center gap-2.5 rounded-full px-4 py-2 text-[12.5px] font-medium transition-colors duration-500"
+                :class="index === active
+                  ? 'b-btn-red'
+                  : 'border border-[var(--b-line)] bg-[var(--b-surface)] text-[var(--b-stone)]'"
+              >
+                <PersonalMark :size="12" :tone="index === active ? 'inherit' : 'signature'" />
+                {{ String(index + 1).padStart(2, '0') }} · {{ $t(`landing.how.steps.${step.key}.title`) }}
+              </span>
+
+              <p class="mx-auto mt-5 max-w-[25rem] text-[15px] leading-[1.65] text-[var(--b-stone)] md:mx-0 md:text-[16px]">
+                {{ $t(`landing.how.steps.${step.key}.body`) }}
+              </p>
+            </div>
           </div>
 
-          <li
-            v-for="(step, index) in STEPS"
-            :key="step.key"
-            :ref="(el) => registerBeat(el as Element | null, index)"
-            class="relative border-b border-[var(--b-line)] py-10 transition-opacity duration-500 md:min-h-[58vh] md:border-b-0 md:flex md:flex-col md:justify-center md:py-0 md:last:min-h-[34vh]"
-            :class="index === active ? 'md:opacity-100' : 'md:opacity-45'"
-          >
-            <!-- The dot on the rail marking this beat's own place. -->
-            <span
-              class="absolute -left-9 top-1/2 hidden h-2 w-2 -translate-x-[3.5px] -translate-y-1/2 rounded-full transition-colors duration-500 md:block"
-              :class="index === active ? 'bg-[var(--b-red-500)]' : 'bg-[var(--b-line)]'"
+          <!-- The wire from the node into the screen, carrying what the step is
+               doing while it runs. -->
+          <LandingFlowLink
+            :from="nodeX(index)"
+            :to="CENTER"
+            :height="112"
+            :label="$t(`landing.how.steps.${step.key}.caption`)"
+            :active="index <= active"
+          />
+
+          <!-- The screen. Not a diagram of the step: the step, in the app. -->
+          <div class="relative mx-auto max-w-[940px]">
+            <div
+              class="b-glow-blob pointer-events-none absolute -inset-8 -z-10 transition-opacity duration-700"
+              :class="index === active ? 'opacity-70' : 'opacity-0'"
               aria-hidden="true"
             />
 
-            <p class="b-mono flex items-center gap-3 text-[var(--b-stone)]">
-              {{ String(index + 1).padStart(2, '0') }}
-              <span class="h-px w-8 bg-[var(--b-line)]" aria-hidden="true" />
-            </p>
-
-            <h3 class="mt-5 font-display text-[30px] leading-none tracking-[-.02em] md:text-[36px]">
-              {{ $t(`landing.how.steps.${step.key}.title`) }}
-            </h3>
-
-            <p class="mt-4 max-w-[25rem] text-[15px] leading-[1.65] text-[var(--b-stone)] md:text-[16.5px]">
-              {{ $t(`landing.how.steps.${step.key}.body`) }}
-            </p>
-
-            <!-- On a phone there is nothing to pin against, so each beat carries
-                 its own frame instead. -->
-            <LandingMedia
-              :src="LANDING_CLIPS[step.key]"
-              :label="$t('landing.how.mediaLabel')"
-              class="mt-8 md:hidden"
-            >
+            <LandingMedia :src="LANDING_CLIPS[step.key]" :label="$t('landing.how.mediaLabel')">
               <component :is="step.mock" />
             </LandingMedia>
-          </li>
-        </ol>
-
-        <!-- One frame, held still. The minimum height is the tallest mock, so
-             swapping steps never nudges the layout — and it is the shape the
-             clips are cut to once they land. -->
-        <div class="hidden md:sticky md:top-28 md:block md:self-start">
-          <div class="relative">
-            <div class="b-glow-blob pointer-events-none absolute -inset-10 -z-10 opacity-60" aria-hidden="true" />
-
-            <LandingMedia
-              :src="LANDING_CLIPS[current.key]"
-              :label="$t('landing.how.mediaLabel')"
-              class="min-h-[27rem]"
-            >
-              <Transition
-                mode="out-in"
-                enter-active-class="transition-opacity duration-300 ease-out"
-                leave-active-class="transition-opacity duration-200 ease-in"
-                enter-from-class="opacity-0"
-                leave-to-class="opacity-0"
-              >
-                <component :is="current.mock" :key="current.key" />
-              </Transition>
-            </LandingMedia>
           </div>
-
-          <p class="b-mono mt-5 flex items-center gap-2.5 text-[var(--b-stone)]">
-            <span class="b-live" aria-hidden="true" />
-            {{ $t(`landing.how.steps.${current.key}.caption`) }}
-          </p>
-        </div>
+        </template>
       </div>
     </div>
   </section>

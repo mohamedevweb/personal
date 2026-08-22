@@ -1,6 +1,15 @@
 import type { InstagramStatusResponse } from '~/types/instagram'
 
-const publicRoutes = new Set(['/', '/login', '/verify-email', '/privacy', '/terms'])
+const publicRoutes = new Set([
+  '/',
+  '/login',
+  '/forgot-password',
+  '/reset-password',
+  '/verify-email',
+  '/privacy',
+  '/terms',
+  '/mock-preview'
+])
 
 export default defineNuxtRouteMiddleware(async (to) => {
   if (publicRoutes.has(to.path)) return

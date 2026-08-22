@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\ContentPost;
 use App\Models\Creator;
+use App\Models\Remix;
 use App\Models\User;
 use App\Services\ContentPostView;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -98,6 +99,34 @@ class InstagramMediaProxyTest extends TestCase
         $post->update(['thumbnail_url' => 'https://images.unsplash.com/photo.jpg']);
         $payload = app(ContentPostView::class)->make($post->fresh(), $user);
         $this->assertSame('https://images.unsplash.com/photo.jpg', $payload['thumbnail_url']);
+    }
+
+    public function test_remix_source_uses_signed_personal_urls_for_instagram_media(): void
+    {
+        config(['app.url' => 'https://api.personal.test']);
+        $user = User::factory()->create();
+        $post = $this->createPost('https://instagram.ftce2-1.fna.fbcdn.net/thumb.jpg');
+        $post->creator->update(['avatar_url' => 'https://scontent-sea5-1.cdninstagram.com/avatar.jpg']);
+        $remix = Remix::query()->create([
+            'user_id' => $user->id,
+            'source_content_id' => $post->id,
+            'format' => 'reel',
+            'generated_content' => [],
+            'status' => 'draft',
+        ]);
+
+        $response = $this->actingAs($user)
+            ->getJson("/api/remixes/{$remix->id}")
+            ->assertOk();
+
+        $this->assertStringStartsWith(
+            'https://api.personal.test/api/media/content/',
+            $response->json('remix.source_content.thumbnail_url'),
+        );
+        $this->assertStringStartsWith(
+            'https://api.personal.test/api/media/creator/',
+            $response->json('remix.source_content.creator.avatar_url'),
+        );
     }
 
     public function test_feed_deduplicates_repeated_carousel_images(): void

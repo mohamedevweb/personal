@@ -52,7 +52,9 @@ class OpenAiContentGenerationTest extends TestCase
         $this->assertArrayNotHasKey('caption', $result);
 
         $body = $this->sentBodies[0];
-        $this->assertSame(config('services.openai.model'), $body['model']);
+        $this->assertSame(config('services.openai.remix_model'), $body['model']);
+        $this->assertSame(config('services.openai.remix_max_output_tokens'), $body['max_output_tokens']);
+        $this->assertSame(['effort' => 'none'], $body['reasoning']);
         $this->assertSame('json_schema', $body['text']['format']['type']);
         $this->assertTrue($body['text']['format']['strict']);
         $this->assertSame(
@@ -69,12 +71,12 @@ class OpenAiContentGenerationTest extends TestCase
         [$user, $post] = $this->draftFixtures();
         $payload = ['why_it_works' => ['x'], 'your_version' => 'y', 'caption' => 'z'];
 
-        config()->set('services.openai.reasoning_effort', '');
+        config()->set('services.openai.remix_reasoning_effort', '');
         $this->serviceReturning($payload)->generate($post, $user, 'caption');
         $this->assertArrayNotHasKey('reasoning', $this->sentBodies[0]);
 
         $this->sentBodies = [];
-        config()->set('services.openai.reasoning_effort', 'high');
+        config()->set('services.openai.remix_reasoning_effort', 'high');
         $this->serviceReturning($payload)->generate($post, $user, 'caption');
         $this->assertSame(['effort' => 'high'], $this->sentBodies[0]['reasoning']);
     }

@@ -78,5 +78,24 @@ const REASONS = ['one', 'two', 'three'] as const
         <p class="min-w-0 flex-1 text-[12px] leading-[1.5] text-[var(--b-stone)]">{{ $t('landing.how.connect.verdict') }}</p>
       </div>
     </article>
+
+    <!-- The list goes on. The next Moment is there, waiting for the week that
+         makes it worth writing. -->
+    <article class="mt-3 flex items-start justify-between gap-4 rounded-[16px] border border-[var(--b-line)] bg-[var(--b-surface)] p-5 opacity-55">
+      <div class="min-w-0 flex-1">
+        <div class="flex items-center gap-2">
+          <span class="rounded-full bg-[var(--b-ivory)] px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--b-stone)]">
+            {{ $t('moments.categories.Win') }}
+          </span>
+          <span class="text-[12px] text-[var(--b-stone)]">{{ $t('landing.how.connect.second.date') }}</span>
+        </div>
+        <p class="mt-3.5 text-[15.5px] leading-[1.5] tracking-[-.01em]">{{ $t('landing.how.connect.second.quote') }}</p>
+      </div>
+
+      <div class="shrink-0 rounded-[12px] bg-[var(--b-red-100)] px-3.5 py-2.5 text-center text-[var(--b-red-700)]">
+        <strong class="font-display text-[20px] leading-none">7/10</strong>
+        <p class="mt-1.5 text-[8.5px] uppercase tracking-widest">{{ $t('moments.storyPotential') }}</p>
+      </div>
+    </article>
   </LandingMockScreen>
 </template>

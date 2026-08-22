@@ -24,7 +24,7 @@ class GenerateRemix implements ShouldQueue
         public readonly int $remixId,
         public readonly string $locale,
     ) {
-        $this->onQueue('interactive');
+        $this->onQueue('remix');
     }
 
     public function handle(ContentGenerationService $generator, PostInsightService $insights): void

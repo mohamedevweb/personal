@@ -83,8 +83,8 @@ return [
         'search_results_per_query' => (int) env('DISCOVERY_SEARCH_RESULTS_PER_QUERY', 8),
         'seed_limit' => (int) env('DISCOVERY_SEED_LIMIT', 8),
         'related_per_seed' => (int) env('DISCOVERY_RELATED_PER_SEED', 6),
-        // A creator re-measured within this window is skipped, so profile-scrape
-        // cost scales with the number of tracked accounts, not syncs.
+        // Legacy recovery cutoff used while discovery resumes accounts that were
+        // never measured. Ongoing refreshes use config/instagram_scraping.php.
         'measure_cooldown_days' => (int) env('DISCOVERY_MEASURE_COOLDOWN_DAYS', 3),
         // Cap on accounts measured per job run, so a large niche can't blow the
         // Apify budget in one pass.
@@ -171,10 +171,11 @@ return [
     'openai' => [
         'api_key' => env('OPENAI_API_KEY'),
         'model' => env('OPENAI_MODEL', 'gpt-5'),
-        // Reasoning models only ("minimal" through "high"). Leave empty for the
-        // rest; sending it to a non-reasoning model is rejected.
-        'reasoning_effort' => env('OPENAI_REASONING_EFFORT', ''),
-        'max_output_tokens' => (int) env('OPENAI_MAX_OUTPUT_TOKENS', 8000),
+        // Remix drafting is a bounded creative task, so it uses a faster model
+        // and avoids spending tokens on reasoning needed by harder workflows.
+        'remix_model' => env('OPENAI_REMIX_MODEL', 'gpt-5.6-luna'),
+        'remix_reasoning_effort' => env('OPENAI_REMIX_REASONING_EFFORT', 'none'),
+        'remix_max_output_tokens' => (int) env('OPENAI_REMIX_MAX_OUTPUT_TOKENS', 2500),
         'request_timeout' => (int) env('OPENAI_TIMEOUT', 120),
     ],
 

@@ -6,7 +6,7 @@ use Illuminate\Support\Collection;
 
 interface InstagramDataProvider
 {
-    public function getProfile(string $username): ?DiscoveredProfile;
+    public function getProfile(string $username, bool $fresh = false): ?DiscoveredProfile;
 
     /** @return Collection<int, DiscoveredPost> */
     public function getPosts(string $username, int $limit, ?string $externalId = null): Collection;

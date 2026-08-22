@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Notifications\PersonalResetPassword;
+use App\Notifications\PersonalVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -60,6 +62,16 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function avatarUrl(): Attribute
     {
         return Attribute::get(fn (): ?string => $this->instagramAccount?->profile_picture_url);
+    }
+
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new PersonalVerifyEmail);
+    }
+
+    public function sendPasswordResetNotification(#[\SensitiveParameter] $token): void
+    {
+        $this->notify(new PersonalResetPassword($token));
     }
 
     public function instagramAccount(): HasOne

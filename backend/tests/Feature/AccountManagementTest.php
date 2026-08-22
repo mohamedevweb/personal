@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use Illuminate\Auth\Notifications\VerifyEmail;
+use App\Notifications\PersonalVerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
@@ -27,7 +27,7 @@ class AccountManagementTest extends TestCase
 
         $this->withToken($token)->getJson('/api/feed')->assertForbidden();
 
-        Notification::assertSentTo(User::query()->firstWhere('email', 'ada@personal.test'), VerifyEmail::class);
+        Notification::assertSentTo(User::query()->firstWhere('email', 'ada@personal.test'), PersonalVerifyEmail::class);
     }
 
     public function test_a_verified_account_reaches_product_endpoints(): void
@@ -73,7 +73,7 @@ class AccountManagementTest extends TestCase
 
         $this->actingAs($user)->postJson('/api/email/verification-notification')->assertAccepted();
 
-        Notification::assertSentTo($user, VerifyEmail::class);
+        Notification::assertSentTo($user, PersonalVerifyEmail::class);
     }
 
     public function test_a_creator_can_update_their_name(): void
@@ -102,7 +102,7 @@ class AccountManagementTest extends TestCase
         $this->assertSame('new@personal.test', $fresh->email);
         $this->assertNull($fresh->email_verified_at);
 
-        Notification::assertSentTo($fresh, VerifyEmail::class);
+        Notification::assertSentTo($fresh, PersonalVerifyEmail::class);
     }
 
     public function test_the_email_must_be_unique_when_updating(): void

@@ -242,7 +242,13 @@
         "positioning": "Positionnement",
         "positioningValue": "Construit en public, montre le bazar",
         "correct": "Une erreur ? Dites-le en une phrase et Personal réécrit sa lecture.",
-        "edit": "Modifier la mémoire"
+        "edit": "Modifier la mémoire",
+        "topics": "Sujets",
+        "topicsValue": "Pricing, premiers clients, revers",
+        "goals": "Objectifs",
+        "goalsValue": "Vendre sans jouer un rôle",
+        "strengths": "Points forts de contenu",
+        "strengthsValue": "Vos meilleurs posts partent tous d’une décision que vous avez failli ne pas prendre."
       },
       "outliers": {
         "label": "Outliers dans votre niche",
@@ -284,6 +290,10 @@
           "one": "transformation forte",
           "two": "personnel",
           "three": "renforce votre crédibilité"
+        },
+        "second": {
+          "date": "jeudi",
+          "quote": "« Premier mois à cinq chiffres, et je n’ai rien dit à personne. »"
         }
       },
       "draft": {
@@ -398,6 +408,7 @@
     "haveAccount": "Vous avez déjà un compte ?",
     "goToRegister": "Créer un compte",
     "goToLogin": "Se connecter",
+    "forgotPassword": "Mot de passe oublié ?",
     "legal": "En continuant, vous acceptez nos",
     "legalTermsLink": "conditions d’utilisation",
     "legalAnd": "et notre",
@@ -414,6 +425,29 @@
         "label": "Votre courbe d’engagement depuis que Personal observe votre niche."
       }
     }
+  },
+  "passwordRecovery": {
+    "requestTitle": "Retrouve ton espace.",
+    "requestCopy": "Saisis ton adresse email. Si elle correspond à un compte Personal, tu recevras un lien sécurisé.",
+    "sendLink": "Recevoir le lien",
+    "sending": "Envoi…",
+    "sentTitle": "Consulte tes emails.",
+    "sentCopy": "Si cette adresse correspond à un compte Personal, le lien est en route. Il restera valable pendant 60 minutes.",
+    "backToLogin": "Retour à la connexion",
+    "requestError": "Personal n’a pas pu envoyer le lien. Réessaie.",
+    "resetTitle": "Choisis un nouveau mot de passe.",
+    "resetCopy": "Le nouveau mot de passe sera appliqué au compte {email}.",
+    "newPassword": "Nouveau mot de passe",
+    "confirmPassword": "Confirmer le nouveau mot de passe",
+    "resetAction": "Changer mon mot de passe",
+    "resetting": "Mise à jour…",
+    "resetError": "Ce lien est invalide ou a expiré. Demande un nouveau lien.",
+    "completeTitle": "Mot de passe mis à jour.",
+    "completeCopy": "Ton compte est sécurisé. Tu peux maintenant te reconnecter.",
+    "signIn": "Se connecter",
+    "invalidTitle": "Ce lien n’est plus valide.",
+    "invalidCopy": "Il est incomplet ou a expiré. Demande un nouveau lien pour continuer.",
+    "requestAnother": "Recevoir un nouveau lien"
   },
   "onboarding": {
     "eyebrow": "D’abord, apprenons à vous connaître",

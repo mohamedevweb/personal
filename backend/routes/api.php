@@ -11,6 +11,7 @@ use App\Http\Controllers\InstagramConnectionController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\MomentController;
 use App\Http\Controllers\OpportunityController;
+use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RemixController;
 use App\Http\Controllers\SavedContentController;
@@ -21,6 +22,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('throttle:auth')->prefix('auth')->group(function (): void {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/forgot-password', [PasswordResetController::class, 'requestLink']);
+    Route::post('/reset-password', [PasswordResetController::class, 'reset']);
 });
 
 Route::middleware('auth:sanctum')->prefix('auth')->group(function (): void {

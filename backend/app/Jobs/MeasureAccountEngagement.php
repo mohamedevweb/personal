@@ -9,12 +9,18 @@ use App\Services\Discovery\ContentSafetyDecision;
 use App\Services\Discovery\ContentSafetyPolicy;
 use App\Services\Discovery\CreatorNicheCatalog;
 use App\Services\Discovery\CreatorNicheService;
+use App\Services\Discovery\CreatorScrapeSchedule;
 use App\Services\Discovery\DiscoveredPost;
 use App\Services\Discovery\DiscoveredProfile;
 use App\Services\Discovery\InstagramDataProvider;
 use App\Services\Discovery\OutlierScore;
+use App\Services\Discovery\PostMetricsLifecycle;
+use Carbon\CarbonInterface;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -28,7 +34,7 @@ use Illuminate\Support\Str;
  * earlier through a hashtag — is (re)scored against it, so a post in the feed
  * means "this beat its own creator", not "this came from a big account".
  */
-class MeasureAccountEngagement implements ShouldQueue
+class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
 {
     use Queueable;
 
@@ -37,8 +43,18 @@ class MeasureAccountEngagement implements ShouldQueue
     /** Room for every chunk to burn its full HTTP timeout without the job being killed. */
     public int $timeout = 900;
 
+    public int $uniqueFor = 3600;
+
     /** @param list<string> $usernames Accounts to measure, bare handles. */
     public function __construct(public readonly array $usernames) {}
+
+    public function uniqueId(): string
+    {
+        $usernames = $this->usernames;
+        sort($usernames);
+
+        return sha1(implode('|', $usernames));
+    }
 
     public function handle(
         InstagramDataProvider $provider,
@@ -46,7 +62,11 @@ class MeasureAccountEngagement implements ShouldQueue
         CreatorNicheCatalog $catalog,
         OutlierScore $performance,
         ContentSafetyPolicy $safety,
+        ?CreatorScrapeSchedule $schedule = null,
+        ?PostMetricsLifecycle $lifecycle = null,
     ): void {
+        $schedule ??= app(CreatorScrapeSchedule::class);
+        $lifecycle ??= app(PostMetricsLifecycle::class);
         $due = $this->dueUsernames();
 
         if ($due === []) {
@@ -54,33 +74,95 @@ class MeasureAccountEngagement implements ShouldQueue
         }
 
         foreach ($due as $username) {
-            try {
-                $profile = $provider->getProfile($username);
+            $lock = Cache::lock('instagram-creator-scrape:'.mb_strtolower($username), $this->timeout + 60);
 
-                if (! $profile) {
-                    continue;
-                }
-
-                $posts = $profile->posts->isNotEmpty()
-                    ? $profile->posts->take((int) config('services.discovery.profile_posts'))->values()
-                    : $provider->getPosts($profile->username, (int) config('services.discovery.profile_posts'), $profile->externalId);
-            } catch (ContentDiscoveryException $exception) {
-                Log::warning('Account engagement measurement skipped.', ['account' => $username, 'exception' => $exception]);
-
+            if (! $lock->get()) {
                 continue;
             }
 
-            $this->measure(new DiscoveredProfile(
-                username: $profile->username,
-                displayName: $profile->displayName,
-                avatarUrl: $profile->avatarUrl,
-                followers: $profile->followers,
-                posts: $posts,
-                bio: $profile->bio,
-                externalId: $profile->externalId,
-                isPrivate: $profile->isPrivate,
-                metadata: $profile->metadata,
-            ), $niches, $catalog, $performance, $safety);
+            try {
+                $this->refreshUsername(
+                    $username,
+                    $provider,
+                    $niches,
+                    $catalog,
+                    $performance,
+                    $safety,
+                    $schedule,
+                    $lifecycle,
+                );
+            } finally {
+                $lock->release();
+            }
+        }
+    }
+
+    private function refreshUsername(
+        string $username,
+        InstagramDataProvider $provider,
+        CreatorNicheService $niches,
+        CreatorNicheCatalog $catalog,
+        OutlierScore $performance,
+        ContentSafetyPolicy $safety,
+        CreatorScrapeSchedule $schedule,
+        PostMetricsLifecycle $lifecycle,
+    ): void {
+        try {
+            $profile = $provider->getProfile($username, fresh: true);
+
+            if (! $profile) {
+                $creator = Creator::query()->where('username', $username)->first();
+
+                if ($creator) {
+                    $schedule->recordFailure($creator, now());
+                }
+
+                return;
+            }
+
+            $posts = $profile->posts->isNotEmpty()
+                ? $profile->posts->take((int) config('services.discovery.profile_posts'))->values()
+                : $provider->getPosts($profile->username, (int) config('services.discovery.profile_posts'), $profile->externalId);
+        } catch (ContentDiscoveryException $exception) {
+            $creator = Creator::query()->where('username', $username)->first();
+
+            if ($creator) {
+                $schedule->recordFailure($creator, now());
+            }
+
+            Log::warning('Account engagement measurement skipped.', ['account' => $username, 'exception' => $exception]);
+
+            return;
+        }
+
+        if ($profile->posts->isEmpty() && $posts->isEmpty()) {
+            $creator = Creator::query()->where('username', $profile->username)->first();
+
+            if ($creator) {
+                $schedule->recordSuccess($creator, now());
+            }
+
+            return;
+        }
+
+        $creator = $this->measure(new DiscoveredProfile(
+            username: $profile->username,
+            displayName: $profile->displayName,
+            avatarUrl: $profile->avatarUrl,
+            followers: $profile->followers,
+            posts: $posts,
+            bio: $profile->bio,
+            externalId: $profile->externalId,
+            isPrivate: $profile->isPrivate,
+            metadata: $profile->metadata,
+        ), $niches, $catalog, $performance, $safety, $lifecycle);
+
+        if ($creator) {
+            if ($creator->safety_status === ContentSafetyDecision::PENDING || ! $creator->last_measured_at) {
+                $schedule->recordFailure($creator, now());
+            } else {
+                $schedule->recordSuccess($creator, now());
+            }
         }
     }
 
@@ -99,25 +181,16 @@ class MeasureAccountEngagement implements ShouldQueue
             return [];
         }
 
-        $blocked = Creator::query()
-            ->whereIn('username', $usernames)
-            ->where('safety_status', ContentSafetyDecision::BLOCKED)
-            ->pluck('username')
-            ->all();
+        $known = Creator::query()->whereIn('username', $usernames)->get()->keyBy('username');
+        $ignoreSchedule = (int) config('services.discovery.measure_cooldown_days') === 0;
 
-        $fresh = Creator::query()
-            ->whereIn('username', $usernames)
-            ->where('safety_status', ContentSafetyDecision::ALLOWED)
-            ->whereHas('posts')
-            ->where('last_measured_at', '>', now()->subDays((int) config('services.discovery.measure_cooldown_days')))
-            ->pluck('username')
-            ->all();
+        return array_slice(array_values(array_filter($usernames, function (string $username) use ($known, $ignoreSchedule): bool {
+            $creator = $known->get($username);
 
-        return array_slice(
-            array_values(array_diff($usernames, $fresh, $blocked)),
-            0,
-            (int) config('services.discovery.measure_batch'),
-        );
+            return ! $creator
+                || ($creator->safety_status !== ContentSafetyDecision::BLOCKED
+                    && ($ignoreSchedule || ! $creator->next_scrape_at || $creator->next_scrape_at->isPast()));
+        })), 0, (int) config('services.discovery.measure_batch'));
     }
 
     private function measure(
@@ -126,9 +199,10 @@ class MeasureAccountEngagement implements ShouldQueue
         CreatorNicheCatalog $catalog,
         OutlierScore $performance,
         ContentSafetyPolicy $safety,
-    ): void {
+        PostMetricsLifecycle $lifecycle,
+    ): ?Creator {
         if ($profile->posts->isEmpty()) {
-            return;
+            return null;
         }
 
         $existing = Creator::query()
@@ -140,7 +214,7 @@ class MeasureAccountEngagement implements ShouldQueue
         if (! $creatorSafety->isAllowed()) {
             $this->blockCreator($profile, $existing, $creatorSafety);
 
-            return;
+            return Creator::query()->where('username', $profile->username)->first();
         }
 
         $decisions = $profile->posts->mapWithKeys(
@@ -204,12 +278,17 @@ class MeasureAccountEngagement implements ShouldQueue
             $catalog->sync($creator, $creator->niche, $creator->niche_topics, $creator->is_catalog_seed ? 'catalog' : 'analysis');
         }
 
+        $refreshedPostIds = [];
+        $capturedAt = now();
+
         foreach ($profile->posts as $post) {
             $decision = $decisions[$post->sourceUrl];
 
-            $decision->isAllowed()
-                ? $this->storePost($creator, $post, $decision)
-                : $this->blockExistingPost($post, $decision);
+            if ($decision->isAllowed()) {
+                $refreshedPostIds[] = $this->storePost($creator, $post, $decision, $lifecycle, $capturedAt)->id;
+            } else {
+                $this->blockExistingPost($post, $decision);
+            }
         }
 
         // An account under the follower floor is measured — so the cooldown stops us
@@ -219,6 +298,14 @@ class MeasureAccountEngagement implements ShouldQueue
         $qualified && $safePosts->isNotEmpty()
             ? $this->score($creator, $baselines, $performance)
             : $this->disqualify($creator);
+
+        ContentPost::query()
+            ->whereIn('id', $refreshedPostIds)
+            ->with('creator')
+            ->get()
+            ->each(fn (ContentPost $post) => $lifecycle->reschedule($post, $capturedAt));
+
+        return $creator;
     }
 
     private function blockCreator(
@@ -285,7 +372,9 @@ class MeasureAccountEngagement implements ShouldQueue
         Creator $creator,
         DiscoveredPost $post,
         ContentSafetyDecision $decision,
-    ): void {
+        PostMetricsLifecycle $lifecycle,
+        CarbonInterface $capturedAt,
+    ): ContentPost {
         $existing = ContentPost::query()
             ->when($post->externalId, fn ($query) => $query->where('instagram_media_id', $post->externalId))
             ->orWhere('source_url', $post->sourceUrl)
@@ -308,18 +397,41 @@ class MeasureAccountEngagement implements ShouldQueue
             'published_at' => $post->publishedAt,
             'tags' => $post->hashtags,
             'metadata' => array_replace_recursive($existing?->metadata ?? [], $post->metadata),
-            'last_fetched_at' => now(),
-            'metrics_updated_at' => now(),
+            'last_fetched_at' => $capturedAt,
+            'metrics_updated_at' => $capturedAt,
             'safety_status' => $decision->status,
             'safety_reasons' => $decision->reasons,
-            'safety_checked_at' => now(),
+            'safety_checked_at' => $capturedAt,
             // why_it_works is written by score() once the baseline is known;
             // the hook and structure breakdown is generated lazily the first
             // time a creator opens the post.
         ];
 
-        $content = $existing ?: new ContentPost;
-        $content->fill($attributes)->save();
+        return DB::transaction(function () use ($attributes, $capturedAt, $existing, $lifecycle, $post): ContentPost {
+            if ($existing) {
+                $content = $existing;
+                $content->fill($attributes)->save();
+            } else {
+                $attributes['created_at'] = $capturedAt;
+                $attributes['updated_at'] = $capturedAt;
+                $identity = $post->externalId ? ['instagram_media_id'] : ['source_url'];
+                $updates = array_values(array_diff(array_keys($attributes), ['created_at']));
+                $upsertAttributes = $attributes;
+
+                foreach (['media_urls', 'tags', 'metadata', 'safety_reasons'] as $jsonColumn) {
+                    $upsertAttributes[$jsonColumn] = json_encode($upsertAttributes[$jsonColumn], JSON_THROW_ON_ERROR);
+                }
+
+                ContentPost::query()->upsert([$upsertAttributes], $identity, $updates);
+                $content = ContentPost::query()
+                    ->where($post->externalId ? 'instagram_media_id' : 'source_url', $post->externalId ?: $post->sourceUrl)
+                    ->firstOrFail();
+            }
+
+            $lifecycle->recordRefresh($content, $capturedAt);
+
+            return $content;
+        });
     }
 
     private function blockExistingPost(DiscoveredPost $post, ContentSafetyDecision $decision): void

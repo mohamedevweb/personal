@@ -46,10 +46,10 @@ class OpenAiContentGenerationService implements ContentGenerationService
     private function request(string $brief, array $schema): CreateResponse
     {
         $parameters = [
-            'model' => (string) config('services.openai.model'),
+            'model' => (string) config('services.openai.remix_model'),
             'instructions' => $this->blueprint->system(),
             'input' => $brief,
-            'max_output_tokens' => (int) config('services.openai.max_output_tokens'),
+            'max_output_tokens' => (int) config('services.openai.remix_max_output_tokens'),
             'text' => [
                 'format' => [
                     'type' => 'json_schema',
@@ -62,7 +62,7 @@ class OpenAiContentGenerationService implements ContentGenerationService
 
         // Only reasoning models accept this parameter, so it stays out of the
         // request unless it has been configured.
-        if ($effort = config('services.openai.reasoning_effort')) {
+        if ($effort = config('services.openai.remix_reasoning_effort')) {
             $parameters['reasoning'] = ['effort' => $effort];
         }
 
@@ -110,7 +110,7 @@ class OpenAiContentGenerationService implements ContentGenerationService
             ]);
 
             throw new ContentGenerationException(
-                'Personal ran out of room drafting this. Try a shorter moment, or raise OPENAI_MAX_OUTPUT_TOKENS.'
+                'Personal ran out of room drafting this. Try a shorter moment, or raise OPENAI_REMIX_MAX_OUTPUT_TOKENS.'
             );
         }
     }

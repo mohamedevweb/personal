@@ -68,6 +68,11 @@ class PostInsightService
     private function analyze(ContentPost $post, string $locale): ?array
     {
         $post->loadMissing('creator');
+        $engagement = ["{$post->likes} likes", "{$post->comments} comments"];
+
+        if ($post->views > 0) {
+            $engagement[] = "{$post->views} views";
+        }
 
         $result = $this->llm->object(
             'You are a short-form content strategist. Analyze why an Instagram post performs, in plain, '
@@ -78,7 +83,7 @@ class PostInsightService
                 'Format: '.$post->format,
                 'Hook: '.$post->hook,
                 'Caption: '.Str::limit($post->caption, 600),
-                "Engagement: {$post->likes} likes, {$post->comments} comments, {$post->views} views.",
+                'Engagement: '.implode(', ', $engagement).'.',
             ]),
             [
                 'type' => 'object',

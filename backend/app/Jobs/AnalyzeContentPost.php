@@ -22,7 +22,7 @@ class AnalyzeContentPost implements ShouldBeUnique, ShouldQueue
         public readonly int $contentPostId,
         public readonly string $locale,
     ) {
-        $this->onQueue('interactive');
+        $this->onQueue('analysis');
     }
 
     public function uniqueId(): string

@@ -161,6 +161,19 @@ class ScrapeCreatorsInstagramProviderTest extends TestCase
         $this->assertNull(app(ScrapeCreatorsInstagramProvider::class)->getProfile('missing'));
     }
 
+    public function test_scheduled_profile_refresh_bypasses_provider_cache(): void
+    {
+        Http::fake(['*' => Http::response([
+            'success' => true,
+            'data' => ['user' => ['id' => 'creator-1', 'username' => 'fresh.creator']],
+        ])]);
+
+        app(ScrapeCreatorsInstagramProvider::class)->getProfile('fresh.creator', fresh: true);
+
+        Http::assertSent(fn ($request): bool => $request['handle'] === 'fresh.creator'
+            && ! isset($request['cache_max_age']));
+    }
+
     public function test_provider_failures_become_domain_exceptions(): void
     {
         Http::fake(['*' => Http::response(['success' => false], 500)]);

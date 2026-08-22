@@ -14,11 +14,14 @@ use Throwable;
 
 class ScrapeCreatorsInstagramProvider implements InstagramDataProvider
 {
-    public function getProfile(string $username): ?DiscoveredProfile
+    public function getProfile(string $username, bool $fresh = false): ?DiscoveredProfile
     {
         $payload = $this->get('/v1/instagram/profile', array_filter([
             'handle' => ltrim($username, '@'),
-            'cache_max_age' => config('services.discovery.scrapecreators.cache_max_age'),
+            // Interactive search can reuse provider-side cache. Scheduled refreshes
+            // already have their own adaptive cache in next_scrape_at and must see
+            // posts newer than the former three-day global cooldown.
+            'cache_max_age' => $fresh ? null : config('services.discovery.scrapecreators.cache_max_age'),
         ]), allowNotFound: true);
         $user = data_get($payload, 'data.user');
 

@@ -27,6 +27,12 @@ class ContentPost extends Model
             'last_fetched_at' => 'datetime',
             'metrics_updated_at' => 'datetime',
             'safety_checked_at' => 'datetime',
+            'last_metrics_scraped_at' => 'datetime',
+            'next_metrics_scrape_at' => 'datetime',
+            'views_velocity' => 'float',
+            'views_acceleration' => 'float',
+            'metrics_growth_rate' => 'float',
+            'tracking_stopped_at' => 'datetime',
         ];
     }
 
@@ -43,5 +49,10 @@ class ContentPost extends Model
     public function remixes(): HasMany
     {
         return $this->hasMany(Remix::class, 'source_content_id');
+    }
+
+    public function metricSnapshots(): HasMany
+    {
+        return $this->hasMany(ContentPostMetricSnapshot::class);
     }
 }
