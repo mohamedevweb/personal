@@ -58,7 +58,6 @@ async function createMoment() {
     moments.value.unshift(response.moment)
     modalOpen.value = false
     form.content = ''
-    toast.success(t('moments.created'))
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('moments.createError')))
   } finally { saving.value = false }
@@ -68,7 +67,6 @@ async function removeMoment(moment: LifeMoment) {
   try {
     await apiFetch(`/api/moments/${moment.id}`, { method: 'DELETE' })
     moments.value = moments.value.filter(item => item.id !== moment.id)
-    toast.success(t('moments.deleted'))
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('moments.deleteError')))
   }

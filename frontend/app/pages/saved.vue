@@ -12,7 +12,6 @@ async function unsave(post: ContentPost) {
   try {
     await apiFetch(`/api/content/${post.id}/save`, { method: 'POST' })
     items.value = items.value.filter(item => item.id !== post.id)
-    toast.success(t('saved.removed'))
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('saved.removeError')))
   }

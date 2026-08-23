@@ -13,7 +13,6 @@ async function disconnect() {
     await loadUser()
     instagramAvatarFailed.value = false
     if (error.value) return
-    toast.success(t('settings.disconnected'))
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('settings.disconnectError')))
   }
@@ -69,7 +68,6 @@ async function resend() {
   try {
     await resendVerification()
     resent.value = true
-    toast.success(t('settings.account.resent'))
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('verifyEmail.error')))
   } finally {

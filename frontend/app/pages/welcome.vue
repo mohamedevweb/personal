@@ -106,7 +106,7 @@ async function finish(destination = '/feed') {
           </div>
         </div>
 
-        <div class="hero-night m-3 flex min-h-[430px] items-center justify-center overflow-hidden rounded-[24px] p-5 text-white md:m-4 md:p-10">
+        <div class="m-3 flex min-h-[430px] items-center justify-center overflow-hidden rounded-[24px] bg-[var(--night)] p-5 text-white md:m-4 md:p-10">
           <Transition name="guide" mode="out-in">
             <div :key="current.key" class="w-full max-w-lg">
               <div v-if="current.key === 'welcome'" class="text-center">

@@ -125,6 +125,7 @@ class AuthTest extends TestCase
 
     public function test_product_endpoints_require_authentication(): void
     {
+        $this->patchJson('/api/me/onboarding')->assertUnauthorized();
         $this->getJson('/api/feed')->assertUnauthorized();
         $this->getJson('/api/moments')->assertUnauthorized();
         $this->getJson('/api/integrations/instagram/status')->assertUnauthorized();

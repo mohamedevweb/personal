@@ -115,7 +115,7 @@ async function addSlide() {
 
 /* --- Saving, copying, switching ------------------------------------------ */
 
-async function save(status: 'draft' | 'ready' = 'draft', announce = true): Promise<boolean> {
+async function save(status: 'draft' | 'ready' = 'draft'): Promise<boolean> {
   if (!remix.value || saving.value) return false
   saving.value = true
   const payload = JSON.stringify(remix.value.generated_content)
@@ -126,7 +126,6 @@ async function save(status: 'draft' | 'ready' = 'draft', announce = true): Promi
     })
     remix.value.status = status
     pristine.value = payload
-    if (announce) toast.success(t('remix.savedToast'))
     return true
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('remix.saveError')))
@@ -154,7 +153,6 @@ async function copyDraft() {
   try {
     await navigator.clipboard.writeText(plainText())
     copied.value = true
-    toast.success(t('remix.copiedToast'))
     setTimeout(() => { copied.value = false }, 1800)
   } catch {
     toast.error(t('remix.copyError'))
@@ -167,7 +165,7 @@ async function switchFormat(format: Format) {
   switching.value = format
   try {
     if (dirty.value) {
-      const saved = await save(remix.value.status === 'ready' ? 'ready' : 'draft', false)
+      const saved = await save(remix.value.status === 'ready' ? 'ready' : 'draft')
       if (!saved) {
         switching.value = null
         return

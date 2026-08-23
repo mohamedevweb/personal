@@ -75,7 +75,6 @@ async function saveProfile() {
     const response = await apiFetch<{ profile: PersonalProfile }>('/api/me/profile', { method: 'PATCH', body: draft })
     profile.value = response.profile
     editing.value = false
-    toast.success(t('personal.saved'))
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('personal.saveError')))
   } finally { saving.value = false }
@@ -177,7 +176,6 @@ async function importVoiceFile(event: Event) {
       body: { voice_profile: contents }
     })
     profile.value = response.profile
-    toast.success(t('personal.voice.imported'))
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('personal.voice.importError')))
   } finally {

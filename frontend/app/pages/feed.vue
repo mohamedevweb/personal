@@ -42,7 +42,6 @@ async function refresh() {
 
     if (response.items.length > 0) {
       data.value = response
-      toast.success(t('feed.refreshed'))
     } else {
       toast.success(t('feed.rotationComplete'))
     }
@@ -57,7 +56,6 @@ async function save(post: ContentPost) {
   try {
     const response = await apiFetch<{ saved: boolean }>(`/api/content/${post.id}/save`, { method: 'POST' })
     post.is_saved = response.saved
-    toast.success(t(response.saved ? 'feed.saved' : 'feed.unsaved'))
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('feed.saveError')))
   }
