@@ -1,5 +1,9 @@
 <script setup lang="ts">
 const { locale, t } = useI18n()
+const { initialize: initializeGoogleAnalytics } = useGoogleAnalytics()
+
+onMounted(initializeGoogleAnalytics)
+
 useHead({
   htmlAttrs: { lang: locale },
   title: computed(() => t('meta.title')),
@@ -12,7 +16,6 @@ useHead({
 <template>
   <NuxtRouteAnnouncer />
   <ToastViewport />
-  <AnalyticsConsentBanner />
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>

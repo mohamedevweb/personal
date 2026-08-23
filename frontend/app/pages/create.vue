@@ -24,6 +24,11 @@ const opportunityKeys: Record<string, string> = {
 const pick = computed(() => opportunities.value.find(opportunity => opportunity.life_moment))
 const hasMaterial = computed(() => moments.value.length > 0)
 const selectedMoment = computed(() => moments.value.find(moment => moment.id === selectedMomentId.value) || null)
+const visibleMoments = computed(() => {
+  const firstMoments = moments.value.slice(0, 4)
+  if (!selectedMoment.value || firstMoments.some(moment => moment.id === selectedMoment.value?.id)) return firstMoments
+  return [selectedMoment.value, ...firstMoments.slice(0, 3)]
+})
 
 function pickCopy(type: 'title' | 'explanation'): string | undefined {
   const opportunity = pick.value
@@ -73,7 +78,8 @@ onMounted(async () => {
     ])
     opportunities.value = ops.opportunities
     moments.value = momentData.moments
-    selectedMomentId.value = pick.value?.life_moment?.id || moments.value[0]?.id || null
+    const recommendedMoment = moments.value.find(moment => moment.id === pick.value?.life_moment?.id)
+    selectedMomentId.value = recommendedMoment?.id || moments.value[0]?.id || null
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('create.loadError')))
   } finally {
@@ -134,7 +140,7 @@ onMounted(async () => {
 
         <div class="mt-5 space-y-2">
           <button
-            v-for="moment in moments.slice(0, 4)"
+            v-for="moment in visibleMoments"
             :key="moment.id"
             type="button"
             class="flex w-full items-center gap-4 rounded-[14px] border p-4 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:cursor-wait disabled:opacity-70"
@@ -190,7 +196,9 @@ onMounted(async () => {
             <span class="min-w-0 flex-1">
               <span class="flex items-center justify-between gap-2">
                 <strong class="text-sm font-medium">{{ angle.title }}</strong>
-                <span class="text-[10px] uppercase tracking-[.12em] text-[var(--faint)]">{{ angle.output }}</span>
+                <span class="shrink-0 text-[var(--faint)]" :title="angle.output" :aria-label="angle.output">
+                  <AppIcon :name="angle.format" :size="20" />
+                </span>
               </span>
               <span class="mt-1 block text-xs leading-5 text-[var(--muted)]">{{ angle.copy }}</span>
             </span>

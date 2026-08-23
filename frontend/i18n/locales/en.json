@@ -3,14 +3,6 @@
     "title": "Personal, your content strategist",
     "description": "Personal understands your work and helps you create content that matters."
   },
-  "analyticsConsent": {
-    "title": "Audience measurement",
-    "body": "With your permission, Google Analytics helps us understand which pages are useful and improve Personal. No data is used for advertising.",
-    "privacy": "Read the privacy policy",
-    "deny": "Decline",
-    "accept": "Accept",
-    "manage": "Manage cookies"
-  },
   "brand": {
     "name": "Personal",
     "tagline": "Claude for personal branding.",
@@ -1013,8 +1005,8 @@
               "detail": "Understanding errors and usage in order to fix and evolve the service. We work on aggregated or anonymised data wherever that is possible."
             },
             "analytics": {
-              "term": "Measuring the audience, consent",
-              "detail": "Understanding pages viewed and navigation within Personal through Google Analytics, only after your permission. You can withdraw that permission at any time."
+              "term": "Measuring the audience, legitimate interest",
+              "detail": "Understanding pages viewed and navigation within Personal through Google Analytics in cookieless mode. Advertising and personalisation features are disabled."
             }
           }
         },
@@ -1064,7 +1056,7 @@
             },
             "google": {
               "term": "Google Analytics",
-              "detail": "Measurement of pages viewed and navigation, only after your permission. Google Ireland Limited, with processing that may take place in the United States."
+              "detail": "Cookieless measurement of pages viewed and navigation. Google Ireland Limited, with processing that may take place in the United States."
             },
             "hosting": {
               "term": "Hosting and domain",
@@ -1214,7 +1206,7 @@
         "cookies": {
           "title": "Cookies and local storage",
           "p": {
-            "intro": "Personal uses no advertising cookie or social network tracker. Google Analytics loads only after your permission. You can change this choice at any time from the footer or Settings."
+            "intro": "Personal uses no advertising cookie or social network tracker. Google Analytics runs with analytics storage denied and therefore sets no audience measurement cookie. The only cookies set are necessary for the service to work."
           },
           "items": {
             "token": {
@@ -1228,14 +1220,6 @@
             "onboarding": {
               "term": "personal-onboarding-skipped",
               "detail": "Remembers that you chose to skip the Instagram connection step. Lifetime: one year."
-            },
-            "analyticsConsent": {
-              "term": "personal_analytics_consent",
-              "detail": "Remembers for six months whether you accepted or declined audience measurement. This cookie contains no profile identifier."
-            },
-            "googleAnalytics": {
-              "term": "_ga and _ga_*",
-              "detail": "Google Analytics cookies set only after your permission to distinguish visits and measure pages viewed. They are removed when you withdraw permission."
             }
           }
         },

@@ -65,7 +65,7 @@ const SECTIONS: Section[] = [
     note: true
   },
   { id: 'deletion', p: ['intro'], items: ['disconnect', 'revoke', 'content', 'account'], note: true },
-  { id: 'cookies', p: ['intro'], items: ['token', 'lang', 'onboarding', 'analyticsConsent', 'googleAnalytics'] },
+  { id: 'cookies', p: ['intro'], items: ['token', 'lang', 'onboarding'] },
   { id: 'minors', p: ['text'] },
   { id: 'changes', p: ['text'] },
   { id: 'contact', p: ['mail', 'post'] }

@@ -33,6 +33,11 @@ defineProps<{ name: string, size?: number, filled?: boolean, strokeWidth?: numbe
     <template v-else-if="name === 'clock'"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.3l3.4 2"/></template>    <template v-else-if="name === 'mail'"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m4 7 8 6 8-6"/></template>
     <template v-else-if="name === 'check'"><path d="m5 12.5 4.2 4.2L19 7"/></template>
     <template v-else-if="name === 'alert'"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.2M12 16.5h.01"/></template>
+    <template v-else-if="name === 'chatgpt'"><path d="M12 3.2a4.3 4.3 0 0 1 4 2.7 4.3 4.3 0 0 1 3.4 6.5 4.3 4.3 0 0 1-3.4 5.7 4.3 4.3 0 0 1-6.6 2 4.3 4.3 0 0 1-5.5-4.6 4.3 4.3 0 0 1 1.8-7 4.3 4.3 0 0 1 6.3-5.3Z"/><path d="m8.3 8.4 7.4 4.3v4.1m0-8.4-7.4 4.3v4.1M12 6.3v8.5"/></template>
+    <template v-else-if="name === 'claude'"><path d="M12 2.7v18.6M2.7 12h18.6M5.4 5.4l13.2 13.2M18.6 5.4 5.4 18.6M8.3 3.5l7.4 17M3.5 8.3l17 7.4M15.7 3.5l-7.4 17M20.5 8.3l-17 7.4"/></template>
+    <template v-else-if="name === 'gemini'"><path d="M12 2.8c.6 5.5 3.7 8.6 9.2 9.2-5.5.6-8.6 3.7-9.2 9.2-.6-5.5-3.7-8.6-9.2-9.2 5.5-.6 8.6-3.7 9.2-9.2Z"/></template>
+    <template v-else-if="name === 'perplexity'"><path d="M6 4.2v15.6M18 4.2v15.6M6 8.2h12M6 15.8h12M8.1 8.2 12 4.3l3.9 3.9M8.1 15.8 12 19.7l3.9-3.9M12 4.3v15.4"/></template>
+    <template v-else-if="name === 'grok'"><circle cx="12" cy="12" r="7.2"/><path d="M5.2 18.8 18.8 5.2M8.2 15.8c2 1.3 4.8 1 6.6-.8s2.1-4.6.8-6.6"/></template>
     <template v-else><circle cx="12" cy="12" r="9"/><path d="m9.5 12 1.7 1.7 3.8-4"/></template>
   </svg>
 </template>

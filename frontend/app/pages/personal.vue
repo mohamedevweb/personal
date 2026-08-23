@@ -42,9 +42,11 @@ const draft = reactive<PersonalProfileDraft>({
 
 const sections = ['topics', 'tone', 'current_projects', 'goals', 'content_strengths'] as const
 const voiceProviders = [
-  { name: 'ChatGPT', url: 'https://chatgpt.com/' },
-  { name: 'Claude', url: 'https://claude.ai/new' },
-  { name: 'Gemini', url: 'https://gemini.google.com/app' }
+  { name: 'ChatGPT', url: 'https://chatgpt.com/', icon: 'chatgpt' },
+  { name: 'Claude', url: 'https://claude.ai/new', icon: 'claude' },
+  { name: 'Gemini', url: 'https://gemini.google.com/app', icon: 'gemini' },
+  { name: 'Perplexity', url: 'https://www.perplexity.ai/', icon: 'perplexity' },
+  { name: 'Grok', url: 'https://grok.com/', icon: 'grok' }
 ] as const
 const analysisStatus = computed(() => profile.value?.creator_dna?.analysis_status)
 const hasVoiceProfile = computed(() => Boolean(profile.value?.voice_profile?.trim()))
@@ -121,10 +123,12 @@ async function copyVoicePrompt() {
   else toast.error(t('personal.voice.copyError'))
 }
 
-async function openVoiceProvider(provider: typeof voiceProviders[number]) {
-  if (!import.meta.client || !voicePrompt.value) return
+async function prepareVoiceProvider(event: MouseEvent, provider: typeof voiceProviders[number]) {
+  if (!import.meta.client || !voicePrompt.value) {
+    event.preventDefault()
+    return
+  }
 
-  window.open(provider.url, '_blank', 'noopener,noreferrer')
   if (await writeVoicePrompt()) toast.success(t('personal.voice.providerOpened', { provider: provider.name }))
   else toast.error(t('personal.voice.copyError'))
 }
@@ -192,18 +196,7 @@ onMounted(async () => {
 
 <template>
   <main class="page-shell pb-16 pt-2">
-    <header class="flex flex-col gap-4 rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-6 md:flex-row md:items-center md:justify-between">
-      <div class="flex items-start gap-4">
-        <span class="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-[var(--accent-soft)] text-[var(--accent-ink)]"><AppIcon name="user" :size="19" /></span>
-        <div>
-          <p class="text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--faint)]">{{ $t('personal.eyebrow') }}</p>
-          <p class="mt-2 max-w-xl text-[15px] leading-6 text-[var(--muted)]">{{ $t('personal.subtitle') }}</p>
-        </div>
-      </div>
-      <button v-if="profile && !editing" type="button" class="inline-flex h-11 w-fit shrink-0 items-center justify-center rounded-full b-btn-red px-5 text-[14px] font-medium transition" @click="beginEdit">{{ $t('personal.editMemory') }}</button>
-    </header>
-
-    <section v-if="profile" class="mt-5 overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">
+    <section v-if="profile" class="overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">
       <div class="grid gap-7 p-6 md:grid-cols-[minmax(0,1fr)_minmax(340px,.8fr)] md:p-8">
         <div>
           <div class="flex flex-wrap items-center gap-3">
@@ -233,11 +226,13 @@ onMounted(async () => {
             <p>{{ $t('personal.voice.promptError') }}</p>
             <button type="button" class="mt-3 font-medium text-[var(--ink)] underline underline-offset-4" @click="loadVoicePrompt">{{ $t('personal.voice.retry') }}</button>
           </div>
-          <div v-else class="mt-4 grid gap-2 sm:grid-cols-3 md:grid-cols-1 xl:grid-cols-3">
-            <button v-for="provider in voiceProviders" :key="provider.name" type="button" class="inline-flex min-h-11 items-center justify-between gap-3 rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 text-sm font-medium transition hover:border-[var(--muted)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ai)] disabled:cursor-not-allowed disabled:opacity-50" :disabled="voicePromptLoading || !voicePrompt" @click="openVoiceProvider(provider)">
-              {{ provider.name }}
-              <AppIcon name="arrow" :size="15" />
-            </button>
+          <div v-else class="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-5 md:grid-cols-3 xl:grid-cols-5">
+            <a v-for="provider in voiceProviders" :key="provider.name" :href="provider.url" target="_blank" rel="noopener noreferrer" class="group flex min-w-0 flex-col items-center gap-2 rounded-[13px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ai)]" :class="voicePromptLoading || !voicePrompt ? 'pointer-events-none opacity-50' : ''" :aria-disabled="voicePromptLoading || !voicePrompt" :tabindex="voicePromptLoading || !voicePrompt ? -1 : undefined" @click="prepareVoiceProvider($event, provider)">
+              <span class="grid aspect-square w-full max-w-[64px] place-items-center rounded-[13px] border border-[var(--line)] bg-[var(--surface)] text-[var(--ink)] transition group-hover:-translate-y-0.5 group-hover:border-[var(--muted)] group-hover:shadow-[0_5px_14px_rgba(23,23,26,.08)]">
+                <AppIcon :name="provider.icon" :size="28" :stroke-width="1.5" />
+              </span>
+              <span class="max-w-full truncate text-[11px] font-medium text-[var(--muted)] transition group-hover:text-[var(--ink)]">{{ provider.name }}</span>
+            </a>
           </div>
 
           <div class="my-5 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[.14em] text-[var(--faint)]">
@@ -267,16 +262,23 @@ onMounted(async () => {
       </div>
     </section>
 
-    <div v-if="profile" class="mt-5 overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">
-      <div v-if="instagram" class="flex items-center gap-3 border-b border-[var(--line)] px-6 py-5">
-        <img v-if="instagram.profile_picture_url" :src="instagram.profile_picture_url" alt="" class="h-10 w-10 rounded-full object-cover">
-        <div v-else class="grid h-10 w-10 place-items-center rounded-full bg-[var(--paper)] text-xs">IG</div>
-        <div>
-          <p class="text-sm font-medium">@{{ instagram.username }}</p>
-          <p class="text-xs text-[var(--faint)]">{{ $t('personal.liveContext', { count: instagram.media_count || 0 }) }}</p>
-          <p v-if="analysisMessage" class="mt-1 text-xs text-[var(--accent-ink)]">{{ analysisMessage }}</p>
+    <form v-if="profile" class="mt-5 overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]" @submit.prevent="saveProfile">
+      <div class="flex flex-wrap items-center gap-3 border-b border-[var(--line)] px-6 py-5">
+        <template v-if="instagram">
+          <img v-if="instagram.profile_picture_url" :src="instagram.profile_picture_url" alt="" class="h-10 w-10 rounded-full object-cover">
+          <div v-else class="grid h-10 w-10 place-items-center rounded-full bg-[var(--paper)] text-xs">IG</div>
+          <div>
+            <p class="text-sm font-medium">@{{ instagram.username }}</p>
+            <p class="text-xs text-[var(--faint)]">{{ $t('personal.liveContext', { count: instagram.media_count || 0 }) }}</p>
+            <p v-if="analysisMessage" class="mt-1 text-xs text-[var(--accent-ink)]">{{ analysisMessage }}</p>
+          </div>
+          <span class="hidden text-xs text-[var(--positive)] sm:inline">{{ $t('personal.connected') }}</span>
+        </template>
+        <div class="ml-auto flex shrink-0 items-center justify-end gap-2">
+          <button v-if="editing" type="button" class="rounded-full px-4 py-2.5 text-sm text-[var(--muted)] transition hover:text-[var(--ink)]" @click="editing = false">{{ $t('personal.cancel') }}</button>
+          <button v-if="editing" type="submit" class="inline-flex h-11 items-center justify-center rounded-full b-btn-red px-5 text-[14px] font-medium transition disabled:opacity-60" :disabled="saving">{{ saving ? $t('personal.saving') : $t('personal.saveMemory') }}</button>
+          <button v-else type="button" class="inline-flex h-11 w-fit items-center justify-center rounded-full b-btn-red px-5 text-[14px] font-medium transition" @click="beginEdit">{{ $t('personal.editMemory') }}</button>
         </div>
-        <span class="ml-auto text-xs text-[var(--positive)]">{{ $t('personal.connected') }}</span>
       </div>
 
       <div class="grid md:grid-cols-2">
@@ -290,11 +292,7 @@ onMounted(async () => {
           <p v-else class="mt-3 text-sm text-[var(--faint)]">{{ $t('personal.notProvided') }}</p>
         </section>
       </div>
-      <div v-if="editing" class="flex justify-end gap-3 p-5">
-        <button class="rounded-full px-5 py-2.5 text-sm text-[var(--muted)] transition hover:text-[var(--ink)]" @click="editing = false">{{ $t('personal.cancel') }}</button>
-        <button class="inline-flex h-11 items-center justify-center rounded-full b-btn-red px-5 text-[14px] font-medium transition disabled:opacity-60" :disabled="saving" @click="saveProfile">{{ saving ? $t('personal.saving') : $t('personal.saveMemory') }}</button>
-      </div>
-    </div>
+    </form>
   </main>
 </template>
 

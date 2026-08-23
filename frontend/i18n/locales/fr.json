@@ -3,14 +3,6 @@
     "title": "Personal, votre stratège de contenu",
     "description": "Personal comprend votre travail et vous aide à créer les contenus qui comptent."
   },
-  "analyticsConsent": {
-    "title": "Mesure d’audience",
-    "body": "Avec ton accord, Google Analytics nous aide à comprendre quelles pages sont utiles et à améliorer Personal. Aucune donnée n’est utilisée pour la publicité.",
-    "privacy": "Lire la politique de confidentialité",
-    "deny": "Refuser",
-    "accept": "Accepter",
-    "manage": "Gérer les cookies"
-  },
   "brand": {
     "name": "Personal",
     "tagline": "Claude pour le personal branding.",
@@ -1013,8 +1005,8 @@
               "detail": "Comprendre les erreurs et les usages pour corriger et faire évoluer le service. Nous travaillons sur des données agrégées ou anonymisées chaque fois que c’est possible."
             },
             "analytics": {
-              "term": "Mesurer l’audience, consentement",
-              "detail": "Comprendre les pages consultées et la navigation dans Personal avec Google Analytics, uniquement après votre accord. Vous pouvez retirer cet accord à tout moment."
+              "term": "Mesurer l’audience, intérêt légitime",
+              "detail": "Comprendre les pages consultées et la navigation dans Personal avec Google Analytics en mode sans cookies. Les fonctions publicitaires et la personnalisation sont désactivées."
             }
           }
         },
@@ -1064,7 +1056,7 @@
             },
             "google": {
               "term": "Google Analytics",
-              "detail": "Mesure des pages consultées et de la navigation, uniquement après votre accord. Google Ireland Limited, avec des traitements susceptibles d’avoir lieu aux États-Unis."
+              "detail": "Mesure sans cookies des pages consultées et de la navigation. Google Ireland Limited, avec des traitements susceptibles d’avoir lieu aux États-Unis."
             },
             "hosting": {
               "term": "Hébergement et domaine",
@@ -1214,7 +1206,7 @@
         "cookies": {
           "title": "Cookies et stockage local",
           "p": {
-            "intro": "Personal n’utilise aucun cookie publicitaire ni traceur de réseau social. Google Analytics est chargé uniquement après votre accord. Vous pouvez modifier ce choix à tout moment depuis le pied de page ou les Réglages."
+            "intro": "Personal n’utilise aucun cookie publicitaire ni traceur de réseau social. Google Analytics fonctionne avec le stockage analytique refusé et ne dépose donc aucun cookie de mesure d’audience. Les seuls cookies déposés sont nécessaires au fonctionnement du service."
           },
           "items": {
             "token": {
@@ -1228,14 +1220,6 @@
             "onboarding": {
               "term": "personal-onboarding-skipped",
               "detail": "Retient que vous avez choisi de passer l’étape de connexion Instagram. Durée : un an."
-            },
-            "analyticsConsent": {
-              "term": "personal_analytics_consent",
-              "detail": "Mémorise pendant six mois si vous avez accepté ou refusé la mesure d’audience. Ce cookie ne contient aucun identifiant de profil."
-            },
-            "googleAnalytics": {
-              "term": "_ga et _ga_*",
-              "detail": "Cookies Google Analytics déposés seulement après votre accord pour distinguer les visites et mesurer les pages consultées. Ils sont supprimés lorsque vous retirez votre accord."
             }
           }
         },

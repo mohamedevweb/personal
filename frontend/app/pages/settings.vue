@@ -2,7 +2,6 @@
 const { status, loading, error, connect, loadStatus } = useInstagram()
 const { apiFetch } = usePersonalApi()
 const { user, loadUser, updateAccount, updatePassword, resendVerification } = useAuth()
-const { isConfigured: analyticsConfigured, openPreferences: openAnalyticsPreferences } = useGoogleAnalytics()
 const { t } = useI18n()
 const toast = useToast()
 
@@ -191,12 +190,7 @@ watch(error, (message) => {
         <div>
           <h2 class="font-serif text-[26px] tracking-[-.02em]">{{ $t('settings.privacy') }}</h2>
           <p class="mt-2 text-sm leading-6 text-[var(--muted)]">{{ $t('settings.privacyCopy') }}</p>
-          <div class="mt-3 flex flex-wrap gap-x-5 gap-y-2">
-            <NuxtLink to="/privacy" class="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--ink)] underline underline-offset-4 transition hover:text-[var(--accent)]">{{ $t('settings.privacyLink') }}</NuxtLink>
-            <button v-if="analyticsConfigured" type="button" class="text-sm font-medium text-[var(--ink)] underline underline-offset-4 transition hover:text-[var(--accent)]" @click="openAnalyticsPreferences">
-              {{ $t('analyticsConsent.manage') }}
-            </button>
-          </div>
+          <NuxtLink to="/privacy" class="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-[var(--ink)] underline underline-offset-4 transition hover:text-[var(--accent)]">{{ $t('settings.privacyLink') }}</NuxtLink>
         </div>
       </div>
     </section>
