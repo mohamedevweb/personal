@@ -90,7 +90,7 @@ onMounted(async () => {
           <p class="mt-2 max-w-xl text-[15px] leading-6 text-[var(--muted)]">{{ $t('personal.subtitle') }}</p>
         </div>
       </div>
-      <button v-if="profile && !editing" type="button" class="inline-flex h-11 w-fit shrink-0 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-[14px] transition hover:border-[#d8d2c6] hover:bg-[var(--paper)]" @click="beginEdit">{{ $t('personal.editMemory') }}</button>
+      <button v-if="profile && !editing" type="button" class="inline-flex h-11 w-fit shrink-0 items-center justify-center rounded-full b-btn-red px-5 text-[14px] font-medium transition" @click="beginEdit">{{ $t('personal.editMemory') }}</button>
     </header>
 
     <div v-if="profile" class="mt-5 overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">

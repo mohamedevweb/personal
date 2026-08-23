@@ -393,25 +393,6 @@ button, a { -webkit-tap-highlight-color: transparent; }
   }
 }
 
-@layer components {
-  /* The knob: a paper disc carrying the mark, sitting on the corner of a card
-     that floats over the field. It is the only control the stage has that is
-     not a word. */
-  .b-knob {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 46px;
-    width: 46px;
-    border-radius: 999px;
-    background: var(--b-surface);
-    color: var(--b-black);
-    box-shadow: 0 14px 34px -16px rgba(9, 8, 7, .9);
-    transition: transform .45s cubic-bezier(.22, 1, .36, 1), background .3s ease;
-  }
-  .b-knob:hover { background: #fff; transform: scale(1.09) rotate(9deg); }
-}
-
 
 
 /* Emphasis in the signature, for a word that lives inside a translation and so

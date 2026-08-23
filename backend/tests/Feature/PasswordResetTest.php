@@ -95,9 +95,20 @@ class PasswordResetTest extends TestCase
         $text = view($message->view['text'], $message->viewData)->render();
 
         $this->assertStringContainsString('Personal', $html);
+        $this->assertStringContainsString('images/personal-mark.png', $html);
         $this->assertStringContainsString('#e04f36', $html);
         $this->assertStringContainsString('#f7f5f0', $html);
         $this->assertStringContainsString('Confirm my email', $html);
+        $this->assertStringNotContainsString('Your Personal workspace', $html);
+        $this->assertStringNotContainsString('✦', $html);
         $this->assertStringNotContainsString('&amp;', $text);
+        $this->assertFileExists(public_path('images/personal-mark.png'));
+
+        app()->setLocale('fr');
+
+        $resetMessage = (new PersonalResetPassword('reset-token'))->toMail($user);
+        $resetHtml = view($resetMessage->view['html'], $resetMessage->viewData)->render();
+
+        $this->assertStringNotContainsString('Récupération du compte', $resetHtml);
     }
 }

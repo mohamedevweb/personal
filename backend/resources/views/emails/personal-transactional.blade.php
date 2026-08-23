@@ -15,14 +15,13 @@
                     <tr>
                         <td align="center" style="padding:0 0 24px;">
                             <a href="{{ rtrim((string) config('app.frontend_url'), '/') }}" style="color:#171715;text-decoration:none;">
-                                <span style="color:#e04f36;font-size:22px;line-height:1;vertical-align:2px;">✦</span>
+                                <img src="{{ asset('images/personal-mark.png') }}" width="24" height="24" alt="" style="display:inline-block;width:24px;height:24px;border:0;vertical-align:-3px;">
                                 <span style="font-family:Georgia,'Times New Roman',serif;font-size:27px;letter-spacing:-0.5px;">Personal</span>
                             </a>
                         </td>
                     </tr>
                     <tr>
                         <td style="border:1px solid #e4dfd4;border-radius:24px;background:#fefdfb;padding:48px 44px;">
-                            <p style="margin:0 0 18px;color:#a8402a;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">{{ $eyebrow }}</p>
                             <h1 style="margin:0;color:#171715;font-family:Georgia,'Times New Roman',serif;font-size:42px;font-weight:400;line-height:1.08;letter-spacing:-1px;">{{ $title }}</h1>
                             <p style="margin:22px 0 0;color:#77736d;font-size:16px;line-height:1.65;">{{ $copy }}</p>
                             <table role="presentation" cellspacing="0" cellpadding="0" style="margin:30px 0;">

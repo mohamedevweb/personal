@@ -4,7 +4,6 @@ return [
     'verify' => [
         'subject' => 'Confirm your Personal email',
         'preheader' => 'Confirm your address to enter your Personal workspace.',
-        'eyebrow' => 'Your Personal workspace',
         'title' => 'One last step.',
         'copy' => 'Confirm your email address so Personal can keep your workspace private and ready for you.',
         'action' => 'Confirm my email',
@@ -13,7 +12,6 @@ return [
     'reset' => [
         'subject' => 'Reset your Personal password',
         'preheader' => 'Choose a new password for your Personal account.',
-        'eyebrow' => 'Account recovery',
         'title' => 'Choose a new password.',
         'copy' => 'We received a request to reset the password for your Personal account.',
         'action' => 'Reset my password',

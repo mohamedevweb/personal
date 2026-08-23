@@ -76,6 +76,7 @@ export interface PersonalProfile {
   current_projects: string[] | null
   goals: string[] | null
   content_strengths: string[] | null
+  voice_profile: string | null
   creator_dna?: {
     primary_niche: string | null
     sub_niches: string[]

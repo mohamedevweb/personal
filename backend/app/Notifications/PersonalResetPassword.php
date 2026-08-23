@@ -21,7 +21,6 @@ class PersonalResetPassword extends ResetPassword
                 'text' => 'emails.personal-transactional-text',
             ], [
                 'preheader' => __('mail.reset.preheader'),
-                'eyebrow' => __('mail.reset.eyebrow'),
                 'title' => __('mail.reset.title'),
                 'copy' => __('mail.reset.copy'),
                 'actionLabel' => __('mail.reset.action'),

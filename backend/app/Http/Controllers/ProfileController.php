@@ -38,6 +38,7 @@ class ProfileController extends Controller
             'goals.*' => ['string', 'max:120'],
             'content_strengths' => ['sometimes', 'array', 'max:12'],
             'content_strengths.*' => ['string', 'max:120'],
+            'voice_profile' => ['sometimes', 'nullable', 'string', 'max:12000'],
         ]);
 
         $profile = CreatorProfile::query()->firstOrNew(['user_id' => $request->user()->id]);

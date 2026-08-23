@@ -3,11 +3,11 @@
  * The stage. Every other section of the launch page is an argument set on
  * ivory; this one is the product's night sky. The field behind the copy is the
  * posts Personal read overnight drifting past, with the outliers lit in the
- * signature, and the brief under the claim is what the product made of them.
+ * signature.
  *
- * The composition is the page's original one, one claim centred and one frame
- * of the product below it, moved onto the field. Only the field moves: the
- * copy stays exactly where it was set.
+ * One claim, centred on the field, and the two ways in under it. The product
+ * itself is not shown here: "how it works" is four screens of it, and putting
+ * a fifth above the fold only spent the surprise early.
  */
 </script>
 
@@ -76,28 +76,6 @@
           <span class="h-[3px] w-[3px] rounded-full bg-white/30" aria-hidden="true" />
           <span>{{ $t('landing.hero.reassuranceTwo') }}</span>
         </p>
-      </div>
-
-      <!-- Deliberately low, so the fold cuts through it. -->
-      <div data-reveal class="relative mx-auto mt-16 max-w-[960px] md:mt-20" style="--reveal-delay:280ms">
-        <div class="b-glow-blob pointer-events-none absolute -inset-x-16 -bottom-8 top-10 -z-10" aria-hidden="true" />
-
-        <LandingMedia
-          :src="LANDING_CLIPS.hero"
-          :label="$t('landing.hero.mediaLabel')"
-          class="!border-white/10 shadow-[0_54px_110px_-46px_rgba(0,0,0,.9)]"
-        >
-          <LandingMockBrief />
-        </LandingMedia>
-
-        <!-- The one control on the stage that is not a word. -->
-        <a
-          href="#how"
-          class="b-knob b-focus absolute -bottom-5 -right-5"
-          :aria-label="$t('landing.hero.openHow')"
-        >
-          <PersonalMark :size="19" />
-        </a>
       </div>
     </div>
   </section>

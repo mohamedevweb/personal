@@ -210,6 +210,8 @@ session. Do not add a second auth mechanism. `/api/development/session` only exi
 
 - **Avoid dashes (`—`, `–`, ` - `) in user-facing copy.** Prefer a comma, a full stop, or two
   sentences. This applies to i18n strings, error messages and any product-voiced text.
+- Transactional emails use one clear main title. Do not add an eyebrow, surtitre or category
+  label above it when that label only repeats the email's purpose, such as account recovery.
 - All user-facing text lives in i18n (`frontend/i18n/locales/en.json` + `fr.json`). Never
   hardcode a visible string in a component; add the key to **both** locales in the same change.
 - French copy uses **tutoiement** (informal "tu", not "vous") and matches the product voice.

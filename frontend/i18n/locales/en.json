@@ -83,85 +83,8 @@
       "subtitle": "Personal finds what's working in your niche and rewrites it with your life. Your voice, your week, ten minutes.",
       "getAccess": "Get early access",
       "seeHow": "See how it works",
-      "openHow": "See how Personal builds this brief",
       "reassuranceOne": "Free during early access",
-      "reassuranceTwo": "Personal never posts for you",
-      "mediaLabel": "Personal, one morning",
-      "brief": {
-        "greeting": "Morning, Mohamed.",
-        "updated": "Updated 6 min ago",
-        "tabsLabel": "What Personal does, in three moves",
-        "tabs": {
-          "understand": "Understand me",
-          "find": "Find what works",
-          "remix": "Remix for me"
-        },
-        "panels": {
-          "understand": {
-            "eyebrow": "What Personal reads of you",
-            "count": "3 sources read",
-            "rows": {
-              "one": {
-                "metric": "40",
-                "title": "posts read on your account",
-                "body": "Your captions, your formats, the hours you post, your numbers. Personal reads you before it writes as you."
-              },
-              "two": {
-                "metric": "5",
-                "title": "creators you picked yourself",
-                "body": "The ones you actually watch to create. Personal learns what works for them, at your size."
-              },
-              "three": {
-                "metric": "12",
-                "title": "Moments you wrote down",
-                "body": "Your failures, your lessons, your behind the scenes. The material only your life can give."
-              }
-            }
-          },
-          "find": {
-            "eyebrow": "Your niche, this morning",
-            "count": "4 opportunities",
-            "rows": {
-              "one": {
-                "metric": "8.4×",
-                "title": "engagement, in your niche",
-                "body": "Failure → realization → lesson is beating everything else this week."
-              },
-              "two": {
-                "metric": "94%",
-                "title": "match with your pivot story",
-                "body": "The format working right now fits something you wrote down on Tuesday."
-              },
-              "three": {
-                "metric": "12",
-                "title": "outliers found overnight",
-                "body": "Posts beating their own creator's average, at your size, not at 2M followers."
-              }
-            }
-          },
-          "remix": {
-            "eyebrow": "Your week, rewritten",
-            "count": "1 draft",
-            "rows": {
-              "one": {
-                "metric": "1",
-                "title": "draft waiting for you",
-                "body": "Written from this morning’s outlier and what you wrote down on Tuesday."
-              },
-              "two": {
-                "metric": "9 min",
-                "title": "since the Moment",
-                "body": "All that is left is deciding whether it is true."
-              },
-              "three": {
-                "metric": "0",
-                "title": "automatic posts",
-                "body": "Personal never posts for you. You copy it, you decide, you publish."
-              }
-            }
-          }
-        }
-      }
+      "reassuranceTwo": "Personal never posts for you"
     },
     "proof": {
       "scanned": "Your last 40 posts, read once",

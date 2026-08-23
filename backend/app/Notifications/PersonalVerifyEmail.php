@@ -16,7 +16,6 @@ class PersonalVerifyEmail extends VerifyEmail
                 'text' => 'emails.personal-transactional-text',
             ], [
                 'preheader' => __('mail.verify.preheader'),
-                'eyebrow' => __('mail.verify.eyebrow'),
                 'title' => __('mail.verify.title'),
                 'copy' => __('mail.verify.copy'),
                 'actionLabel' => __('mail.verify.action'),

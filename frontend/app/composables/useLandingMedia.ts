@@ -6,10 +6,9 @@
  * Turning a section into video is one line here: drop the file in
  * `public/landing/` and name it below.
  */
-export type LandingClip = 'hero' | 'understand' | 'discover' | 'connect' | 'write'
+export type LandingClip = 'understand' | 'discover' | 'connect' | 'write'
 
 export const LANDING_CLIPS: Record<LandingClip, string | null> = {
-  hero: null,
   understand: null,
   discover: null,
   connect: null,
