@@ -12,10 +12,18 @@ const publicRoutes = new Set([
   '/story'
 ])
 
-export default defineNuxtRouteMiddleware(async (to) => {
-  if (publicRoutes.has(to.path)) return
+// Sign-in routes: reaching one with a session already in hand means the user is
+// simply back on the app, so we send them straight in instead of asking again.
+const signedInRedirects = new Set(['/login', '/forgot-password'])
 
+export default defineNuxtRouteMiddleware(async (to) => {
   const { token, bootstrapDevelopmentToken, apiFetch } = usePersonalApi()
+
+  if (signedInRedirects.has(to.path) && token.value) {
+    return navigateTo('/feed')
+  }
+
+  if (publicRoutes.has(to.path)) return
 
   // Local development can mint a demo token; everywhere else this is a sign-in.
   if (!token.value && !(await bootstrapDevelopmentToken())) {
