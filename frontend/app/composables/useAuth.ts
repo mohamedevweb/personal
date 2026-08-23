@@ -3,6 +3,7 @@ interface AuthUser {
   name: string
   email: string
   avatar_url: string | null
+  instagram_username: string | null
   email_verified_at: string | null
 }
 

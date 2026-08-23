@@ -208,6 +208,8 @@ session. Do not add a second auth mechanism. `/api/development/session` only exi
 
 ### Copy and tone
 
+- Keep product copy concise. Every sentence must help the user understand or act; remove
+  repeated headings, instructions and explanations.
 - **Avoid dashes (`—`, `–`, ` - `) in user-facing copy.** Prefer a comma, a full stop, or two
   sentences. This applies to i18n strings, error messages and any product-voiced text.
 - Transactional emails use one clear main title. Do not add an eyebrow, surtitre or category

@@ -13,7 +13,11 @@ class FeedController extends Controller
 {
     public function index(Request $request, RecommendationService $recommendations): JsonResponse
     {
-        $items = $recommendations->forUser($request->user());
+        $data = $request->validate([
+            'exclude' => ['sometimes', 'array', 'max:48'],
+            'exclude.*' => ['integer', 'distinct'],
+        ]);
+        $items = $recommendations->forUser($request->user(), excludeIds: $data['exclude'] ?? []);
 
         return $this->response($request, $items);
     }
@@ -44,7 +48,7 @@ class FeedController extends Controller
      */
     public function refresh(Request $request): JsonResponse
     {
-        DiscoverNicheContent::dispatch($request->user()->id);
+        DiscoverNicheContent::dispatch($request->user()->id, forceRefresh: true);
 
         return response()->json(['status' => 'queued'], Response::HTTP_ACCEPTED);
     }

@@ -76,7 +76,8 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function (): void {
     Route::get('/me/voice-prompt', VoiceProfileController::class);
     Route::get('/feed', [FeedController::class, 'index']);
     Route::get('/feed/global', [FeedController::class, 'global']);
-    Route::post('/feed/refresh', [FeedController::class, 'refresh']);
+    Route::post('/feed/refresh', [FeedController::class, 'refresh'])
+        ->middleware('throttle:discovery');
     Route::get('/content/{content}', [ContentController::class, 'show']);
     Route::post('/content/{content}/save', [ContentController::class, 'save']);
     Route::post('/content/{content}/dismiss', [ContentController::class, 'dismiss']);

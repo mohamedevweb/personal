@@ -415,6 +415,7 @@ class PersonalMvpTest extends TestCase
         $this->assertStringNotContainsString($this->user->name, $prompt);
         $this->assertStringNotContainsString('I build calm tools for independent creators.', $prompt);
         $this->assertStringContainsString('N’inclus aucun secret', $prompt);
+        $this->assertStringContainsString('au maximum 12 000 caractères', $prompt);
     }
 
     public function test_a_voice_profile_has_a_bounded_length(): void

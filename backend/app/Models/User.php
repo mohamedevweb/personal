@@ -64,6 +64,12 @@ class User extends Authenticatable implements MustVerifyEmail
         return Attribute::get(fn (): ?string => $this->instagramAccount?->profile_picture_url);
     }
 
+    protected function instagramUsername(): Attribute
+    {
+        return Attribute::get(fn (): ?string => $this->instagramAccount?->username
+            ?? $this->creatorProfile?->instagram_username);
+    }
+
     public function sendEmailVerificationNotification(): void
     {
         $this->notify(new PersonalVerifyEmail);

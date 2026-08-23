@@ -28,19 +28,22 @@ class DiscoverNicheContent implements ShouldQueue
 
     public int $timeout = 300;
 
-    public function __construct(public readonly int $userId) {}
+    public function __construct(
+        public readonly int $userId,
+        public readonly bool $forceRefresh = false,
+    ) {}
 
     public function handle(NicheExpansionService $expansion, InstagramDataProvider $provider): void
     {
-        if (config('creator_catalog.curated_only')) {
-            $this->queueCuratedMeasurements();
+        $user = User::query()->with(['creatorProfile', 'inspirationCreators'])->find($this->userId);
 
+        if (! $user) {
             return;
         }
 
-        $user = User::query()->with('creatorProfile')->find($this->userId);
+        if (config('creator_catalog.curated_only')) {
+            $this->queueCuratedMeasurements($user);
 
-        if (! $user) {
             return;
         }
 
@@ -95,12 +98,52 @@ class DiscoverNicheContent implements ShouldQueue
         $handles = $usernames->filter()->unique()->values()->all();
 
         if ($handles !== []) {
-            MeasureAccountEngagement::dispatch($handles);
+            MeasureAccountEngagement::dispatch($handles, $this->forceRefresh);
         }
     }
 
-    private function queueCuratedMeasurements(): void
+    private function queueCuratedMeasurements(User $user): void
     {
+        if ($this->forceRefresh) {
+            $limit = max(1, (int) config('services.discovery.refresh_creator_limit'));
+            $inspirations = $user->inspirationCreators
+                ->where('safety_status', '!=', 'blocked')
+                ->take($limit)
+                ->pluck('username');
+            $profile = $user->creatorProfile;
+            $catalog = Creator::query()
+                ->where('curation_status', 'approved')
+                ->where('safety_status', '!=', 'blocked')
+                ->whereNotIn('username', $inspirations)
+                ->when(
+                    $profile?->primary_vertical,
+                    fn ($query, string $vertical) => $query->orderByRaw(
+                        'CASE WHEN niche = ? THEN 0 ELSE 1 END',
+                        [$vertical],
+                    ),
+                )
+                ->when(
+                    $profile?->market,
+                    fn ($query, string $market) => $query->orderByRaw(
+                        'CASE WHEN market = ? THEN 0 ELSE 1 END',
+                        [$market],
+                    ),
+                )
+                ->orderByDesc('scrape_priority')
+                ->limit(max(0, $limit - $inspirations->count()))
+                ->pluck('username');
+            $handles = $inspirations->concat($catalog)->filter()->unique()->values();
+
+            $handles
+                ->chunk(max(1, (int) config('services.discovery.measure_chunk')))
+                ->each(fn (Collection $chunk) => MeasureAccountEngagement::dispatch(
+                    $chunk->values()->all(),
+                    true,
+                ));
+
+            return;
+        }
+
         $measurementCutoff = now()->subDays((int) config('services.discovery.measure_cooldown_days'));
         $handles = Creator::query()
             ->where('curation_status', 'approved')

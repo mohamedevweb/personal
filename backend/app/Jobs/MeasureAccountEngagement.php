@@ -46,14 +46,17 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
     public int $uniqueFor = 3600;
 
     /** @param list<string> $usernames Accounts to measure, bare handles. */
-    public function __construct(public readonly array $usernames) {}
+    public function __construct(
+        public readonly array $usernames,
+        public readonly bool $forceRefresh = false,
+    ) {}
 
     public function uniqueId(): string
     {
         $usernames = $this->usernames;
         sort($usernames);
 
-        return sha1(implode('|', $usernames));
+        return sha1(($this->forceRefresh ? 'forced|' : 'scheduled|').implode('|', $usernames));
     }
 
     public function handle(
@@ -182,6 +185,14 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
         }
 
         $known = Creator::query()->whereIn('username', $usernames)->get()->keyBy('username');
+
+        if ($this->forceRefresh) {
+            return array_slice(array_values(array_filter(
+                $usernames,
+                fn (string $username): bool => $known->get($username)?->safety_status !== ContentSafetyDecision::BLOCKED,
+            )), 0, (int) config('services.discovery.measure_batch'));
+        }
+
         $ignoreSchedule = (int) config('services.discovery.measure_cooldown_days') === 0;
 
         return array_slice(array_values(array_filter($usernames, function (string $username) use ($known, $ignoreSchedule): bool {

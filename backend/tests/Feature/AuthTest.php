@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\InstagramAccount;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -54,6 +55,22 @@ class AuthTest extends TestCase
         ]);
 
         $this->assertArrayNotHasKey('password', $response->json('user'));
+    }
+
+    public function test_authenticated_user_payload_includes_the_instagram_username(): void
+    {
+        $user = User::factory()->create();
+        InstagramAccount::query()->create([
+            'user_id' => $user->id,
+            'instagram_user_id' => '123',
+            'username' => 'ada.creates',
+            'access_token' => 'encrypted-at-rest',
+            'connected_at' => now(),
+        ]);
+
+        $this->actingAs($user)->getJson('/api/auth/me')
+            ->assertOk()
+            ->assertJsonPath('user.instagram_username', 'ada.creates');
     }
 
     public function test_logout_revokes_only_the_current_token(): void

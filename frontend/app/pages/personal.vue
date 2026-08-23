@@ -203,59 +203,48 @@ onMounted(async () => {
 <template>
   <main class="page-shell pb-16 pt-2">
     <section v-if="profile" class="overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">
-      <div class="grid gap-7 p-6 md:grid-cols-[minmax(0,1fr)_minmax(340px,.8fr)] md:p-8">
-        <div>
-          <div class="flex flex-wrap items-center gap-3">
-            <span class="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-[var(--paper)] text-[var(--ai)]"><AppIcon name="sparkles" :size="19" /></span>
-            <div>
-              <p class="text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--faint)]">{{ $t('personal.voice.eyebrow') }}</p>
-              <h2 class="mt-1 font-serif text-[26px] tracking-[-.03em]">{{ $t('personal.voice.title') }}</h2>
-            </div>
-            <span class="ml-auto inline-flex items-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--paper)] px-3 py-1.5 text-xs" :class="hasVoiceProfile ? 'text-[var(--positive)]' : 'text-[var(--muted)]'">
-              <AppIcon :name="hasVoiceProfile ? 'check' : 'draft'" :size="13" />
-              {{ $t(hasVoiceProfile ? 'personal.voice.ready' : 'personal.voice.notReady') }}
-            </span>
+      <div class="p-6 md:p-8">
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-[var(--paper)] text-[var(--ai)]"><AppIcon name="sparkles" :size="19" /></span>
+          <div>
+            <h2 class="font-serif text-[26px] tracking-[-.03em]">{{ $t('personal.voice.title') }}</h2>
+            <p class="mt-1 text-sm text-[var(--muted)]">{{ $t('personal.voice.description') }}</p>
           </div>
-          <p class="mt-5 max-w-2xl text-[15px] leading-6 text-[var(--muted)]">{{ $t('personal.voice.description') }}</p>
-          <ol class="mt-6 grid gap-3 text-sm text-[var(--copy)] sm:grid-cols-3">
-            <li v-for="step in 3" :key="step" class="flex gap-3 rounded-[14px] bg-[var(--paper)] p-3.5">
-              <span class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[var(--surface)] text-[11px] font-semibold text-[var(--ai)]">{{ step }}</span>
-              <span class="leading-5">{{ $t(`personal.voice.steps.${step}`) }}</span>
-            </li>
-          </ol>
-          <p class="mt-4 text-xs leading-5 text-[var(--faint)]">{{ $t('personal.voice.privacy') }}</p>
+          <span class="ml-auto inline-flex items-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--paper)] px-3 py-1.5 text-xs" :class="hasVoiceProfile ? 'text-[var(--positive)]' : 'text-[var(--muted)]'">
+            <AppIcon :name="hasVoiceProfile ? 'check' : 'draft'" :size="13" />
+            {{ $t(hasVoiceProfile ? 'personal.voice.ready' : 'personal.voice.notReady') }}
+          </span>
         </div>
 
-        <div class="rounded-[16px] border border-[var(--line-soft)] bg-[var(--paper)] p-5">
-          <p class="memory-label">{{ $t('personal.voice.chooseProvider') }}</p>
-          <div v-if="voicePromptError" role="alert" class="mt-4 rounded-[12px] border border-[var(--line)] bg-[var(--surface)] p-4 text-sm text-[var(--muted)]">
-            <p>{{ $t('personal.voice.promptError') }}</p>
-            <button type="button" class="mt-3 font-medium text-[var(--ink)] underline underline-offset-4" @click="loadVoicePrompt">{{ $t('personal.voice.retry') }}</button>
-          </div>
-          <div v-else class="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-5 md:grid-cols-3 xl:grid-cols-5">
-            <a v-for="provider in voiceProviders" :key="provider.name" :href="voiceProviderUrl(provider)" target="_blank" rel="noopener noreferrer" class="group flex min-w-0 flex-col items-center gap-2 rounded-[13px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ai)]" :class="voicePromptLoading || !voicePrompt ? 'pointer-events-none opacity-50' : ''" :aria-disabled="voicePromptLoading || !voicePrompt" :tabindex="voicePromptLoading || !voicePrompt ? -1 : undefined" @click="prepareVoiceProvider($event, provider)">
-              <span class="grid aspect-square w-full max-w-[64px] place-items-center rounded-[13px] border border-[var(--line)] bg-[var(--surface)] text-[var(--ink)] transition group-hover:-translate-y-0.5 group-hover:border-[var(--muted)] group-hover:shadow-[0_5px_14px_rgba(23,23,26,.08)]">
-                <AppIcon :name="provider.icon" :size="28" :stroke-width="1.5" />
-              </span>
-              <span class="max-w-full truncate text-[11px] font-medium text-[var(--muted)] transition group-hover:text-[var(--ink)]">{{ provider.name }}</span>
-            </a>
-          </div>
-
-          <div class="my-5 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[.14em] text-[var(--faint)]">
-            <span class="h-px flex-1 bg-[var(--line)]" />
-            {{ $t('personal.voice.then') }}
-            <span class="h-px flex-1 bg-[var(--line)]" />
+        <div class="mt-6 grid gap-6 border-t border-[var(--line-soft)] pt-6 md:grid-cols-[minmax(0,1fr)_minmax(260px,320px)] md:gap-8">
+          <div>
+            <p class="memory-label">{{ $t('personal.voice.chooseProvider') }}</p>
+            <div v-if="voicePromptError" role="alert" class="mt-4 rounded-[12px] border border-[var(--line)] bg-[var(--surface)] p-4 text-sm text-[var(--muted)]">
+              <p>{{ $t('personal.voice.promptError') }}</p>
+              <button type="button" class="mt-3 font-medium text-[var(--ink)] underline underline-offset-4" @click="loadVoicePrompt">{{ $t('personal.voice.retry') }}</button>
+            </div>
+            <div v-else class="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-5">
+              <a v-for="provider in voiceProviders" :key="provider.name" :href="voiceProviderUrl(provider)" target="_blank" rel="noopener noreferrer" class="group flex min-w-0 flex-col items-center gap-2 rounded-[13px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ai)]" :class="voicePromptLoading || !voicePrompt ? 'pointer-events-none opacity-50' : ''" :aria-disabled="voicePromptLoading || !voicePrompt" :tabindex="voicePromptLoading || !voicePrompt ? -1 : undefined" @click="prepareVoiceProvider($event, provider)">
+                <span class="grid h-12 w-12 place-items-center rounded-[13px] border border-[var(--line)] bg-[var(--paper)] text-[var(--ink)] transition group-hover:border-[var(--muted)]">
+                  <AppIcon :name="provider.icon" :size="23" :stroke-width="1.5" />
+                </span>
+                <span class="max-w-full truncate text-[11px] font-medium text-[var(--muted)] transition group-hover:text-[var(--ink)]">{{ provider.name }}</span>
+              </a>
+            </div>
           </div>
 
-          <input ref="voiceFileInput" type="file" accept=".md,text/markdown,text/plain" class="sr-only" @change="importVoiceFile">
-          <div class="flex flex-wrap gap-2">
-            <button type="button" class="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-full b-btn-red px-5 text-[14px] font-medium transition disabled:cursor-not-allowed disabled:opacity-60" :disabled="importingVoice" @click="chooseVoiceFile">
-              <AppIcon name="draft" :size="16" />
-              {{ importingVoice ? $t('personal.voice.importing') : $t(hasVoiceProfile ? 'personal.voice.replace' : 'personal.voice.import') }}
-            </button>
-            <button v-if="hasVoiceProfile" type="button" class="inline-flex h-11 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 text-sm font-medium transition hover:border-[var(--muted)]" @click="downloadVoiceProfile">{{ $t('personal.voice.download') }}</button>
+          <div class="md:border-l md:border-[var(--line-soft)] md:pl-8">
+            <input ref="voiceFileInput" type="file" accept=".md,text/markdown,text/plain" class="sr-only" @change="importVoiceFile">
+            <div class="flex flex-wrap gap-2">
+              <button type="button" class="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-full b-btn-red px-5 text-[14px] font-medium transition disabled:cursor-not-allowed disabled:opacity-60" :disabled="importingVoice" @click="chooseVoiceFile">
+                <AppIcon name="draft" :size="16" />
+                {{ importingVoice ? $t('personal.voice.importing') : $t(hasVoiceProfile ? 'personal.voice.replace' : 'personal.voice.import') }}
+              </button>
+              <button v-if="hasVoiceProfile" type="button" class="inline-flex h-11 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 text-sm font-medium transition hover:border-[var(--muted)]" @click="downloadVoiceProfile">{{ $t('personal.voice.download') }}</button>
+            </div>
+            <p class="mt-3 text-xs leading-5 text-[var(--faint)]">{{ $t('personal.voice.privacy') }}</p>
+            <button v-if="voicePrompt" type="button" class="mt-2 text-xs text-[var(--muted)] underline underline-offset-4 transition hover:text-[var(--ink)]" @click="showingVoicePrompt = !showingVoicePrompt">{{ $t(showingVoicePrompt ? 'personal.voice.hidePrompt' : 'personal.voice.showPrompt') }}</button>
           </div>
-          <button v-if="voicePrompt" type="button" class="mt-4 text-xs text-[var(--muted)] underline underline-offset-4 transition hover:text-[var(--ink)]" @click="showingVoicePrompt = !showingVoicePrompt">{{ $t(showingVoicePrompt ? 'personal.voice.hidePrompt' : 'personal.voice.showPrompt') }}</button>
         </div>
       </div>
 

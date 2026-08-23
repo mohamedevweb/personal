@@ -8,7 +8,7 @@ PostgreSQL is the configured application database. PHPUnit uses an isolated in-m
 
 - Email and password accounts with Sanctum API tokens
 - Real Instagram Login onboarding and background import
-- Global feed with 12 ranked daily opportunities
+- Global feed with 24 ranked opportunities and explicit fresh-content rotation
 - Content analysis with hook, structure, fit, and performance context
 - Reel, carousel, and caption remix flows grounded in life moments
 - Editable carousel slides with reorder, delete, and regeneration controls

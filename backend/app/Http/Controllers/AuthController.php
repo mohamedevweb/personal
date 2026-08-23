@@ -97,6 +97,6 @@ class AuthController extends Controller
      */
     private function userPayload(User $user): array
     {
-        return $user->only(['id', 'name', 'email', 'avatar_url', 'email_verified_at']);
+        return $user->only(['id', 'name', 'email', 'avatar_url', 'instagram_username', 'email_verified_at']);
     }
 }

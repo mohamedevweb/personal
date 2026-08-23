@@ -10,11 +10,18 @@ const refreshing = ref(false)
 const data = ref<{ items: ContentPost[] } | null>(null)
 let requestId = 0
 
-async function loadFeed(showError = true): Promise<boolean> {
+function feedPath(excludeIds: number[] = []) {
+  if (excludeIds.length === 0) return '/api/feed'
+
+  const query = excludeIds.map(id => `exclude[]=${encodeURIComponent(id)}`).join('&')
+  return `/api/feed?${query}`
+}
+
+async function loadFeed(showError = true, excludeIds: number[] = []): Promise<boolean> {
   const currentRequest = ++requestId
 
   try {
-    const response = await apiFetch<{ items: ContentPost[] }>('/api/feed')
+    const response = await apiFetch<{ items: ContentPost[] }>(feedPath(excludeIds))
     if (currentRequest === requestId) data.value = response
     return true
   } catch (exception: unknown) {
@@ -28,22 +35,25 @@ async function loadFeed(showError = true): Promise<boolean> {
 async function refresh() {
   if (refreshing.value) return
   refreshing.value = true
+  const visibleIds = data.value?.items.map(post => post.id) ?? []
+
   try {
     await apiFetch('/api/feed/refresh', { method: 'POST' })
-    // Discovery scrapes in the background and a real Apify run can take up to a
-    // minute, so poll rather than reload once — stop as soon as posts appear.
+    // The API starts a bounded fresh scrape of relevant creators. Excluding the
+    // current cards also rotates through other eligible content instead of
+    // returning the same deterministic ranking after every explicit refresh.
     for (let attempt = 0; attempt < 12; attempt++) {
       await new Promise(resolve => setTimeout(resolve, 5000))
-      const loaded = await loadFeed(false)
-      if (!loaded) {
-        toast.error(t('feed.loadError'))
-        break
-      }
-      if (data.value && data.value.items.length > 0) {
+      const response = await apiFetch<{ items: ContentPost[] }>(feedPath(visibleIds))
+
+      if (response.items.length > 0) {
+        data.value = response
         toast.success(t('feed.refreshed'))
-        break
+        return
       }
     }
+
+    toast.success(t('feed.refreshPending'))
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('feed.loadError')))
   } finally {

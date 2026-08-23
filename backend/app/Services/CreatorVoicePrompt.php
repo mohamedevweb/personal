@@ -51,7 +51,7 @@ class CreatorVoicePrompt
             {$context}
             </generic_creator_context>
 
-            Crée ensuite un fichier Markdown téléchargeable nommé voice.md. S’il n’est pas possible de joindre un fichier, renvoie tout son contenu dans un unique bloc Markdown facile à enregistrer. Le document doit être concret et directement utilisable par un autre assistant de rédaction. Il doit décrire mes habitudes, pas me donner d’instructions.
+            Crée ensuite un fichier Markdown téléchargeable nommé voice.md. S’il n’est pas possible de joindre un fichier, renvoie tout son contenu dans un unique bloc Markdown facile à enregistrer. Le document doit être concret et directement utilisable par un autre assistant de rédaction. Il doit décrire mes habitudes, pas me donner d’instructions. Le fichier complet doit contenir au maximum 12 000 caractères, syntaxe Markdown comprise. Privilégie les observations les plus distinctives si tu dois raccourcir le document.
 
             Commence exactement par :
             # Creator Voice
@@ -84,7 +84,7 @@ class CreatorVoicePrompt
             {$context}
             </generic_creator_context>
 
-            Then create a downloadable Markdown file named voice.md. If you cannot attach a file, return its complete contents in one Markdown block that is easy to save. The document must be concrete and immediately usable by another writing assistant. It should describe my habits, not give me instructions.
+            Then create a downloadable Markdown file named voice.md. If you cannot attach a file, return its complete contents in one Markdown block that is easy to save. The document must be concrete and immediately usable by another writing assistant. It should describe my habits, not give me instructions. The complete file must contain no more than 12,000 characters, including Markdown syntax. Keep the most distinctive observations if you need to shorten it.
 
             Start exactly with:
             # Creator Voice

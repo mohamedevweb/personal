@@ -2,8 +2,17 @@
 const route = useRoute()
 const { user, loadUser, logout } = useAuth()
 const { launch } = useRemixLaunch()
+const { t } = useI18n()
 
 onMounted(() => { if (!user.value) loadUser().catch(() => {}) })
+
+const accountLabel = computed(() => {
+  const instagramUsername = user.value?.instagram_username?.replace(/^@/, '')
+
+  if (instagramUsername) return `@${instagramUsername}`
+
+  return user.value?.name || t('common.yourWorkspace')
+})
 
 const groups = [
   {
@@ -82,7 +91,7 @@ const pageTitle = computed(() => {
         <div class="flex items-center gap-3 rounded-[14px] px-2 py-2">
           <div class="grid h-9 w-9 place-items-center rounded-full bg-[var(--ink)] text-[var(--paper)]"><AppIcon name="user" :size="16" /></div>
           <div class="min-w-0 flex-1">
-            <p class="truncate text-[13px] font-medium">{{ $t('common.yourWorkspace') }}</p>
+            <p class="truncate text-[13px] font-medium">{{ accountLabel }}</p>
             <button class="text-[11px] text-[var(--faint)] transition hover:text-[var(--ink)]" @click="logout">{{ $t('common.signOut') }}</button>
           </div>
         </div>

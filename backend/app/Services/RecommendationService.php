@@ -34,13 +34,14 @@ class RecommendationService
     ) {}
 
     /** @return Collection<int, array<string, mixed>> */
-    public function forUser(User $user, int $limit = 12): Collection
+    public function forUser(User $user, ?int $limit = null, array $excludeIds = []): Collection
     {
+        $limit = max(1, $limit ?? (int) config('services.discovery.feed_size'));
         $savedIds = $user->savedContent()->pluck('content_post_id')->flip();
         $primaryVertical = $this->primaryVertical($user);
         $inspirationIds = $user->inspirationCreators()->pluck('creators.id');
 
-        $ranked = $this->candidates($user, $limit, $primaryVertical, $inspirationIds)
+        $ranked = $this->candidates($user, $limit, $primaryVertical, $inspirationIds, $excludeIds)
             ->map(fn (ContentPost $post): array => ['post' => $post, 'ranking' => $this->ranker->rank($post)])
             ->sortByDesc('ranking.score')
             ->values();
@@ -64,10 +65,11 @@ class RecommendationService
     }
 
     /** @return Collection<int, array<string, mixed>> */
-    public function globalForUser(User $user, int $limit = 12): Collection
+    public function globalForUser(User $user, ?int $limit = null): Collection
     {
+        $limit = max(1, $limit ?? (int) config('services.discovery.feed_size'));
         $savedIds = $user->savedContent()->pluck('content_post_id')->flip();
-        $ranked = $this->pool($user, collect())
+        $ranked = $this->pool($user, collect(), [])
             ->whereNotNull('measured_at')
             ->where('outlier_score', '>=', (float) config('services.discovery.min_outlier_score'))
             ->whereHas('creator', fn (Builder $creator): Builder => $creator->where('curation_status', 'approved'))
@@ -123,8 +125,9 @@ class RecommendationService
         int $limit,
         ?string $primaryVertical,
         Collection $inspirationIds,
+        array $excludeIds,
     ): Collection {
-        $query = $this->pool($user, $inspirationIds)
+        $query = $this->pool($user, $inspirationIds, $excludeIds)
             ->whereNotNull('measured_at')
             ->where('outlier_score', '>=', (float) config('services.discovery.min_outlier_score'));
 
@@ -175,13 +178,14 @@ class RecommendationService
         )->unique('id')->values();
     }
 
-    private function pool(User $user, Collection $inspirationIds): Builder
+    private function pool(User $user, Collection $inspirationIds, array $excludeIds): Builder
     {
         $window = now()->subDays((int) config('services.discovery.feed_window_days'));
 
         return ContentPost::query()
             ->with('creator')
             ->where('safety_status', 'allowed')
+            ->when($excludeIds !== [], fn (Builder $query): Builder => $query->whereNotIn('id', $excludeIds))
             ->whereNotIn('id', $user->dismissedContent()->select('content_post_id'))
             ->where('published_at', '>=', $window)
             // The absolute floors. outlier_score is a ratio, so on its own it rates a

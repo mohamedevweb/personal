@@ -40,7 +40,7 @@ class AccountController extends Controller
         }
 
         return response()->json([
-            'user' => $user->only(['id', 'name', 'email', 'avatar_url', 'email_verified_at']),
+            'user' => $user->only(['id', 'name', 'email', 'avatar_url', 'instagram_username', 'email_verified_at']),
         ]);
     }
 
