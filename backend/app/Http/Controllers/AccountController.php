@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\UserView;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -16,7 +17,7 @@ class AccountController extends Controller
      * the verified stamp and re-sends the verification notification to the new
      * address, so a swapped email cannot silently stay trusted.
      */
-    public function update(Request $request): JsonResponse
+    public function update(Request $request, UserView $view): JsonResponse
     {
         $user = $request->user();
 
@@ -40,7 +41,7 @@ class AccountController extends Controller
         }
 
         return response()->json([
-            'user' => $user->only(['id', 'name', 'email', 'avatar_url', 'instagram_username', 'email_verified_at']),
+            'user' => $view->make($user),
         ]);
     }
 

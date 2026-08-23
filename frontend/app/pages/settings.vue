@@ -4,11 +4,14 @@ const { apiFetch } = usePersonalApi()
 const { user, loadUser, updateAccount, updatePassword, resendVerification } = useAuth()
 const { t } = useI18n()
 const toast = useToast()
+const instagramAvatarFailed = ref(false)
 
 async function disconnect() {
   try {
     await apiFetch('/api/integrations/instagram', { method: 'DELETE' })
     await loadStatus()
+    await loadUser()
+    instagramAvatarFailed.value = false
     if (error.value) return
     toast.success(t('settings.disconnected'))
   } catch (exception: unknown) {
@@ -76,7 +79,8 @@ async function resend() {
 
 onMounted(async () => {
   await loadStatus()
-  if (!user.value) await loadUser().catch(() => {})
+  instagramAvatarFailed.value = false
+  await loadUser().catch(() => {})
   syncAccountForm()
 })
 
@@ -166,7 +170,14 @@ watch(error, (message) => {
         </div>
       </div>
       <div v-if="status.connected" class="mt-7 flex items-center gap-3 rounded-[14px] border border-[var(--line-soft)] bg-[var(--paper)] p-4">
-        <div class="grid h-10 w-10 place-items-center rounded-full bg-[var(--surface)] text-xs font-medium">IG</div>
+        <img
+          v-if="status.account?.profile_picture_url && !instagramAvatarFailed"
+          :src="status.account.profile_picture_url"
+          :alt="status.account.display_name || `@${status.account.username}`"
+          class="h-10 w-10 rounded-full object-cover"
+          @error="instagramAvatarFailed = true"
+        >
+        <div v-else class="grid h-10 w-10 place-items-center rounded-full bg-[var(--surface)] text-xs font-medium">IG</div>
         <div>
           <p class="text-sm font-medium">{{ $t('settings.instagramConnected') }}</p>
           <p class="text-xs text-[var(--faint)]">{{ $t('settings.postsImported', { count: status.account?.imported_media_count, status: status.account?.sync_status }) }}</p>

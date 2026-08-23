@@ -19,7 +19,12 @@ class CuratedFeedTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        config(['creator_catalog.curated_only' => true]);
+        config([
+            'creator_catalog.curated_only' => true,
+            // Quota expectations in this class intentionally exercise a 12-card
+            // sample independently from the product's configured feed size.
+            'services.discovery.feed_size' => 12,
+        ]);
         $this->user = User::factory()->create();
         CreatorProfile::query()->create(['user_id' => $this->user->id, 'market' => 'FR']);
     }

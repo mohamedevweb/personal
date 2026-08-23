@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Jobs\SyncInstagramAccount;
 use App\Services\CreatorInspirationService;
 use App\Services\Instagram\InstagramAuthService;
+use App\Services\UserView;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,7 +17,7 @@ class InstagramConnectionController extends Controller
         return response()->json(['authorization_url' => $auth->authorizationUrl($request->user())]);
     }
 
-    public function status(Request $request): JsonResponse
+    public function status(Request $request, UserView $view): JsonResponse
     {
         $inspirationCount = $request->user()->inspirationCreators()->count();
         $profile = $request->user()->creatorProfile()->first();
@@ -42,7 +43,7 @@ class InstagramConnectionController extends Controller
             'account' => [
                 'username' => $account->username,
                 'display_name' => $account->display_name,
-                'profile_picture_url' => $account->profile_picture_url,
+                'profile_picture_url' => $view->avatarUrl($request->user()),
                 'account_type' => $account->account_type,
                 'followers_count' => $account->followers_count,
                 'media_count' => $account->media_count,

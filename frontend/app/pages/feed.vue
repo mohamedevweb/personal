@@ -38,22 +38,14 @@ async function refresh() {
   const visibleIds = data.value?.items.map(post => post.id) ?? []
 
   try {
-    await apiFetch('/api/feed/refresh', { method: 'POST' })
-    // The API starts a bounded fresh scrape of relevant creators. Excluding the
-    // current cards also rotates through other eligible content instead of
-    // returning the same deterministic ranking after every explicit refresh.
-    for (let attempt = 0; attempt < 12; attempt++) {
-      await new Promise(resolve => setTimeout(resolve, 5000))
-      const response = await apiFetch<{ items: ContentPost[] }>(feedPath(visibleIds))
+    const response = await apiFetch<{ items: ContentPost[] }>(feedPath(visibleIds))
 
-      if (response.items.length > 0) {
-        data.value = response
-        toast.success(t('feed.refreshed'))
-        return
-      }
+    if (response.items.length > 0) {
+      data.value = response
+      toast.success(t('feed.refreshed'))
+    } else {
+      toast.success(t('feed.rotationComplete'))
     }
-
-    toast.success(t('feed.refreshPending'))
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('feed.loadError')))
   } finally {

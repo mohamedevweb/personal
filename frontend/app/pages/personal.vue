@@ -17,8 +17,12 @@ const { t } = useI18n()
 const toast = useToast()
 const profile = ref<PersonalProfile | null>(null)
 const instagram = ref<{
+  username: string
+  display_name: string | null
+  profile_picture_url: string | null
   media_count: number | null
 } | null>(null)
+const instagramAvatarFailed = ref(false)
 const editing = ref(false)
 const saving = ref(false)
 const voicePrompt = ref('')
@@ -86,6 +90,7 @@ async function loadProfile() {
     const response = await apiFetch<{ profile: PersonalProfile, instagram: typeof instagram.value }>('/api/me/profile')
     profile.value = response.profile
     instagram.value = response.instagram
+    instagramAvatarFailed.value = false
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('personal.loadError')))
   }
@@ -260,7 +265,14 @@ onMounted(async () => {
     <form v-if="profile" class="mt-5 overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]" @submit.prevent="saveProfile">
       <div class="flex flex-wrap items-center gap-3 border-b border-[var(--line)] px-6 py-5">
         <template v-if="instagram">
-          <div class="grid h-10 w-10 place-items-center rounded-full bg-[var(--paper)] text-xs">IG</div>
+          <img
+            v-if="instagram.profile_picture_url && !instagramAvatarFailed"
+            :src="instagram.profile_picture_url"
+            :alt="instagram.display_name || `@${instagram.username}`"
+            class="h-10 w-10 rounded-full object-cover"
+            @error="instagramAvatarFailed = true"
+          >
+          <div v-else class="grid h-10 w-10 place-items-center rounded-full bg-[var(--paper)] text-xs">IG</div>
           <div>
             <p class="text-sm font-medium">{{ $t('personal.instagramAccount') }}</p>
             <p class="text-xs text-[var(--faint)]">{{ $t('personal.liveContext', { count: instagram.media_count || 0 }) }}</p>

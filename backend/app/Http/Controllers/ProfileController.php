@@ -4,19 +4,23 @@ namespace App\Http\Controllers;
 
 use App\Models\CreatorProfile;
 use App\Services\Discovery\CanonicalCreatorVerticals;
+use App\Services\UserView;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ProfileController extends Controller
 {
-    public function show(Request $request): JsonResponse
+    public function show(Request $request, UserView $view): JsonResponse
     {
+        $account = $request->user()->instagramAccount;
+
         return response()->json([
             'user' => $request->user()->only(['id', 'name', 'email']),
             'profile' => $this->profile($request),
-            'instagram' => $request->user()->instagramAccount?->only([
-                'username', 'display_name', 'profile_picture_url', 'account_type', 'followers_count', 'media_count', 'sync_status',
-            ]),
+            'instagram' => $account ? [
+                ...$account->only(['username', 'display_name', 'account_type', 'followers_count', 'media_count', 'sync_status']),
+                'profile_picture_url' => $view->avatarUrl($request->user()),
+            ] : null,
         ]);
     }
 

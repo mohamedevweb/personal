@@ -102,9 +102,6 @@ return [
         // describes a niche that has already moved on, however well it did.
         'feed_window_days' => (int) env('DISCOVERY_FEED_WINDOW_DAYS', 30),
         'feed_size' => (int) env('DISCOVERY_FEED_SIZE', 24),
-        // An explicit refresh re-scrapes a small relevant set instead of the whole
-        // catalogue, so the button can find new posts without an unbounded bill.
-        'refresh_creator_limit' => (int) env('DISCOVERY_REFRESH_CREATOR_LIMIT', 8),
         // Minimum outlier score to reach the feed: a post has to beat the account
         // that published it, not merely come from a large one.
         'min_outlier_score' => (float) env('DISCOVERY_MIN_OUTLIER_SCORE', 1.2),

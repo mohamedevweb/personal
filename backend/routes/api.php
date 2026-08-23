@@ -61,6 +61,9 @@ Route::get('/media/content/{content}/{position}', [MediaController::class, 'cont
 Route::get('/media/creator/{creator}', [MediaController::class, 'creator'])
     ->middleware('signed:relative')
     ->name('media.creator');
+Route::get('/media/instagram-account/{account}', [MediaController::class, 'instagramAccount'])
+    ->middleware('signed:relative')
+    ->name('media.instagram-account');
 
 Route::middleware(['auth:sanctum', 'verified'])->prefix('integrations/instagram')->group(function (): void {
     Route::get('/authorize', [InstagramConnectionController::class, 'authorize']);
@@ -76,8 +79,6 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function (): void {
     Route::get('/me/voice-prompt', VoiceProfileController::class);
     Route::get('/feed', [FeedController::class, 'index']);
     Route::get('/feed/global', [FeedController::class, 'global']);
-    Route::post('/feed/refresh', [FeedController::class, 'refresh'])
-        ->middleware('throttle:discovery');
     Route::get('/content/{content}', [ContentController::class, 'show']);
     Route::post('/content/{content}/save', [ContentController::class, 'save']);
     Route::post('/content/{content}/dismiss', [ContentController::class, 'dismiss']);

@@ -36,13 +36,27 @@ class PersonalMvpTest extends TestCase
 
         $response->assertOk()
             ->assertJsonMissingPath('greeting_name')
-            ->assertJsonCount(12, 'items')
+            ->assertJsonCount(24, 'items')
             ->assertJsonStructure(['featured_opportunity', 'items' => [[
                 'id', 'hook', 'performance_ratio', 'recommendation_score', 'why_recommended', 'creator',
             ]]]);
 
         $scores = collect($response->json('items'))->pluck('recommendation_score');
         $this->assertSame($scores->sortDesc()->values()->all(), $scores->values()->all());
+    }
+
+    public function test_feed_can_rotate_past_the_current_cards(): void
+    {
+        $first = $this->actingAs($this->user)->getJson('/api/feed')->assertOk();
+        $visibleIds = collect($first->json('items'))->pluck('id')->all();
+
+        $next = $this->actingAs($this->user)->getJson('/api/feed?'.http_build_query([
+            'exclude' => $visibleIds,
+        ]))->assertOk();
+        $nextIds = collect($next->json('items'))->pluck('id');
+
+        $this->assertNotEmpty($nextIds);
+        $this->assertSame([], $nextIds->intersect($visibleIds)->values()->all());
     }
 
     public function test_the_feed_query_count_does_not_grow_with_the_catalog(): void

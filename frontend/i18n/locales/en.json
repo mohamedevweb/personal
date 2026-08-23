@@ -448,14 +448,14 @@
     "loadError": "Personal could not load today’s opportunities.",
     "remixError": "Personal could not draft this right now. Please try again.",
     "refreshed": "New content has been added to your feed.",
-    "refreshPending": "No new eligible post yet. Personal is still checking the latest publications.",
+    "rotationComplete": "You have seen all currently eligible content. New publications arrive through the regular refresh cycle.",
     "saved": "Saved to your library.",
     "unsaved": "Removed from your library.",
     "saveError": "Personal could not update your library. Please try again.",
     "emptyTitle": "No content yet.",
     "emptyBody": "We’re finding standout content from creators across the platform. This can take a moment right after connecting Instagram.",
     "refresh": "Refresh my feed",
-    "refreshing": "Finding content…"
+    "refreshing": "Loading more content…"
   },
   "create": {
     "eyebrow": "Studio",

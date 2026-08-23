@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\UserView;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,7 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends Controller
 {
-    public function register(Request $request): JsonResponse
+    public function register(Request $request, UserView $view): JsonResponse
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
@@ -34,12 +35,12 @@ class AuthController extends Controller
         event(new Registered($user));
 
         return response()->json([
-            'user' => $this->userPayload($user),
+            'user' => $view->make($user),
             'token' => $user->createToken($this->tokenName($request))->plainTextToken,
         ], Response::HTTP_CREATED);
     }
 
-    public function login(Request $request): JsonResponse
+    public function login(Request $request, UserView $view): JsonResponse
     {
         $data = $request->validate([
             'email' => ['required', 'email'],
@@ -55,7 +56,7 @@ class AuthController extends Controller
         }
 
         return response()->json([
-            'user' => $this->userPayload($user),
+            'user' => $view->make($user),
             'token' => $user->createToken($this->tokenName($request))->plainTextToken,
         ]);
     }
@@ -79,24 +80,13 @@ class AuthController extends Controller
         return response()->noContent();
     }
 
-    public function me(Request $request): JsonResponse
+    public function me(Request $request, UserView $view): JsonResponse
     {
-        return response()->json(['user' => $this->userPayload($request->user())]);
+        return response()->json(['user' => $view->make($request->user())]);
     }
 
     private function tokenName(Request $request): string
     {
         return str($request->userAgent() ?? 'api')->limit(60, '')->toString();
-    }
-
-    /**
-     * The public shape of a user the SPA relies on. `email_verified_at` drives the
-     * verification gate, so every auth response has to carry it.
-     *
-     * @return array<string, mixed>
-     */
-    private function userPayload(User $user): array
-    {
-        return $user->only(['id', 'name', 'email', 'avatar_url', 'instagram_username', 'email_verified_at']);
     }
 }

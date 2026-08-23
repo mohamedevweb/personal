@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\ContentPost;
 use App\Models\Creator;
+use App\Models\InstagramAccount;
 use App\Models\Remix;
 use App\Models\User;
 use App\Services\ContentPostView;
@@ -44,6 +45,41 @@ class InstagramMediaProxyTest extends TestCase
         $post = $this->createPost('https://scontent-sea5-1.cdninstagram.com/photo.jpg');
 
         $this->get("/api/media/content/{$post->id}")->assertForbidden();
+    }
+
+    public function test_connected_user_avatar_uses_the_signed_media_proxy_across_api_responses(): void
+    {
+        config(['app.url' => 'https://api.personal.test']);
+        Storage::fake('local');
+        Http::preventStrayRequests();
+        $source = 'https://scontent-sea5-1.cdninstagram.com/avatar.jpg';
+        Http::fake([$source => Http::response('avatar-content', 200, ['Content-Type' => 'image/jpeg'])]);
+        $user = User::factory()->create();
+        InstagramAccount::query()->create([
+            'user_id' => $user->id,
+            'instagram_user_id' => 'instagram-user',
+            'username' => 'personal_creator',
+            'profile_picture_url' => $source,
+            'access_token' => 'encrypted-secret',
+            'sync_status' => 'completed',
+            'connected_at' => now(),
+        ]);
+
+        $authAvatar = $this->actingAs($user)->getJson('/api/auth/me')->assertOk()->json('user.avatar_url');
+        $profileAvatar = $this->actingAs($user)->getJson('/api/me/profile')->assertOk()->json('instagram.profile_picture_url');
+        $statusAvatar = $this->actingAs($user)->getJson('/api/integrations/instagram/status')->assertOk()->json('account.profile_picture_url');
+
+        $this->assertIsString($authAvatar);
+        $this->assertStringStartsWith('https://api.personal.test/api/media/instagram-account/', $authAvatar);
+        $this->assertStringContainsString('signature=', $authAvatar);
+        $this->assertSame($authAvatar, $profileAvatar);
+        $this->assertSame($authAvatar, $statusAvatar);
+
+        $relativeAvatar = parse_url($authAvatar, PHP_URL_PATH).'?'.parse_url($authAvatar, PHP_URL_QUERY);
+        $this->get($relativeAvatar)
+            ->assertOk()
+            ->assertHeader('Cross-Origin-Resource-Policy', 'cross-origin')
+            ->assertContent('avatar-content');
     }
 
     public function test_signed_carousel_media_route_proxies_the_requested_slide(): void

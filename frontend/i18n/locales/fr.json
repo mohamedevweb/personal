@@ -448,14 +448,14 @@
     "loadError": "Personal n’a pas pu charger les opportunités du jour.",
     "remixError": "Personal n’a pas pu rédiger ceci pour l’instant. Veuillez réessayer.",
     "refreshed": "De nouveaux contenus ont été ajoutés à ton feed.",
-    "refreshPending": "Aucune nouvelle publication éligible pour l’instant. Personal vérifie encore les contenus récents.",
+    "rotationComplete": "Tu as vu tous les contenus éligibles pour l’instant. Les nouvelles publications arriveront avec le cycle habituel.",
     "saved": "Ajouté à tes favoris.",
     "unsaved": "Retiré de tes favoris.",
     "saveError": "Personal n’a pas pu mettre à jour tes favoris. Réessaie.",
     "emptyTitle": "Rien pour l’instant.",
     "emptyBody": "On cherche les contenus qui se démarquent parmi tous les créateurs. Ça peut prendre un moment juste après la connexion Instagram.",
     "refresh": "Rafraîchir mon feed",
-    "refreshing": "Recherche en cours…"
+    "refreshing": "Chargement d’autres contenus…"
   },
   "create": {
     "eyebrow": "Studio",
