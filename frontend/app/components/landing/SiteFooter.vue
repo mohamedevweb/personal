@@ -1,3 +1,7 @@
+<script setup lang="ts">
+const { isConfigured, openPreferences } = useGoogleAnalytics()
+</script>
+
 <template>
   <footer class="border-t border-[var(--b-line)] px-5 py-14 md:px-10">
     <div class="mx-auto flex max-w-[1200px] flex-col gap-10 md:flex-row md:items-end md:justify-between">
@@ -11,6 +15,9 @@
           <NuxtLink to="/login" class="b-focus transition-colors hover:text-[var(--b-black)]">{{ $t('landing.nav.signIn') }}</NuxtLink>
           <NuxtLink to="/terms" class="b-focus transition-colors hover:text-[var(--b-black)]">{{ $t('landing.nav.terms') }}</NuxtLink>
           <NuxtLink to="/privacy" class="b-focus transition-colors hover:text-[var(--b-black)]">{{ $t('landing.nav.privacy') }}</NuxtLink>
+          <button v-if="isConfigured" type="button" class="b-focus transition-colors hover:text-[var(--b-black)]" @click="openPreferences">
+            {{ $t('analyticsConsent.manage') }}
+          </button>
         </nav>
         <div class="flex items-center gap-5">
           <LanguageSwitcher />

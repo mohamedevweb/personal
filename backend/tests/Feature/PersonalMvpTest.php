@@ -377,11 +377,13 @@ class PersonalMvpTest extends TestCase
             'positioning' => 'I build calm tools for independent creators.',
             'niche' => 'création de contenu',
             'topics' => ['Creator tools', 'Founder stories'],
+            'voice_profile' => "# Creator Voice\n\nDirect, reflective, and specific.",
         ])->assertOk()->assertJsonPath('profile.positioning', 'I build calm tools for independent creators.');
 
         $this->assertDatabaseHas('creator_profiles', [
             'user_id' => $this->user->id,
             'positioning' => 'I build calm tools for independent creators.',
+            'voice_profile' => "# Creator Voice\n\nDirect, reflective, and specific.",
         ]);
 
         $profile = $this->user->creatorProfile()->firstOrFail();
@@ -391,6 +393,33 @@ class PersonalMvpTest extends TestCase
         $this->assertSame('personal-branding', $profile->primary_vertical);
         $this->assertNull($profile->discovery_queries);
         $this->assertNull($profile->discovery_refreshed_at);
+    }
+
+    public function test_a_creator_can_export_a_prompt_for_their_voice_profile(): void
+    {
+        $this->user->creatorProfile->update([
+            'positioning' => 'I build calm tools for independent creators.',
+            'topics' => ['Creator tools'],
+        ]);
+
+        $response = $this->actingAs($this->user)
+            ->withHeader('Accept-Language', 'fr')
+            ->getJson('/api/me/voice-prompt')
+            ->assertOk()
+            ->assertJsonPath('filename', 'voice.md');
+
+        $prompt = $response->json('prompt');
+        $this->assertStringContainsString('usepersonal.app', $prompt);
+        $this->assertStringContainsString('voice.md', $prompt);
+        $this->assertStringContainsString('I build calm tools for independent creators.', $prompt);
+        $this->assertStringContainsString('N’inclus aucun secret', $prompt);
+    }
+
+    public function test_a_voice_profile_has_a_bounded_length(): void
+    {
+        $this->actingAs($this->user)->patchJson('/api/me/profile', [
+            'voice_profile' => str_repeat('a', 12001),
+        ])->assertUnprocessable()->assertJsonValidationErrors('voice_profile');
     }
 
     public function test_demo_personal_memory_is_empty_without_a_synced_instagram_account(): void
@@ -406,7 +435,8 @@ class PersonalMvpTest extends TestCase
             ->assertJsonPath('profile.tone', [])
             ->assertJsonPath('profile.current_projects', [])
             ->assertJsonPath('profile.goals', [])
-            ->assertJsonPath('profile.content_strengths', []);
+            ->assertJsonPath('profile.content_strengths', [])
+            ->assertJsonPath('profile.voice_profile', null);
     }
 
     public function test_a_new_personal_memory_does_not_claim_placeholder_insights(): void
@@ -422,6 +452,7 @@ class PersonalMvpTest extends TestCase
             ->assertJsonPath('profile.tone', [])
             ->assertJsonPath('profile.current_projects', [])
             ->assertJsonPath('profile.goals', [])
-            ->assertJsonPath('profile.content_strengths', []);
+            ->assertJsonPath('profile.content_strengths', [])
+            ->assertJsonPath('profile.voice_profile', null);
     }
 }

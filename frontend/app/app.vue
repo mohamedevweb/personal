@@ -12,6 +12,7 @@ useHead({
 <template>
   <NuxtRouteAnnouncer />
   <ToastViewport />
+  <AnalyticsConsentBanner />
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>

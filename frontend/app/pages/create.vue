@@ -7,6 +7,8 @@ const toast = useToast()
 const { begin: beginRemix, attach: attachRemix, clear: clearRemix } = useRemixLaunch()
 const opportunities = ref<Opportunity[]>([])
 const moments = ref<LifeMoment[]>([])
+const selectedMomentId = ref<number | null>(null)
+const selectedAngleIndex = ref(0)
 const loading = ref(true)
 const drafting = ref(false)
 
@@ -17,11 +19,11 @@ const opportunityKeys: Record<string, string> = {
   'Turn this moment into a story your audience can use': 'lifeMoment'
 }
 
-// The pick is only worth showing when it can actually be acted on: an
-// opportunity without a life moment has no material to draft from, so its
-// button would be dead and the page would look broken.
+// A recommendation without a moment cannot be drafted, so it should not
+// influence the selection or appear as an actionable suggestion.
 const pick = computed(() => opportunities.value.find(opportunity => opportunity.life_moment))
 const hasMaterial = computed(() => moments.value.length > 0)
+const selectedMoment = computed(() => moments.value.find(moment => moment.id === selectedMomentId.value) || null)
 
 function pickCopy(type: 'title' | 'explanation'): string | undefined {
   const opportunity = pick.value
@@ -30,17 +32,19 @@ function pickCopy(type: 'title' | 'explanation'): string | undefined {
   return key ? t(`create.opportunities.${key}.${type}`) : opportunity[type]
 }
 
-const quickCards = computed(() => [
-  { title: t('create.cards.story.title'), copy: t('create.cards.story.copy'), format: 'carousel' },
-  { title: t('create.cards.teach.title'), copy: t('create.cards.teach.copy'), format: 'carousel' },
-  { title: t('create.cards.opinion.title'), copy: t('create.cards.opinion.copy'), format: 'reel' }
+const angles = computed(() => [
+  { title: t('create.cards.story.title'), copy: t('create.cards.story.copy'), output: t('create.cards.story.output'), format: 'carousel', icon: 'moments' },
+  { title: t('create.cards.teach.title'), copy: t('create.cards.teach.copy'), output: t('create.cards.teach.output'), format: 'carousel', icon: 'carousel' },
+  { title: t('create.cards.opinion.title'), copy: t('create.cards.opinion.copy'), output: t('create.cards.opinion.output'), format: 'reel', icon: 'reel' }
 ] as const)
+const selectedAngle = computed(() => angles.value[selectedAngleIndex.value]!)
+const selectedMomentIsPick = computed(() => selectedMoment.value?.id === pick.value?.life_moment?.id)
 
 function addMoment() {
   return navigateTo('/moments?new=1')
 }
 
-async function createFromMoment(moment: LifeMoment, format: Remix['format'] = 'carousel') {
+async function createFromMoment(moment: LifeMoment, format: Remix['format']) {
   if (drafting.value) return
   drafting.value = true
   beginRemix({ format, sourceHook: null, moment: moment.content })
@@ -56,18 +60,20 @@ async function createFromMoment(moment: LifeMoment, format: Remix['format'] = 'c
   }
 }
 
-// Without material every card would be a no-op, so the same click becomes an
-// invitation to write the first moment instead of doing nothing at all.
-function startCard(index: number, format: Remix['format']) {
-  if (!hasMaterial.value) return addMoment()
-  return createFromMoment(moments.value[index % moments.value.length]!, format)
+function createSelected() {
+  if (!selectedMoment.value) return
+  return createFromMoment(selectedMoment.value, selectedAngle.value.format)
 }
 
 onMounted(async () => {
   try {
-    const [ops, momentData] = await Promise.all([apiFetch<{ opportunities: Opportunity[] }>('/api/opportunities'), apiFetch<{ moments: LifeMoment[] }>('/api/moments')])
+    const [ops, momentData] = await Promise.all([
+      apiFetch<{ opportunities: Opportunity[] }>('/api/opportunities'),
+      apiFetch<{ moments: LifeMoment[] }>('/api/moments')
+    ])
     opportunities.value = ops.opportunities
     moments.value = momentData.moments
+    selectedMomentId.value = pick.value?.life_moment?.id || moments.value[0]?.id || null
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('create.loadError')))
   } finally {
@@ -78,82 +84,136 @@ onMounted(async () => {
 
 <template>
   <main class="page-shell pb-16 pt-2">
-    <header>
-      <p class="text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--faint)]">{{ $t('create.eyebrow') }}</p>
-      <h1 class="mt-3 max-w-2xl font-serif text-[32px] leading-[1.1] tracking-[-.02em] md:text-[38px]">{{ $t('create.title') }}</h1>
-      <p class="mt-3 max-w-xl text-[15px] leading-7 text-[var(--muted)]">{{ $t('create.subtitle') }}</p>
+    <header class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+      <div>
+        <p class="text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--faint)]">{{ $t('create.eyebrow') }}</p>
+        <h1 class="mt-3 max-w-2xl font-serif text-[34px] leading-[1.08] tracking-[-.03em] md:text-[42px]">{{ $t('create.title') }}</h1>
+        <p class="mt-3 max-w-2xl text-[15px] leading-6 text-[var(--muted)]">{{ $t('create.subtitle') }}</p>
+      </div>
+      <button
+        type="button"
+        class="inline-flex h-11 w-fit shrink-0 items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-[13px] font-medium transition hover:border-[var(--muted)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+        @click="addMoment"
+      >
+        <AppIcon name="plus" :size="16" />{{ $t('create.addMoment') }}
+      </button>
     </header>
 
-    <p v-if="drafting" class="mt-5 text-sm text-[var(--muted)]">{{ $t('create.drafting') }}</p>
-
-    <div v-if="loading" class="mt-6 h-40 animate-pulse rounded-[18px] bg-[var(--sand-soft)]" />
-
-    <section
-      v-else-if="pick"
-      class="mt-6 rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-6 shadow-[0_1px_2px_rgba(23,23,26,.04)] md:p-8"
-    >
-      <p class="inline-flex items-center gap-2.5 text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--accent-ink)]">
-        <span class="grid h-6 w-6 place-items-center rounded-full bg-[var(--accent-soft)]"><AppIcon name="sparkles" :size="12" /></span>
-        {{ $t('create.personalsPick') }}
-      </p>
-      <h2 class="mt-5 max-w-2xl font-serif text-[26px] leading-[1.15] tracking-[-.02em] md:text-[32px]">{{ pickCopy('title') }}</h2>
-      <p class="mt-3 max-w-xl text-[15px] leading-7 text-[var(--muted)]">{{ pickCopy('explanation') }}</p>
-      <button
-        class="b-btn-red mt-7 inline-flex h-12 items-center rounded-full px-6 text-[14px] font-medium disabled:cursor-wait disabled:opacity-70"
-        :disabled="drafting"
-        @click="createFromMoment(pick.life_moment!)"
-      >
-        {{ $t('create.createThis') }}
-      </button>
-    </section>
+    <div v-if="loading" class="mt-7 overflow-hidden rounded-[20px] border border-[var(--line)] bg-[var(--surface)]">
+      <div class="space-y-3 p-5 md:p-7">
+        <div class="h-5 w-52 animate-pulse rounded bg-[var(--sand-soft)]" />
+        <div v-for="item in 3" :key="item" class="h-20 animate-pulse rounded-[14px] bg-[var(--sand-soft)]" />
+      </div>
+      <div class="grid gap-3 border-t border-[var(--line)] p-5 md:grid-cols-3 md:p-7">
+        <div v-for="item in 3" :key="item" class="h-24 animate-pulse rounded-[14px] bg-[var(--sand-soft)]" />
+      </div>
+    </div>
 
     <section
       v-else-if="!hasMaterial"
-      class="mt-6 rounded-[18px] border border-dashed border-[var(--line)] bg-[var(--surface)] p-6 md:p-8"
+      class="mt-7 rounded-[20px] border border-dashed border-[var(--line)] bg-[var(--surface)] p-6 md:p-8"
     >
       <span class="grid h-11 w-11 place-items-center rounded-[12px] bg-[var(--accent-soft)] text-[var(--accent-ink)]"><AppIcon name="moments" :size="19" /></span>
-      <h2 class="mt-5 font-serif text-[26px] tracking-[-.02em]">{{ $t('create.empty.title') }}</h2>
-      <p class="mt-3 max-w-xl text-[15px] leading-7 text-[var(--muted)]">{{ $t('create.empty.copy') }}</p>
-      <button class="b-btn-red mt-7 inline-flex h-12 items-center gap-2 rounded-full px-6 text-[14px] font-medium" @click="addMoment()">
+      <h2 class="mt-5 font-serif text-[28px] tracking-[-.03em]">{{ $t('create.empty.title') }}</h2>
+      <p class="mt-3 max-w-xl text-[15px] leading-6 text-[var(--muted)]">{{ $t('create.empty.copy') }}</p>
+      <button type="button" class="b-btn-red mt-6 inline-flex h-11 items-center gap-2 rounded-full px-5 text-[14px] font-medium" @click="addMoment">
         <AppIcon name="plus" :size="17" />{{ $t('create.empty.action') }}
       </button>
     </section>
 
-    <div class="mt-6 grid gap-4 md:grid-cols-3">
-      <button
-        v-for="(item, index) in quickCards"
-        :key="item.title"
-        class="rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-6 text-left shadow-[0_1px_2px_rgba(23,23,26,.04)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_30px_rgba(23,23,26,.07)] disabled:cursor-wait disabled:opacity-70"
-        :disabled="drafting"
-        @click="startCard(index, item.format)"
-      >
-        <span class="grid h-10 w-10 place-items-center rounded-[12px] bg-[var(--accent-soft)] text-[13px] font-semibold text-[var(--accent-ink)]">0{{ index + 1 }}</span>
-        <h3 class="mt-6 font-serif text-[24px] tracking-[-.02em]">{{ item.title }}</h3>
-        <p class="mt-2 text-sm leading-6 text-[var(--muted)]">{{ item.copy }}</p>
-        <span class="mt-6 inline-flex items-center gap-2 text-xs font-medium">{{ hasMaterial ? $t('create.begin') : $t('create.empty.action') }} <AppIcon name="arrow" :size="14" /></span>
-      </button>
-    </div>
+    <section v-else class="mt-7 overflow-hidden rounded-[20px] border border-[var(--line)] bg-[var(--surface)] shadow-[0_1px_2px_rgba(23,23,26,.04)]">
+      <div class="p-5 md:p-7">
+        <div class="flex items-start justify-between gap-5">
+          <div>
+            <p class="text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--accent-ink)]">{{ $t('create.stepMoment') }}</p>
+            <h2 class="mt-2 font-serif text-[26px] tracking-[-.025em]">{{ $t('create.chooseMoment') }}</h2>
+            <p class="mt-1 text-sm text-[var(--muted)]">{{ $t('create.momentHelp') }}</p>
+          </div>
+          <NuxtLink to="/moments" class="hidden shrink-0 text-xs text-[var(--muted)] underline-offset-4 transition hover:text-[var(--ink)] hover:underline sm:block">{{ $t('create.viewAllMoments') }}</NuxtLink>
+        </div>
 
-    <template v-if="hasMaterial">
-      <div class="mt-12 flex items-center justify-between border-b border-[var(--line)] pb-4">
-        <h2 class="text-[11px] font-semibold uppercase tracking-[.18em] text-[var(--muted)]">{{ $t('create.bestMaterial') }}</h2>
-        <NuxtLink to="/moments" class="text-xs text-[var(--muted)] transition hover:text-[var(--ink)]">{{ $t('create.viewAllMoments') }}</NuxtLink>
+        <div class="mt-5 space-y-2">
+          <button
+            v-for="moment in moments.slice(0, 4)"
+            :key="moment.id"
+            type="button"
+            class="flex w-full items-center gap-4 rounded-[14px] border p-4 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:cursor-wait disabled:opacity-70"
+            :class="selectedMomentId === moment.id ? 'border-[var(--accent)] bg-[var(--b-red-50)]' : 'border-[var(--line-soft)] hover:border-[var(--line)] hover:bg-[var(--paper)]'"
+            :aria-pressed="selectedMomentId === moment.id"
+            :disabled="drafting"
+            @click="selectedMomentId = moment.id"
+          >
+            <span
+              class="grid h-5 w-5 shrink-0 place-items-center rounded-full border transition"
+              :class="selectedMomentId === moment.id ? 'border-[var(--accent)] bg-[var(--accent)] text-white' : 'border-[var(--line)] bg-[var(--surface)] text-transparent'"
+            ><AppIcon name="check" :size="12" :stroke-width="2.2" /></span>
+            <span class="min-w-0 flex-1">
+              <span class="line-clamp-2 text-[14px] leading-5 text-[var(--copy)] md:text-[15px]">{{ moment.content }}</span>
+              <span class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-[var(--faint)]">
+                <span>{{ $t(`moments.categories.${moment.category}`) }}</span>
+                <span>{{ $t('create.storyScore', { score: moment.story_score }) }}</span>
+              </span>
+            </span>
+            <span v-if="pick?.life_moment?.id === moment.id" class="hidden shrink-0 items-center gap-1.5 rounded-full bg-[var(--accent-soft)] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.1em] text-[var(--accent-ink)] sm:inline-flex">
+              <AppIcon name="sparkles" :size="12" />{{ $t('create.recommended') }}
+            </span>
+          </button>
+        </div>
+
+        <div v-if="selectedMomentIsPick" class="mt-3 flex items-start gap-3 rounded-[12px] bg-[var(--paper)] px-4 py-3 text-xs leading-5 text-[var(--muted)]">
+          <AppIcon name="sparkles" :size="15" class="mt-0.5 shrink-0 text-[var(--accent)]" />
+          <p><strong class="font-medium text-[var(--ink)]">{{ $t('create.whyRecommended') }}</strong> {{ pickCopy('explanation') }}</p>
+        </div>
+
+        <NuxtLink to="/moments" class="mt-4 inline-block text-xs text-[var(--muted)] underline-offset-4 hover:text-[var(--ink)] hover:underline sm:hidden">{{ $t('create.viewAllMoments') }}</NuxtLink>
       </div>
 
-      <div class="mt-4 overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">
+      <div class="border-t border-[var(--line)] bg-[var(--paper)]/55 p-5 md:p-7">
+        <p class="text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--accent-ink)]">{{ $t('create.stepAngle') }}</p>
+        <h2 class="mt-2 font-serif text-[26px] tracking-[-.025em]">{{ $t('create.chooseAngle') }}</h2>
+        <p class="mt-1 text-sm text-[var(--muted)]">{{ $t('create.angleHelp') }}</p>
+
+        <div class="mt-5 grid gap-2.5 md:grid-cols-3">
+          <button
+            v-for="(angle, index) in angles"
+            :key="angle.title"
+            type="button"
+            class="flex items-center gap-3 rounded-[14px] border p-4 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:cursor-wait disabled:opacity-70"
+            :class="selectedAngleIndex === index ? 'border-[var(--accent)] bg-[var(--surface)] shadow-[0_1px_2px_rgba(23,23,26,.04)]' : 'border-[var(--line)] bg-transparent hover:bg-[var(--surface)]'"
+            :aria-pressed="selectedAngleIndex === index"
+            :disabled="drafting"
+            @click="selectedAngleIndex = index"
+          >
+            <span class="grid h-10 w-10 shrink-0 place-items-center rounded-[11px]" :class="selectedAngleIndex === index ? 'bg-[var(--accent-soft)] text-[var(--accent-ink)]' : 'bg-[var(--sand-soft)] text-[var(--muted)]'">
+              <AppIcon :name="angle.icon" :size="18" />
+            </span>
+            <span class="min-w-0 flex-1">
+              <span class="flex items-center justify-between gap-2">
+                <strong class="text-sm font-medium">{{ angle.title }}</strong>
+                <span class="text-[10px] uppercase tracking-[.12em] text-[var(--faint)]">{{ angle.output }}</span>
+              </span>
+              <span class="mt-1 block text-xs leading-5 text-[var(--muted)]">{{ angle.copy }}</span>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-4 border-t border-[var(--line)] px-5 py-4 sm:flex-row sm:items-center sm:justify-between md:px-7">
+        <div class="min-w-0">
+          <p class="text-[10px] font-semibold uppercase tracking-[.14em] text-[var(--faint)]">{{ $t('create.selectedMoment') }}</p>
+          <p class="mt-1 truncate text-sm text-[var(--muted)]">{{ selectedMoment?.content }}</p>
+        </div>
         <button
-          v-for="moment in moments.slice(0, 3)"
-          :key="moment.id"
-          class="flex w-full items-center gap-5 border-b border-[var(--line-soft)] px-5 py-5 text-left transition last:border-0 hover:bg-[var(--paper)] disabled:cursor-wait disabled:opacity-70"
-          :disabled="drafting"
-          @click="createFromMoment(moment)"
+          type="button"
+          class="b-btn-red inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-full px-6 text-[14px] font-medium transition disabled:cursor-wait disabled:opacity-70"
+          :disabled="drafting || !selectedMoment"
+          @click="createSelected"
         >
-          <span class="grid h-10 w-10 shrink-0 place-items-center rounded-[12px] bg-[var(--accent-soft)] font-serif text-[17px] text-[var(--accent-ink)]">{{ moment.story_score }}</span>
-          <p class="flex-1 text-sm md:text-[15px]">{{ moment.content }}</p>
-          <span class="hidden shrink-0 text-xs text-[var(--faint)] md:inline">{{ $t('create.turnIntoContent') }}</span>
-          <AppIcon name="chevron" :size="15" class="shrink-0 text-[var(--faint)]" />
+          {{ drafting ? $t('create.drafting') : $t('create.transform') }}
+          <AppIcon v-if="!drafting" name="arrow" :size="16" />
         </button>
       </div>
-    </template>
+      <p v-if="drafting" role="status" class="sr-only">{{ $t('create.drafting') }}</p>
+    </section>
   </main>
 </template>

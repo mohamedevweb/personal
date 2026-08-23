@@ -48,6 +48,7 @@ export default defineNuxtConfig({
     public: {
       apiBase: 'http://localhost:8000',
       demoBookingUrl: 'https://cal.com/mc-studio/demo-personal-app',
+      googleAnalyticsId: 'G-2X3WXN19GF',
       sentry: {
         dsn: '',
         environment: '',

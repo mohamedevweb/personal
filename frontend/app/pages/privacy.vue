@@ -36,14 +36,14 @@ const SECTIONS: Section[] = [
   {
     id: 'purposes',
     p: ['intro'],
-    items: ['service', 'personalisation', 'connection', 'emails', 'security', 'improve']
+    items: ['service', 'personalisation', 'connection', 'emails', 'security', 'improve', 'analytics']
   },
   { id: 'ai', p: ['what', 'training', 'decisions', 'quality'] },
   { id: 'discovery', p: ['what', 'fields', 'basis', 'rights'] },
   {
     id: 'sharing',
     p: ['intro'],
-    items: ['meta', 'openai', 'anthropic', 'apify', 'resend', 'hosting'],
+    items: ['meta', 'openai', 'anthropic', 'apify', 'resend', 'google', 'hosting'],
     note: true
   },
   { id: 'transfers', p: ['text'] },
@@ -65,7 +65,7 @@ const SECTIONS: Section[] = [
     note: true
   },
   { id: 'deletion', p: ['intro'], items: ['disconnect', 'revoke', 'content', 'account'], note: true },
-  { id: 'cookies', p: ['intro'], items: ['token', 'lang', 'onboarding'] },
+  { id: 'cookies', p: ['intro'], items: ['token', 'lang', 'onboarding', 'analyticsConsent', 'googleAnalytics'] },
   { id: 'minors', p: ['text'] },
   { id: 'changes', p: ['text'] },
   { id: 'contact', p: ['mail', 'post'] }

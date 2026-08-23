@@ -9,16 +9,16 @@ class CreatorVoicePrompt
 {
     public function make(User $user, ?CreatorProfile $profile): string
     {
-        $context = implode("\n", [
-            'Name: '.$user->name,
-            'Niche: '.($profile?->niche ?? 'unspecified'),
-            'Positioning: '.($profile?->positioning ?? 'unspecified'),
-            'Audience: '.($profile?->audience_description ?? 'unspecified'),
-            'Topics: '.$this->list($profile?->topics),
-            'Known tone: '.$this->list($profile?->tone),
-            'Current projects: '.$this->list($profile?->current_projects),
-            'Goals: '.$this->list($profile?->goals),
-        ]);
+        $context = (string) json_encode([
+            'name' => $user->name,
+            'niche' => $profile?->niche,
+            'positioning' => $profile?->positioning,
+            'audience' => $profile?->audience_description,
+            'topics' => $profile?->topics ?? [],
+            'known_tone' => $profile?->tone ?? [],
+            'current_projects' => $profile?->current_projects ?? [],
+            'goals' => $profile?->goals ?? [],
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG);
 
         return app()->getLocale() === 'fr'
             ? $this->frenchPrompt($context)
@@ -89,11 +89,5 @@ class CreatorVoicePrompt
 
             Give precise, nuanced observations. Quote only very short examples from my own messages when they are available. Do not include secrets, passwords, financial data, health data, exact addresses, information about third parties, or other sensitive data. Write the document in natural English. Produce no text outside voice.md.
             PROMPT;
-    }
-
-    /** @param list<string>|null $values */
-    private function list(?array $values): string
-    {
-        return $values ? implode(', ', $values) : 'unspecified';
     }
 }

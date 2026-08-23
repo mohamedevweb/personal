@@ -3,6 +3,14 @@
     "title": "Personal, votre stratège de contenu",
     "description": "Personal comprend votre travail et vous aide à créer les contenus qui comptent."
   },
+  "analyticsConsent": {
+    "title": "Mesure d’audience",
+    "body": "Avec ton accord, Google Analytics nous aide à comprendre quelles pages sont utiles et à améliorer Personal. Aucune donnée n’est utilisée pour la publicité.",
+    "privacy": "Lire la politique de confidentialité",
+    "deny": "Refuser",
+    "accept": "Accepter",
+    "manage": "Gérer les cookies"
+  },
   "brand": {
     "name": "Personal",
     "tagline": "Claude pour le personal branding.",
@@ -446,21 +454,29 @@
     "refreshing": "Recherche en cours…"
   },
   "create": {
-    "eyebrow": "Créer",
-    "title": "Partez de quelque chose de réel.",
-    "subtitle": "La meilleure idée est souvent un schéma qui marche, relié à une histoire que vous seul pouvez raconter.",
-    "drafting": "Rédaction à partir de votre matière…",
-    "draftError": "Personal n’a pas pu rédiger ceci pour l’instant. Veuillez réessayer.",
+    "eyebrow": "Studio",
+    "title": "Transforme un moment en contenu.",
+    "subtitle": "Choisis ce que tu as vécu, puis l’angle qui donnera une idée claire et personnelle à ton audience.",
+    "addMoment": "Ajouter un moment",
+    "drafting": "Création du brouillon…",
+    "draftError": "Personal n’a pas pu rédiger ceci pour l’instant. Réessaie.",
     "loadError": "Personal n’a pas pu charger ta matière créative.",
     "empty": {
-      "title": "Pas encore de matière.",
-      "copy": "Personal écrit à partir de ce que vous avez vraiment vécu. Ajoutez un premier moment : une décision, un échec, une leçon. Tous les formats ci-dessous deviennent alors disponibles.",
+      "title": "Ajoute ton premier moment.",
+      "copy": "Une décision, un échec ou une leçon suffit. Personal t’aidera ensuite à en faire un contenu qui te ressemble.",
       "action": "Ajouter un moment"
     },
-    "personalsPick": "Le choix de Personal",
-    "pickTitleFallback": "Racontez l’histoire derrière votre dernière décision produit.",
-    "pickCopyFallback": "Une décision concrète crée de la tension, de l’insight et un enseignement utile.",
-    "createThis": "Créer ceci →",
+    "stepMoment": "Étape 1",
+    "chooseMoment": "Choisis le moment à transformer",
+    "momentHelp": "Le brouillon sera écrit à partir du moment sélectionné.",
+    "storyScore": "Potentiel narratif {score}/10",
+    "recommended": "Recommandé",
+    "whyRecommended": "Pourquoi ce moment ?",
+    "stepAngle": "Étape 2",
+    "chooseAngle": "Choisis ce que tu veux en faire",
+    "angleHelp": "L’angle détermine la structure du brouillon.",
+    "selectedMoment": "Moment sélectionné",
+    "transform": "Transformer ce moment",
     "opportunities": {
       "pivot": {
         "title": "Raconte ton pivot avec une structure en trois temps : échec, prise de conscience, nouvelle direction.",
@@ -481,22 +497,22 @@
     },
     "cards": {
       "story": {
-        "title": "Raconter une histoire",
-        "copy": "Transformez un moment de vie en récit dont on se souvient."
+        "title": "Raconter",
+        "copy": "Un récit personnel dont on se souvient.",
+        "output": "Carrousel"
       },
       "teach": {
         "title": "Enseigner",
-        "copy": "Façonnez une leçon en un carrousel utile."
+        "copy": "Une leçon concrète que ton audience peut appliquer.",
+        "output": "Carrousel"
       },
       "opinion": {
-        "title": "Donner un avis",
-        "copy": "Construisez un reel face caméra clair et crédible."
+        "title": "Prendre position",
+        "copy": "Un point de vue clair et crédible face caméra.",
+        "output": "Reel"
       }
     },
-    "begin": "Commencer",
-    "bestMaterial": "Votre meilleure matière brute",
-    "viewAllMoments": "Voir tous les moments →",
-    "turnIntoContent": "Transformer en contenu →"
+    "viewAllMoments": "Voir tous les moments"
   },
   "moments": {
     "eyebrow": "Contexte personnel",
@@ -568,6 +584,40 @@
     "saved": "Ta mémoire Personal a été mise à jour.",
     "loadError": "Personal n’a pas pu charger ta mémoire.",
     "saveError": "Personal n’a pas pu mettre à jour ta mémoire. Réessaie.",
+    "voice": {
+      "eyebrow": "Ta voix",
+      "title": "Écris comme toi, même avec une IA.",
+      "ready": "Voix active",
+      "notReady": "À configurer",
+      "description": "Transforme ce que ton assistant IA connaît déjà de ta manière de penser et d’écrire en un voice.md portable. Personal s’en servira pour rendre chaque brouillon plus fidèle à ta voix.",
+      "steps": {
+        "1": "Ouvre ton assistant habituel avec le prompt Personal.",
+        "2": "Demande-lui de créer ton fichier voice.md.",
+        "3": "Relis le fichier, puis importe-le dans Personal."
+      },
+      "privacy": "Le prompt est copié dans ton presse-papiers. Personal n’accède pas à tes conversations. Relis le fichier et retire toute information sensible avant de l’importer.",
+      "chooseProvider": "Choisir un assistant",
+      "then": "Puis",
+      "import": "Importer voice.md",
+      "replace": "Remplacer voice.md",
+      "importing": "Import en cours…",
+      "download": "Télécharger",
+      "showPrompt": "Voir le prompt avant de continuer",
+      "hidePrompt": "Masquer le prompt",
+      "promptLabel": "Prompt Personal",
+      "copyPrompt": "Copier le prompt",
+      "promptCopied": "Le prompt Personal est copié.",
+      "providerOpened": "{provider} est ouvert. Colle le prompt pour créer ton voice.md.",
+      "copyError": "Le prompt n’a pas pu être copié. Tu peux le copier depuis l’aperçu.",
+      "promptError": "Personal n’a pas pu préparer le prompt.",
+      "retry": "Réessayer",
+      "invalidFile": "Choisis un fichier Markdown nommé voice.md.",
+      "fileTooLarge": "Ce fichier est trop volumineux. Choisis un fichier de moins de 50 Ko.",
+      "fileTooLong": "Ce fichier est trop long. Garde les observations les plus utiles dans 12 000 caractères.",
+      "emptyFile": "Ce fichier est vide.",
+      "imported": "Ta voix est maintenant utilisée dans les brouillons Personal.",
+      "importError": "Personal n’a pas pu importer ce fichier. Réessaie."
+    },
     "sections": {
       "topics": "Sujets",
       "tone": "Ton",
@@ -825,7 +875,7 @@
         "eyebrow": "Confidentialité",
         "title": "Politique de confidentialité",
         "lede": "Personal ne fonctionne qu’avec ce que vous lui confiez : votre compte Instagram professionnel, votre positionnement et les moments de votre vie que vous notez. Cette page dit exactement ce que nous collectons, pourquoi, avec qui c’est partagé, combien de temps c’est conservé et comment tout effacer.",
-        "updated": "Dernière mise à jour : 20 août 2026",
+        "updated": "Dernière mise à jour : 23 août 2026",
         "back": "Retour à l’accueil"
       },
       "toc": {
@@ -961,6 +1011,10 @@
             "improve": {
               "term": "Améliorer le produit — intérêt légitime",
               "detail": "Comprendre les erreurs et les usages pour corriger et faire évoluer le service. Nous travaillons sur des données agrégées ou anonymisées chaque fois que c’est possible."
+            },
+            "analytics": {
+              "term": "Mesurer l’audience, consentement",
+              "detail": "Comprendre les pages consultées et la navigation dans Personal avec Google Analytics, uniquement après votre accord. Vous pouvez retirer cet accord à tout moment."
             }
           }
         },
@@ -1007,6 +1061,10 @@
             "resend": {
               "term": "Resend",
               "detail": "Acheminement des e-mails de service (vérification d’adresse, sécurité du compte). États-Unis."
+            },
+            "google": {
+              "term": "Google Analytics",
+              "detail": "Mesure des pages consultées et de la navigation, uniquement après votre accord. Google Ireland Limited, avec des traitements susceptibles d’avoir lieu aux États-Unis."
             },
             "hosting": {
               "term": "Hébergement et domaine",
@@ -1156,7 +1214,7 @@
         "cookies": {
           "title": "Cookies et stockage local",
           "p": {
-            "intro": "Personal n’utilise aucun cookie publicitaire, aucun outil de mesure d’audience tiers et aucun traceur de réseau social. Aucune bannière de consentement n’est donc nécessaire : les seuls cookies déposés sont strictement nécessaires au fonctionnement du service."
+            "intro": "Personal n’utilise aucun cookie publicitaire ni traceur de réseau social. Google Analytics est chargé uniquement après votre accord. Vous pouvez modifier ce choix à tout moment depuis le pied de page ou les Réglages."
           },
           "items": {
             "token": {
@@ -1170,6 +1228,14 @@
             "onboarding": {
               "term": "personal-onboarding-skipped",
               "detail": "Retient que vous avez choisi de passer l’étape de connexion Instagram. Durée : un an."
+            },
+            "analyticsConsent": {
+              "term": "personal_analytics_consent",
+              "detail": "Mémorise pendant six mois si vous avez accepté ou refusé la mesure d’audience. Ce cookie ne contient aucun identifiant de profil."
+            },
+            "googleAnalytics": {
+              "term": "_ga et _ga_*",
+              "detail": "Cookies Google Analytics déposés seulement après votre accord pour distinguer les visites et mesurer les pages consultées. Ils sont supprimés lorsque vous retirez votre accord."
             }
           }
         },

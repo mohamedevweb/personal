@@ -27,6 +27,7 @@ trait DraftsContentFixtures
             'audience_description' => 'Founders and creators',
             'topics' => ['Creator economy'],
             'tone' => ['Direct'],
+            'voice_profile' => "# Creator Voice\n\nShort sentences. Concrete examples before conclusions.",
         ]);
 
         $creator = Creator::query()->create([

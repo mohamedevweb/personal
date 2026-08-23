@@ -3,6 +3,14 @@
     "title": "Personal, your content strategist",
     "description": "Personal understands your work and helps you create content that matters."
   },
+  "analyticsConsent": {
+    "title": "Audience measurement",
+    "body": "With your permission, Google Analytics helps us understand which pages are useful and improve Personal. No data is used for advertising.",
+    "privacy": "Read the privacy policy",
+    "deny": "Decline",
+    "accept": "Accept",
+    "manage": "Manage cookies"
+  },
   "brand": {
     "name": "Personal",
     "tagline": "Claude for personal branding.",
@@ -446,21 +454,29 @@
     "refreshing": "Finding content…"
   },
   "create": {
-    "eyebrow": "Create",
-    "title": "Start with something real.",
-    "subtitle": "The strongest idea is usually a pattern that works, connected to a story only you can tell.",
-    "drafting": "Drafting from your material…",
+    "eyebrow": "Studio",
+    "title": "Turn a moment into content.",
+    "subtitle": "Choose something you lived through, then the angle that will make it clear, personal and useful to your audience.",
+    "addMoment": "Add a moment",
+    "drafting": "Creating your draft…",
     "draftError": "Personal could not draft this right now. Please try again.",
     "loadError": "Personal could not load your creative material.",
     "empty": {
-      "title": "Nothing to work from yet.",
-      "copy": "Personal writes from what actually happened to you. Add a first moment: a decision, a failure, a lesson. Every format below then becomes available.",
+      "title": "Add your first moment.",
+      "copy": "A decision, a failure or a lesson is enough. Personal will then help you turn it into content that sounds like you.",
       "action": "Add a moment"
     },
-    "personalsPick": "Personal’s pick",
-    "pickTitleFallback": "Tell the story behind your latest product decision.",
-    "pickCopyFallback": "A concrete decision creates tension, insight and a useful takeaway.",
-    "createThis": "Create this →",
+    "stepMoment": "Step 1",
+    "chooseMoment": "Choose the moment to transform",
+    "momentHelp": "The draft will be written from the moment you select.",
+    "storyScore": "Story potential {score}/10",
+    "recommended": "Recommended",
+    "whyRecommended": "Why this moment?",
+    "stepAngle": "Step 2",
+    "chooseAngle": "Choose what to make from it",
+    "angleHelp": "The angle determines the structure of your draft.",
+    "selectedMoment": "Selected moment",
+    "transform": "Turn this moment into content",
     "opportunities": {
       "pivot": {
         "title": "Tell the story of your pivot through failure, realization and a new direction.",
@@ -482,21 +498,21 @@
     "cards": {
       "story": {
         "title": "Tell a story",
-        "copy": "Turn a life moment into a narrative people remember."
+        "copy": "A personal narrative people remember.",
+        "output": "Carousel"
       },
       "teach": {
-        "title": "Teach something",
-        "copy": "Shape one lesson into a useful carousel."
+        "title": "Teach",
+        "copy": "A concrete lesson your audience can apply.",
+        "output": "Carousel"
       },
       "opinion": {
-        "title": "Share an opinion",
-        "copy": "Build a clear, credible talking-head reel."
+        "title": "Take a position",
+        "copy": "A clear, credible point of view on camera.",
+        "output": "Reel"
       }
     },
-    "begin": "Begin",
-    "bestMaterial": "Your best raw material",
-    "viewAllMoments": "View all moments →",
-    "turnIntoContent": "Turn into content →"
+    "viewAllMoments": "View all moments"
   },
   "moments": {
     "eyebrow": "Personal context",
@@ -568,6 +584,40 @@
     "saved": "Your Personal memory has been updated.",
     "loadError": "Personal could not load your memory.",
     "saveError": "Personal could not update your memory. Please try again.",
+    "voice": {
+      "eyebrow": "Your voice",
+      "title": "Sound like yourself, even with AI.",
+      "ready": "Voice active",
+      "notReady": "Set up needed",
+      "description": "Turn what your AI assistant already knows about how you think and write into a portable voice.md. Personal will use it to make every draft sound more like you.",
+      "steps": {
+        "1": "Open your usual assistant with the Personal prompt.",
+        "2": "Ask it to create your voice.md file.",
+        "3": "Review the file, then import it into Personal."
+      },
+      "privacy": "The prompt is copied to your clipboard. Personal cannot access your conversations. Review the file and remove any sensitive information before importing it.",
+      "chooseProvider": "Choose an assistant",
+      "then": "Then",
+      "import": "Import voice.md",
+      "replace": "Replace voice.md",
+      "importing": "Importing…",
+      "download": "Download",
+      "showPrompt": "Review the prompt first",
+      "hidePrompt": "Hide prompt",
+      "promptLabel": "Personal prompt",
+      "copyPrompt": "Copy prompt",
+      "promptCopied": "The Personal prompt is copied.",
+      "providerOpened": "{provider} is open. Paste the prompt to create your voice.md.",
+      "copyError": "The prompt could not be copied. You can copy it from the preview.",
+      "promptError": "Personal could not prepare the prompt.",
+      "retry": "Try again",
+      "invalidFile": "Choose a Markdown file named voice.md.",
+      "fileTooLarge": "This file is too large. Choose a file under 50 KB.",
+      "fileTooLong": "This file is too long. Keep the most useful observations within 12,000 characters.",
+      "emptyFile": "This file is empty.",
+      "imported": "Your voice is now used in Personal drafts.",
+      "importError": "Personal could not import this file. Please try again."
+    },
     "sections": {
       "topics": "Topics",
       "tone": "Tone",
@@ -825,7 +875,7 @@
         "eyebrow": "Privacy",
         "title": "Privacy Policy",
         "lede": "Personal only works with what you hand it: your professional Instagram account, your positioning, and the moments of your life you write down. This page states exactly what we collect, why, who it is shared with, how long it is kept, and how to erase all of it.",
-        "updated": "Last updated: 20 August 2026",
+        "updated": "Last updated: 23 August 2026",
         "back": "Back to home"
       },
       "toc": {
@@ -961,6 +1011,10 @@
             "improve": {
               "term": "Improving the product — legitimate interest",
               "detail": "Understanding errors and usage in order to fix and evolve the service. We work on aggregated or anonymised data wherever that is possible."
+            },
+            "analytics": {
+              "term": "Measuring the audience, consent",
+              "detail": "Understanding pages viewed and navigation within Personal through Google Analytics, only after your permission. You can withdraw that permission at any time."
             }
           }
         },
@@ -1007,6 +1061,10 @@
             "resend": {
               "term": "Resend",
               "detail": "Delivery of service email (address verification, account security). United States."
+            },
+            "google": {
+              "term": "Google Analytics",
+              "detail": "Measurement of pages viewed and navigation, only after your permission. Google Ireland Limited, with processing that may take place in the United States."
             },
             "hosting": {
               "term": "Hosting and domain",
@@ -1156,7 +1214,7 @@
         "cookies": {
           "title": "Cookies and local storage",
           "p": {
-            "intro": "Personal uses no advertising cookie, no third-party analytics tool and no social network tracker. No consent banner is therefore needed: the only cookies set are strictly necessary for the service to work."
+            "intro": "Personal uses no advertising cookie or social network tracker. Google Analytics loads only after your permission. You can change this choice at any time from the footer or Settings."
           },
           "items": {
             "token": {
@@ -1170,6 +1228,14 @@
             "onboarding": {
               "term": "personal-onboarding-skipped",
               "detail": "Remembers that you chose to skip the Instagram connection step. Lifetime: one year."
+            },
+            "analyticsConsent": {
+              "term": "personal_analytics_consent",
+              "detail": "Remembers for six months whether you accepted or declined audience measurement. This cookie contains no profile identifier."
+            },
+            "googleAnalytics": {
+              "term": "_ga and _ga_*",
+              "detail": "Google Analytics cookies set only after your permission to distinguish visits and measure pages viewed. They are removed when you withdraw permission."
             }
           }
         },
