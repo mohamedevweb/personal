@@ -9,7 +9,8 @@
     "render:all": "./render.sh",
     "still": "remotion still LaunchFilm out/frame.png",
     "typecheck": "tsc --noEmit",
-    "upgrade": "remotion upgrade"
+    "upgrade": "remotion upgrade",
+    "render:web": "remotion render LaunchFilm ../frontend/app/public/launch-film.mp4 --codec=h264 --crf=25 --muted --props='{\"language\":\"en\",\"hasScore\":false,\"hasVoice\":false}' && remotion still LaunchFilm ../frontend/app/public/launch-film-poster.jpg --frame=330 --image-format=jpeg"
   },
   "dependencies": {
     "@remotion/cli": "4.0.515",

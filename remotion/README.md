@@ -29,6 +29,14 @@ Renders all three shapes, H.264 at CRF 18, into `out/`:
 ./render.sh
 ```
 
+Rebuilds the copy the landing page hero plays — 1280×720, no audio track at all
+rather than a silent one, plus its poster frame — straight into
+`frontend/app/public/`:
+
+```bash
+npm run render:web
+```
+
 A French cut is a data change, not a rewrite — all copy lives in `src/copy.ts`:
 
 ```bash

@@ -5,6 +5,12 @@
  * The hidden state is applied only once JS is running, so the page still reads
  * in full if the script never executes, and it is never applied at all when the
  * visitor has asked for reduced motion.
+ *
+ * Mark a block `data-reveal-now` when it is above the fold by construction — the
+ * hero, in practice. The observer's root is inset by 10% and needs 12% of a
+ * block in view, so on a short window the last block of a tall hero never
+ * qualifies and its content stays hidden until the visitor scrolls. Content that
+ * is meant to be visible on arrival must not depend on that.
  */
 export function useReveal() {
   const root = ref<HTMLElement | null>(null)
@@ -32,7 +38,13 @@ export function useReveal() {
       })
     }, { rootMargin: '0px 0px -10% 0px', threshold: 0.12 })
 
-    targets.forEach(node => observer!.observe(node))
+    targets.forEach((node) => {
+      if (node.dataset.revealNow !== undefined) {
+        node.classList.add('is-revealed')
+        return
+      }
+      observer!.observe(node)
+    })
   })
 
   onUnmounted(() => observer?.disconnect())
