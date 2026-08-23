@@ -1,12 +1,21 @@
 import React from 'react';
-import {AbsoluteFill, Audio, Series, interpolate, staticFile, useCurrentFrame} from 'remotion';
+import {
+  AbsoluteFill,
+  Audio,
+  Sequence,
+  Series,
+  interpolate,
+  staticFile,
+  useCurrentFrame,
+} from 'remotion';
 import {z} from 'zod';
 
 import {Layout} from './layout';
 import {loadBrandFonts} from './fonts';
 import {palette} from './theme';
 import {beats, durationOf, startOf} from './timing';
-import {copyFor, cuts} from './copy';
+import {copyFor, cuts, type CutLanguage} from './copy';
+import {VOICE_FORMAT, voiceoverFor} from './voiceover';
 import {ColdOpen} from './scenes/ColdOpen';
 import {Claim} from './scenes/Claim';
 import {WipeToPaper} from './scenes/WipeToPaper';
@@ -23,9 +32,10 @@ export const launchFilmSchema = z.object({
   language: z.enum(Object.keys(cuts) as ['en', 'fr']),
   /**
    * The film is silent-first: every claim is on screen as type, and it must
-   * read with the sound off. The score is an addition, never a crutch.
+   * read with the sound off. Both of these are additions, never crutches.
    */
   hasScore: z.boolean(),
+  hasVoice: z.boolean(),
 });
 
 export type LaunchFilmProps = z.infer<typeof launchFilmSchema>;
@@ -33,13 +43,15 @@ export type LaunchFilmProps = z.infer<typeof launchFilmSchema>;
 export const defaultLaunchFilmProps: LaunchFilmProps = {
   language: 'en',
   hasScore: false,
+  hasVoice: true,
 };
 
 /**
  * The score ducks under the end card so the last line is read in something close
- * to silence, and fades out entirely across the final still.
+ * to silence, and fades out entirely across the final still. It sits lower
+ * still when there is a voice over it — the voice is the foreground.
  */
-const Score: React.FC = () => {
+const Score: React.FC<{under: number}> = ({under}) => {
   const frame = useCurrentFrame();
 
   const volume = interpolate(
@@ -55,8 +67,27 @@ const Score: React.FC = () => {
     {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'},
   );
 
-  return <Audio src={staticFile('score.mp3')} volume={volume} />;
+  return <Audio src={staticFile('score.mp3')} volume={volume * under} />;
 };
+
+/**
+ * The read, one line per shot. Each line is anchored to its own shot's first
+ * frame, so retiming a shot carries its line along instead of sliding the whole
+ * track out of sync.
+ */
+const Voiceover: React.FC<{language: CutLanguage}> = ({language}) => (
+  <>
+    {voiceoverFor(language).map((line) => (
+      <Sequence
+        key={line.file}
+        from={startOf(line.scene) + line.offset}
+        name={`Voice · ${line.file}`}
+      >
+        <Audio src={staticFile(`voice/${language}/${line.file}.${VOICE_FORMAT}`)} />
+      </Sequence>
+    ))}
+  </>
+);
 
 /**
  * The film. Eight shots, one argument: you are a creator, here is what is
@@ -67,7 +98,7 @@ const Score: React.FC = () => {
  * shots go in. The same components render all three aspect ratios — the shape
  * is read from `<Layout>`, never forked here.
  */
-export const LaunchFilm: React.FC<LaunchFilmProps> = ({language, hasScore}) => {
+export const LaunchFilm: React.FC<LaunchFilmProps> = ({language, hasScore, hasVoice}) => {
   const copy = copyFor(language);
 
   return (
@@ -107,7 +138,8 @@ export const LaunchFilm: React.FC<LaunchFilmProps> = ({language, hasScore}) => {
           </Series.Sequence>
         </Series>
 
-        {hasScore ? <Score /> : null}
+        {hasScore ? <Score under={hasVoice ? 0.45 : 1} /> : null}
+        {hasVoice ? <Voiceover language={language} /> : null}
       </AbsoluteFill>
     </Layout>
   );

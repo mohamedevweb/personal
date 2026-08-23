@@ -11,19 +11,21 @@
 export const FPS = 30;
 
 /**
- * How long each shot runs. These were cut down from the first assembly, which
- * held on settled frames longer than it needed to — every shot now leaves
- * roughly a second after its last arrival rather than two or three.
+ * How long each shot runs. Cut down twice from the first assembly: every shot
+ * now leaves only as long as it takes to read what is on it after the last
+ * thing has arrived, rather than sitting on a settled frame. The two shots with
+ * the most words on screen — Discover's list and Write's draft — keep the
+ * longest tails, because those are the frames a viewer actually has to read.
  */
 const durations = {
-  coldOpen: 105,
-  claim: 118,
-  wipe: 52,
-  understand: 160,
-  discover: 215,
-  connect: 205,
-  write: 190,
-  endCard: 115,
+  coldOpen: 88,
+  claim: 92,
+  wipe: 42,
+  understand: 138,
+  discover: 190,
+  connect: 158,
+  write: 168,
+  endCard: 100,
 } as const;
 
 export type SceneName = keyof typeof durations;
@@ -53,95 +55,95 @@ export const SCENE_ORDER: ReadonlyArray<SceneName> = order;
  */
 export const beats = {
   coldOpen: {
-    matrixFadeIn: 6,
+    matrixFadeIn: 5,
     /** Frames at which each particle ignites. Deliberately off-rhythm. */
-    ignitions: [10, 21, 34, 44] as const,
+    ignitions: [8, 17, 28, 37] as const,
     /**
      * The category line. It arrives after the last ignition has held a beat,
      * sits still long enough to be read, and is gone before the claim enters —
      * the two statements never share the screen.
      */
-    category: 50,
-    categoryOut: 90,
+    category: 44,
+    categoryOut: 76,
     categoryOutDuration: 12,
   },
   claim: {
-    lineOne: 6,
-    lineTwo: 16,
-    subtitle: 36,
+    lineOne: 4,
+    lineTwo: 13,
+    subtitle: 30,
   },
   wipe: {
-    start: 3,
-    duration: 40,
+    start: 2,
+    duration: 34,
   },
   understand: {
     heading: 4,
     card: 12,
     /** The account arrives first: this is the thing being connected. */
-    account: 18,
-    connected: 28,
+    account: 14,
+    connected: 22,
     /** The read itself — a count and a rail, running to 40. */
-    readStart: 34,
-    readDuration: 28,
+    readStart: 28,
+    readDuration: 24,
     /** Then what it understood, one line at a time. */
-    firstRow: 66,
-    rowStagger: 16,
+    firstRow: 56,
+    rowStagger: 13,
     /** How long a value takes to reveal itself, character by character. */
-    rowReveal: 12,
+    rowReveal: 10,
   },
   discover: {
     heading: 4,
     card: 12,
-    barsGrow: 26,
-    barsGrowDuration: 26,
-    outlierClimb: 58,
-    outlierClimbDuration: 34,
+    barsGrow: 20,
+    barsGrowDuration: 22,
+    outlierClimb: 46,
+    outlierClimbDuration: 28,
     /** Snaps in once the climb has topped out, and then the shot holds. */
-    badge: 96,
+    badge: 78,
     /**
      * The chart leaves and the list arrives across the same frames, so there is
      * never a frame where the card is empty.
      */
-    collapse: 132,
-    collapseDuration: 16,
-    firstRow: 134,
-    rowStagger: 10,
-    footnote: 176,
+    collapse: 116,
+    collapseDuration: 14,
+    firstRow: 118,
+    rowStagger: 9,
+    footnote: 152,
   },
   connect: {
     heading: 4,
-    cardsEnter: 14,
-    cardsTravel: 46,
+    cardsEnter: 10,
+    cardsTravel: 38,
     /** The join: hairline draws, then both cards settle half a pixel closer. */
-    join: 74,
-    joinDuration: 24,
-    settle: 108,
+    join: 58,
+    joinDuration: 20,
+    settle: 86,
     /** Air. Nothing new arrives between here and the cut. */
-    hold: 140,
+    hold: 112,
   },
   write: {
     heading: 4,
-    resolve: 10,
-    chips: 26,
-    hook: 38,
-    beatsStart: 56,
-    beatStagger: 16,
-    caption: 112,
-    stamp: 140,
+    resolve: 8,
+    chips: 20,
+    hook: 30,
+    beatsStart: 48,
+    beatStagger: 13,
+    caption: 94,
+    stamp: 120,
   },
   endCard: {
     lift: 0,
-    liftDuration: 22,
-    mark: 14,
-    markDuration: 28,
+    liftDuration: 20,
+    mark: 12,
+    markDuration: 24,
     /**
      * Each of these is a spring entrance, so it settles 30 frames after it
-     * starts. The last one starts at 62 and is finished at 92 — which is what
-     * buys the final 23 frames of complete stillness.
+     * starts. The last one starts at 50 and is finished at 80 — which is what
+     * buys the final 20 frames of complete stillness.
      */
-    wordmark: 38,
-    line: 50,
-    url: 62,
-    stillFrom: 92,
+    wordmark: 30,
+    line: 40,
+    url: 50,
+    stillFrom: 80,
   },
 } as const;

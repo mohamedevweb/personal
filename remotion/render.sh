@@ -7,8 +7,11 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 LANGUAGE="${1:-en}"
+# Pass "silent" as the second argument to render without the voiceover.
+VOICE="true"
+if [ "${2:-}" = "silent" ]; then VOICE="false"; fi
 OUT_DIR="out"
-PROPS="{\"language\":\"$LANGUAGE\",\"hasScore\":false}"
+PROPS="{\"language\":\"$LANGUAGE\",\"hasScore\":false,\"hasVoice\":$VOICE}"
 
 mkdir -p "$OUT_DIR"
 

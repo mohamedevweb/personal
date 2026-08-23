@@ -75,7 +75,6 @@ export const EndCard: React.FC<{copy: Copy}> = ({copy}) => {
           <div
             style={{
               fontFamily: families.display,
-              fontStyle: 'italic',
               fontWeight: 400,
               fontSize: px(shape === 'horizontal' ? 30 : 34),
               letterSpacing: typeScale.displayTracking,

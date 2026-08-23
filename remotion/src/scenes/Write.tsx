@@ -24,8 +24,8 @@ export const Write: React.FC<{copy: Copy}> = ({copy}) => {
   const {fps} = useVideoConfig();
   const {px, cardWidth, shape} = useLayout();
 
-  const hook = travel({frame, start: beats.write.hook, duration: 26});
-  const caption = travel({frame, start: beats.write.caption, duration: 24});
+  const hook = travel({frame, start: beats.write.hook, duration: 16});
+  const caption = travel({frame, start: beats.write.caption, duration: 20});
   const stamp = enter({frame, fps, delay: beats.write.stamp});
 
   return (
@@ -82,7 +82,7 @@ export const Write: React.FC<{copy: Copy}> = ({copy}) => {
             <div style={{marginTop: px(30)}}>
               {copy.write.beats.map((beat, index) => {
                 const at = beats.write.beatsStart + index * beats.write.beatStagger;
-                const beatIn = travel({frame, start: at, duration: 18});
+                const beatIn = travel({frame, start: at, duration: 12});
 
                 return (
                   <div

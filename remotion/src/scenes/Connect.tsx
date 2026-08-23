@@ -131,7 +131,6 @@ export const Connect: React.FC<{copy: Copy}> = ({copy}) => {
                       alignItems: 'center',
                       marginTop: px(24),
                       fontFamily: families.display,
-                      fontStyle: 'italic',
                       fontWeight: 400,
                       fontSize: px(shape === 'horizontal' ? 34 : 38),
                       lineHeight: 1.16,

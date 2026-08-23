@@ -17,6 +17,6 @@ return [
         'action' => 'Réinitialiser mon mot de passe',
         'notice' => 'Ce lien expire dans :count minutes. Si tu n’es pas à l’origine de cette demande, tu peux ignorer cet email.',
     ],
-    'footer' => 'Clarté humaine. Intelligence artificielle.',
+    'footer' => 'Le contenu que vous seul pouviez publier.',
     'fallback' => 'Si le bouton ne fonctionne pas, copie et colle ce lien dans ton navigateur :',
 ];

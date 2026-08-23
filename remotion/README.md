@@ -1,6 +1,6 @@
 # Personal — launch film
 
-The 39-second launch film for **Personal**, built in Remotion. One argument, told
+The 33-second launch film for **Personal**, built in Remotion. One argument, told
 once: *you are a creator, here is what's working, here is what happened to you,
 here is the post only you could have written.*
 
@@ -53,14 +53,14 @@ Props (`language`, `hasScore`) are typed and editable in the Studio sidebar.
 
 | frames | shot |
 | --- | --- |
-| 0–105 | Cold open, night. The field drifts, four points ignite, and the category lands: *Claude for personal brand.* |
-| 105–223 | The claim. *You're a creator. Not a content machine.* |
-| 223–275 | Turn to paper. A hard wipe with a signature hairline on its leading edge. |
-| 275–435 | 01 Understand — Instagram connects, the read runs to forty, and the product writes down what it understood. |
-| 435–650 | 02 Discover — one account against its own average, and the one post beating it. |
-| 650–855 | 03 Connect — a working format, held against a story you already lived. |
-| 855–1045 | 04 Write — the draft, and the promise that it stays a draft. |
-| 1045–1160 | End card, night. The mark, the wordmark, the line. |
+| 0–88 | Cold open, night. The field drifts, four points ignite, and the category lands: *Claude for personal brand.* |
+| 88–180 | The claim. *You're a creator. Not a content machine.* |
+| 180–222 | Turn to paper. A hard wipe with a signature hairline on its leading edge. |
+| 222–360 | 01 Understand — Instagram connects, the read runs to forty, and the product writes down what it understood. |
+| 360–550 | 02 Discover — one account against its own average, and the one post beating it. |
+| 550–708 | 03 Connect — a working format, held against a story you already lived. |
+| 708–876 | 04 Write — the draft, and the promise that it stays a draft. |
+| 876–976 | End card, night. The mark, the wordmark, the line. |
 
 Durations — not absolute marks — are the source of truth in `src/timing.ts`, so
 shortening one shot moves every shot after it without any other number needing to
@@ -89,6 +89,11 @@ src/
 nothing calls `Math.random()` — the drift in the particle field comes from a
 seeded hash in `motion.ts`. Any frame renders identically in isolation, which is
 what makes distributed rendering and single-frame stills trustworthy.
+
+**The italic is rationed too.** Instrument Serif's italic is a true calligraphic
+italic, not a slant, and it is loud. It is used in exactly one place — the turn
+in the claim, *Not a content machine.* Everywhere else the display face is set
+upright.
 
 **Red is rationed.** It belongs to three things and no others: the primary action
 (the active format chip), a live indicator (the dot in the Understand card

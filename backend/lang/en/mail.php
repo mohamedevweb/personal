@@ -17,6 +17,6 @@ return [
         'action' => 'Reset my password',
         'notice' => 'This link expires in :count minutes. If you did not request it, you can ignore this email.',
     ],
-    'footer' => 'Human clarity. Artificial intelligence.',
+    'footer' => 'Content only you could post.',
     'fallback' => 'If the button does not work, copy and paste this link into your browser:',
 ];

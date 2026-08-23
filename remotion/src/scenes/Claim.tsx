@@ -21,7 +21,9 @@ import type {Copy} from '../copy';
  *
  * The cold open said what the product is. This says why it should exist — the
  * whole argument of the film in two lines. `creator` takes the signature; it is
- * the only red on screen. The turn takes the italic, never a colour.
+ * the only red on screen. The turn is carried by the line break and the weight
+ * of the sentence itself — Instrument Serif's italic is a true calligraphic
+ * italic rather than a slant, and at 92px it read as decoration.
  *
  * The particle field keeps the cold open's clock so the ground does not restart
  * under the cut: the copy changes, the shot does not.
@@ -59,7 +61,7 @@ export const Claim: React.FC<{copy: Copy}> = ({copy}) => {
           </Reveal>
 
           <Reveal delay={beats.claim.lineTwo} distance={10}>
-            <Headline size={size} color={alpha.onNightPrimary} italic>
+            <Headline size={size} color={alpha.onNightPrimary}>
               {copy.claim.lineTwo}
             </Headline>
           </Reveal>
