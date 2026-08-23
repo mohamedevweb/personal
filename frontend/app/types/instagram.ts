@@ -48,6 +48,7 @@ export interface CreatorInspiration {
 export interface CreatorInspirationResponse {
   selected: CreatorInspiration[]
   suggestions: CreatorInspiration[]
+  suggestion_limit: number
   minimum: number
   maximum: number
 }

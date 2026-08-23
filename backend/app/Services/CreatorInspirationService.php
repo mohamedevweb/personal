@@ -32,7 +32,7 @@ class CreatorInspirationService
         private readonly CreatorScrapeSchedule $scrapeSchedule,
     ) {}
 
-    /** @return array{selected: list<array<string, mixed>>, suggestions: list<array<string, mixed>>, minimum: int, maximum: int} */
+    /** @return array{selected: list<array<string, mixed>>, suggestions: list<array<string, mixed>>, suggestion_limit: int, minimum: int, maximum: int} */
     public function forUser(User $user): array
     {
         $selected = $user->inspirationCreators()
@@ -59,12 +59,15 @@ class CreatorInspirationService
                 + ($market && $creator->market === $market ? 2 : 0)
                 + ($creator->is_catalog_seed ? 1 : 0)
             )
-            ->take(self::SUGGESTION_LIMIT)
+            // The client keeps only six cards visible. The reserve lets it replace
+            // every locally selected creator without another provider request.
+            ->take(self::SUGGESTION_LIMIT + self::MAXIMUM_SELECTION)
             ->values();
 
         return [
             'selected' => $selected->map(fn (Creator $creator): array => $this->render($creator, true))->all(),
             'suggestions' => $suggestions->map(fn (Creator $creator): array => $this->render($creator, false))->all(),
+            'suggestion_limit' => self::SUGGESTION_LIMIT,
             'minimum' => self::MINIMUM_SELECTION,
             'maximum' => self::MAXIMUM_SELECTION,
         ];

@@ -160,15 +160,15 @@ class SyncInstagramAccountTest extends TestCase
         $account = InstagramAccount::query()->create([
             'user_id' => $user->id,
             'instagram_user_id' => '456',
-            'username' => 'mohamed.chettahh',
+            'username' => 'sample.creator',
             'access_token' => 'server-side-secret',
             'token_expires_at' => now()->addMonth(),
             'connected_at' => now(),
         ]);
         CreatorProfile::query()->create([
             'user_id' => $user->id,
-            'niche' => 'Http / Mohamedchettah',
-            'topics' => ['Http', 'Mohamedchettah', 'Vivatech', '2026'],
+            'niche' => 'Http / Samplecreator',
+            'topics' => ['Http', 'Samplecreator', 'Vivatech', '2026'],
             'current_projects' => ['Personal'],
             'goals' => ['Build a personal brand', 'Grow an audience', 'Launch Personal'],
             'content_strengths' => ['Founder stories', 'Personal lessons', 'Behind the scenes'],
@@ -178,7 +178,7 @@ class SyncInstagramAccountTest extends TestCase
             if (str_contains($request->url(), '/me/media')) {
                 return Http::response(['data' => [[
                     'id' => 'media-weak',
-                    'caption' => 'https://mohamedchettah.com @mohamed.chettahh VivaTech 2026',
+                    'caption' => 'https://example.test @sample.creator VivaTech 2026',
                     'media_type' => 'IMAGE',
                     'media_product_type' => 'FEED',
                     'timestamp' => '2026-08-20T10:00:00+0000',
@@ -191,8 +191,8 @@ class SyncInstagramAccountTest extends TestCase
 
             return Http::response([
                 'id' => '456',
-                'username' => 'mohamed.chettahh',
-                'name' => 'Mohamed Chettah',
+                'username' => 'sample.creator',
+                'name' => 'Sample Creator',
                 'media_count' => 1,
             ]);
         });

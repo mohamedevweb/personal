@@ -4,14 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Services\CreatorVoicePrompt;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class VoiceProfileController extends Controller
 {
-    public function __invoke(Request $request, CreatorVoicePrompt $prompt): JsonResponse
+    public function __invoke(CreatorVoicePrompt $prompt): JsonResponse
     {
         return response()->json([
-            'prompt' => $prompt->make($request->user(), $request->user()->creatorProfile),
+            'prompt' => $prompt->make(),
             'filename' => 'voice.md',
         ]);
     }

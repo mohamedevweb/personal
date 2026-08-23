@@ -46,8 +46,22 @@ class CreatorInspirationTest extends TestCase
         $response->assertOk()
             ->assertJsonPath('minimum', 3)
             ->assertJsonPath('maximum', 6)
+            ->assertJsonPath('suggestion_limit', 6)
             ->assertJsonPath('suggestions.0.username', $tech->username)
             ->assertJsonCount(2, 'suggestions');
+    }
+
+    public function test_suggestions_include_a_reserve_to_refill_six_visible_choices(): void
+    {
+        foreach (range(1, 12) as $position) {
+            $this->creator("creator_{$position}", followers: 100000 - $position);
+        }
+
+        $this->actingAs($this->user)
+            ->getJson('/api/creator-inspirations')
+            ->assertOk()
+            ->assertJsonPath('suggestion_limit', 6)
+            ->assertJsonCount(12, 'suggestions');
     }
 
     public function test_explicit_search_uses_the_provider_without_writing_to_the_database(): void

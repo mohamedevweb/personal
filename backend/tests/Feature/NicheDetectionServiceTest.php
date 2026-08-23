@@ -20,12 +20,12 @@ class NicheDetectionServiceTest extends TestCase
     public function test_one_caption_without_a_descriptive_bio_is_not_presented_as_a_niche(): void
     {
         $account = new InstagramAccount([
-            'username' => 'mohamed.chettahh',
-            'display_name' => 'Mohamed Chettah',
+            'username' => 'sample.creator',
+            'display_name' => 'Sample Creator',
         ]);
 
         $signals = app(NicheDetectionService::class)->detect($account, [[
-            'caption' => 'https://mohamedchettah.com @mohamed.chettahh VivaTech 2026',
+            'caption' => 'https://example.test @sample.creator VivaTech 2026',
         ]]);
 
         $this->assertNull($signals['primary_niche']);

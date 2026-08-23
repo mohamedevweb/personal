@@ -95,14 +95,15 @@ class PasswordResetTest extends TestCase
         $text = view($message->view['text'], $message->viewData)->render();
 
         $this->assertStringContainsString('Personal', $html);
-        $this->assertStringContainsString('images/personal-mark.png', $html);
+        $this->assertStringContainsString('images/personal-logo.png', $html);
+        $this->assertStringContainsString('width="114" height="28" alt="Personal"', $html);
         $this->assertStringContainsString('#e04f36', $html);
         $this->assertStringContainsString('#f7f5f0', $html);
         $this->assertStringContainsString('Confirm my email', $html);
         $this->assertStringNotContainsString('Your Personal workspace', $html);
         $this->assertStringNotContainsString('✦', $html);
         $this->assertStringNotContainsString('&amp;', $text);
-        $this->assertFileExists(public_path('images/personal-mark.png'));
+        $this->assertFileExists(public_path('images/personal-logo.png'));
 
         app()->setLocale('fr');
 

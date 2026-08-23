@@ -2,12 +2,6 @@
 const route = useRoute()
 const { user, loadUser, logout } = useAuth()
 const { launch } = useRemixLaunch()
-const initials = computed(() => (user.value?.name || '')
-  .split(' ')
-  .filter(Boolean)
-  .slice(0, 2)
-  .map(part => part[0]!.toUpperCase())
-  .join('') || '—')
 
 onMounted(() => { if (!user.value) loadUser().catch(() => {}) })
 
@@ -86,10 +80,9 @@ const pageTitle = computed(() => {
 
       <div class="mt-auto">
         <div class="flex items-center gap-3 rounded-[14px] px-2 py-2">
-          <img v-if="user?.avatar_url" :src="user.avatar_url" alt="" class="h-9 w-9 rounded-full bg-[var(--sand)] object-cover">
-          <div v-else class="grid h-9 w-9 place-items-center rounded-full bg-[var(--ink)] text-xs font-medium text-[var(--paper)]">{{ initials }}</div>
+          <div class="grid h-9 w-9 place-items-center rounded-full bg-[var(--ink)] text-[var(--paper)]"><AppIcon name="user" :size="16" /></div>
           <div class="min-w-0 flex-1">
-            <p class="truncate text-[13px] font-medium">{{ user?.name || $t('common.yourWorkspace') }}</p>
+            <p class="truncate text-[13px] font-medium">{{ $t('common.yourWorkspace') }}</p>
             <button class="text-[11px] text-[var(--faint)] transition hover:text-[var(--ink)]" @click="logout">{{ $t('common.signOut') }}</button>
           </div>
         </div>
@@ -105,8 +98,7 @@ const pageTitle = computed(() => {
               <AppIcon name="settings" :size="17" />
             </NuxtLink>
             <NuxtLink to="/personal" class="grid h-10 w-10 place-items-center overflow-hidden rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--muted)] transition hover:text-[var(--ink)]" :aria-label="$t('nav.personal')">
-              <img v-if="user?.avatar_url" :src="user.avatar_url" alt="" class="h-full w-full object-cover">
-              <AppIcon v-else name="user" :size="17" />
+              <AppIcon name="user" :size="17" />
             </NuxtLink>
             <NuxtLink to="/create" class="grid h-10 w-10 place-items-center rounded-full b-btn-red transition" :aria-label="$t('nav.create')">
               <AppIcon name="plus" :size="18" />

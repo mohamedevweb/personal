@@ -35,7 +35,7 @@ class PersonalMvpTest extends TestCase
         $response = $this->actingAs($this->user)->getJson('/api/feed');
 
         $response->assertOk()
-            ->assertJsonPath('greeting_name', 'Mohamed')
+            ->assertJsonMissingPath('greeting_name')
             ->assertJsonCount(12, 'items')
             ->assertJsonStructure(['featured_opportunity', 'items' => [[
                 'id', 'hook', 'performance_ratio', 'recommendation_score', 'why_recommended', 'creator',
@@ -411,7 +411,9 @@ class PersonalMvpTest extends TestCase
         $prompt = $response->json('prompt');
         $this->assertStringContainsString('usepersonal.app', $prompt);
         $this->assertStringContainsString('voice.md', $prompt);
-        $this->assertStringContainsString('I build calm tools for independent creators.', $prompt);
+        $this->assertStringContainsString('Création de contenu et personal branding', $prompt);
+        $this->assertStringNotContainsString($this->user->name, $prompt);
+        $this->assertStringNotContainsString('I build calm tools for independent creators.', $prompt);
         $this->assertStringContainsString('N’inclus aucun secret', $prompt);
     }
 
@@ -422,20 +424,21 @@ class PersonalMvpTest extends TestCase
         ])->assertUnprocessable()->assertJsonValidationErrors('voice_profile');
     }
 
-    public function test_demo_personal_memory_is_empty_without_a_synced_instagram_account(): void
+    public function test_demo_personal_memory_uses_a_complete_generic_creator_profile(): void
     {
         $this->assertFalse($this->user->instagramAccount()->exists());
 
         $this->actingAs($this->user)->getJson('/api/me/profile')
             ->assertOk()
-            ->assertJsonPath('profile.niche', null)
-            ->assertJsonPath('profile.audience_description', null)
-            ->assertJsonPath('profile.positioning', null)
-            ->assertJsonPath('profile.topics', [])
-            ->assertJsonPath('profile.tone', [])
-            ->assertJsonPath('profile.current_projects', [])
-            ->assertJsonPath('profile.goals', [])
-            ->assertJsonPath('profile.content_strengths', [])
+            ->assertJsonPath('profile.display_name', 'Créateur Personal')
+            ->assertJsonPath('profile.niche', 'Création de contenu et personal branding')
+            ->assertJsonPath('profile.audience_description', 'Entrepreneurs, créateurs et indépendants qui veulent développer leur visibilité avec une stratégie éditoriale simple.')
+            ->assertJsonPath('profile.positioning', 'Partager une expertise de manière claire, utile et incarnée pour aider une audience à passer à l’action.')
+            ->assertJsonCount(4, 'profile.topics')
+            ->assertJsonCount(4, 'profile.tone')
+            ->assertJsonCount(2, 'profile.current_projects')
+            ->assertJsonCount(3, 'profile.goals')
+            ->assertJsonCount(3, 'profile.content_strengths')
             ->assertJsonPath('profile.voice_profile', null);
     }
 

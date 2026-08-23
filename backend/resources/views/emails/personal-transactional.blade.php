@@ -15,8 +15,7 @@
                     <tr>
                         <td align="center" style="padding:0 0 24px;">
                             <a href="{{ rtrim((string) config('app.frontend_url'), '/') }}" style="color:#171715;text-decoration:none;">
-                                <img src="{{ asset('images/personal-mark.png') }}" width="24" height="24" alt="" style="display:inline-block;width:24px;height:24px;border:0;vertical-align:-3px;">
-                                <span style="font-family:Georgia,'Times New Roman',serif;font-size:27px;letter-spacing:-0.5px;">Personal</span>
+                                <img src="{{ asset('images/personal-logo.png') }}" width="114" height="28" alt="Personal" style="display:block;width:114px;height:28px;border:0;">
                             </a>
                         </td>
                     </tr>

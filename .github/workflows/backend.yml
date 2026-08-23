@@ -58,6 +58,10 @@ jobs:
           cp .env.example .env
           php artisan key:generate
 
+      - name: Validate production composition
+        working-directory: ${{ github.workspace }}
+        run: docker compose -f docker-compose.yml -f docker-compose.prod.yml config --quiet
+
       # Fails the build on any style violation without rewriting files.
       - name: Check code style (Pint)
         run: vendor/bin/pint --test

@@ -16,7 +16,7 @@ async function disconnect() {
   }
 }
 
-const account = reactive({ name: '', email: '' })
+const account = reactive({ email: '' })
 const accountSaving = ref(false)
 
 const password = reactive({ current_password: '', password: '', password_confirmation: '' })
@@ -28,20 +28,17 @@ const resent = ref(false)
 const verified = computed(() => !!user.value?.email_verified_at)
 
 function syncAccountForm() {
-  account.name = user.value?.name ?? ''
   account.email = user.value?.email ?? ''
 }
 
 async function saveAccount() {
   accountSaving.value = true
   try {
-    const payload: { name?: string, email?: string } = {}
-    if (account.name !== user.value?.name) payload.name = account.name
+    const payload: { email?: string } = {}
     if (account.email !== user.value?.email) payload.email = account.email
     if (!Object.keys(payload).length) { accountSaving.value = false; return }
-    const emailChanged = 'email' in payload
     await updateAccount(payload)
-    toast.success(emailChanged ? t('settings.account.emailChanged') : t('settings.account.saved'))
+    toast.success(t('settings.account.emailChanged'))
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('settings.account.error')))
   } finally {
@@ -113,10 +110,6 @@ watch(error, (message) => {
 
       <form class="mt-6 max-w-[520px] space-y-4" @submit.prevent="saveAccount">
         <label class="block">
-          <span class="text-xs font-medium uppercase tracking-[.14em] text-[var(--faint)]">{{ $t('settings.account.name') }}</span>
-          <input v-model="account.name" type="text" autocomplete="name" required class="settings-input">
-        </label>
-        <label class="block">
           <span class="text-xs font-medium uppercase tracking-[.14em] text-[var(--faint)]">{{ $t('settings.account.email') }}</span>
           <input v-model="account.email" type="email" autocomplete="email" required class="settings-input">
         </label>
@@ -173,9 +166,9 @@ watch(error, (message) => {
         </div>
       </div>
       <div v-if="status.connected" class="mt-7 flex items-center gap-3 rounded-[14px] border border-[var(--line-soft)] bg-[var(--paper)] p-4">
-        <img v-if="status.account?.profile_picture_url" :src="status.account.profile_picture_url" alt="" class="h-10 w-10 rounded-full object-cover">
+        <div class="grid h-10 w-10 place-items-center rounded-full bg-[var(--surface)] text-xs font-medium">IG</div>
         <div>
-          <p class="text-sm font-medium">@{{ status.account?.username }}</p>
+          <p class="text-sm font-medium">{{ $t('settings.instagramConnected') }}</p>
           <p class="text-xs text-[var(--faint)]">{{ $t('settings.postsImported', { count: status.account?.imported_media_count, status: status.account?.sync_status }) }}</p>
         </div>
         <button class="ml-auto text-xs text-[var(--faint)] transition hover:text-[var(--danger)]" @click="disconnect">{{ $t('settings.disconnect') }}</button>

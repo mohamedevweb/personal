@@ -24,21 +24,40 @@ class DatabaseSeeder extends Seeder
 
         $user = User::query()->updateOrCreate(
             ['email' => 'creator@personal.local'],
-            ['name' => 'Mohamed Chettah', 'password' => Hash::make('personal'), 'email_verified_at' => now()],
+            ['name' => 'Creator Personal', 'password' => Hash::make('personal'), 'email_verified_at' => now()],
         );
 
         CreatorProfile::query()->updateOrCreate(['user_id' => $user->id], [
             'instagram_username' => null,
-            'display_name' => 'Mohamed Chettah',
-            'bio' => null,
-            'niche' => null,
-            'audience_description' => null,
-            'positioning' => null,
-            'topics' => [],
-            'tone' => [],
-            'current_projects' => [],
-            'goals' => [],
-            'content_strengths' => [],
+            'display_name' => 'Créateur Personal',
+            'bio' => 'Je transforme mon expertise en contenus clairs, utiles et faciles à appliquer.',
+            'niche' => 'Création de contenu et personal branding',
+            'audience_description' => 'Entrepreneurs, créateurs et indépendants qui veulent développer leur visibilité avec une stratégie éditoriale simple.',
+            'positioning' => 'Partager une expertise de manière claire, utile et incarnée pour aider une audience à passer à l’action.',
+            'topics' => ['Création de contenu', 'Entrepreneuriat', 'Intelligence artificielle', 'Productivité'],
+            'tone' => ['Direct', 'Pédagogique', 'Authentique', 'Narratif'],
+            'current_projects' => ['Créer une série éditoriale hebdomadaire', 'Structurer une bibliothèque de contenus réutilisables'],
+            'goals' => ['Publier régulièrement', 'Renforcer son autorité', 'Créer des conversations utiles'],
+            'content_strengths' => ['Explications concrètes', 'Retours d’expérience', 'Cadres actionnables'],
+            'market' => 'FR',
+            'market_confidence' => 1.0,
+            'primary_vertical' => 'personal-branding',
+            'creator_dna' => [
+                'primary_niche' => 'Création de contenu et personal branding',
+                'sub_niches' => ['Stratégie éditoriale', 'Entrepreneuriat créatif'],
+                'topics' => ['Création de contenu', 'Entrepreneuriat', 'Intelligence artificielle', 'Productivité'],
+                'audience' => ['Entrepreneurs', 'Créateurs', 'Indépendants'],
+                'language' => 'fr',
+                'content_pillars' => ['Éducation', 'Expérience', 'Méthodes'],
+                'tone' => ['Direct', 'Pédagogique', 'Authentique', 'Narratif'],
+                'analysis_status' => 'complete',
+                'analysis_method' => 'manual',
+                'confidence' => 1.0,
+            ],
+            'discovery_queries' => null,
+            'discovery_hashtags' => null,
+            'discovery_refreshed_at' => null,
+            'voice_profile' => null,
         ]);
 
         $creators = collect([
@@ -160,13 +179,15 @@ class DatabaseSeeder extends Seeder
             );
         }
 
+        $user->moments()->delete();
         $moments = collect([
-            ['I decided to pivot my creator partnership product after four months of research.', 'Failure', 9, ['strong transformation', 'personal', 'relatable founder problem', 'creates authority']],
-            ['I might go to San Francisco for an incubator in September.', 'Upcoming event', 7, ['future tension', 'creates anticipation', 'invites the audience into the journey']],
-            ['A creator told me he spends hours every week trying to find content ideas.', 'Meeting', 8, ['real customer insight', 'specific pain point', 'supports your positioning']],
-        ])->map(fn (array $item, int $index) => LifeMoment::query()->updateOrCreate(
-            ['user_id' => $user->id, 'content' => $item[0]],
+            ['J’ai transformé des questions fréquentes de mon audience en une semaine de contenus pédagogiques.', 'Win', 9, ['strong transformation', 'personal', 'creates authority']],
+            ['Je prépare une ressource gratuite pour aider les créateurs à structurer leurs idées.', 'Upcoming event', 7, ['future tension', 'creates anticipation', 'invites the audience into the journey']],
+            ['Un échange client m’a montré qu’un exemple concret vaut mieux qu’une longue explication.', 'Meeting', 8, ['real customer insight', 'specific pain point', 'supports your positioning']],
+        ])->map(fn (array $item, int $index) => LifeMoment::query()->create(
             [
+                'user_id' => $user->id,
+                'content' => $item[0],
                 'category' => $item[1],
                 'happened_at' => now()->subDays($index * 4)->toDateString(),
                 'upcoming_at' => $item[1] === 'Upcoming event' ? now()->addMonth()->toDateString() : null,

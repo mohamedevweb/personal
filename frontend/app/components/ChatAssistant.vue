@@ -5,7 +5,6 @@ interface ChatMessage {
 }
 
 const { t } = useI18n()
-const { user } = useAuth()
 const { apiFetch } = usePersonalApi()
 const toast = useToast()
 
@@ -17,9 +16,8 @@ const messages = ref<ChatMessage[]>([])
 const inputEl = ref<HTMLTextAreaElement | null>(null)
 const scrollEl = ref<HTMLDivElement | null>(null)
 
-const firstName = computed(() => (user.value?.name || '').split(' ')[0] || '')
-const greeting = computed(() => t('chat.greeting', { name: firstName.value }).replace('  ', ' '))
-const emptyTitle = computed(() => t('chat.emptyTitle', { name: firstName.value }).replace(', ?', ' ?').replace('  ', ' '))
+const greeting = computed(() => t('chat.greeting'))
+const emptyTitle = computed(() => t('chat.emptyTitle'))
 const starters = computed(() => [t('chat.starters.hooks'), t('chat.starters.repurpose'), t('chat.starters.caption')])
 
 function scrollToBottom() {

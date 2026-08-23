@@ -17,8 +17,6 @@ const { t } = useI18n()
 const toast = useToast()
 const profile = ref<PersonalProfile | null>(null)
 const instagram = ref<{
-  username: string
-  profile_picture_url: string | null
   media_count: number | null
 } | null>(null)
 const editing = ref(false)
@@ -42,11 +40,11 @@ const draft = reactive<PersonalProfileDraft>({
 
 const sections = ['topics', 'tone', 'current_projects', 'goals', 'content_strengths'] as const
 const voiceProviders = [
-  { name: 'ChatGPT', url: 'https://chatgpt.com/', icon: 'chatgpt' },
-  { name: 'Claude', url: 'https://claude.ai/new', icon: 'claude' },
-  { name: 'Gemini', url: 'https://gemini.google.com/app', icon: 'gemini' },
-  { name: 'Perplexity', url: 'https://www.perplexity.ai/', icon: 'perplexity' },
-  { name: 'Grok', url: 'https://grok.com/', icon: 'grok' }
+  { name: 'ChatGPT', url: 'https://chatgpt.com/', promptParameter: 'q', icon: 'chatgpt' },
+  { name: 'Claude', url: 'https://claude.ai/new', promptParameter: 'q', icon: 'claude' },
+  { name: 'Gemini', url: 'https://gemini.google.com/app', promptParameter: 'q', icon: 'gemini' },
+  { name: 'Perplexity', url: 'https://www.perplexity.ai/search', promptParameter: 'q', icon: 'perplexity' },
+  { name: 'Grok', url: 'https://grok.com/', promptParameter: 'q', icon: 'grok' }
 ] as const
 const analysisStatus = computed(() => profile.value?.creator_dna?.analysis_status)
 const hasVoiceProfile = computed(() => Boolean(profile.value?.voice_profile?.trim()))
@@ -121,6 +119,14 @@ async function writeVoicePrompt() {
 async function copyVoicePrompt() {
   if (await writeVoicePrompt()) toast.success(t('personal.voice.promptCopied'))
   else toast.error(t('personal.voice.copyError'))
+}
+
+function voiceProviderUrl(provider: typeof voiceProviders[number]) {
+  if (!voicePrompt.value) return provider.url
+
+  const url = new URL(provider.url)
+  url.searchParams.set(provider.promptParameter, voicePrompt.value)
+  return url.toString()
 }
 
 async function prepareVoiceProvider(event: MouseEvent, provider: typeof voiceProviders[number]) {
@@ -227,7 +233,7 @@ onMounted(async () => {
             <button type="button" class="mt-3 font-medium text-[var(--ink)] underline underline-offset-4" @click="loadVoicePrompt">{{ $t('personal.voice.retry') }}</button>
           </div>
           <div v-else class="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-5 md:grid-cols-3 xl:grid-cols-5">
-            <a v-for="provider in voiceProviders" :key="provider.name" :href="provider.url" target="_blank" rel="noopener noreferrer" class="group flex min-w-0 flex-col items-center gap-2 rounded-[13px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ai)]" :class="voicePromptLoading || !voicePrompt ? 'pointer-events-none opacity-50' : ''" :aria-disabled="voicePromptLoading || !voicePrompt" :tabindex="voicePromptLoading || !voicePrompt ? -1 : undefined" @click="prepareVoiceProvider($event, provider)">
+            <a v-for="provider in voiceProviders" :key="provider.name" :href="voiceProviderUrl(provider)" target="_blank" rel="noopener noreferrer" class="group flex min-w-0 flex-col items-center gap-2 rounded-[13px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ai)]" :class="voicePromptLoading || !voicePrompt ? 'pointer-events-none opacity-50' : ''" :aria-disabled="voicePromptLoading || !voicePrompt" :tabindex="voicePromptLoading || !voicePrompt ? -1 : undefined" @click="prepareVoiceProvider($event, provider)">
               <span class="grid aspect-square w-full max-w-[64px] place-items-center rounded-[13px] border border-[var(--line)] bg-[var(--surface)] text-[var(--ink)] transition group-hover:-translate-y-0.5 group-hover:border-[var(--muted)] group-hover:shadow-[0_5px_14px_rgba(23,23,26,.08)]">
                 <AppIcon :name="provider.icon" :size="28" :stroke-width="1.5" />
               </span>
@@ -265,10 +271,9 @@ onMounted(async () => {
     <form v-if="profile" class="mt-5 overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]" @submit.prevent="saveProfile">
       <div class="flex flex-wrap items-center gap-3 border-b border-[var(--line)] px-6 py-5">
         <template v-if="instagram">
-          <img v-if="instagram.profile_picture_url" :src="instagram.profile_picture_url" alt="" class="h-10 w-10 rounded-full object-cover">
-          <div v-else class="grid h-10 w-10 place-items-center rounded-full bg-[var(--paper)] text-xs">IG</div>
+          <div class="grid h-10 w-10 place-items-center rounded-full bg-[var(--paper)] text-xs">IG</div>
           <div>
-            <p class="text-sm font-medium">@{{ instagram.username }}</p>
+            <p class="text-sm font-medium">{{ $t('personal.instagramAccount') }}</p>
             <p class="text-xs text-[var(--faint)]">{{ $t('personal.liveContext', { count: instagram.media_count || 0 }) }}</p>
             <p v-if="analysisMessage" class="mt-1 text-xs text-[var(--accent-ink)]">{{ analysisMessage }}</p>
           </div>

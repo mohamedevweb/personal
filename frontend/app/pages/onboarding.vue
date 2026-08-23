@@ -88,6 +88,7 @@ const showInspirations = computed(() => (status.value.connected && status.value.
 
 const minimum = computed(() => inspirationData.value?.minimum ?? 3)
 const maximum = computed(() => inspirationData.value?.maximum ?? 6)
+const suggestionLimit = computed(() => inspirationData.value?.suggestion_limit ?? 6)
 
 // Suggestions and search hits already picked live in the favorites card, so the
 // browsable grid only offers what is still addable.
@@ -95,6 +96,7 @@ const availableCreators = computed(() => {
   const creators = [...searchResults.value, ...(inspirationData.value?.suggestions || [])]
   return Array.from(new Map(creators.map(creator => [creator.username.toLowerCase(), creator])).values())
     .filter(creator => !isSelected(creator.username))
+    .slice(0, suggestionLimit.value)
 })
 
 const canContinue = computed(() => selected.value.length >= minimum.value && selected.value.length <= maximum.value)
@@ -313,9 +315,8 @@ onMounted(async () => {
 
         <template v-else>
           <div v-if="status.connected" class="mb-8 inline-flex items-center gap-3 rounded-full border border-[var(--line)] bg-[var(--surface)] py-2 pl-2 pr-4">
-            <img v-if="status.account?.profile_picture_url" :src="status.account.profile_picture_url" alt="" class="h-8 w-8 rounded-full object-cover">
-            <span v-else class="grid h-8 w-8 place-items-center rounded-full bg-[var(--paper)] text-xs">IG</span>
-            <span class="text-sm font-medium">@{{ status.account?.username }} {{ $t('onboarding.connectedSuffix') }}</span>
+            <span class="grid h-8 w-8 place-items-center rounded-full bg-[var(--paper)] text-xs">IG</span>
+            <span class="text-sm font-medium">Instagram {{ $t('onboarding.connectedSuffix') }}</span>
             <span class="text-[var(--positive)]">✓</span>
           </div>
 

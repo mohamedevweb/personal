@@ -38,9 +38,9 @@ function pickCopy(type: 'title' | 'explanation'): string | undefined {
 }
 
 const angles = computed(() => [
-  { title: t('create.cards.story.title'), copy: t('create.cards.story.copy'), output: t('create.cards.story.output'), format: 'carousel', icon: 'moments' },
-  { title: t('create.cards.teach.title'), copy: t('create.cards.teach.copy'), output: t('create.cards.teach.output'), format: 'carousel', icon: 'carousel' },
-  { title: t('create.cards.opinion.title'), copy: t('create.cards.opinion.copy'), output: t('create.cards.opinion.output'), format: 'reel', icon: 'reel' }
+  { title: t('create.cards.story.title'), copy: t('create.cards.story.copy'), format: 'carousel', icon: 'moments' },
+  { title: t('create.cards.teach.title'), copy: t('create.cards.teach.copy'), format: 'carousel', icon: 'carousel' },
+  { title: t('create.cards.opinion.title'), copy: t('create.cards.opinion.copy'), format: 'reel', icon: 'reel' }
 ] as const)
 const selectedAngle = computed(() => angles.value[selectedAngleIndex.value]!)
 const selectedMomentIsPick = computed(() => selectedMoment.value?.id === pick.value?.life_moment?.id)
@@ -194,12 +194,7 @@ onMounted(async () => {
               <AppIcon :name="angle.icon" :size="18" />
             </span>
             <span class="min-w-0 flex-1">
-              <span class="flex items-center justify-between gap-2">
-                <strong class="text-sm font-medium">{{ angle.title }}</strong>
-                <span class="shrink-0 text-[var(--faint)]" :title="angle.output" :aria-label="angle.output">
-                  <AppIcon :name="angle.format" :size="20" />
-                </span>
-              </span>
+              <strong class="text-sm font-medium">{{ angle.title }}</strong>
               <span class="mt-1 block text-xs leading-5 text-[var(--muted)]">{{ angle.copy }}</span>
             </span>
           </button>

@@ -154,15 +154,15 @@ watch(() => props.post.id, () => {
     </div>
 
     <!-- Everything Personal adds on top of the post lives below the fold line. -->
-    <div class="flex flex-1 flex-col border-t border-[var(--line)] bg-[var(--paper)] p-3.5">
-      <div class="flex flex-wrap items-center gap-2">
-        <span class="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-[var(--accent-soft)] px-3 py-1.5 text-[12px] font-semibold text-[var(--accent-ink)]">
+    <div class="flex flex-1 flex-col border-t border-[var(--line)] bg-[var(--paper)] px-2.5 py-3.5">
+      <div class="flex flex-nowrap items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <span class="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-[var(--accent-soft)] px-2.5 py-1.5 text-[12px] font-semibold text-[var(--accent-ink)]">
           <AppIcon name="trend" :size="15" />{{ $t('contentCard.average', { ratio: post.performance_ratio.toFixed(1) }) }}
         </span>
-        <span class="shrink-0 whitespace-nowrap rounded-full border border-[var(--line)] px-3 py-1.5 text-[12px] text-[var(--muted)]">
+        <span class="shrink-0 whitespace-nowrap rounded-full border border-[var(--line)] px-2.5 py-1.5 text-[12px] text-[var(--muted)]">
           {{ mediaKind === 'reel' && post.views > 0 ? $t('contentCard.views', { count: compactNumber(post.views) }) : $t('contentCard.engagements', { count: compactNumber(engagement) }) }}
         </span>
-        <span v-for="signal in post.signals?.slice(-1)" :key="signal" class="hidden shrink-0 whitespace-nowrap rounded-full border border-[var(--line)] px-3 py-1.5 text-[12px] text-[var(--muted)] min-[360px]:inline">{{ signal }}</span>
+        <span v-for="signal in post.signals?.slice(-1)" :key="signal" class="hidden shrink-0 whitespace-nowrap rounded-full border border-[var(--line)] px-2.5 py-1.5 text-[12px] text-[var(--muted)] min-[360px]:inline">{{ signal }}</span>
       </div>
 
       <div class="mt-auto grid gap-2 pt-3">

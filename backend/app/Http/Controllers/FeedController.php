@@ -29,7 +29,6 @@ class FeedController extends Controller
     private function response(Request $request, Collection $items): JsonResponse
     {
         return response()->json([
-            'greeting_name' => str($request->user()->name)->before(' ')->toString(),
             'opportunity_count' => $items->count(),
             'featured_opportunity' => $request->user()->opportunities()
                 ->with(['contentPost.creator', 'lifeMoment'])
