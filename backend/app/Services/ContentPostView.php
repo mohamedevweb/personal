@@ -4,11 +4,15 @@ namespace App\Services;
 
 use App\Models\ContentPost;
 use App\Models\User;
+use App\Services\Discovery\OutlierScore;
 use Illuminate\Support\Facades\URL;
 
 class ContentPostView
 {
-    public function __construct(private readonly InstagramMediaProxy $media) {}
+    public function __construct(
+        private readonly InstagramMediaProxy $media,
+        private readonly OutlierScore $performance,
+    ) {}
 
     /**
      * @param  bool|null  $isSaved  Pass a known value when rendering a batch; leaving
@@ -37,6 +41,7 @@ class ContentPostView
             'published_at' => $post->published_at,
             'performance_ratio' => $post->performance_ratio,
             'outlier_score' => $post->outlier_score,
+            'benchmark' => $this->benchmark($post),
             'engagement_rate' => $post->engagement_rate,
             'tags' => $post->tags ?? [],
             'why_it_works' => $post->why_it_works,
@@ -53,6 +58,27 @@ class ContentPostView
                 'followers' => $post->creator->followers,
                 'average_views' => $post->creator->average_views,
             ],
+        ];
+    }
+
+    /**
+     * What the ratio was actually measured against, so the app can say it out loud
+     * rather than asking the reader to trust a number.
+     *
+     * @return array{format: ?string, posts: int, views: ?int, engagement: ?int}
+     */
+    private function benchmark(ContentPost $post): array
+    {
+        $against = $this->performance->against(
+            $post->creator->performance_baselines ?? [],
+            $post->format,
+        );
+
+        return [
+            'format' => $against['format'],
+            'posts' => $against['posts'],
+            'views' => $against['views'] === null ? null : (int) round($against['views']),
+            'engagement' => $against['engagement'] === null ? null : (int) round($against['engagement']),
         ];
     }
 

@@ -111,6 +111,10 @@ return [
         // Nothing under these thresholds is evidence of anything.
         'min_followers' => (int) env('DISCOVERY_MIN_FOLLOWERS', 5000),
         'min_post_engagement' => (int) env('DISCOVERY_MIN_POST_ENGAGEMENT', 500),
+        // A format is compared to its own normal only once the account has posted
+        // it this many times. Below that there is no normal to speak of, and the
+        // post falls back to the account-wide median.
+        'format_baseline_min_posts' => (int) env('DISCOVERY_FORMAT_BASELINE_MIN_POSTS', 3),
         'safety' => [
             'enabled' => (bool) env('DISCOVERY_CONTENT_SAFETY_ENABLED', true),
             'use_openai' => (bool) env('DISCOVERY_CONTENT_SAFETY_USE_OPENAI', true),

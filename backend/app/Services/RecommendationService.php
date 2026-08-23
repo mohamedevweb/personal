@@ -213,12 +213,13 @@ class RecommendationService
     private function reason(ContentPost $post): string
     {
         $lift = round($post->outlier_score, 1);
+        $normal = "{$post->creator->username}'s usual ".strtolower($post->format);
 
         if ($post->outlier_score >= 2) {
-            return "This beat {$post->creator->username}'s own average by {$lift}×, so the idea did the work rather than the audience size.";
+            return "This beat {$normal} by {$lift}×, so the idea did the work rather than the audience size.";
         }
 
-        return "Above average for {$post->creator->username} ({$lift}×), with enough engagement to make it a useful global benchmark.";
+        return "Above {$normal} ({$lift}×), with enough engagement to make it a useful global benchmark.";
     }
 
     private function primaryVertical(User $user): ?string

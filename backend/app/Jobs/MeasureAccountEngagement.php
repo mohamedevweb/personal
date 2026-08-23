@@ -475,7 +475,11 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
                         // is narrower, so a runaway outlier is clamped here only.
                         'performance_ratio' => min(9999.99, $outlier),
                         'engagement_rate' => $performance->engagementRate($engagement, $creator->followers),
-                        'why_it_works' => $this->whyItWorks($post, $outlier),
+                        'why_it_works' => $this->whyItWorks(
+                            $post,
+                            $outlier,
+                            $performance->against($baselines, $post->format)['format'],
+                        ),
                         'measured_at' => now(),
                     ])->save();
                 }
@@ -489,13 +493,19 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
         return Str::limit($firstLine !== '' ? $firstLine : 'New '.($niche ?: 'creator').' post', 120);
     }
 
-    private function whyItWorks(ContentPost $post, float $outlier): string
+    private function whyItWorks(ContentPost $post, float $outlier, ?string $comparedFormat): string
     {
+        // Naming the format matters: the number only means something once you know
+        // it is this account's usual Reel, not its usual anything.
+        $normal = $comparedFormat
+            ? 'this account normally gets on a '.$comparedFormat
+            : 'this account normally gets';
+
         if ($outlier < 1) {
             return 'A steady post for this account, below the engagement its audience usually gives it.';
         }
 
-        return 'This one reached '.round($outlier, 1).'× the engagement this account normally gets, on '
+        return 'This one reached '.round($outlier, 1).'× the engagement '.$normal.', on '
             .number_format($post->likes).' likes and '.number_format($post->comments).' comments.';
     }
 }

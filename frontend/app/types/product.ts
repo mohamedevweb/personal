@@ -8,6 +8,18 @@ export interface Creator {
   average_views: number
 }
 
+/**
+ * What the performance ratio was measured against, so the app can show its work.
+ * `format` is null when the account has posted too few of that format to have a
+ * normal of its own and the whole account was used instead.
+ */
+export interface PerformanceBenchmark {
+  format: 'reel' | 'carousel' | 'image' | null
+  posts: number
+  views: number | null
+  engagement: number | null
+}
+
 export interface ContentPost {
   id: number
   format: 'Reel' | 'Carousel'
@@ -21,8 +33,9 @@ export interface ContentPost {
   shares: number
   published_at: string
   performance_ratio: number
-  /** Engagement over this creator's own median post. 1.0 is an average post for them. */
+  /** Engagement over this creator's own median post of the same format. 1.0 is ordinary for them. */
   outlier_score: number
+  benchmark?: PerformanceBenchmark
   /** Engagement as a percentage of the creator's followers. */
   engagement_rate: number
   tags: string[]

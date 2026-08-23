@@ -40,6 +40,16 @@
     "pattern": "Pattern",
     "remix": "Remix"
   },
+  "support": {
+    "nav": "Support / Feedback",
+    "title": "Support & feedback",
+    "copy": "Something broken, confusing, or missing? Write to us and a human on the team answers.",
+    "cta": "Write to the team",
+    "hint": "Opens your email app with a message ready to send to {address}.",
+    "subject": "Support / Feedback — Personal",
+    "noAccount": "not signed in",
+    "body": "Hi Personal team,\n\nI want to give feedback or I need help with…\n\nFor example: I don't like the fact that the remix is…\n\nWhat I expected instead:\n\n\n—\nAccount: {account}\nPage: {page}"
+  },
   "chat": {
     "open": "Open assistant",
     "close": "Close assistant",
@@ -80,7 +90,7 @@
     "hero": {
       "titleLineOne": "You're a <span class=\"b-lit\">creator</span>.",
       "titleLineTwo": "Not a content machine.",
-      "subtitle": "Personal finds what's working in your niche and rewrites it with your life. Your voice, your week, ten minutes.",
+      "subtitle": "Personal finds what's working in your niche and rewrites it with your life. Your voice, your week, one minute.",
       "getAccess": "Get early access",
       "seeHow": "See how it works",
       "reassuranceOne": "Free during early access",
@@ -91,7 +101,7 @@
       "outliers": "Outliers, not top posts",
       "niches": "Your niche, not the internet",
       "voice": "Your voice, learned from your captions",
-      "minutes": "Draft to post in ten minutes"
+      "minutes": "Draft to post in one minute"
     },
     "stat": {
       "label": "Outlier detected",
@@ -133,7 +143,7 @@
         },
         "write": {
           "title": "Write",
-          "body": "Reel, carousel or caption. Your structure, your voice, your story. Ten minutes to posted.",
+          "body": "Reel, carousel or caption. Your structure, your voice, your story. One minute to posted.",
           "caption": "A draft, never a post"
         }
       },
@@ -838,7 +848,7 @@
     "startAnother": "Start a new draft"
   },
   "contentCard": {
-    "average": "{ratio}× creator average",
+    "average": "{ratio}× normal for their {format}",
     "followers": "{count} followers",
     "views": "{count} views",
     "engagements": "{count} interactions",
@@ -851,7 +861,28 @@
     "openProfile": "View {'@'}{username} on Instagram",
     "previousSlide": "Previous slide",
     "nextSlide": "Next slide",
-    "goToSlide": "Go to slide {slide}"
+    "goToSlide": "Go to slide {slide}",
+    "averageAccount": "{ratio}× normal for this account"
+  },
+  "performance": {
+    "title": "How this is measured",
+    "open": "How is this calculated?",
+    "close": "Close",
+    "comparedFormat": "Measured against the median of {'@'}{username}'s last {count} {format}.",
+    "comparedAccount": "Measured against the median of {'@'}{username}'s last {count} posts, every format together — too few of this one to have a normal of its own.",
+    "comparedUnknown": "Measured against {'@'}{username}'s own recent posts, not against other creators.",
+    "normal": "Their normal: {parts}",
+    "normalViews": "{count} views",
+    "normalEngagement": "{count} interactions",
+    "formulaBoth": "Views count for 60% of the ratio, likes + comments + shares for the other 40%.",
+    "formulaEngagement": "This format reports no views, so the ratio is likes, comments and shares only.",
+    "median": "A median, not an average — one viral post does not move it.",
+    "floor": "Only posts above 1.2× carrying at least 500 likes and comments reach your feed.",
+    "formats": {
+      "reel": "Reels",
+      "carousel": "carousels",
+      "image": "photos"
+    }
   },
   "legal": {
     "privacy": {

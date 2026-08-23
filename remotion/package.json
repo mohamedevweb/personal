@@ -1,0 +1,27 @@
+{
+  "name": "personal-launch-film",
+  "version": "1.0.0",
+  "private": true,
+  "description": "The Personal launch film, built in Remotion.",
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render LaunchFilm out/launch-film.mp4 --crf=18",
+    "render:all": "./render.sh",
+    "still": "remotion still LaunchFilm out/frame.png",
+    "typecheck": "tsc --noEmit",
+    "upgrade": "remotion upgrade"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.515",
+    "@remotion/google-fonts": "4.0.515",
+    "@remotion/shapes": "4.0.515",
+    "@remotion/transitions": "4.0.515",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "remotion": "4.0.515"
+  },
+  "devDependencies": {
+    "@types/react": "19.0.0",
+    "typescript": "5.8.3"
+  }
+}

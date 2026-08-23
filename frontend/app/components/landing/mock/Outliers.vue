@@ -121,7 +121,7 @@ const posts = computed(() => POSTS.map(({ key, kind, angle, image }) => ({
           <div class="flex items-center gap-1">
             <span class="inline-flex shrink-0 items-center gap-1 rounded-full bg-[var(--b-red-100)] px-1.5 py-1 text-[10px] font-semibold text-[var(--b-red-700)]">
               <AppIcon name="trend" :size="12" />
-              {{ $t('contentCard.average', { ratio: post.ratio }) }}
+              {{ $t('contentCard.averageAccount', { ratio: post.ratio }) }}
             </span>
             <span class="shrink-0 rounded-full border border-[var(--b-line)] px-1.5 py-1 text-[10px] text-[var(--b-stone)]">
               {{ $t('contentCard.views', { count: post.views }) }}

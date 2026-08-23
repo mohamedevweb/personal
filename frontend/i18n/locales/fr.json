@@ -40,6 +40,16 @@
     "pattern": "Analyse",
     "remix": "Remix"
   },
+  "support": {
+    "nav": "Support / Avis",
+    "title": "Support et avis",
+    "copy": "Un bug, quelque chose de confus ou qui manque ? Écrivez-nous, une vraie personne de l'équipe vous répond.",
+    "cta": "Écrire à l'équipe",
+    "hint": "Ouvre votre application mail avec un message prêt à envoyer à {address}.",
+    "subject": "Support / Avis — Personal",
+    "noAccount": "non connecté",
+    "body": "Bonjour l'équipe Personal,\n\nJe veux donner un avis ou j'ai besoin d'aide sur…\n\nPar exemple : je n'aime pas le fait que le remix soit…\n\nCe que j'attendais à la place :\n\n\n—\nCompte : {account}\nPage : {page}"
+  },
   "chat": {
     "open": "Ouvrir l'assistant",
     "close": "Fermer l'assistant",
@@ -80,7 +90,7 @@
     "hero": {
       "titleLineOne": "Vous êtes <span class=\"b-lit\">créateur</span>.",
       "titleLineTwo": "Pas une machine à contenu.",
-      "subtitle": "Personal trouve ce qui marche dans votre niche et le réécrit avec votre vie. Votre voix, votre semaine, dix minutes.",
+      "subtitle": "Personal trouve ce qui marche dans votre niche et le réécrit avec votre vie. Votre voix, votre semaine, une minute.",
       "getAccess": "Accès anticipé",
       "seeHow": "Voir comment ça marche",
       "reassuranceOne": "Gratuit en accès anticipé",
@@ -91,7 +101,7 @@
       "outliers": "Des outliers, pas des top posts",
       "niches": "Votre niche, pas internet",
       "voice": "Votre voix, apprise de vos légendes",
-      "minutes": "Du brouillon au post en dix minutes"
+      "minutes": "Du brouillon au post en une minute"
     },
     "stat": {
       "label": "Outlier détecté",
@@ -133,7 +143,7 @@
         },
         "write": {
           "title": "Écrire",
-          "body": "Reel, carrousel ou légende. Votre structure, votre voix, votre histoire. Dix minutes jusqu'à la publication.",
+          "body": "Reel, carrousel ou légende. Votre structure, votre voix, votre histoire. Une minute jusqu'à la publication.",
           "caption": "Un brouillon, jamais un post"
         }
       },
@@ -838,7 +848,7 @@
     "startAnother": "Commencer un brouillon"
   },
   "contentCard": {
-    "average": "{ratio}× sa moyenne",
+    "average": "{ratio}× sa normale en {format}",
     "followers": "{count} abonnés",
     "views": "{count} vues",
     "engagements": "{count} interactions",
@@ -851,7 +861,28 @@
     "openProfile": "Voir le compte de {'@'}{username} sur Instagram",
     "previousSlide": "Diapositive précédente",
     "nextSlide": "Diapositive suivante",
-    "goToSlide": "Aller à la diapositive {slide}"
+    "goToSlide": "Aller à la diapositive {slide}",
+    "averageAccount": "{ratio}× sa normale"
+  },
+  "performance": {
+    "title": "Comment c’est mesuré",
+    "open": "Comment c’est calculé ?",
+    "close": "Fermer",
+    "comparedFormat": "Mesuré contre la médiane des {count} derniers {format} de {'@'}{username}.",
+    "comparedAccount": "Mesuré contre la médiane des {count} derniers posts de {'@'}{username}, tous formats confondus — trop peu de ce format-là pour qu’il ait sa propre normale.",
+    "comparedUnknown": "Mesuré contre les posts récents de {'@'}{username}, pas contre les autres créateurs.",
+    "normal": "Sa normale : {parts}",
+    "normalViews": "{count} vues",
+    "normalEngagement": "{count} interactions",
+    "formulaBoth": "Les vues comptent pour 60 % du ratio, les j’aime + commentaires + partages pour les 40 % restants.",
+    "formulaEngagement": "Ce format ne remonte pas de vues : le ratio ne tient compte que des j’aime, commentaires et partages.",
+    "median": "Une médiane, pas une moyenne — un post viral ne la déplace pas.",
+    "floor": "Seuls les posts au-dessus de 1,2× avec au moins 500 j’aime et commentaires entrent dans votre feed.",
+    "formats": {
+      "reel": "Reels",
+      "carousel": "carrousels",
+      "image": "photos"
+    }
   },
   "legal": {
     "privacy": {

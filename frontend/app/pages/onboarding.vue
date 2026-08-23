@@ -622,7 +622,7 @@ onMounted(async () => {
                 v-if="tile.outlier"
                 class="absolute inset-x-1.5 bottom-1.5 rounded-[6px] bg-[rgba(11,10,9,.55)] px-1.5 py-1 text-center text-[9.5px] font-semibold tabular-nums text-[var(--b-red-lit)]"
               >
-                {{ $t('contentCard.average', { ratio: previewRatio }) }}
+                {{ $t('contentCard.averageAccount', { ratio: previewRatio }) }}
               </span>
             </div>
           </div>

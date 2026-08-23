@@ -99,6 +99,12 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
           </p>
         </div>
         <div class="mt-5 inline-flex items-baseline gap-2 rounded-2xl bg-[var(--accent-soft)] px-5 py-4 text-[var(--accent-ink)]"><span class="font-serif text-4xl">{{ post.performance_ratio.toFixed(1) }}×</span><span class="text-xs">{{ $t('content.usualPerformance') }}</span></div>
+        <!-- The number is only worth what its denominator is, so the denominator
+             is stated here rather than left to be trusted. -->
+        <div class="mt-3 rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-4">
+          <p class="mb-2 text-[11px] font-semibold uppercase tracking-[.16em] text-[var(--faint)]">{{ $t('performance.title') }}</p>
+          <PerformanceNote :post="post" />
+        </div>
         <div class="mt-8 divide-y divide-[var(--line-soft)] border-y border-[var(--line)]">
           <div class="py-6"><p class="text-xs font-semibold uppercase tracking-widest text-[var(--faint)]">{{ $t('content.hook') }}</p><p class="mt-2 text-[17px] leading-7">{{ post.hook_analysis }}</p></div>
           <div class="py-6"><p class="text-xs font-semibold uppercase tracking-widest text-[var(--faint)]">{{ $t('content.structure') }}</p><p class="mt-2 text-[17px] leading-7">{{ post.structure_analysis }}</p></div>
