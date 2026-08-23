@@ -22,8 +22,7 @@ class AuthTest extends TestCase
         ]);
 
         $response->assertCreated()
-            ->assertJsonPath('user.email', 'ada@personal.test')
-            ->assertJsonPath('user.onboarding_completed_at', null);
+            ->assertJsonPath('user.email', 'ada@personal.test');
         $this->assertIsString($response->json('token'));
         $this->assertDatabaseHas('users', ['email' => 'ada@personal.test']);
     }
@@ -75,32 +74,6 @@ class AuthTest extends TestCase
             ->assertJsonPath('user.instagram_username', 'ada.creates');
     }
 
-    public function test_a_verified_creator_can_complete_product_onboarding_once(): void
-    {
-        $user = User::factory()->create(['email_verified_at' => now()]);
-
-        $this->actingAs($user)->patchJson('/api/me/onboarding')
-            ->assertOk()
-            ->assertJsonPath('user.id', $user->id)
-            ->assertJsonPath('user.onboarding_completed_at', fn ($value) => is_string($value));
-
-        $completedAt = $user->fresh()->onboarding_completed_at;
-
-        $this->travel(10)->minutes();
-
-        $this->actingAs($user)->patchJson('/api/me/onboarding')->assertOk();
-
-        $this->assertTrue($completedAt->equalTo($user->fresh()->onboarding_completed_at));
-    }
-
-    public function test_an_unverified_creator_cannot_complete_product_onboarding(): void
-    {
-        $user = User::factory()->unverified()->create();
-
-        $this->actingAs($user)->patchJson('/api/me/onboarding')->assertForbidden();
-        $this->assertNull($user->fresh()->onboarding_completed_at);
-    }
-
     public function test_logout_revokes_only_the_current_token(): void
     {
         $user = User::query()->create([
@@ -125,7 +98,6 @@ class AuthTest extends TestCase
 
     public function test_product_endpoints_require_authentication(): void
     {
-        $this->patchJson('/api/me/onboarding')->assertUnauthorized();
         $this->getJson('/api/feed')->assertUnauthorized();
         $this->getJson('/api/moments')->assertUnauthorized();
         $this->getJson('/api/integrations/instagram/status')->assertUnauthorized();

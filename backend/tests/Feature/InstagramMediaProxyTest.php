@@ -40,6 +40,22 @@ class InstagramMediaProxyTest extends TestCase
         Http::assertSentCount(1);
     }
 
+    public function test_signed_media_uses_its_own_request_budget(): void
+    {
+        Storage::fake('local');
+        Http::preventStrayRequests();
+        $source = 'https://scontent-sea5-1.cdninstagram.com/rate-limit.jpg';
+        Http::fake([$source => Http::response('jpeg-content', 200, ['Content-Type' => 'image/jpeg'])]);
+        $post = $this->createPost($source);
+        $path = URL::temporarySignedRoute('media.content', now()->addHour(), ['content' => $post], absolute: false);
+
+        foreach (range(1, 121) as $request) {
+            $this->get($path)->assertOk();
+        }
+
+        Http::assertSentCount(1);
+    }
+
     public function test_media_route_requires_a_valid_signature(): void
     {
         $post = $this->createPost('https://scontent-sea5-1.cdninstagram.com/photo.jpg');
@@ -135,6 +151,21 @@ class InstagramMediaProxyTest extends TestCase
         $post->update(['thumbnail_url' => 'https://images.unsplash.com/photo.jpg']);
         $payload = app(ContentPostView::class)->make($post->fresh(), $user);
         $this->assertSame('https://images.unsplash.com/photo.jpg', $payload['thumbnail_url']);
+    }
+
+    public function test_feed_media_urls_are_stable_within_the_signature_hour(): void
+    {
+        config(['app.url' => 'https://api.personal.test']);
+        $this->travelTo('2026-08-23 10:05:00');
+        $user = User::factory()->create();
+        $post = $this->createPost('https://instagram.ftce2-1.fna.fbcdn.net/thumb.jpg');
+
+        $firstUrl = app(ContentPostView::class)->make($post, $user)['thumbnail_url'];
+        $this->travel(30)->minutes();
+        $secondUrl = app(ContentPostView::class)->make($post, $user)['thumbnail_url'];
+        $this->travelBack();
+
+        $this->assertSame($firstUrl, $secondUrl);
     }
 
     public function test_remix_source_uses_signed_personal_urls_for_instagram_media(): void

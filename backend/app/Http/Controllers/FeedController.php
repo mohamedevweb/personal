@@ -12,7 +12,7 @@ class FeedController extends Controller
     public function index(Request $request, RecommendationService $recommendations): JsonResponse
     {
         $data = $request->validate([
-            'exclude' => ['sometimes', 'array', 'max:48'],
+            'exclude' => ['sometimes', 'array', 'max:240'],
             'exclude.*' => ['integer', 'distinct'],
         ]);
         $items = $recommendations->forUser($request->user(), excludeIds: $data['exclude'] ?? []);

@@ -10,6 +10,7 @@ use App\Services\Discovery\ContentSafetyDecision;
 use App\Services\Discovery\CreatorScrapeSchedule;
 use App\Services\Discovery\DiscoveredProfile;
 use App\Services\Discovery\InstagramDataProviderManager;
+use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -74,56 +75,52 @@ class CreatorInspirationService
     }
 
     /** @return list<array<string, mixed>> */
-    public function search(User $user, string $query, int $limit = self::SUGGESTION_LIMIT): array
+    public function search(User $user, string $query): array
     {
-        $query = trim($query);
-        $exactHandle = str_starts_with($query, '@') || filter_var($query, FILTER_VALIDATE_URL)
-            ? $this->handleFromInput($query, allowKeywords: true)
-            : null;
+        $exactHandle = $this->handleFromInput($query);
         $selected = $user->inspirationCreators()->pluck('creators.id')->flip();
-        $needle = Str::lower($exactHandle ?: $query);
-
         $local = Creator::query()
             ->where('safety_status', '!=', ContentSafetyDecision::BLOCKED)
             ->where(function ($builder) use ($user): void {
                 $builder->whereNull('user_id')->orWhere('user_id', '!=', $user->id);
             })
-            ->where(function ($builder) use ($needle): void {
-                $like = "%{$needle}%";
-                $builder->whereRaw('LOWER(username) LIKE ?', [$like])
-                    ->orWhereRaw('LOWER(display_name) LIKE ?', [$like]);
-            })
-            ->orderByDesc('followers')
-            ->limit($limit)
-            ->get();
+            ->whereRaw('LOWER(username) = ?', [Str::lower($exactHandle)])
+            ->first();
 
-        if ($exactHandle && $local->contains(fn (Creator $creator): bool => Str::lower($creator->username) === Str::lower($exactHandle))) {
-            return $local->map(fn (Creator $creator): array => $this->render($creator, $selected->has($creator->id)))->all();
+        if ($local?->avatar_url) {
+            return [$this->render($local, $selected->has($local->id))];
         }
 
-        $remote = $exactHandle
-            ? collect(array_filter([$this->providers->provider()->getProfile($exactHandle)]))
-            : $this->providers->provider()->searchAccounts($query, $limit);
+        $profile = $this->providers->provider()->getProfile($exactHandle);
 
-        $remote->each(fn (DiscoveredProfile $profile) => Cache::put(
+        if (! $profile
+            || $profile->isPrivate
+            || Str::lower($profile->username) !== Str::lower($exactHandle)
+            || Str::lower($profile->username) === Str::lower($this->ownInstagramUsername($user))) {
+            return $local ? [$this->render($local, $selected->has($local->id))] : [];
+        }
+
+        Cache::put(
             $this->profileCacheKey($profile->username),
             $profile,
-            now()->addMinutes(30),
-        ));
+            now()->addHours(max(1, (int) config('services.instagram_media_proxy.signature_hours'))),
+        );
 
-        $remoteResults = $remote
-            ->reject(fn (DiscoveredProfile $profile): bool => $profile->isPrivate)
-            ->reject(fn (DiscoveredProfile $profile): bool => Str::lower($profile->username) === Str::lower($this->ownInstagramUsername($user)))
-            ->map(fn (DiscoveredProfile $profile): array => $this->renderProfile($profile))
-            ->values();
+        return [$this->renderProfile($profile, $local ? $selected->has($local->id) : false)];
+    }
 
-        return $local
-            ->map(fn (Creator $creator): array => $this->render($creator, $selected->has($creator->id)))
-            ->concat($remoteResults)
-            ->unique(fn (array $creator): string => Str::lower($creator['username']))
-            ->take($limit)
-            ->values()
-            ->all();
+    public function previewAvatarResponse(string $username): ?Response
+    {
+        $profile = Cache::get($this->profileCacheKey($username));
+
+        if (! $profile instanceof DiscoveredProfile || ! $profile->avatarUrl) {
+            return null;
+        }
+
+        return $this->media->response(
+            $profile->avatarUrl,
+            'creator-preview:'.Str::lower($profile->username),
+        );
     }
 
     /** @param list<string> $inputs @return list<array<string, mixed>> */
@@ -275,17 +272,15 @@ class CreatorInspirationService
     }
 
     /** @return array<string, mixed> */
-    private function renderProfile(DiscoveredProfile $profile): array
+    private function renderProfile(DiscoveredProfile $profile, bool $selected = false): array
     {
         return [
             'username' => $profile->username,
             'display_name' => $profile->displayName ?: $profile->username,
-            // Remote CDN media is deliberately not embedded before the account is
-            // stored, because Instagram blocks it in third-party image elements.
-            'avatar_url' => null,
+            'avatar_url' => $this->previewAvatarUrl($profile),
             'followers' => $profile->followers,
             'niche' => null,
-            'is_selected' => false,
+            'is_selected' => $selected,
             'is_measured' => false,
         ];
     }
@@ -300,6 +295,22 @@ class CreatorInspirationService
             'media.creator',
             now()->addHours((int) config('services.instagram_media_proxy.signature_hours')),
             ['creator' => $creator->id],
+            absolute: false,
+        );
+
+        return rtrim((string) config('app.url'), '/').$path;
+    }
+
+    private function previewAvatarUrl(DiscoveredProfile $profile): ?string
+    {
+        if (! $profile->avatarUrl || ! $this->media->supports($profile->avatarUrl)) {
+            return $profile->avatarUrl;
+        }
+
+        $path = URL::temporarySignedRoute(
+            'media.creator-preview',
+            now()->addHours(max(1, (int) config('services.instagram_media_proxy.signature_hours'))),
+            ['username' => $profile->username],
             absolute: false,
         );
 

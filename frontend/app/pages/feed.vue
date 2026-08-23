@@ -8,6 +8,7 @@ const { begin: beginRemix, attach: attachRemix, clear: clearRemix } = useRemixLa
 const loading = ref(true)
 const refreshing = ref(false)
 const data = ref<{ items: ContentPost[] } | null>(null)
+const seenIds = new Set<number>()
 let requestId = 0
 
 function feedPath(excludeIds: number[] = []) {
@@ -35,14 +36,15 @@ async function loadFeed(showError = true, excludeIds: number[] = []): Promise<bo
 async function refresh() {
   if (refreshing.value) return
   refreshing.value = true
-  const visibleIds = data.value?.items.map(post => post.id) ?? []
+  data.value?.items.forEach(post => seenIds.add(post.id))
 
   try {
-    const response = await apiFetch<{ items: ContentPost[] }>(feedPath(visibleIds))
+    const response = await apiFetch<{ items: ContentPost[] }>(feedPath([...seenIds]))
 
     if (response.items.length > 0) {
       data.value = response
     } else {
+      seenIds.clear()
       toast.success(t('feed.rotationComplete'))
     }
   } catch (exception: unknown) {

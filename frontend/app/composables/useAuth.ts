@@ -5,7 +5,6 @@ interface AuthUser {
   avatar_url: string | null
   instagram_username: string | null
   email_verified_at: string | null
-  onboarding_completed_at: string | null
 }
 
 interface AuthResponse {
@@ -72,12 +71,6 @@ export function useAuth() {
     await apiFetch('/api/email/verification-notification', { method: 'POST' })
   }
 
-  async function completeOnboarding() {
-    const response = await apiFetch<{ user: AuthUser }>('/api/me/onboarding', { method: 'PATCH' })
-    user.value = response.user
-    return response.user
-  }
-
   return {
     user,
     token,
@@ -89,7 +82,6 @@ export function useAuth() {
     loadUser,
     updateAccount,
     updatePassword,
-    resendVerification,
-    completeOnboarding
+    resendVerification
   }
 }

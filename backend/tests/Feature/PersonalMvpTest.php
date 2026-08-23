@@ -45,18 +45,28 @@ class PersonalMvpTest extends TestCase
         $this->assertSame($scores->sortDesc()->values()->all(), $scores->values()->all());
     }
 
-    public function test_feed_can_rotate_past_the_current_cards(): void
+    public function test_feed_rotation_does_not_repeat_until_the_catalog_is_exhausted(): void
     {
         $first = $this->actingAs($this->user)->getJson('/api/feed')->assertOk();
-        $visibleIds = collect($first->json('items'))->pluck('id')->all();
+        $firstIds = collect($first->json('items'))->pluck('id');
 
         $next = $this->actingAs($this->user)->getJson('/api/feed?'.http_build_query([
-            'exclude' => $visibleIds,
+            'exclude' => $firstIds->all(),
         ]))->assertOk();
         $nextIds = collect($next->json('items'))->pluck('id');
 
         $this->assertNotEmpty($nextIds);
-        $this->assertSame([], $nextIds->intersect($visibleIds)->values()->all());
+        $this->assertSame([], $nextIds->intersect($firstIds)->values()->all());
+
+        $seenIds = $firstIds->concat($nextIds)->unique()->values()->all();
+        $this->actingAs($this->user)->getJson('/api/feed?'.http_build_query([
+            'exclude' => $seenIds,
+        ]))->assertOk()->assertJsonCount(0, 'items');
+
+        $restartedIds = collect(
+            $this->actingAs($this->user)->getJson('/api/feed')->assertOk()->json('items'),
+        )->pluck('id');
+        $this->assertSame($firstIds->all(), $restartedIds->all());
     }
 
     public function test_the_feed_query_count_does_not_grow_with_the_catalog(): void

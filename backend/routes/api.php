@@ -10,7 +10,6 @@ use App\Http\Controllers\FeedController;
 use App\Http\Controllers\InstagramConnectionController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\MomentController;
-use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\OpportunityController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\ProfileController;
@@ -52,19 +51,20 @@ Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 've
 // Browsers cannot embed some Instagram CDN responses because they carry
 // Cross-Origin-Resource-Policy: same-origin. These URLs are signed so the
 // application remains a bounded media relay rather than an open proxy.
-Route::get('/media/content/{content}', [MediaController::class, 'content'])
-    ->middleware('signed:relative')
-    ->name('media.content');
-Route::get('/media/content/{content}/{position}', [MediaController::class, 'contentItem'])
-    ->whereNumber('position')
-    ->middleware('signed:relative')
-    ->name('media.content.item');
-Route::get('/media/creator/{creator}', [MediaController::class, 'creator'])
-    ->middleware('signed:relative')
-    ->name('media.creator');
-Route::get('/media/instagram-account/{account}', [MediaController::class, 'instagramAccount'])
-    ->middleware('signed:relative')
-    ->name('media.instagram-account');
+Route::middleware(['signed:relative', 'throttle:media'])->group(function (): void {
+    Route::get('/media/content/{content}', [MediaController::class, 'content'])
+        ->name('media.content');
+    Route::get('/media/content/{content}/{position}', [MediaController::class, 'contentItem'])
+        ->whereNumber('position')
+        ->name('media.content.item');
+    Route::get('/media/creator/{creator}', [MediaController::class, 'creator'])
+        ->name('media.creator');
+    Route::get('/media/creator-preview/{username}', [MediaController::class, 'creatorPreview'])
+        ->where('username', '[A-Za-z0-9._]+')
+        ->name('media.creator-preview');
+    Route::get('/media/instagram-account/{account}', [MediaController::class, 'instagramAccount'])
+        ->name('media.instagram-account');
+});
 
 Route::middleware(['auth:sanctum', 'verified'])->prefix('integrations/instagram')->group(function (): void {
     Route::get('/authorize', [InstagramConnectionController::class, 'authorize']);
@@ -75,7 +75,6 @@ Route::middleware(['auth:sanctum', 'verified'])->prefix('integrations/instagram'
 });
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function (): void {
-    Route::patch('/me/onboarding', OnboardingController::class);
     Route::get('/me/profile', [ProfileController::class, 'show']);
     Route::patch('/me/profile', [ProfileController::class, 'update']);
     Route::get('/me/voice-prompt', VoiceProfileController::class);

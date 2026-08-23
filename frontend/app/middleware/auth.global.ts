@@ -26,14 +26,12 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // the app is reachable. We resolve the user once and reuse the cached state.
   const user = useState<{
     email_verified_at: string | null
-    onboarding_completed_at: string | null
   } | null>('personal-user', () => null)
   if (!user.value) {
     try {
       const response = await apiFetch<{
         user: {
           email_verified_at: string | null
-          onboarding_completed_at: string | null
         }
       }>('/api/auth/me')
       user.value = response.user
@@ -72,16 +70,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   if (onboarded.value && to.path === '/onboarding') {
-    return navigateTo(user.value?.onboarding_completed_at ? '/feed' : '/welcome')
-  }
-
-  const guideCompleted = Boolean(user.value?.onboarding_completed_at)
-
-  if (!guideCompleted && to.path !== '/welcome') {
-    return navigateTo('/welcome')
-  }
-
-  if (guideCompleted && to.path === '/welcome') {
     return navigateTo('/feed')
   }
 })

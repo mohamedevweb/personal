@@ -11,6 +11,7 @@ const toast = useToast()
 const inspirationData = ref<CreatorInspirationResponse | null>(null)
 const inspirationLoading = ref(false)
 const searchResults = ref<CreatorInspiration[]>([])
+const hasSearched = ref(false)
 const searching = ref(false)
 const saving = ref(false)
 const selected = ref<CreatorInspiration[]>([])
@@ -104,7 +105,7 @@ const suggestionLimit = computed(() => inspirationData.value?.suggestion_limit ?
 // Suggestions and search hits already picked live in the favorites card, so the
 // browsable grid only offers what is still addable.
 const availableCreators = computed(() => {
-  const creators = [...searchResults.value, ...(inspirationData.value?.suggestions || [])]
+  const creators = hasSearched.value ? searchResults.value : (inspirationData.value?.suggestions || [])
   return Array.from(new Map(creators.map(creator => [creator.username.toLowerCase(), creator])).values())
     .filter(creator => !isSelected(creator.username))
     .slice(0, suggestionLimit.value)
@@ -161,9 +162,9 @@ function toggleCreator(creator: CreatorInspiration) {
   addCreator(creator)
 }
 
-function addHandle() {
+async function addHandle() {
   const handle = parsedHandle.value
-  if (!handle) {
+  if (!handle || searching.value) {
     if (handleInput.value.trim()) toast.error(t('onboarding.inspirations.handleError'))
     return
   }
@@ -173,17 +174,35 @@ function addHandle() {
     return
   }
 
-  const known = availableCreators.value.find(creator => creator.username.toLowerCase() === handle.toLowerCase())
-  addCreator(known || {
-    username: handle,
-    display_name: handle,
-    avatar_url: null,
-    followers: 0,
-    niche: null,
-    is_selected: true,
-    is_measured: false
-  })
-  handleInput.value = ''
+  const known = [...searchResults.value, ...(inspirationData.value?.suggestions || [])]
+    .find(creator => creator.username.toLowerCase() === handle.toLowerCase())
+
+  if (known?.avatar_url) {
+    addCreator(known)
+    handleInput.value = ''
+    return
+  }
+
+  searching.value = true
+  hasSearched.value = true
+
+  try {
+    const response = await apiFetch<{ items: CreatorInspiration[] }>(`/api/creator-inspirations/search?q=${encodeURIComponent(handle)}`)
+    searchResults.value = response.items
+    const creator = response.items.find(item => item.username.toLowerCase() === handle.toLowerCase())
+
+    if (!creator) {
+      toast.error(t('onboarding.inspirations.noResults'))
+      return
+    }
+
+    addCreator(creator)
+    handleInput.value = ''
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('onboarding.inspirations.searchError')))
+  } finally {
+    searching.value = false
+  }
 }
 
 function initials(creator: CreatorInspiration) {
@@ -206,9 +225,14 @@ async function loadInspirations() {
 }
 
 async function searchCreators() {
-  const query = handleInput.value.trim()
-  if (query.length < 2 || searching.value) return
+  const query = parsedHandle.value
+  if (!query || searching.value) {
+    if (handleInput.value.trim()) toast.error(t('onboarding.inspirations.handleError'))
+    return
+  }
+
   searching.value = true
+  hasSearched.value = true
 
   try {
     const response = await apiFetch<{ items: CreatorInspiration[] }>(`/api/creator-inspirations/search?q=${encodeURIComponent(query)}`)
@@ -277,7 +301,7 @@ function skipConnection() {
 function enterApp() {
   if (connectionSkipped.value) skipped.value = true
   onboarded.value = true
-  return navigateTo('/welcome')
+  return navigateTo('/feed')
 }
 
 function skipInspirations() {
@@ -428,7 +452,7 @@ onMounted(async () => {
                 <button
                   type="button"
                   class="rounded-full border border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-sm font-medium transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
-                  :disabled="searching || handleInput.trim().length < 2"
+                  :disabled="searching || !parsedHandle"
                   @click="searchCreators"
                 >
                   {{ searching ? $t('onboarding.inspirations.searching') : $t('onboarding.inspirations.search') }}
@@ -436,7 +460,7 @@ onMounted(async () => {
                 <button
                   type="submit"
                   class="rounded-full border border-[var(--ink)] bg-[var(--ink)] px-4 py-3 text-sm font-medium text-[var(--paper)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40"
-                  :disabled="!parsedHandle || selected.length >= maximum"
+                  :disabled="searching || !parsedHandle || selected.length >= maximum"
                 >
                   {{ $t('onboarding.inspirations.add') }}
                 </button>
@@ -466,7 +490,7 @@ onMounted(async () => {
               </p>
 
               <p class="mt-5 text-xs font-medium uppercase tracking-[0.14em] text-[var(--faint)]">
-                {{ searchResults.length ? $t('onboarding.inspirations.resultsLabel') : $t('onboarding.inspirations.suggestionsLabel') }}
+                {{ hasSearched ? $t('onboarding.inspirations.resultsLabel') : $t('onboarding.inspirations.suggestionsLabel') }}
               </p>
 
               <div v-if="inspirationLoading" class="mt-3 grid grid-cols-2 gap-2">

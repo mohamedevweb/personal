@@ -82,8 +82,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        RateLimiter::for('api', fn (Request $request) => Limit::perMinute(120)
-            ->by($request->user()?->id ?: $request->ip()));
+        RateLimiter::for('api', fn (Request $request) => $request->routeIs('media.*')
+            ? Limit::none()
+            : Limit::perMinute(120)->by($request->user()?->id ?: $request->ip()));
+
+        // Signed media can fan out into an image and avatar request per feed card.
+        // Keep it bounded without spending the product API's interactive budget.
+        RateLimiter::for('media', fn (Request $request) => Limit::perMinute(600)
+            ->by($request->ip()));
 
         // Credential endpoints are rate limited per identity and per address so a
         // single address cannot spray attempts across many accounts.

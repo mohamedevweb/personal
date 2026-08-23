@@ -11,7 +11,9 @@ use App\Services\Discovery\DiscoveredProfile;
 use App\Services\Discovery\InstagramDataProvider;
 use App\Services\Discovery\InstagramDataProviderManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class CreatorInspirationTest extends TestCase
@@ -66,12 +68,19 @@ class CreatorInspirationTest extends TestCase
 
     public function test_explicit_search_uses_the_provider_without_writing_to_the_database(): void
     {
+        config(['app.url' => 'https://api.personal.test']);
+        Storage::fake('local');
+        Http::preventStrayRequests();
+        $avatar = 'https://scontent-sea5-1.cdninstagram.com/remote-avatar.jpg';
+        Http::fake([$avatar => Http::response('avatar-content', 200, ['Content-Type' => 'image/jpeg'])]);
+        $this->creator('remote.creator.fan', followers: 900000);
+        $this->creator('the_remote.creator', followers: 800000);
         $provider = \Mockery::mock(InstagramDataProvider::class);
         $provider->shouldReceive('getProfile')->once()->with('remote.creator')->andReturn(
             new DiscoveredProfile(
                 username: 'remote.creator',
                 displayName: 'Remote Creator',
-                avatarUrl: 'https://instagram.test/avatar.jpg',
+                avatarUrl: $avatar,
                 followers: 42000,
                 posts: collect(),
                 externalId: 'instagram-remote',
@@ -81,13 +90,20 @@ class CreatorInspirationTest extends TestCase
         $manager->shouldReceive('provider')->once()->andReturn($provider);
         $this->app->instance(InstagramDataProviderManager::class, $manager);
 
-        $this->actingAs($this->user)
-            ->getJson('/api/creator-inspirations/search?q=%40remote.creator')
+        $response = $this->actingAs($this->user)
+            ->getJson('/api/creator-inspirations/search?q=remote.creator')
             ->assertOk()
             ->assertJsonPath('items.0.username', 'remote.creator')
-            ->assertJsonPath('items.0.avatar_url', null);
+            ->assertJsonCount(1, 'items');
 
-        $this->assertDatabaseCount('creators', 0);
+        $avatarUrl = $response->json('items.0.avatar_url');
+        $this->assertIsString($avatarUrl);
+        $this->assertStringStartsWith('https://api.personal.test/api/media/creator-preview/remote.creator', $avatarUrl);
+
+        $relativeAvatarUrl = parse_url($avatarUrl, PHP_URL_PATH).'?'.parse_url($avatarUrl, PHP_URL_QUERY);
+        $this->get($relativeAvatarUrl)->assertOk()->assertContent('avatar-content');
+
+        $this->assertDatabaseCount('creators', 2);
     }
 
     public function test_selection_is_private_idempotent_and_queues_new_creators_for_measurement(): void

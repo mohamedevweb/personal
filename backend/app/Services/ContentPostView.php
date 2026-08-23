@@ -62,14 +62,7 @@ class ContentPostView
             return $sourceUrl;
         }
 
-        $path = URL::temporarySignedRoute(
-            $route,
-            now()->addHours((int) config('services.instagram_media_proxy.signature_hours')),
-            [$parameter => $id],
-            absolute: false,
-        );
-
-        return rtrim((string) config('app.url'), '/').$path;
+        return $this->signedMediaUrl($route, [$parameter => $id]);
     }
 
     /** @return list<string> */
@@ -97,15 +90,24 @@ class ContentPostView
                     return (string) $this->mediaUrl('media.content', 'content', $post->id, $sourceUrl);
                 }
 
-                $path = URL::temporarySignedRoute(
-                    'media.content.item',
-                    now()->addHours((int) config('services.instagram_media_proxy.signature_hours')),
-                    ['content' => $post->id, 'position' => $position],
-                    absolute: false,
-                );
-
-                return rtrim((string) config('app.url'), '/').$path;
+                return $this->signedMediaUrl('media.content.item', [
+                    'content' => $post->id,
+                    'position' => $position,
+                ]);
             })
             ->all();
+    }
+
+    /** @param array<string, int> $parameters */
+    private function signedMediaUrl(string $route, array $parameters): string
+    {
+        // A fixed expiry within the current hour keeps the URL stable across feed
+        // refreshes, allowing the browser to reuse its cached image response.
+        $expiresAt = now()
+            ->addHours(max(1, (int) config('services.instagram_media_proxy.signature_hours')))
+            ->endOfHour();
+        $path = URL::temporarySignedRoute($route, $expiresAt, $parameters, absolute: false);
+
+        return rtrim((string) config('app.url'), '/').$path;
     }
 }
