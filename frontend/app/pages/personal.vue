@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { InstagramAccount } from '~/types/instagram'
 import type { PersonalProfile } from '~/types/product'
 
 type PersonalProfileDraft = Pick<PersonalProfile,
@@ -16,12 +17,7 @@ const { apiFetch } = usePersonalApi()
 const { t } = useI18n()
 const toast = useToast()
 const profile = ref<PersonalProfile | null>(null)
-const instagram = ref<{
-  username: string
-  display_name: string | null
-  profile_picture_url: string | null
-  media_count: number | null
-} | null>(null)
+const instagram = ref<Pick<InstagramAccount, 'username' | 'display_name' | 'profile_picture_url' | 'media_count'> | null>(null)
 const instagramAvatarFailed = ref(false)
 const editing = ref(false)
 const saving = ref(false)

@@ -21,7 +21,9 @@ class AuthTest extends TestCase
             'password_confirmation' => 'correct-horse-battery',
         ]);
 
-        $response->assertCreated()->assertJsonPath('user.email', 'ada@personal.test');
+        $response->assertCreated()
+            ->assertJsonPath('user.email', 'ada@personal.test')
+            ->assertJsonPath('user.onboarding_completed_at', null);
         $this->assertIsString($response->json('token'));
         $this->assertDatabaseHas('users', ['email' => 'ada@personal.test']);
     }
@@ -71,6 +73,32 @@ class AuthTest extends TestCase
         $this->actingAs($user)->getJson('/api/auth/me')
             ->assertOk()
             ->assertJsonPath('user.instagram_username', 'ada.creates');
+    }
+
+    public function test_a_verified_creator_can_complete_product_onboarding_once(): void
+    {
+        $user = User::factory()->create(['email_verified_at' => now()]);
+
+        $this->actingAs($user)->patchJson('/api/me/onboarding')
+            ->assertOk()
+            ->assertJsonPath('user.id', $user->id)
+            ->assertJsonPath('user.onboarding_completed_at', fn ($value) => is_string($value));
+
+        $completedAt = $user->fresh()->onboarding_completed_at;
+
+        $this->travel(10)->minutes();
+
+        $this->actingAs($user)->patchJson('/api/me/onboarding')->assertOk();
+
+        $this->assertTrue($completedAt->equalTo($user->fresh()->onboarding_completed_at));
+    }
+
+    public function test_an_unverified_creator_cannot_complete_product_onboarding(): void
+    {
+        $user = User::factory()->unverified()->create();
+
+        $this->actingAs($user)->patchJson('/api/me/onboarding')->assertForbidden();
+        $this->assertNull($user->fresh()->onboarding_completed_at);
     }
 
     public function test_logout_revokes_only_the_current_token(): void

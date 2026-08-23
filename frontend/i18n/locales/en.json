@@ -442,6 +442,70 @@
       "skip": "Skip for now"
     }
   },
+  "productGuide": {
+    "creator": "creator",
+    "progress": "Step {current} of {total}",
+    "progressLabel": "Onboarding progress",
+    "goToStep": "Go to step {step}",
+    "skip": "Skip tour",
+    "back": "Back",
+    "next": "Continue",
+    "error": "Personal could not finish the tour. Please try again.",
+    "steps": {
+      "welcome": {
+        "title": "Welcome, {name}.",
+        "copy": "Personal connects what is working in your niche with what you actually live through. Here is the flow in three simple moves."
+      },
+      "discover": {
+        "title": "Spot the content that stands out.",
+        "copy": "For You ranks posts beating their own creator’s usual performance. You see the signal, then decide what to do with it."
+      },
+      "moments": {
+        "title": "Keep track of what you live through.",
+        "copy": "A decision, a doubt or a lesson becomes a private Moment. It is the personal material that keeps your content from sounding like everyone else."
+      },
+      "create": {
+        "title": "Turn the right signal into content that sounds like you.",
+        "copy": "Personal brings together a proven pattern, one of your Moments and your voice. Choose where you want to begin."
+      }
+    },
+    "preview": {
+      "welcome": "The right signal. A true story. Your next piece of content.",
+      "labels": {
+        "discover": "Discover",
+        "moments": "Tell",
+        "create": "Create"
+      },
+      "discover": {
+        "eyebrow": "Signal found in your niche",
+        "ratio": "6.2 times the average",
+        "hook": "The decision I almost did not make this year",
+        "views": "128K views",
+        "signal": "Still gaining momentum"
+      },
+      "moments": {
+        "eyebrow": "Your Moment",
+        "quote": "I turned down a project that looked perfect, then understood what I actually wanted to build.",
+        "reasons": {
+          "personal": "personal",
+          "change": "strong decision",
+          "lesson": "clear lesson"
+        },
+        "note": "Your Moments stay private and are never shown to other creators."
+      },
+      "create": {
+        "eyebrow": "Your Personal draft",
+        "pattern": "A pattern that is working now",
+        "story": "A story only you can tell",
+        "draft": "A draft written in your voice"
+      }
+    },
+    "actions": {
+      "feed": "See my feed",
+      "moments": "Add a Moment",
+      "create": "Create content"
+    }
+  },
   "feed": {
     "forYou": "For you",
     "global": "Global",

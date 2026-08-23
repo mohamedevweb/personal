@@ -21,6 +21,7 @@ class UserView
             'avatar_url' => $this->avatarUrl($user),
             'instagram_username' => $user->instagram_username,
             'email_verified_at' => $user->email_verified_at,
+            'onboarding_completed_at' => $user->onboarding_completed_at,
         ];
     }
 

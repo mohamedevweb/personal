@@ -442,6 +442,70 @@
       "skip": "Passer pour l’instant"
     }
   },
+  "productGuide": {
+    "creator": "créateur",
+    "progress": "Étape {current} sur {total}",
+    "progressLabel": "Progression de l’onboarding",
+    "goToStep": "Aller à l’étape {step}",
+    "skip": "Passer la visite",
+    "back": "Retour",
+    "next": "Continuer",
+    "error": "Personal n’a pas pu terminer la visite. Réessaie.",
+    "steps": {
+      "welcome": {
+        "title": "Bienvenue, {name}.",
+        "copy": "Personal relie ce qui fonctionne dans ta niche à ce que tu vis vraiment. Voici le parcours en trois gestes."
+      },
+      "discover": {
+        "title": "Repère les contenus qui sortent du lot.",
+        "copy": "Pour vous classe les publications qui battent la performance habituelle de leur propre créateur. Tu vois le signal, puis tu décides quoi en faire."
+      },
+      "moments": {
+        "title": "Garde une trace de ce que tu vis.",
+        "copy": "Une décision, un doute ou une leçon devient un Moment privé. C’est la matière personnelle qui empêchera tes contenus de ressembler à ceux des autres."
+      },
+      "create": {
+        "title": "Transforme le bon signal en contenu qui te ressemble.",
+        "copy": "Personal assemble un schéma qui fonctionne, un de tes Moments et ta voix. Choisis maintenant par où tu veux commencer."
+      }
+    },
+    "preview": {
+      "welcome": "Un signal juste. Une histoire vraie. Ton prochain contenu.",
+      "labels": {
+        "discover": "Découvrir",
+        "moments": "Raconter",
+        "create": "Créer"
+      },
+      "discover": {
+        "eyebrow": "Signal détecté dans ta niche",
+        "ratio": "6,2 fois la moyenne",
+        "hook": "La décision que j’ai failli ne pas prendre cette année",
+        "views": "128 k vues",
+        "signal": "Encore en progression"
+      },
+      "moments": {
+        "eyebrow": "Ton Moment",
+        "quote": "J’ai refusé un projet qui semblait parfait, puis compris ce que je voulais vraiment construire.",
+        "reasons": {
+          "personal": "personnel",
+          "change": "décision forte",
+          "lesson": "leçon claire"
+        },
+        "note": "Tes Moments restent privés et ne sont jamais montrés à d’autres créateurs."
+      },
+      "create": {
+        "eyebrow": "Ton brouillon Personal",
+        "pattern": "Un schéma qui fonctionne maintenant",
+        "story": "Une histoire que toi seul peux raconter",
+        "draft": "Un brouillon écrit dans ta voix"
+      }
+    },
+    "actions": {
+      "feed": "Voir mon feed",
+      "moments": "Ajouter un Moment",
+      "create": "Créer un contenu"
+    }
+  },
   "feed": {
     "forYou": "Pour toi",
     "global": "Global",

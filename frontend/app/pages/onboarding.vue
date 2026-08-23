@@ -277,7 +277,7 @@ function skipConnection() {
 function enterApp() {
   if (connectionSkipped.value) skipped.value = true
   onboarded.value = true
-  return navigateTo('/feed')
+  return navigateTo('/welcome')
 }
 
 function skipInspirations() {

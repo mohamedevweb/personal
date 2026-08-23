@@ -10,6 +10,7 @@ use App\Http\Controllers\FeedController;
 use App\Http\Controllers\InstagramConnectionController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\MomentController;
+use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\OpportunityController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\ProfileController;
@@ -74,6 +75,7 @@ Route::middleware(['auth:sanctum', 'verified'])->prefix('integrations/instagram'
 });
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function (): void {
+    Route::patch('/me/onboarding', OnboardingController::class);
     Route::get('/me/profile', [ProfileController::class, 'show']);
     Route::patch('/me/profile', [ProfileController::class, 'update']);
     Route::get('/me/voice-prompt', VoiceProfileController::class);
