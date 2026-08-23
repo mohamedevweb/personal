@@ -1,6 +1,6 @@
 # Personal — launch film
 
-The 45-second launch film for **Personal**, built in Remotion. One argument, told
+The 39-second launch film for **Personal**, built in Remotion. One argument, told
 once: *you are a creator, here is what's working, here is what happened to you,
 here is the post only you could have written.*
 
@@ -53,17 +53,19 @@ Props (`language`, `hasScore`) are typed and editable in the Studio sidebar.
 
 | frames | shot |
 | --- | --- |
-| 0–120 | Cold open, night. The field drifts, four points ignite, and the category lands: *Claude for personal brand.* |
-| 120–270 | The claim. *You're a creator. Not a content machine.* |
-| 270–330 | Turn to paper. A hard wipe with a signature hairline on its leading edge. |
-| 330–540 | 01 Understand — the product writes down what it read. |
-| 540–780 | 02 Discover — one account against its own average, and the one post beating it. |
-| 780–1020 | 03 Connect — a working format, held against a story you already lived. |
-| 1020–1230 | 04 Write — the draft, and the promise that it stays a draft. |
-| 1230–1350 | End card, night. The mark, the wordmark, the line. |
+| 0–105 | Cold open, night. The field drifts, four points ignite, and the category lands: *Claude for personal brand.* |
+| 105–223 | The claim. *You're a creator. Not a content machine.* |
+| 223–275 | Turn to paper. A hard wipe with a signature hairline on its leading edge. |
+| 275–435 | 01 Understand — Instagram connects, the read runs to forty, and the product writes down what it understood. |
+| 435–650 | 02 Discover — one account against its own average, and the one post beating it. |
+| 650–855 | 03 Connect — a working format, held against a story you already lived. |
+| 855–1045 | 04 Write — the draft, and the promise that it stays a draft. |
+| 1045–1160 | End card, night. The mark, the wordmark, the line. |
 
-Every one of those numbers lives in `src/timing.ts`, including the beats inside
-each scene. Retune the film there and nowhere else.
+Durations — not absolute marks — are the source of truth in `src/timing.ts`, so
+shortening one shot moves every shot after it without any other number needing to
+change. The beats inside each scene live there too. Retune the film there and
+nowhere else.
 
 ## How it is put together
 

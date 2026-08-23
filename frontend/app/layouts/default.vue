@@ -2,6 +2,7 @@
 const route = useRoute()
 const { user, loadUser, logout } = useAuth()
 const { launch } = useRemixLaunch()
+const { mailto: supportMailto } = useSupportEmail()
 const { t } = useI18n()
 const avatarFailed = ref(false)
 
@@ -91,7 +92,15 @@ const pageTitle = computed(() => {
       </nav>
 
       <div class="mt-auto">
-        <div class="flex items-center gap-3 rounded-[14px] px-2 py-2">
+        <a
+          :href="supportMailto"
+          class="flex items-center gap-3 rounded-[10px] px-3 py-2 text-[13.5px] text-[var(--muted)] transition hover:bg-[var(--sand-soft)] hover:text-[var(--ink)]"
+        >
+          <AppIcon name="chat" :size="17" />
+          {{ $t('support.nav') }}
+        </a>
+
+        <div class="mt-1 flex items-center gap-3 rounded-[14px] px-2 py-2">
           <img v-if="user?.avatar_url && !avatarFailed" :src="user.avatar_url" :alt="accountLabel" class="h-9 w-9 rounded-full object-cover" @error="avatarFailed = true">
           <div v-else class="grid h-9 w-9 place-items-center rounded-full bg-[var(--ink)] text-[var(--paper)]"><AppIcon name="user" :size="16" /></div>
           <div class="min-w-0 flex-1">

@@ -2,6 +2,7 @@
 const { status, loading, error, connect, loadStatus } = useInstagram()
 const { apiFetch } = usePersonalApi()
 const { user, loadUser, updateAccount, updatePassword, resendVerification } = useAuth()
+const { address: supportAddress, mailto: supportMailto } = useSupportEmail()
 const { t } = useI18n()
 const toast = useToast()
 const instagramAvatarFailed = ref(false)
@@ -183,6 +184,22 @@ watch(error, (message) => {
         <button class="ml-auto text-xs text-[var(--faint)] transition hover:text-[var(--danger)]" @click="disconnect">{{ $t('settings.disconnect') }}</button>
       </div>
       <button v-else class="mt-7 inline-flex h-11 items-center justify-center rounded-full b-btn-red px-5 text-[14px] font-medium transition disabled:opacity-60" :disabled="loading" @click="connect">{{ $t('settings.continueWithInstagram') }}</button>
+    </section>
+
+    <!-- Support -->
+    <section class="mt-5 rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-6 md:p-8">
+      <div class="flex items-start gap-4">
+        <span class="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-[var(--paper)] text-[var(--muted)]"><AppIcon name="chat" :size="19" /></span>
+        <div class="flex-1">
+          <h2 class="font-serif text-[26px] tracking-[-.02em]">{{ $t('support.title') }}</h2>
+          <p class="mt-2 text-sm leading-6 text-[var(--muted)]">{{ $t('support.copy') }}</p>
+          <a :href="supportMailto" class="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-full b-btn-red px-5 text-[14px] font-medium transition">
+            <AppIcon name="mail" :size="17" />
+            {{ $t('support.cta') }}
+          </a>
+          <p class="mt-3 text-xs text-[var(--faint)]">{{ $t('support.hint', { address: supportAddress }) }}</p>
+        </div>
+      </div>
     </section>
 
     <!-- Privacy -->

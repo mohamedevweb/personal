@@ -61,7 +61,7 @@ export const beats = {
      * sits still long enough to be read, and is gone before the claim enters —
      * the two statements never share the screen.
      */
-    category: 54,
+    category: 50,
     categoryOut: 90,
     categoryOutDuration: 12,
   },
