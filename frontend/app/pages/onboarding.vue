@@ -16,6 +16,8 @@ const saving = ref(false)
 const selected = ref<CreatorInspiration[]>([])
 const inspirationsLoaded = ref(false)
 const handleInput = ref('')
+const accountHandleInput = ref('')
+const handleSaving = ref(false)
 // Choosing inspirations does not need Instagram: a creator who skips the
 // connection still gets this step, so the first feed has something to build on.
 const connectionSkipped = ref(false)
@@ -24,20 +26,28 @@ const connectionSkipped = ref(false)
 // profile with no face on it, because the only part Personal reads is what the
 // posts did. The figures illustrate the shape of a profile — the card is
 // labelled an aperçu, never presented as the visitor's own account.
-const PREVIEW_TILES = [
+interface PreviewTile {
+  id: number
+  kind: 'carousel' | 'reel' | null
+  angle: number
+  light: number
+  outlier?: boolean
+}
+
+const PREVIEW_TILES: readonly PreviewTile[] = [
   { id: 1, kind: 'carousel', angle: 148, light: .085 },
   { id: 2, kind: null, angle: 32, light: .05 },
   { id: 3, kind: 'reel', outlier: true, angle: 200, light: .07 },
   { id: 4, kind: null, angle: 210, light: .065 },
   { id: 5, kind: 'reel', angle: 118, light: .045 },
   { id: 6, kind: 'carousel', angle: 60, light: .075 }
-] as const
+]
 
 // Each tile gets its own wash so the grid reads as six thumbnails rather than
 // six empty boxes. The angle and the amount of light are all that separate
 // them: enough at this size, and abstract enough that the card never pretends
 // to be showing anyone's actual photos.
-function tileWash(tile: (typeof PREVIEW_TILES)[number]) {
+function tileWash(tile: PreviewTile) {
   return `linear-gradient(${tile.angle}deg, rgba(255, 255, 255, ${tile.light}) 0%, rgba(255, 255, 255, .012) 70%)`
 }
 
@@ -81,9 +91,10 @@ watch(connectionError, (message) => {
 
 const onboarded = useState('personal-onboarded', () => false)
 
-// The favorites step opens once the import is done, or right away for a creator
-// who chose not to connect Instagram.
+// The favorites step opens once the import is done, or right away when a
+// creator provided their handle or chose not to connect Instagram.
 const showInspirations = computed(() => (status.value.connected && status.value.account?.sync_status === 'completed')
+  || (!status.value.connected && Boolean(status.value.instagram_username))
   || (!status.value.connected && connectionSkipped.value))
 
 const minimum = computed(() => inspirationData.value?.minimum ?? 3)
@@ -101,6 +112,7 @@ const availableCreators = computed(() => {
 
 const canContinue = computed(() => selected.value.length >= minimum.value && selected.value.length <= maximum.value)
 const parsedHandle = computed(() => parseHandle(handleInput.value))
+const parsedAccountHandle = computed(() => parseHandle(accountHandleInput.value))
 
 function isSelected(username: string) {
   return selected.value.some(creator => creator.username.toLowerCase() === username.toLowerCase())
@@ -225,6 +237,29 @@ async function saveInspirations() {
   }
 }
 
+async function saveAccountHandle() {
+  const username = parsedAccountHandle.value
+  if (!username || handleSaving.value) {
+    if (accountHandleInput.value.trim()) toast.error(t('onboarding.handleError'))
+    return
+  }
+
+  handleSaving.value = true
+
+  try {
+    const response = await apiFetch<{ instagram_username: string }>('/api/integrations/instagram/handle', {
+      method: 'PUT',
+      body: { username }
+    })
+    status.value.instagram_username = response.instagram_username
+    await loadInspirations()
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('onboarding.handleSaveError')))
+  } finally {
+    handleSaving.value = false
+  }
+}
+
 watch(() => status.value.account?.sync_status, (syncStatus) => {
   if (status.value.connected && syncStatus === 'completed') void loadInspirations()
 })
@@ -251,7 +286,7 @@ function skipInspirations() {
 
 onMounted(async () => {
   await loadStatus()
-  if (status.value.connected && status.value.account?.sync_status === 'completed') {
+  if (showInspirations.value) {
     await loadInspirations()
   }
   if (route.query.instagram === 'connected' || (status.value.connected && status.value.account?.sync_status !== 'completed')) {
@@ -279,7 +314,7 @@ onMounted(async () => {
           {{ $t('onboarding.eyebrow') }}
         </div>
 
-        <template v-if="!status.connected && !connectionSkipped">
+        <template v-if="!status.connected && !status.instagram_username && !connectionSkipped">
           <h1 class="font-serif text-5xl leading-[1.02] tracking-[-0.045em] md:text-7xl" v-html="$t('onboarding.connectTitle')" />
           <p class="mt-7 max-w-lg text-[17px] leading-7 text-[var(--muted)]">
             {{ $t('onboarding.connectCopy') }}
@@ -304,6 +339,41 @@ onMounted(async () => {
             {{ $t('onboarding.tokenNote') }}
           </p>
 
+          <div class="my-8 flex items-center gap-4 text-xs font-medium uppercase tracking-[.16em] text-[var(--faint)]">
+            <span class="h-px flex-1 bg-[var(--line)]" />
+            {{ $t('onboarding.or') }}
+            <span class="h-px flex-1 bg-[var(--line)]" />
+          </div>
+
+          <form class="rounded-[20px] border border-[var(--line)] bg-[var(--surface)] p-5" @submit.prevent="saveAccountHandle">
+            <label for="instagram-account-handle" class="block text-sm font-semibold">
+              {{ $t('onboarding.handleTitle') }}
+            </label>
+            <p class="mt-1.5 text-[13px] leading-5 text-[var(--muted)]">
+              {{ $t('onboarding.handleCopy') }}
+            </p>
+            <div class="mt-4 flex flex-col gap-2 sm:flex-row">
+              <input
+                id="instagram-account-handle"
+                v-model="accountHandleInput"
+                type="text"
+                autocomplete="off"
+                autocapitalize="none"
+                spellcheck="false"
+                class="min-w-0 flex-1 rounded-full border border-[var(--line)] bg-[var(--paper)] px-5 py-3 text-sm outline-none transition focus:border-[var(--ink)]"
+                :placeholder="$t('onboarding.handlePlaceholder')"
+                :aria-label="$t('onboarding.handleLabel')"
+              >
+              <button
+                type="submit"
+                class="rounded-full bg-[var(--ink)] px-5 py-3 text-sm font-medium text-white transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40"
+                :disabled="!parsedAccountHandle || handleSaving"
+              >
+                {{ handleSaving ? $t('onboarding.savingHandle') : $t('onboarding.saveHandle') }}
+              </button>
+            </div>
+          </form>
+
           <button
             type="button"
             class="mt-8 text-sm text-[var(--faint)] underline decoration-[var(--line)] underline-offset-4 transition hover:text-[var(--ink)]"
@@ -317,6 +387,11 @@ onMounted(async () => {
           <div v-if="status.connected" class="mb-8 inline-flex items-center gap-3 rounded-full border border-[var(--line)] bg-[var(--surface)] py-2 pl-2 pr-4">
             <span class="grid h-8 w-8 place-items-center rounded-full bg-[var(--paper)] text-xs">IG</span>
             <span class="text-sm font-medium">Instagram {{ $t('onboarding.connectedSuffix') }}</span>
+            <span class="text-[var(--positive)]">✓</span>
+          </div>
+          <div v-else-if="status.instagram_username" class="mb-8 inline-flex items-center gap-3 rounded-full border border-[var(--line)] bg-[var(--surface)] py-2 pl-2 pr-4">
+            <span class="grid h-8 w-8 place-items-center rounded-full bg-[var(--paper)] text-xs">IG</span>
+            <span class="text-sm font-medium">@{{ status.instagram_username }} {{ $t('onboarding.handleSuffix') }}</span>
             <span class="text-[var(--positive)]">✓</span>
           </div>
 
@@ -466,7 +541,7 @@ onMounted(async () => {
         </div>
 
         <p class="text-[10px] font-semibold uppercase tracking-[.22em] text-[var(--b-red-lit)]">
-          {{ status.connected ? $t('onboarding.profileLive') : $t('onboarding.preview.label') }}
+          {{ status.connected ? $t('onboarding.profileLive') : status.instagram_username ? $t('onboarding.profileProvided') : $t('onboarding.preview.label') }}
         </p>
 
         <div v-if="status.connected" class="mt-12 space-y-1">
@@ -490,7 +565,9 @@ onMounted(async () => {
              account's own average, which is the first thing Personal looks
              for once the connection is made. -->
         <div v-else class="mt-10">
-          <p class="font-display text-[26px] leading-none tracking-[-.02em]">{{ $t('onboarding.preview.handle') }}</p>
+          <p class="font-display text-[26px] leading-none tracking-[-.02em]">
+            {{ status.instagram_username ? `@${status.instagram_username}` : $t('onboarding.preview.handle') }}
+          </p>
           <p class="mt-3 max-w-[19rem] text-[12.5px] leading-[1.6] text-white/45">{{ $t('onboarding.preview.bio') }}</p>
 
           <dl class="mt-7 flex gap-8 border-y border-white/10 py-4">

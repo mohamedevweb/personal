@@ -135,6 +135,38 @@ class InstagramOAuthTest extends TestCase
         $this->assertStringNotContainsString('must-never-leak', $response->getContent());
     }
 
+    public function test_user_can_provide_a_handle_without_connecting_oauth(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->putJson('/api/integrations/instagram/handle', [
+            'username' => '@manual.creator',
+        ])->assertOk()->assertJsonPath('instagram_username', 'manual.creator');
+
+        $this->assertDatabaseHas('creator_profiles', [
+            'user_id' => $user->id,
+            'instagram_username' => 'manual.creator',
+        ]);
+        $this->assertDatabaseCount('instagram_accounts', 0);
+
+        $this->actingAs($user)->getJson('/api/integrations/instagram/status')
+            ->assertOk()
+            ->assertJsonPath('connected', false)
+            ->assertJsonPath('instagram_username', 'manual.creator')
+            ->assertJsonPath('onboarding_complete', false);
+    }
+
+    public function test_manual_handle_must_be_a_valid_instagram_username(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->putJson('/api/integrations/instagram/handle', [
+            'username' => 'invalid handle',
+        ])->assertUnprocessable()->assertJsonValidationErrors('username');
+
+        $this->assertDatabaseCount('creator_profiles', 0);
+    }
+
     public function test_user_can_disconnect_and_delete_stored_credentials(): void
     {
         $user = User::factory()->create();

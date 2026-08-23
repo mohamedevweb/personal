@@ -160,6 +160,25 @@ class CreatorInspirationTest extends TestCase
         $this->assertDatabaseCount('user_creator_inspirations', 0);
     }
 
+    public function test_manual_handle_completes_onboarding_after_selecting_inspirations(): void
+    {
+        Queue::fake();
+        $this->user->creatorProfile()->update(['instagram_username' => 'personal_user']);
+        $this->creator('first_creator');
+        $this->creator('second_creator');
+        $this->creator('third_creator');
+
+        $this->actingAs($this->user)->putJson('/api/creator-inspirations', [
+            'handles' => ['first_creator', 'second_creator', 'third_creator'],
+        ])->assertOk()->assertJsonPath('onboarding_complete', true);
+
+        $this->actingAs($this->user)->getJson('/api/integrations/instagram/status')
+            ->assertOk()
+            ->assertJsonPath('connected', false)
+            ->assertJsonPath('instagram_username', 'personal_user')
+            ->assertJsonPath('onboarding_complete', true);
+    }
+
     public function test_selection_rejects_more_than_six_handles(): void
     {
         $handles = ['one', 'two', 'three', 'four', 'five', 'six', 'seven'];

@@ -29,6 +29,7 @@ export interface CreatorProfile {
 
 export interface InstagramStatusResponse {
   connected: boolean
+  instagram_username?: string | null
   inspiration_count: number
   onboarding_complete: boolean
   account?: InstagramAccount

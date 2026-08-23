@@ -19,6 +19,7 @@ class InstagramConnectionController extends Controller
     public function status(Request $request): JsonResponse
     {
         $inspirationCount = $request->user()->inspirationCreators()->count();
+        $profile = $request->user()->creatorProfile()->first();
         $account = $request->user()->instagramAccount()
             ->withCount(['media as imported_media_count'])
             ->first();
@@ -26,15 +27,16 @@ class InstagramConnectionController extends Controller
         if (! $account) {
             return response()->json([
                 'connected' => false,
+                'instagram_username' => $profile?->instagram_username,
                 'inspiration_count' => $inspirationCount,
-                'onboarding_complete' => false,
+                'onboarding_complete' => filled($profile?->instagram_username)
+                    && $inspirationCount >= CreatorInspirationService::MINIMUM_SELECTION,
             ]);
         }
 
-        $profile = $request->user()->creatorProfile()->first();
-
         return response()->json([
             'connected' => true,
+            'instagram_username' => $account->username,
             'inspiration_count' => $inspirationCount,
             'onboarding_complete' => $account->sync_status === 'completed' && $inspirationCount >= CreatorInspirationService::MINIMUM_SELECTION,
             'account' => [
@@ -58,6 +60,21 @@ class InstagramConnectionController extends Controller
                 'dna_analyzed_at' => $profile->dna_analyzed_at,
             ] : null,
         ]);
+    }
+
+    public function storeHandle(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'username' => ['required', 'string', 'max:31', 'regex:/^@?[A-Za-z0-9._]{1,30}$/'],
+        ]);
+
+        $username = ltrim($data['username'], '@');
+        $request->user()->creatorProfile()->updateOrCreate(
+            ['user_id' => $request->user()->id],
+            ['instagram_username' => $username],
+        );
+
+        return response()->json(['instagram_username' => $username]);
     }
 
     public function sync(Request $request): JsonResponse

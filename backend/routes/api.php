@@ -65,6 +65,7 @@ Route::get('/media/creator/{creator}', [MediaController::class, 'creator'])
 Route::middleware(['auth:sanctum', 'verified'])->prefix('integrations/instagram')->group(function (): void {
     Route::get('/authorize', [InstagramConnectionController::class, 'authorize']);
     Route::get('/status', [InstagramConnectionController::class, 'status']);
+    Route::put('/handle', [InstagramConnectionController::class, 'storeHandle']);
     Route::post('/sync', [InstagramConnectionController::class, 'sync']);
     Route::delete('/', [InstagramConnectionController::class, 'disconnect']);
 });

@@ -113,7 +113,7 @@ class CreatorInspirationService
 
         $remoteResults = $remote
             ->reject(fn (DiscoveredProfile $profile): bool => $profile->isPrivate)
-            ->reject(fn (DiscoveredProfile $profile): bool => Str::lower($profile->username) === Str::lower((string) $user->instagramAccount?->username))
+            ->reject(fn (DiscoveredProfile $profile): bool => Str::lower($profile->username) === Str::lower($this->ownInstagramUsername($user)))
             ->map(fn (DiscoveredProfile $profile): array => $this->renderProfile($profile))
             ->values();
 
@@ -174,7 +174,7 @@ class CreatorInspirationService
 
     private function resolveCreator(User $user, string $handle): Creator
     {
-        if (Str::lower($handle) === Str::lower((string) $user->instagramAccount?->username)) {
+        if (Str::lower($handle) === Str::lower($this->ownInstagramUsername($user))) {
             throw ValidationException::withMessages(['handles' => ['Your own Instagram account cannot be selected.']]);
         }
 
@@ -318,5 +318,10 @@ class CreatorInspirationService
     private function profileCacheKey(string $username): string
     {
         return 'creator-inspiration-profile:'.Str::lower($username);
+    }
+
+    private function ownInstagramUsername(User $user): string
+    {
+        return (string) ($user->instagramAccount?->username ?? $user->creatorProfile?->instagram_username);
     }
 }

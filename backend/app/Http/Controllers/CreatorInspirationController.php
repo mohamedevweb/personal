@@ -36,10 +36,12 @@ class CreatorInspirationController extends Controller
 
         $selected = $inspirations->select($request->user(), $data['handles']);
         $account = $request->user()->instagramAccount()->first();
+        $profile = $request->user()->creatorProfile()->first();
 
         return response()->json([
             'selected' => $selected,
-            'onboarding_complete' => $account?->sync_status === 'completed' && count($selected) >= CreatorInspirationService::MINIMUM_SELECTION,
+            'onboarding_complete' => ($account?->sync_status === 'completed' || filled($profile?->instagram_username))
+                && count($selected) >= CreatorInspirationService::MINIMUM_SELECTION,
         ]);
     }
 }
