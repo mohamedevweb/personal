@@ -120,12 +120,6 @@
       "eyebrow": "How it works",
       "title": "We learn you by heart. Then we write.",
       "mediaLabel": "Personal, step by step",
-      "screens": {
-        "personal": "Personal",
-        "feed": "For You",
-        "moments": "Moments",
-        "remix": "Remix"
-      },
       "steps": {
         "understand": {
           "title": "Understand",
@@ -149,94 +143,20 @@
         }
       },
       "profile": {
-        "label": "What Personal understood",
         "source": "{count} posts read",
-        "niche": "Niche",
-        "nicheValue": "Independent product building",
-        "audience": "Audience",
-        "audienceValue": "Solo founders, ages 22 to 34",
-        "tone": "Tone",
-        "toneValue": "Direct · honest · deadpan",
-        "positioning": "Positioning",
-        "positioningValue": "Builds in public, shows the mess",
-        "correct": "Wrong about something? Say so in one sentence and Personal rewrites the read.",
-        "edit": "Edit memory",
-        "topics": "Topics",
-        "topicsValue": "Pricing, first clients, setbacks",
-        "goals": "Goals",
-        "goalsValue": "Sell without playing a part",
-        "strengths": "Content strengths",
-        "strengthsValue": "Your best posts all start from a decision you almost didn’t make."
-      },
-      "outliers": {
-        "items": {
-          "one": {
-            "hook": "The pricing mistake that cost me 8 months",
-            "views": "352K",
-            "ratio": "8.4",
-            "handle": "founderframes",
-            "date": "2d ago",
-            "followers": "61.2K",
-            "likes": "23.9K"
-          },
-          "two": {
-            "hook": "Nobody tells you this about your first 1,000",
-            "views": "180K",
-            "ratio": "5.1",
-            "handle": "lena.builds",
-            "date": "4d ago",
-            "followers": "18.4K",
-            "likes": "11.2K"
-          },
-          "three": {
-            "hook": "I rebuilt my whole onboarding in a weekend",
-            "views": "121K",
-            "ratio": "3.7",
-            "handle": "marc.oss",
-            "date": "5d ago",
-            "followers": "9.7K",
-            "likes": "6.1K"
-          },
-          "four": {
-            "hook": "The question I ask on every sales call",
-            "views": "244K",
-            "ratio": "6.9",
-            "handle": "studio.nova",
-            "date": "1d ago",
-            "followers": "34.8K",
-            "likes": "15.4K"
-          },
-          "five": {
-            "hook": "I cut half my offer. Revenue doubled.",
-            "views": "96K",
-            "ratio": "4.3",
-            "handle": "claire.writes",
-            "date": "3d ago",
-            "followers": "7.1K",
-            "likes": "4.8K"
-          },
-          "six": {
-            "hook": "Three years to understand what I actually sell",
-            "views": "412K",
-            "ratio": "3.2",
-            "handle": "yanis.co",
-            "date": "6d ago",
-            "followers": "104K",
-            "likes": "31.6K"
-          }
+        "connect": "Connect",
+        "reads": {
+          "niche": "Solo product building",
+          "tone": "Direct, no fluff",
+          "audience": "Solo founders"
         }
       },
+      "outliers": {
+        "overAverage": "above this account’s own average",
+        "handle": "founderframes"
+      },
       "connect": {
-        "patternLabel": "Pattern in your niche",
         "patternQuote": "“The decision I almost didn't make…”",
-        "verdict": "This format is working right now, and something that happened to you this week fits it unusually well.",
-        "reasons": {
-          "one": "strong transformation",
-          "two": "personal",
-          "three": "builds your credibility",
-          "four": "numbers to back it",
-          "five": "rarely told"
-        },
         "moments": {
           "first": {
             "date": "Tuesday",
@@ -246,40 +166,21 @@
             "date": "Thursday",
             "quote": "“First five-figure month, and I told nobody.”"
           }
-        },
-        "pick": "Score this Moment"
+        }
       },
       "draft": {
-        "voice": "Your voice",
-        "source": "Built from your Tuesday Moment and a format outperforming in your niche right now.",
         "beats": {
           "hook": {
-            "label": "Hook",
             "value": "“I almost turned down my first €10k client.”"
-          },
-          "two": {
-            "label": "Beat 2",
-            "value": "Why I didn't think I was ready, and what I was really afraid of."
-          },
-          "three": {
-            "label": "Beat 3",
-            "value": "The one line from my co-founder that made me send the email anyway."
-          },
-          "close": {
-            "label": "Close",
-            "value": "What that single project paid for, two years later."
           }
         },
-        "views": {
+        "marks": {
           "caption": "Caption",
-          "carousel": "Slides",
-          "reel": "Shot list"
-        },
-        "runtime": "24s",
-        "characters": "{count} characters"
+          "carousel": "Cover",
+          "reel": "0:00"
+        }
       },
-      "tryIt": "These four screens are the app. Everything on them is clickable.",
-      "open": "Open Personal"
+      "tryIt": "Everything here is live. Try it."
     },
     "faq": {
       "eyebrow": "FAQ",

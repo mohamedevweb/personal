@@ -6,7 +6,6 @@ const route = useRoute()
 const { apiFetch } = usePersonalApi()
 const { t } = useI18n()
 const toast = useToast()
-const { begin: beginRemix, attach: attachRemix, clear: clearRemix } = useRemixLaunch()
 const post = ref<ContentPost | null>(null)
 const moments = ref<LifeMoment[]>([])
 const format = ref<'reel' | 'carousel' | 'caption'>('carousel')
@@ -43,24 +42,12 @@ async function requestAnalysis() {
 async function createRemix() {
   if (!post.value) return
   generating.value = true
-  const moment = moments.value.find(item => item.id === selectedMoment.value)
   try {
-    const response = await apiFetch<{ remix: { id: number, status: string } }>(`/api/content/${post.value.id}/remix`, {
+    const response = await apiFetch<{ remix: { id: number } }>(`/api/content/${post.value.id}/remix`, {
       method: 'POST', body: { format: format.value, life_moment_id: selectedMoment.value }
     })
-    /* An existing draft comes back untouched; only a generation that actually
-       starts now earns the stage. */
-    if (response.remix.status === 'generating') {
-      beginRemix({
-        format: format.value,
-        sourceHook: post.value.hook,
-        moment: moment?.content || null
-      })
-      attachRemix(response.remix.id)
-    }
     await navigateTo(`/remix/${response.remix.id}`)
   } catch (exception: unknown) {
-    clearRemix()
     toast.error(apiErrorMessage(exception, t('feed.remixError')))
   } finally { generating.value = false }
 }

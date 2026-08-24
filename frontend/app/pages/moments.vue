@@ -4,7 +4,6 @@ import type { LifeMoment } from '~/types/product'
 const { apiFetch } = usePersonalApi()
 const { locale, t } = useI18n()
 const toast = useToast()
-const { begin: beginRemix, attach: attachRemix, clear: clearRemix } = useRemixLaunch()
 const moments = ref<LifeMoment[]>([])
 const loading = ref(true)
 const modalOpen = ref(false)
@@ -59,16 +58,9 @@ async function removeMoment(moment: LifeMoment) {
 
 async function turnIntoContent(moment: LifeMoment) {
   try {
-    const response = await apiFetch<{ remix: { id: number, status: string } }>(`/api/moments/${moment.id}/create-content`, { method: 'POST', body: { format: 'carousel' } })
-    /* A moment already turned into a draft reopens it, and reopening is not
-       something to play a generation stage over. */
-    if (response.remix.status === 'generating') {
-      beginRemix({ format: 'carousel', sourceHook: null, moment: moment.content })
-      attachRemix(response.remix.id)
-    }
+    const response = await apiFetch<{ remix: { id: number } }>(`/api/moments/${moment.id}/create-content`, { method: 'POST', body: { format: 'carousel' } })
     await navigateTo(`/remix/${response.remix.id}`)
   } catch (exception: unknown) {
-    clearRemix()
     toast.error(apiErrorMessage(exception, t('create.draftError')))
   }
 }

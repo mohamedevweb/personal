@@ -118,8 +118,10 @@ onUnmounted(() => observer?.disconnect())
             :active="index <= active"
           />
 
-          <!-- The screen. Not a diagram of the step: the step, in the app. -->
-          <div class="relative mx-auto max-w-[940px]">
+          <!-- The frame. One object doing one thing rather than a screen full
+               of them: the step is the point, and everything the app also
+               happens to draw would only bury it. -->
+          <div class="relative mx-auto max-w-[680px]">
             <div
               class="b-glow-blob pointer-events-none absolute -inset-8 -z-10 transition-opacity duration-700"
               :class="index === active ? 'opacity-70' : 'opacity-0'"
@@ -127,11 +129,9 @@ onUnmounted(() => observer?.disconnect())
             />
 
             <LandingMedia :src="LANDING_CLIPS[step.key]" :label="$t('landing.how.mediaLabel')">
-              <!-- The screen runs its own read the moment the step becomes the
-                   one being read, and not before: four screens animating at
-                   once is noise, and a screen that finished before you arrived
-                   has shown you nothing. -->
-              <component :is="step.mock" :active="index === active" />
+              <!-- The frame tells the visual when it has been reached, so the
+                   step runs its own move at the moment it is looked at. -->
+              <component :is="step.mock" />
             </LandingMedia>
           </div>
         </template>

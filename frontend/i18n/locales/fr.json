@@ -120,12 +120,6 @@
       "eyebrow": "Comment ça marche",
       "title": "On vous apprend par cœur. Puis on écrit.",
       "mediaLabel": "Personal, étape par étape",
-      "screens": {
-        "personal": "Personal",
-        "feed": "Pour vous",
-        "moments": "Moments",
-        "remix": "Remix"
-      },
       "steps": {
         "understand": {
           "title": "Comprendre",
@@ -149,94 +143,20 @@
         }
       },
       "profile": {
-        "label": "Ce que Personal a compris",
         "source": "{count} posts lus",
-        "niche": "Niche",
-        "nicheValue": "Création de produits en indépendant",
-        "audience": "Audience",
-        "audienceValue": "Fondateurs solo, 22 à 34 ans",
-        "tone": "Ton",
-        "toneValue": "Direct · honnête · pince-sans-rire",
-        "positioning": "Positionnement",
-        "positioningValue": "Construit en public, montre le bazar",
-        "correct": "Une erreur ? Dites-le en une phrase et Personal réécrit sa lecture.",
-        "edit": "Modifier la mémoire",
-        "topics": "Sujets",
-        "topicsValue": "Pricing, premiers clients, revers",
-        "goals": "Objectifs",
-        "goalsValue": "Vendre sans jouer un rôle",
-        "strengths": "Points forts de contenu",
-        "strengthsValue": "Vos meilleurs posts partent tous d’une décision que vous avez failli ne pas prendre."
-      },
-      "outliers": {
-        "items": {
-          "one": {
-            "hook": "L'erreur de prix qui m'a coûté 8 mois",
-            "views": "352K",
-            "ratio": "8,4",
-            "handle": "founderframes",
-            "date": "il y a 2 j",
-            "followers": "61,2 k",
-            "likes": "23,9 k"
-          },
-          "two": {
-            "hook": "Personne ne vous dit ça sur vos 1 000 premiers",
-            "views": "180K",
-            "ratio": "5,1",
-            "handle": "lena.builds",
-            "date": "il y a 4 j",
-            "followers": "18,4 k",
-            "likes": "11,2 k"
-          },
-          "three": {
-            "hook": "J'ai refait tout mon onboarding en un week-end",
-            "views": "121K",
-            "ratio": "3,7",
-            "handle": "marc.oss",
-            "date": "il y a 5 j",
-            "followers": "9,7 k",
-            "likes": "6,1 k"
-          },
-          "four": {
-            "hook": "La question que je pose à chaque appel de vente",
-            "views": "244K",
-            "ratio": "6,9",
-            "handle": "studio.nova",
-            "date": "il y a 1 j",
-            "followers": "34,8 k",
-            "likes": "15,4 k"
-          },
-          "five": {
-            "hook": "J’ai supprimé la moitié de mon offre. Le chiffre a doublé.",
-            "views": "96K",
-            "ratio": "4,3",
-            "handle": "claire.writes",
-            "date": "il y a 3 j",
-            "followers": "7,1 k",
-            "likes": "4,8 k"
-          },
-          "six": {
-            "hook": "Trois ans pour comprendre ce que je vends vraiment",
-            "views": "412K",
-            "ratio": "3,2",
-            "handle": "yanis.co",
-            "date": "il y a 6 j",
-            "followers": "104 k",
-            "likes": "31,6 k"
-          }
+        "connect": "Connecter",
+        "reads": {
+          "niche": "Produits en solo",
+          "tone": "Direct, sans détour",
+          "audience": "Fondateurs solo"
         }
       },
+      "outliers": {
+        "overAverage": "au-dessus de la moyenne de ce compte",
+        "handle": "founderframes"
+      },
       "connect": {
-        "patternLabel": "Motif dans votre niche",
         "patternQuote": "« La décision que j'ai failli ne pas prendre… »",
-        "verdict": "Ce format marche en ce moment, et quelque chose qui vous est arrivé cette semaine y colle particulièrement bien.",
-        "reasons": {
-          "one": "transformation forte",
-          "two": "personnel",
-          "three": "renforce votre crédibilité",
-          "four": "preuve chiffrée",
-          "five": "rarement raconté"
-        },
         "moments": {
           "first": {
             "date": "mardi",
@@ -246,40 +166,21 @@
             "date": "jeudi",
             "quote": "« Premier mois à cinq chiffres, et je n’ai rien dit à personne. »"
           }
-        },
-        "pick": "Scorer ce Moment"
+        }
       },
       "draft": {
-        "voice": "Votre voix",
-        "source": "Construit à partir de votre Moment de mardi et d'un format qui surperforme dans votre niche en ce moment.",
         "beats": {
           "hook": {
-            "label": "Accroche",
             "value": "« J'ai failli refuser mon premier client à 10 k€. »"
-          },
-          "two": {
-            "label": "Temps 2",
-            "value": "Pourquoi je ne me sentais pas prêt, et ce dont j'avais vraiment peur."
-          },
-          "three": {
-            "label": "Temps 3",
-            "value": "La phrase de mon associé qui m'a fait envoyer l'e-mail quand même."
-          },
-          "close": {
-            "label": "Chute",
-            "value": "Ce que ce seul projet a payé, deux ans plus tard."
           }
         },
-        "views": {
+        "marks": {
           "caption": "Légende",
-          "carousel": "Slides",
-          "reel": "Plan de tournage"
-        },
-        "runtime": "24 s",
-        "characters": "{count} caractères"
+          "carousel": "Couverture",
+          "reel": "0:00"
+        }
       },
-      "tryIt": "Ces quatre écrans sont l’app. Tout y est cliquable.",
-      "open": "Ouvrir Personal"
+      "tryIt": "Tout ici est vivant. Essayez."
     },
     "faq": {
       "eyebrow": "FAQ",

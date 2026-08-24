@@ -18,7 +18,6 @@ const route = useRoute()
 const { apiFetch } = usePersonalApi()
 const { t } = useI18n()
 const toast = useToast()
-const { launch, begin: beginRemix, attach: attachRemix, clear: clearRemix } = useRemixLaunch()
 
 const remix = ref<Remix | null>(null)
 const loading = ref(true)
@@ -29,13 +28,10 @@ const retrying = ref(false)
 /** A rewrite discards the draft, so the button asks once before it fires. */
 const confirmingRedraft = ref(false)
 const sourceAvatarFailed = ref(false)
-const revealing = ref(false)
 /** The last payload the server acknowledged, used to tell edited from saved. */
 const pristine = ref('')
 let remixTimer: ReturnType<typeof setTimeout> | undefined
-let revealTimer: ReturnType<typeof setTimeout> | undefined
 let confirmTimer: ReturnType<typeof setTimeout> | undefined
-const generationFallbackStartedAt = Date.now()
 
 const tabs = ref<HTMLButtonElement[]>([])
 const slideInputs = ref<HTMLTextAreaElement[]>([])
@@ -43,19 +39,13 @@ const slideInputs = ref<HTMLTextAreaElement[]>([])
 const slides = computed(() => remix.value?.generated_content.slides ?? [])
 const caption = computed(() => remix.value?.generated_content.caption ?? '')
 const isReady = computed(() => remix.value?.status === 'ready')
-const activeLaunch = computed(() => {
-  if (!launch.value) return null
-  const routeId = Number(route.params.id)
-  return launch.value.remixId === null || launch.value.remixId === routeId ? launch.value : null
-})
-const generationFormat = computed(() => switching.value || remix.value?.format || activeLaunch.value?.format || 'carousel')
-const generationSource = computed(() => activeLaunch.value?.sourceHook || remix.value?.source_content?.hook || null)
-const generationMoment = computed(() => activeLaunch.value?.moment || remix.value?.life_moment?.content || null)
-const generationStartedAt = computed(() => {
-  if (activeLaunch.value) return activeLaunch.value.startedAt
-  if (remix.value?.created_at) return new Date(remix.value.created_at).getTime()
-  return generationFallbackStartedAt
-})
+/* Loading the page and waiting on the writer look the same to a reader, so they
+   are one state: the draft, greyed out, in the shape it is about to take. */
+const pending = computed(() => loading.value
+  || Boolean(switching.value)
+  || retrying.value
+  || remix.value?.status === 'generating')
+const pendingFormat = computed(() => switching.value || remix.value?.format || 'carousel')
 const sourceCreatorInitial = computed(() => remix.value?.source_content?.creator.username.charAt(0).toUpperCase() || '')
 const dirty = computed(() => {
   if (!remix.value || !['draft', 'ready'].includes(remix.value.status)) return false
@@ -178,21 +168,8 @@ async function switchFormat(format: Format) {
       `/api/content/${remix.value.source_content?.id}/remix`,
       { method: 'POST', body: { format, life_moment_id: remix.value.life_moment?.id ?? null } }
     )
-    /* The server hands back the draft this shape already has, if there is one.
-       Only work that actually starts now earns the generation stage. */
-    if (response.remix.status === 'generating') {
-      beginRemix({
-        format,
-        sourceHook: remix.value.source_content?.hook || remix.value.generated_content.original_pattern,
-        moment: remix.value.life_moment?.content || remix.value.generated_content.your_context
-      })
-      attachRemix(response.remix.id)
-    } else {
-      clearRemix()
-    }
     await navigateTo(`/remix/${response.remix.id}`)
   } catch (exception: unknown) {
-    clearRemix()
     toast.error(apiErrorMessage(exception, t('remix.switchError')))
     switching.value = null
   }
@@ -238,24 +215,13 @@ function scheduleRemixPoll(delay = 650) {
 
 async function loadRemix(initial = true) {
   try {
-    const wasGenerating = remix.value?.status === 'generating' || Boolean(activeLaunch.value)
     const response = await apiFetch<{ remix: Remix }>(`/api/remixes/${route.params.id}`)
     remix.value = response.remix
     sourceAvatarFailed.value = false
     if (response.remix.status === 'generating') {
       scheduleRemixPoll()
-    } else if (response.remix.status === 'failed') {
-      clearRemix()
-    } else {
+    } else if (response.remix.status !== 'failed') {
       pristine.value = JSON.stringify(response.remix.generated_content)
-      if (wasGenerating) {
-        revealing.value = true
-        clearTimeout(revealTimer)
-        revealTimer = setTimeout(() => {
-          revealing.value = false
-          clearRemix()
-        }, 650)
-      }
     }
   } catch (exception: unknown) {
     if (initial) {
@@ -271,18 +237,11 @@ async function loadRemix(initial = true) {
 async function retryGeneration() {
   if (!remix.value || retrying.value) return
   retrying.value = true
-  beginRemix({
-    format: remix.value.format,
-    sourceHook: remix.value.source_content?.hook || null,
-    moment: remix.value.life_moment?.content || null
-  })
-  attachRemix(remix.value.id)
   try {
     const response = await apiFetch<{ remix: Remix }>(`/api/remixes/${remix.value.id}/retry`, { method: 'POST' })
     remix.value = response.remix
     scheduleRemixPoll(500)
   } catch (exception: unknown) {
-    clearRemix()
     toast.error(apiErrorMessage(exception, t('remix.retryError')))
   } finally {
     retrying.value = false
@@ -311,11 +270,9 @@ onMounted(async () => {
 watch(() => route.params.id, async (id, previousId) => {
   if (id === previousId) return
   clearTimeout(remixTimer)
-  clearTimeout(revealTimer)
   loading.value = true
   remix.value = null
   switching.value = null
-  revealing.value = false
   confirmingRedraft.value = false
   await loadRemix()
 })
@@ -323,53 +280,16 @@ watch(() => route.params.id, async (id, previousId) => {
 onBeforeUnmount(() => {
   window.removeEventListener('beforeunload', guardUnload)
   clearTimeout(remixTimer)
-  clearTimeout(revealTimer)
   clearTimeout(confirmTimer)
-  clearRemix()
 })
 </script>
 
 <template>
   <main class="pb-24">
-    <RemixGenerationStage
-      v-if="(switching || retrying) && activeLaunch"
-      :format="generationFormat"
-      :source-hook="generationSource"
-      :moment="generationMoment"
-      :started-at="generationStartedAt"
-    />
-
-    <RemixGenerationStage
-      v-else-if="revealing"
-      :format="generationFormat"
-      :source-hook="generationSource"
-      :moment="generationMoment"
-      :started-at="generationStartedAt"
-      complete
-    />
-
-    <RemixGenerationStage
-      v-else-if="loading && activeLaunch"
-      :format="generationFormat"
-      :source-hook="generationSource"
-      :moment="generationMoment"
-      :started-at="generationStartedAt"
-    />
-
-    <div v-else-if="loading" class="page-shell pt-8">
-      <div class="h-9 w-52 animate-pulse rounded-full bg-[var(--sand-soft)]" />
-      <div class="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_312px]">
-        <div class="h-[460px] animate-pulse rounded-[18px] bg-[var(--sand-soft)]" />
-        <div class="h-72 animate-pulse rounded-[18px] bg-[var(--sand-soft)]" />
-      </div>
-    </div>
-
-    <RemixGenerationStage
-      v-else-if="remix?.status === 'generating'"
-      :format="generationFormat"
-      :source-hook="generationSource"
-      :moment="generationMoment"
-      :started-at="generationStartedAt"
+    <RemixDraftSkeleton
+      v-if="pending"
+      :format="pendingFormat"
+      :generating="!loading || remix?.status === 'generating'"
     />
 
     <section v-else-if="remix?.status === 'failed'" class="page-shell pt-16 text-center">

@@ -4,7 +4,6 @@ import type { LifeMoment, Opportunity, Remix } from '~/types/product'
 const { apiFetch } = usePersonalApi()
 const { t } = useI18n()
 const toast = useToast()
-const { begin: beginRemix, attach: attachRemix, clear: clearRemix } = useRemixLaunch()
 const opportunities = ref<Opportunity[]>([])
 const moments = ref<LifeMoment[]>([])
 const selectedMomentId = ref<number | null>(null)
@@ -62,16 +61,9 @@ async function createFromMoment(moment: LifeMoment, format: Remix['format']) {
   if (drafting.value) return
   drafting.value = true
   try {
-    const response = await apiFetch<{ remix: { id: number, status: string } }>(`/api/moments/${moment.id}/create-content`, { method: 'POST', body: { format } })
-    /* An existing draft comes back untouched; only a generation that actually
-       starts now earns the stage. */
-    if (response.remix.status === 'generating') {
-      beginRemix({ format, sourceHook: null, moment: moment.content })
-      attachRemix(response.remix.id)
-    }
+    const response = await apiFetch<{ remix: { id: number } }>(`/api/moments/${moment.id}/create-content`, { method: 'POST', body: { format } })
     await navigateTo(`/remix/${response.remix.id}`)
   } catch (exception: unknown) {
-    clearRemix()
     toast.error(apiErrorMessage(exception, t('create.draftError')))
   } finally {
     drafting.value = false

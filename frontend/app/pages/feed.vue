@@ -4,7 +4,6 @@ import type { ContentPost } from '~/types/product'
 const { apiFetch } = usePersonalApi()
 const { t } = useI18n()
 const toast = useToast()
-const { begin: beginRemix, attach: attachRemix, clear: clearRemix } = useRemixLaunch()
 const loading = ref(true)
 const refreshing = ref(false)
 const data = ref<{ items: ContentPost[] } | null>(null)
@@ -65,18 +64,11 @@ async function save(post: ContentPost) {
 
 async function remix(post: ContentPost) {
   try {
-    const response = await apiFetch<{ remix: { id: number, status: string } }>(`/api/content/${post.id}/remix`, {
+    const response = await apiFetch<{ remix: { id: number } }>(`/api/content/${post.id}/remix`, {
       method: 'POST', body: { format: 'carousel' }
     })
-    /* An existing draft comes back untouched; only a generation that actually
-       starts now earns the stage. */
-    if (response.remix.status === 'generating') {
-      beginRemix({ format: 'carousel', sourceHook: post.hook, moment: null })
-      attachRemix(response.remix.id)
-    }
     await navigateTo(`/remix/${response.remix.id}`)
   } catch (exception: unknown) {
-    clearRemix()
     toast.error(apiErrorMessage(exception, t('feed.remixError')))
   }
 }
