@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\AnalyzeCreatorHandle;
 use App\Jobs\SyncInstagramAccount;
 use App\Services\CreatorInspirationService;
 use App\Services\Instagram\InstagramAuthService;
@@ -70,10 +71,19 @@ class InstagramConnectionController extends Controller
         ]);
 
         $username = ltrim($data['username'], '@');
+        $profile = $request->user()->creatorProfile()->first();
+        $changed = $profile?->instagram_username !== $username;
+
         $request->user()->creatorProfile()->updateOrCreate(
             ['user_id' => $request->user()->id],
             ['instagram_username' => $username],
         );
+
+        // Reading the public profile is what makes the app personal, so it starts
+        // here rather than waiting for the creator to find the memory page.
+        if ($changed) {
+            AnalyzeCreatorHandle::dispatch($request->user()->id);
+        }
 
         return response()->json(['instagram_username' => $username]);
     }

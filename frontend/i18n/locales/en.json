@@ -150,7 +150,7 @@
       },
       "profile": {
         "label": "What Personal understood",
-        "source": "40 posts read",
+        "source": "{count} posts read",
         "niche": "Niche",
         "nicheValue": "Independent product building",
         "audience": "Audience",
@@ -196,24 +196,58 @@
             "date": "5d ago",
             "followers": "9.7K",
             "likes": "6.1K"
+          },
+          "four": {
+            "hook": "The question I ask on every sales call",
+            "views": "244K",
+            "ratio": "6.9",
+            "handle": "studio.nova",
+            "date": "1d ago",
+            "followers": "34.8K",
+            "likes": "15.4K"
+          },
+          "five": {
+            "hook": "I cut half my offer. Revenue doubled.",
+            "views": "96K",
+            "ratio": "4.3",
+            "handle": "claire.writes",
+            "date": "3d ago",
+            "followers": "7.1K",
+            "likes": "4.8K"
+          },
+          "six": {
+            "hook": "Three years to understand what I actually sell",
+            "views": "412K",
+            "ratio": "3.2",
+            "handle": "yanis.co",
+            "date": "6d ago",
+            "followers": "104K",
+            "likes": "31.6K"
           }
         }
       },
       "connect": {
         "patternLabel": "Pattern in your niche",
         "patternQuote": "“The decision I almost didn't make…”",
-        "momentQuote": "“I almost turned down my first €10k client because I didn't feel ready.”",
         "verdict": "This format is working right now, and something that happened to you this week fits it unusually well.",
-        "momentDate": "Tuesday",
         "reasons": {
           "one": "strong transformation",
           "two": "personal",
-          "three": "builds your credibility"
+          "three": "builds your credibility",
+          "four": "numbers to back it",
+          "five": "rarely told"
         },
-        "second": {
-          "date": "Thursday",
-          "quote": "“First five-figure month, and I told nobody.”"
-        }
+        "moments": {
+          "first": {
+            "date": "Tuesday",
+            "quote": "“I almost turned down my first €10k client because I didn't feel ready.”"
+          },
+          "second": {
+            "date": "Thursday",
+            "quote": "“First five-figure month, and I told nobody.”"
+          }
+        },
+        "pick": "Score this Moment"
       },
       "draft": {
         "voice": "Your voice",
@@ -235,8 +269,17 @@
             "label": "Close",
             "value": "What that single project paid for, two years later."
           }
-        }
-      }
+        },
+        "views": {
+          "caption": "Caption",
+          "carousel": "Slides",
+          "reel": "Shot list"
+        },
+        "runtime": "24s",
+        "characters": "{count} characters"
+      },
+      "tryIt": "These four screens are the app. Everything on them is clickable.",
+      "open": "Open Personal"
     },
     "faq": {
       "eyebrow": "FAQ",
@@ -585,6 +628,16 @@
     "yourNiche": "Your niche",
     "notProvided": "To be completed",
     "listHint": "Separate with commas",
+    "handle": {
+      "label": "Instagram account",
+      "placeholder": "{'@'}yourhandle",
+      "none": "No Instagram account",
+      "add": "Add your account",
+      "edit": "Change",
+      "save": "Save",
+      "saved": "Account updated. Personal is reading your profile again.",
+      "error": "Personal could not save that account."
+    },
     "nicheInsufficient": "Not enough content yet to determine your niche",
     "analysis": {
       "insufficient": "Instagram does not provide enough signals yet. You can complete these details manually.",

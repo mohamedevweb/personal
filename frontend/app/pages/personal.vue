@@ -69,6 +69,38 @@ const analysisMessage = computed(() => {
   return null
 })
 
+/* Without a connected account the handle is the only thing telling Personal
+   who this creator is, so it has to be changeable from inside the app. Saving
+   it starts a fresh read of the public profile on the server. */
+const editingHandle = ref(false)
+const handleDraft = ref('')
+const handleSaving = ref(false)
+const handle = computed(() => profile.value?.instagram_username || null)
+
+function beginHandleEdit() {
+  handleDraft.value = handle.value || ''
+  editingHandle.value = true
+}
+
+async function saveHandle() {
+  const username = handleDraft.value.trim().replace(/^@/, '')
+  if (!username || handleSaving.value) return
+  handleSaving.value = true
+  try {
+    const response = await apiFetch<{ instagram_username: string }>('/api/integrations/instagram/handle', {
+      method: 'PUT',
+      body: { username }
+    })
+    if (profile.value) profile.value.instagram_username = response.instagram_username
+    editingHandle.value = false
+    toast.success(t('personal.handle.saved'))
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('personal.handle.error')))
+  } finally {
+    handleSaving.value = false
+  }
+}
+
 function beginEdit() {
   if (!profile.value) return
   Object.assign(draft, {
@@ -286,6 +318,30 @@ onMounted(async () => {
           </div>
           <span class="hidden text-xs text-[var(--positive)] sm:inline">{{ $t('personal.connected') }}</span>
         </template>
+
+        <template v-else>
+          <div class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[var(--paper)] text-xs">IG</div>
+          <div v-if="editingHandle" class="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+            <input
+              v-model="handleDraft"
+              class="memory-input mt-0 h-11 w-full max-w-56 flex-1"
+              :placeholder="$t('personal.handle.placeholder')"
+              :aria-label="$t('personal.handle.label')"
+              @keydown.enter.prevent="saveHandle"
+            >
+            <button type="button" class="rounded-full px-3 py-2.5 text-sm text-[var(--muted)] transition hover:text-[var(--ink)]" @click="editingHandle = false">{{ $t('personal.cancel') }}</button>
+            <button type="button" class="inline-flex h-11 items-center rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 text-sm font-medium transition hover:border-[var(--muted)] disabled:opacity-60" :disabled="handleSaving" @click="saveHandle">
+              {{ handleSaving ? $t('personal.saving') : $t('personal.handle.save') }}
+            </button>
+          </div>
+          <div v-else class="min-w-0">
+            <p class="truncate text-sm font-medium">{{ handle ? '@' + handle : $t('personal.handle.none') }}</p>
+            <button type="button" class="mt-0.5 text-xs text-[var(--muted)] underline underline-offset-4 transition hover:text-[var(--ink)]" @click="beginHandleEdit">
+              {{ $t(handle ? 'personal.handle.edit' : 'personal.handle.add') }}
+            </button>
+          </div>
+        </template>
+
         <div class="ml-auto flex shrink-0 items-center justify-end gap-2">
           <button v-if="editing" type="button" class="rounded-full px-4 py-2.5 text-sm text-[var(--muted)] transition hover:text-[var(--ink)]" @click="editing = false">{{ $t('personal.cancel') }}</button>
           <button v-if="editing" type="submit" class="inline-flex h-11 items-center justify-center rounded-full b-btn-red px-5 text-[14px] font-medium transition disabled:opacity-60" :disabled="saving">{{ saving ? $t('personal.saving') : $t('personal.saveMemory') }}</button>

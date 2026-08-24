@@ -7,6 +7,10 @@
  *
  * Clips only run while they are on screen. Five autoplaying loops on one page
  * is a battery bill nobody agreed to.
+ *
+ * The frame is also what tells the mock inside it that it has been reached, so
+ * the screen runs its own read at the moment it is looked at — whether the
+ * visitor scrolled to it or jumped.
  */
 const props = defineProps<{
   src?: string | null
@@ -17,15 +21,28 @@ const frame = ref<HTMLElement | null>(null)
 const video = ref<HTMLVideoElement | null>(null)
 const playable = ref(false)
 
+// Server-side and before the observer exists the screen counts as reached, so
+// a mock is never left half-drawn if JS never runs.
+const live = ref(true)
+provide(LANDING_SCREEN_LIVE, live)
+
 let observer: IntersectionObserver | null = null
 
 watch(() => props.src, () => { playable.value = false })
 
 onMounted(() => {
-  if (!frame.value || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+  if (!frame.value) return
+
+  live.value = false
+  const wantsMotion = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
+      if (entry.isIntersecting) live.value = true
+
+      // The clip is the only part that stops when the frame leaves: the read
+      // the mock ran has already happened, and does not un-happen.
+      if (!wantsMotion) return
       const el = video.value
       if (!el) return
       if (entry.isIntersecting) void el.play().catch(() => {})
@@ -43,7 +60,10 @@ onUnmounted(() => observer?.disconnect())
   <figure ref="frame" class="b-panel b-lift relative overflow-hidden">
     <figcaption class="sr-only">{{ label }}</figcaption>
 
-    <div class="transition-opacity duration-700" :class="playable ? 'opacity-0' : 'opacity-100'">
+    <!-- The mock is a real, clickable screen. Once a clip takes over it is
+         only a poster underneath, so it stops answering the mouse: nothing
+         invisible is allowed to be clickable. -->
+    <div class="transition-opacity duration-700" :class="playable ? 'pointer-events-none opacity-0' : 'opacity-100'">
       <slot />
     </div>
 

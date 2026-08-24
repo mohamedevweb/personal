@@ -338,7 +338,54 @@ button, a { -webkit-tap-highlight-color: transparent; }
     filter: none;
     transform: none;
   }
+
+  /* ---------------------------------------------------------------------
+     The launch page's screens are the app, running.
+
+     Every mock in "how it works" reads, refreshes, scores and cuts in front of
+     the visitor, so it needs the same small vocabulary of motion the product
+     uses: a value still being read, a request in flight, a clip playing, and
+     one view giving way to another.
+     --------------------------------------------------------------------- */
+
+  /* A value the app has not written yet. A rule with light moving across it —
+     the cell holds its height, and the movement says the read is running
+     rather than stalled. */
+  .b-scan {
+    background: linear-gradient(90deg, var(--b-line-soft) 0%, var(--b-line) 26%, rgba(224, 79, 54, .22) 44%, var(--b-line) 62%, var(--b-line-soft) 100%);
+    background-size: 220% 100%;
+    animation: b-scan 1.5s ease-in-out infinite;
+  }
+
+  /* A request in flight, on the icon that started it. */
+  .b-spin { animation: b-spin 1s linear infinite; }
+
+  /* The playhead on a reel that is nominally running. It never reaches the
+     end: the frame is a still, and a bar that completed would promise a clip
+     that is not there. */
+  .b-play { animation: b-play 4.6s ease-in-out infinite; }
 }
+
+@keyframes b-scan {
+  from { background-position: 120% 0; }
+  to { background-position: -120% 0; }
+}
+
+@keyframes b-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes b-play {
+  0% { width: 12%; }
+  70%, 100% { width: 86%; }
+}
+
+/* One view of a draft giving way to another. Short, and downward: the format
+   switch is a cut, not a page change. */
+.b-swap-enter-active,
+.b-swap-leave-active { transition: opacity .22s ease, transform .22s ease; }
+.b-swap-enter-from { opacity: 0; transform: translateY(6px); }
+.b-swap-leave-to { opacity: 0; transform: translateY(-6px); }
 
 @keyframes ping {
   0% { transform: scale(1); opacity: .9; }
@@ -360,8 +407,15 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 @media (prefers-reduced-motion: reduce) {
   .b-live::after,
+  .b-scan,
+  .b-spin,
+  .b-play,
   .animate-breathe { animation: none; }
   [class*="b-drift"] { animation: none !important; }
+
+  /* A cut with no motion is just the next view. */
+  .b-swap-enter-active,
+  .b-swap-leave-active { transition: none; }
 }
 
 /* ---------------------------------------------------------------------------

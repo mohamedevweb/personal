@@ -11,6 +11,7 @@ const selectedMomentId = ref<number | null>(null)
 const selectedAngleIndex = ref(0)
 const loading = ref(true)
 const drafting = ref(false)
+const composerOpen = ref(false)
 
 const opportunityKeys: Record<string, string> = {
   'Tell the story of your pivot using a failure → realization → new direction format.': 'pivot',
@@ -45,8 +46,16 @@ const angles = computed(() => [
 const selectedAngle = computed(() => angles.value[selectedAngleIndex.value]!)
 const selectedMomentIsPick = computed(() => selectedMoment.value?.id === pick.value?.life_moment?.id)
 
+/* Adding material used to hand the creator off to another page and drop them
+   back here. The composer opens in place instead, and what they just wrote is
+   selected so the next click is the one that matters. */
 function addMoment() {
-  return navigateTo('/moments?new=1')
+  composerOpen.value = true
+}
+
+function onMomentCreated(moment: LifeMoment) {
+  moments.value.unshift(moment)
+  selectedMomentId.value = moment.id
 }
 
 async function createFromMoment(moment: LifeMoment, format: Remix['format']) {
@@ -222,5 +231,11 @@ onMounted(async () => {
       </div>
       <p v-if="drafting" role="status" class="sr-only">{{ $t('create.drafting') }}</p>
     </section>
+
+    <MomentComposer
+      :open="composerOpen"
+      @close="composerOpen = false"
+      @created="onMomentCreated"
+    />
   </main>
 </template>

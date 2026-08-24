@@ -67,6 +67,13 @@ onUnmounted(() => observer?.disconnect())
           class="mt-6 font-display text-[36px] leading-[1.04] tracking-[-.025em] sm:text-[46px] md:text-[56px]"
           v-html="$t('landing.how.title')"
         />
+
+        <!-- The four screens below are the app, wired up. Saying so once, here,
+             saves a visitor from mistaking them for pictures. -->
+        <p class="b-chip mx-auto mt-7">
+          <span class="b-live" aria-hidden="true" />
+          {{ $t('landing.how.tryIt') }}
+        </p>
       </div>
 
       <div class="mt-14 md:mt-16">
@@ -120,7 +127,11 @@ onUnmounted(() => observer?.disconnect())
             />
 
             <LandingMedia :src="LANDING_CLIPS[step.key]" :label="$t('landing.how.mediaLabel')">
-              <component :is="step.mock" />
+              <!-- The screen runs its own read the moment the step becomes the
+                   one being read, and not before: four screens animating at
+                   once is noise, and a screen that finished before you arrived
+                   has shown you nothing. -->
+              <component :is="step.mock" :active="index === active" />
             </LandingMedia>
           </div>
         </template>
