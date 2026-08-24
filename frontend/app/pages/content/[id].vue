@@ -44,16 +44,20 @@ async function createRemix() {
   if (!post.value) return
   generating.value = true
   const moment = moments.value.find(item => item.id === selectedMoment.value)
-  beginRemix({
-    format: format.value,
-    sourceHook: post.value.hook,
-    moment: moment?.content || null
-  })
   try {
-    const response = await apiFetch<{ remix: { id: number } }>(`/api/content/${post.value.id}/remix`, {
+    const response = await apiFetch<{ remix: { id: number, status: string } }>(`/api/content/${post.value.id}/remix`, {
       method: 'POST', body: { format: format.value, life_moment_id: selectedMoment.value }
     })
-    attachRemix(response.remix.id)
+    /* An existing draft comes back untouched; only a generation that actually
+       starts now earns the stage. */
+    if (response.remix.status === 'generating') {
+      beginRemix({
+        format: format.value,
+        sourceHook: post.value.hook,
+        moment: moment?.content || null
+      })
+      attachRemix(response.remix.id)
+    }
     await navigateTo(`/remix/${response.remix.id}`)
   } catch (exception: unknown) {
     clearRemix()

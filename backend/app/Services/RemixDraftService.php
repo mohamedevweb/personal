@@ -24,6 +24,12 @@ class RemixDraftService
         return $remix;
     }
 
+    /**
+     * A user keeps one live draft per source, moment and format. Switching
+     * shapes and coming back has to hand back the draft they already worked
+     * on — regenerating it would throw their edits away and bill the tokens
+     * again for a draft that already exists.
+     */
     public function start(
         ContentPost $source,
         User $user,
@@ -31,6 +37,14 @@ class RemixDraftService
         ?LifeMoment $moment,
         string $locale,
     ): Remix {
+        $existing = $this->existingDraft($source, $user, $format, $moment);
+
+        if ($existing) {
+            return $existing->status === 'failed'
+                ? $this->retry($existing, $locale)
+                : $existing;
+        }
+
         $remix = Remix::query()->create([
             'user_id' => $user->id,
             'source_content_id' => $source->id,
@@ -55,5 +69,30 @@ class RemixDraftService
         GenerateRemix::dispatch($remix->id, $locale);
 
         return $remix->fresh();
+    }
+
+    /**
+     * Archived drafts are excluded: putting one away is how the user asks for
+     * a fresh take on the same shape.
+     */
+    private function existingDraft(
+        ContentPost $source,
+        User $user,
+        string $format,
+        ?LifeMoment $moment,
+    ): ?Remix {
+        $query = $user->remixes()
+            ->where('source_content_id', $source->id)
+            ->where('format', $format)
+            ->where('status', '!=', 'archived')
+            ->latest('updated_at');
+
+        $moment
+            ? $query->where('life_moment_id', $moment->id)
+            : $query->whereNull('life_moment_id');
+
+        $existing = $query->first();
+
+        return $existing ? $this->failIfStale($existing) : null;
     }
 }

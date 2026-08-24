@@ -584,6 +584,7 @@
     "audience": "Audience",
     "yourNiche": "Votre niche",
     "notProvided": "À compléter",
+    "listHint": "Séparez par des virgules",
     "nicheInsufficient": "Pas encore assez de contenu pour déterminer ta niche",
     "analysis": {
       "insufficient": "Instagram ne fournit pas encore assez de signaux. Tu peux compléter ces informations manuellement.",
@@ -786,6 +787,8 @@
     "generationFailedCopy": "Le service d’écriture n’a pas répondu correctement. Ton choix est conservé.",
     "retry": "Relancer la rédaction",
     "retrying": "Relance en cours…",
+    "redraft": "Régénérer",
+    "redraftConfirm": "Écraser le brouillon ?",
     "retryError": "Personal n’a pas pu relancer ce brouillon. Réessaie.",
     "statusDraft": "Brouillon",
     "statusReady": "Prêt",
@@ -808,8 +811,8 @@
       "carousel": "Carrousel",
       "caption": "Légende"
     },
-    "switchNote": "Changer de format réécrit le brouillon. Vos modifications sont enregistrées avant.",
-    "switching": "Réécriture en {format}…",
+    "switchNote": "Chaque format garde son propre brouillon. Vos modifications sont enregistrées avant de changer.",
+    "switching": "Passage en {format}…",
     "switchError": "Personal n’a pas pu réécrire dans ce format. Réessayez.",
     "slideDeck": "Slides",
     "slideCount": "{count} slides",

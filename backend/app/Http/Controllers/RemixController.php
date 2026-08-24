@@ -70,10 +70,17 @@ class RemixController extends Controller
         return response()->json(['remix' => $remix->fresh()]);
     }
 
+    /**
+     * Rewrites the draft from scratch — the recovery from a failed generation,
+     * and the way to ask for another take on one that succeeded. Only a
+     * generation already in flight is refused, so two runs never race for the
+     * same row.
+     */
     public function retry(Request $request, Remix $remix, RemixDraftService $drafts): JsonResponse
     {
         $this->ensureOwner($request, $remix);
-        abort_unless($remix->status === 'failed', Response::HTTP_CONFLICT);
+        $remix = $drafts->failIfStale($remix);
+        abort_if($remix->status === 'generating', Response::HTTP_CONFLICT);
 
         return response()->json([
             'remix' => $drafts->retry($remix, app()->getLocale()),

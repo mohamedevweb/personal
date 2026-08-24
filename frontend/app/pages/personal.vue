@@ -39,6 +39,21 @@ const draft = reactive<PersonalProfileDraft>({
 })
 
 const sections = ['topics', 'tone', 'current_projects', 'goals', 'content_strengths'] as const
+/* These fields hold lists but are typed as one line. The text is kept as text
+   while it is being edited: parsing it back into an array on every keystroke
+   would swallow the separator the moment you type it, so a second item could
+   never be added. It becomes a list again on save. */
+const sectionText = reactive<Record<(typeof sections)[number], string>>({
+  topics: '',
+  tone: '',
+  current_projects: '',
+  goals: '',
+  content_strengths: ''
+})
+
+function toList(value: string): string[] {
+  return value.split(',').map(item => item.trim()).filter(Boolean)
+}
 const voiceProviders = [
   { name: 'ChatGPT', url: 'https://chatgpt.com/', promptParameter: 'q', icon: 'chatgpt' },
   { name: 'Claude', url: 'https://claude.ai/new', promptParameter: 'q', icon: 'claude' },
@@ -59,18 +74,15 @@ function beginEdit() {
   Object.assign(draft, {
     niche: profile.value.niche,
     audience_description: profile.value.audience_description,
-    positioning: profile.value.positioning,
-    topics: [...(profile.value.topics ?? [])],
-    tone: [...(profile.value.tone ?? [])],
-    current_projects: [...(profile.value.current_projects ?? [])],
-    goals: [...(profile.value.goals ?? [])],
-    content_strengths: [...(profile.value.content_strengths ?? [])]
+    positioning: profile.value.positioning
   })
+  for (const key of sections) sectionText[key] = (profile.value[key] ?? []).join(', ')
   editing.value = true
 }
 
 async function saveProfile() {
   saving.value = true
+  for (const key of sections) draft[key] = toList(sectionText[key])
   try {
     const response = await apiFetch<{ profile: PersonalProfile }>('/api/me/profile', { method: 'PATCH', body: draft })
     profile.value = response.profile
@@ -287,7 +299,7 @@ onMounted(async () => {
         <section class="border-b border-[var(--line-soft)] p-6 md:col-span-2"><p class="memory-label">{{ $t('personal.yourNiche') }}</p><input v-if="editing" v-model="draft.niche" class="memory-input"><p v-else class="memory-copy" :class="{ 'text-[var(--faint)]': !profile.niche }">{{ profile.niche || $t(analysisStatus === 'insufficient_evidence' ? 'personal.nicheInsufficient' : 'personal.notProvided') }}</p></section>
         <section v-for="(key, index) in sections" :key="key" class="border-b border-[var(--line-soft)] p-6" :class="index % 2 === 0 ? 'md:border-r' : ''">
           <p class="memory-label">{{ $t('personal.sections.' + key) }}</p>
-          <input v-if="editing" :value="(draft[key] || []).join(', ')" class="memory-input" @input="draft[key] = ($event.target as HTMLInputElement).value.split(',').map((v: string) => v.trim()).filter(Boolean)">
+          <input v-if="editing" v-model="sectionText[key]" class="memory-input" :placeholder="$t('personal.listHint')">
           <div v-else-if="profile[key]?.length" class="mt-4 flex flex-wrap gap-2"><span v-for="item in profile[key]" :key="item" class="rounded-full border border-[var(--line)] bg-[var(--paper)] px-3 py-1.5 text-sm">{{ item }}</span></div>
           <p v-else class="mt-3 text-sm text-[var(--faint)]">{{ $t('personal.notProvided') }}</p>
         </section>

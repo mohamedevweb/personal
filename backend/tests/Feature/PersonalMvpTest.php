@@ -255,6 +255,75 @@ class PersonalMvpTest extends TestCase
         $this->assertSame($moment->content, $remix->generated_content['your_context']);
     }
 
+    public function test_remixing_the_same_source_and_format_returns_the_existing_draft(): void
+    {
+        Queue::fake();
+        $post = ContentPost::query()->firstOrFail();
+        $moment = $this->user->moments()->firstOrFail();
+
+        $first = $this->actingAs($this->user)->postJson("/api/content/{$post->id}/remix", [
+            'format' => 'carousel',
+            'life_moment_id' => $moment->id,
+        ])->assertAccepted();
+
+        $remix = Remix::query()->findOrFail($first->json('remix.id'));
+        $remix->update(['generated_content' => ['slides' => [['id' => 1, 'text' => 'My own words.']]], 'status' => 'draft']);
+
+        $second = $this->actingAs($this->user)->postJson("/api/content/{$post->id}/remix", [
+            'format' => 'carousel',
+            'life_moment_id' => $moment->id,
+        ])->assertAccepted();
+
+        $this->assertSame($remix->id, $second->json('remix.id'));
+        $this->assertSame('My own words.', $second->json('remix.generated_content.slides.0.text'));
+        $this->assertSame(1, Remix::query()->where('user_id', $this->user->id)->where('format', 'carousel')->count());
+        Queue::assertPushed(GenerateRemix::class, 1);
+    }
+
+    public function test_each_format_keeps_its_own_draft(): void
+    {
+        Queue::fake();
+        $post = ContentPost::query()->firstOrFail();
+        $moment = $this->user->moments()->firstOrFail();
+
+        $carousel = $this->actingAs($this->user)->postJson("/api/content/{$post->id}/remix", [
+            'format' => 'carousel',
+            'life_moment_id' => $moment->id,
+        ])->assertAccepted();
+
+        $reel = $this->actingAs($this->user)->postJson("/api/content/{$post->id}/remix", [
+            'format' => 'reel',
+            'life_moment_id' => $moment->id,
+        ])->assertAccepted();
+
+        $this->assertNotSame($carousel->json('remix.id'), $reel->json('remix.id'));
+
+        $back = $this->actingAs($this->user)->postJson("/api/content/{$post->id}/remix", [
+            'format' => 'carousel',
+            'life_moment_id' => $moment->id,
+        ])->assertAccepted();
+
+        $this->assertSame($carousel->json('remix.id'), $back->json('remix.id'));
+    }
+
+    public function test_an_archived_draft_does_not_block_a_fresh_one(): void
+    {
+        Queue::fake();
+        $post = ContentPost::query()->firstOrFail();
+
+        $first = $this->actingAs($this->user)->postJson("/api/content/{$post->id}/remix", [
+            'format' => 'caption',
+        ])->assertAccepted();
+
+        Remix::query()->findOrFail($first->json('remix.id'))->update(['status' => 'archived']);
+
+        $second = $this->actingAs($this->user)->postJson("/api/content/{$post->id}/remix", [
+            'format' => 'caption',
+        ])->assertAccepted();
+
+        $this->assertNotSame($first->json('remix.id'), $second->json('remix.id'));
+    }
+
     public function test_drafts_are_returned_for_the_authenticated_user_most_recently_updated_first(): void
     {
         $post = ContentPost::query()->firstOrFail();
@@ -337,6 +406,48 @@ class PersonalMvpTest extends TestCase
         (new GenerateRemix($remix->id, 'fr'))->handle($generator, app(PostInsightService::class));
 
         $this->assertDatabaseHas('remixes', ['id' => $remix->id, 'status' => 'failed']);
+    }
+
+    public function test_a_finished_draft_can_be_rewritten_from_scratch(): void
+    {
+        Queue::fake();
+        $post = ContentPost::query()->firstOrFail();
+        $remix = Remix::query()->create([
+            'user_id' => $this->user->id,
+            'source_content_id' => $post->id,
+            'life_moment_id' => null,
+            'format' => 'caption',
+            'generated_content' => ['caption' => 'The take I no longer want.'],
+            'status' => 'ready',
+        ]);
+
+        $this->actingAs($this->user)
+            ->postJson("/api/remixes/{$remix->id}/retry")
+            ->assertAccepted()
+            ->assertJsonPath('remix.status', 'generating')
+            ->assertJsonPath('remix.generated_content', []);
+
+        Queue::assertPushed(GenerateRemix::class, fn (GenerateRemix $job): bool => $job->remixId === $remix->id);
+    }
+
+    public function test_a_draft_being_written_cannot_be_rewritten_twice_at_once(): void
+    {
+        Queue::fake();
+        $post = ContentPost::query()->firstOrFail();
+        $remix = Remix::query()->create([
+            'user_id' => $this->user->id,
+            'source_content_id' => $post->id,
+            'life_moment_id' => null,
+            'format' => 'reel',
+            'generated_content' => [],
+            'status' => 'generating',
+        ]);
+
+        $this->actingAs($this->user)
+            ->postJson("/api/remixes/{$remix->id}/retry")
+            ->assertConflict();
+
+        Queue::assertNothingPushed();
     }
 
     public function test_an_abandoned_generating_remix_becomes_retryable(): void

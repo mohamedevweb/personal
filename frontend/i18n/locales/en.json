@@ -584,6 +584,7 @@
     "audience": "Audience",
     "yourNiche": "Your niche",
     "notProvided": "To be completed",
+    "listHint": "Separate with commas",
     "nicheInsufficient": "Not enough content yet to determine your niche",
     "analysis": {
       "insufficient": "Instagram does not provide enough signals yet. You can complete these details manually.",
@@ -786,6 +787,8 @@
     "generationFailedCopy": "The writing service did not respond correctly. Your selection is still saved.",
     "retry": "Try writing again",
     "retrying": "Trying again…",
+    "redraft": "Rewrite",
+    "redraftConfirm": "Replace draft?",
     "retryError": "Personal could not restart this draft. Try again.",
     "statusDraft": "Draft",
     "statusReady": "Ready",
@@ -808,8 +811,8 @@
       "carousel": "Carousel",
       "caption": "Caption"
     },
-    "switchNote": "Changing format rewrites the draft. Your edits are saved first.",
-    "switching": "Rewriting as a {format}…",
+    "switchNote": "Each format keeps its own draft. Your edits are saved before you switch.",
+    "switching": "Switching to {format}…",
     "switchError": "Personal could not rewrite this in that format. Try again.",
     "slideDeck": "Slides",
     "slideCount": "{count} slides",

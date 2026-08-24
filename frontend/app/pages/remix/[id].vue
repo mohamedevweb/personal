@@ -26,12 +26,15 @@ const saving = ref(false)
 const switching = ref<Format | null>(null)
 const copied = ref(false)
 const retrying = ref(false)
+/** A rewrite discards the draft, so the button asks once before it fires. */
+const confirmingRedraft = ref(false)
 const sourceAvatarFailed = ref(false)
 const revealing = ref(false)
 /** The last payload the server acknowledged, used to tell edited from saved. */
 const pristine = ref('')
 let remixTimer: ReturnType<typeof setTimeout> | undefined
 let revealTimer: ReturnType<typeof setTimeout> | undefined
+let confirmTimer: ReturnType<typeof setTimeout> | undefined
 const generationFallbackStartedAt = Date.now()
 
 const tabs = ref<HTMLButtonElement[]>([])
@@ -171,16 +174,22 @@ async function switchFormat(format: Format) {
         return
       }
     }
-    beginRemix({
-      format,
-      sourceHook: remix.value.source_content?.hook || remix.value.generated_content.original_pattern,
-      moment: remix.value.life_moment?.content || remix.value.generated_content.your_context
-    })
-    const response = await apiFetch<{ remix: { id: number } }>(
+    const response = await apiFetch<{ remix: Remix }>(
       `/api/content/${remix.value.source_content?.id}/remix`,
       { method: 'POST', body: { format, life_moment_id: remix.value.life_moment?.id ?? null } }
     )
-    attachRemix(response.remix.id)
+    /* The server hands back the draft this shape already has, if there is one.
+       Only work that actually starts now earns the generation stage. */
+    if (response.remix.status === 'generating') {
+      beginRemix({
+        format,
+        sourceHook: remix.value.source_content?.hook || remix.value.generated_content.original_pattern,
+        moment: remix.value.life_moment?.content || remix.value.generated_content.your_context
+      })
+      attachRemix(response.remix.id)
+    } else {
+      clearRemix()
+    }
     await navigateTo(`/remix/${response.remix.id}`)
   } catch (exception: unknown) {
     clearRemix()
@@ -280,6 +289,20 @@ async function retryGeneration() {
   }
 }
 
+/** First click arms the action, second one runs it. It disarms on its own so a
+    stray click never sits there waiting to wipe the draft. */
+function askRedraft() {
+  if (!confirmingRedraft.value) {
+    confirmingRedraft.value = true
+    clearTimeout(confirmTimer)
+    confirmTimer = setTimeout(() => { confirmingRedraft.value = false }, 4000)
+    return
+  }
+  clearTimeout(confirmTimer)
+  confirmingRedraft.value = false
+  retryGeneration()
+}
+
 onMounted(async () => {
   window.addEventListener('beforeunload', guardUnload)
   await loadRemix()
@@ -293,6 +316,7 @@ watch(() => route.params.id, async (id, previousId) => {
   remix.value = null
   switching.value = null
   revealing.value = false
+  confirmingRedraft.value = false
   await loadRemix()
 })
 
@@ -300,6 +324,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('beforeunload', guardUnload)
   clearTimeout(remixTimer)
   clearTimeout(revealTimer)
+  clearTimeout(confirmTimer)
   clearRemix()
 })
 </script>
@@ -388,6 +413,20 @@ onBeforeUnmount(() => {
             <button class="bar-button" :aria-label="$t('remix.copy')" @click="copyDraft">
               <AppIcon :name="copied ? 'check' : 'copy'" :size="15" />
               <span class="hidden sm:inline">{{ copied ? $t('remix.copied') : $t('remix.copy') }}</span>
+            </button>
+            <button
+              class="bar-button"
+              :class="confirmingRedraft ? 'text-[var(--accent-ink)]' : ''"
+              :disabled="retrying || saving"
+              :aria-label="$t('remix.redraft')"
+              @click="askRedraft"
+            >
+              <AppIcon name="sparkles" :size="15" />
+              <!-- Armed, the question has to be readable on a phone too, where the
+                   other labels stay hidden. -->
+              <span :class="confirmingRedraft ? '' : 'hidden sm:inline'">
+                {{ retrying ? $t('remix.retrying') : confirmingRedraft ? $t('remix.redraftConfirm') : $t('remix.redraft') }}
+              </span>
             </button>
             <button class="bar-button" :disabled="saving || !dirty" @click="save(remix.status === 'ready' ? 'ready' : 'draft')">
               {{ $t('remix.saveDraft') }}

@@ -64,12 +64,16 @@ async function save(post: ContentPost) {
 }
 
 async function remix(post: ContentPost) {
-  beginRemix({ format: 'carousel', sourceHook: post.hook, moment: null })
   try {
-    const response = await apiFetch<{ remix: { id: number } }>(`/api/content/${post.id}/remix`, {
+    const response = await apiFetch<{ remix: { id: number, status: string } }>(`/api/content/${post.id}/remix`, {
       method: 'POST', body: { format: 'carousel' }
     })
-    attachRemix(response.remix.id)
+    /* An existing draft comes back untouched; only a generation that actually
+       starts now earns the stage. */
+    if (response.remix.status === 'generating') {
+      beginRemix({ format: 'carousel', sourceHook: post.hook, moment: null })
+      attachRemix(response.remix.id)
+    }
     await navigateTo(`/remix/${response.remix.id}`)
   } catch (exception: unknown) {
     clearRemix()
