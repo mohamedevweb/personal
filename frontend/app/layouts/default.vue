@@ -30,7 +30,6 @@ const groups = [
     items: [
       { label: 'nav.create', to: '/create', icon: 'plus' },
       { label: 'nav.drafts', to: '/drafts', icon: 'draft' },
-      { label: 'nav.moments', to: '/moments', icon: 'moments' },
       { label: 'nav.personal', to: '/personal', icon: 'user' }
     ]
   }
@@ -43,7 +42,6 @@ const titles: Record<string, string> = {
   '/feed': 'nav.forYou',
   '/create': 'nav.create',
   '/drafts': 'nav.drafts',
-  '/moments': 'nav.moments',
   '/personal': 'nav.personal',
   '/saved': 'nav.saved',
   '/settings': 'nav.settings'

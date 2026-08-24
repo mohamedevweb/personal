@@ -65,7 +65,7 @@ onUnmounted(() => {
           >
             {{ $t('landing.nav.signIn') }}
           </NuxtLink>
-          <LandingButtonLink to="/login">
+          <LandingButtonLink to="/login?mode=register">
             {{ $t('landing.nav.getAccess') }}
           </LandingButtonLink>
         </div>

@@ -4,10 +4,23 @@ namespace App\Services;
 
 use App\Models\ContentPost;
 use App\Models\LifeMoment;
+use App\Models\Remix;
 use App\Models\User;
 
 class MockContentGenerationService implements ContentGenerationService
 {
+    public function regenerateBlock(Remix $remix, string $block, ?int $slideIndex = null): string
+    {
+        $content = $remix->generated_content;
+        $current = $block === 'slide'
+            ? (string) ($content['slides'][$slideIndex]['text'] ?? '')
+            : (string) ($content[$block] ?? '');
+
+        return app()->getLocale() === 'fr'
+            ? rtrim($current, '.').' Autrement dit, le vrai déclic était déjà là.'
+            : rtrim($current, '.').' In other words, the real turning point was already there.';
+    }
+
     public function generate(ContentPost $source, User $user, string $format, ?LifeMoment $moment = null): array
     {
         if (app()->getLocale() === 'fr') {
@@ -51,6 +64,7 @@ class MockContentGenerationService implements ContentGenerationService
                 'hook' => $idea,
                 'script' => "I kept assuming the hard part of content was production. It wasn't. The real problem was deciding what was worth saying. After talking to creators, I saw the same pattern: the best ideas happen when a proven format meets a story only you can tell. That insight changed the product I am building.",
                 'visual' => 'Talking head at your desk. Cut to notes and product screens when the realization lands.',
+                'ending' => 'The hardest part was never production. It was choosing the story only I could tell.',
                 'cta' => 'What is one assumption you changed after talking to customers?',
             ],
             default => $base + [
@@ -99,6 +113,7 @@ class MockContentGenerationService implements ContentGenerationService
                 'hook' => $idea,
                 'script' => "Je pensais que la partie difficile était la production. Ce n'était pas le cas. Le vrai problème était de décider ce qui méritait d'être raconté. En parlant avec des créateurs, j'ai vu le même schéma. Les meilleures idées apparaissent quand un format éprouvé rencontre une histoire que toi seul peux raconter. Cette découverte a changé le produit que je construis.",
                 'visual' => 'Filme-toi face caméra à ton bureau. Coupe vers tes notes et les écrans du produit au moment de la prise de conscience.',
+                'ending' => "Le plus difficile n'était pas de produire. C'était de choisir l'histoire que moi seul pouvais raconter.",
                 'cta' => 'Quelle croyance as-tu changée après avoir parlé à tes clients ?',
             ],
             default => $base + [

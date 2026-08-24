@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Remix;
 use App\Services\ContentPostView;
+use App\Services\RemixBlockService;
 use App\Services\RemixDraftService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -70,6 +71,14 @@ class RemixController extends Controller
         return response()->json(['remix' => $remix->fresh()]);
     }
 
+    public function copied(Request $request, Remix $remix): Response
+    {
+        $this->ensureOwner($request, $remix);
+        $remix->increment('copy_count', 1, ['last_copied_at' => now()]);
+
+        return response()->noContent();
+    }
+
     /**
      * Rewrites the draft from scratch — the recovery from a failed generation,
      * and the way to ask for another take on one that succeeded. Only a
@@ -85,6 +94,34 @@ class RemixController extends Controller
         return response()->json([
             'remix' => $drafts->retry($remix, app()->getLocale()),
         ], Response::HTTP_ACCEPTED);
+    }
+
+    public function regenerateBlock(
+        Request $request,
+        Remix $remix,
+        RemixBlockService $blocks,
+    ): JsonResponse {
+        $this->ensureOwner($request, $remix);
+        $data = $request->validate([
+            'block' => ['required', 'string', 'in:hook,script,visual,ending,cta,caption,slide'],
+            'slide_index' => ['nullable', 'required_if:block,slide', 'integer', 'min:0'],
+        ]);
+        abort_unless(in_array($remix->status, ['draft', 'ready'], true), Response::HTTP_CONFLICT);
+
+        $block = $data['block'];
+        $slideIndex = $data['slide_index'] ?? null;
+        $content = $remix->generated_content;
+        $exists = $block === 'slide'
+            ? isset($content['slides'][$slideIndex]['text'])
+            : array_key_exists($block, $content);
+        abort_unless($exists, Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        $remix = $blocks->regenerate($remix, $block, $slideIndex);
+
+        return response()->json([
+            'generated_content' => $remix->generated_content,
+            'status' => $remix->status,
+        ]);
     }
 
     private function ensureOwner(Request $request, Remix $remix): void

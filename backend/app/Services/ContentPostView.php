@@ -32,6 +32,7 @@ class ContentPostView
             'format' => $post->format,
             'hook' => $post->hook,
             'caption' => $post->caption,
+            'source_url' => $post->source_url,
             'thumbnail_url' => $this->mediaUrl('media.content', 'content', $post->id, $post->thumbnail_url),
             'media_urls' => $this->contentMediaUrls($post),
             'views' => $post->views,

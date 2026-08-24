@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\ContentPost;
 use App\Models\LifeMoment;
+use App\Models\Remix;
 use App\Models\User;
 
 /**
@@ -119,9 +120,10 @@ class ContentDraftBlueprint
             ]],
             'reel' => [
                 'hook' => ['type' => 'string', 'description' => 'The spoken opening line.'],
-                'script' => ['type' => 'string', 'description' => 'The full spoken script.'],
+                'script' => ['type' => 'string', 'description' => 'The main spoken body, excluding the hook, ending, and call to action.'],
                 'visual' => ['type' => 'string', 'description' => 'What to film and when to cut.'],
-                'cta' => ['type' => 'string', 'description' => 'A closing question for the caption.'],
+                'ending' => ['type' => 'string', 'description' => 'The spoken closing beat or takeaway that lands the story.'],
+                'cta' => ['type' => 'string', 'description' => 'A concise spoken call to action, distinct from the ending.'],
             ],
             default => ['caption' => ['type' => 'string', 'description' => 'The full caption, paragraphs separated by blank lines.']],
         };
@@ -134,11 +136,43 @@ class ContentDraftBlueprint
         ];
     }
 
+    public function blockBrief(Remix $remix, string $block, ?int $slideIndex): string
+    {
+        $content = $remix->generated_content;
+        $current = $block === 'slide'
+            ? (string) ($content['slides'][$slideIndex]['text'] ?? '')
+            : (string) ($content[$block] ?? '');
+
+        return implode("\n", [
+            'Rewrite exactly one block of an existing Instagram draft.',
+            "Block: {$block}".($slideIndex === null ? '' : ' '.($slideIndex + 1)),
+            "Current block: {$current}",
+            '',
+            'FULL DRAFT FOR CONTEXT ONLY',
+            json_encode($content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+            '',
+            'Return a stronger alternative for the requested block only. Preserve the facts, point of view, voice, role in the draft, and surrounding logic. Do not repeat another block. Do not add labels, markdown, quotation marks, hashtags, or commentary.',
+        ]);
+    }
+
+    /** @return array<string, mixed> */
+    public function blockSchema(): array
+    {
+        return [
+            'type' => 'object',
+            'properties' => [
+                'text' => ['type' => 'string', 'description' => 'The rewritten block only.'],
+            ],
+            'required' => ['text'],
+            'additionalProperties' => false,
+        ];
+    }
+
     private function formatInstruction(string $format): string
     {
         return match ($format) {
             'carousel' => 'Write a 6-slide Instagram carousel. Slide 1 is the hook and must stand alone. Each later slide advances the story by one beat and is at most two sentences.',
-            'reel' => 'Write a talking-head Instagram reel: a spoken hook of one sentence, a script of roughly 45 to 60 seconds, a shot idea that suits the creator filming alone, and a closing question.',
+            'reel' => 'Write a talking-head Instagram reel: a spoken hook of one sentence, a main body, a distinct closing beat that lands the story, a concise call to action, and a shot idea that suits the creator filming alone. The complete spoken draft should last roughly 45 to 60 seconds.',
             default => 'Write a single Instagram caption of three to five short paragraphs, opening on the hook line.',
         };
     }

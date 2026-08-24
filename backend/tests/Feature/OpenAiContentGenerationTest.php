@@ -83,6 +83,30 @@ class OpenAiContentGenerationTest extends TestCase
         $this->assertSame(['effort' => 'high'], $this->sentBodies[0]['reasoning']);
     }
 
+    public function test_a_reel_keeps_the_ending_and_call_to_action_separate(): void
+    {
+        $service = $this->serviceReturning([
+            'why_it_works' => ['The story lands before asking the audience to act'],
+            'your_version' => 'I stopped guessing what to post.',
+            'hook' => 'I stopped guessing what to post.',
+            'script' => 'A customer conversation showed me what was missing.',
+            'visual' => 'Talking head, then cut to the notes.',
+            'ending' => 'The useful story was already there.',
+            'cta' => 'What story are you overlooking?',
+        ]);
+
+        [$user, $post] = $this->draftFixtures();
+
+        $result = $service->generate($post, $user, 'reel');
+
+        $this->assertSame('The useful story was already there.', $result['ending']);
+        $this->assertSame('What story are you overlooking?', $result['cta']);
+        $this->assertSame(
+            ['why_it_works', 'your_version', 'hook', 'script', 'visual', 'ending', 'cta'],
+            $this->sentBodies[0]['text']['format']['schema']['required'],
+        );
+    }
+
     public function test_a_refusal_surfaces_as_a_readable_failure(): void
     {
         $service = $this->serviceReturningRaw($this->response(

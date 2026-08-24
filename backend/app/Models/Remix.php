@@ -11,7 +11,10 @@ class Remix extends Model
 
     protected function casts(): array
     {
-        return ['generated_content' => 'array'];
+        return [
+            'generated_content' => 'array',
+            'last_copied_at' => 'datetime',
+        ];
     }
 
     public function sourceContent(): BelongsTo

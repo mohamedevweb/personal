@@ -499,6 +499,63 @@ class PersonalMvpTest extends TestCase
             ->assertJsonPath('remix.status', 'generating');
     }
 
+    public function test_copying_a_draft_is_counted_for_its_owner(): void
+    {
+        $post = ContentPost::query()->firstOrFail();
+        $remix = Remix::query()->create([
+            'user_id' => $this->user->id,
+            'source_content_id' => $post->id,
+            'format' => 'caption',
+            'generated_content' => ['caption' => 'Ready to paste.'],
+            'status' => 'ready',
+        ]);
+
+        $this->actingAs($this->user)
+            ->postJson("/api/remixes/{$remix->id}/copied")
+            ->assertNoContent();
+
+        $remix->refresh();
+        $this->assertSame(1, $remix->copy_count);
+        $this->assertNotNull($remix->last_copied_at);
+
+        $this->actingAs(User::factory()->create())
+            ->postJson("/api/remixes/{$remix->id}/copied")
+            ->assertNotFound();
+        $this->assertSame(1, $remix->refresh()->copy_count);
+    }
+
+    public function test_one_draft_block_can_be_rewritten_without_replacing_the_rest(): void
+    {
+        $post = ContentPost::query()->firstOrFail();
+        $remix = Remix::query()->create([
+            'user_id' => $this->user->id,
+            'source_content_id' => $post->id,
+            'format' => 'reel',
+            'generated_content' => [
+                'hook' => 'Old hook.',
+                'script' => 'Keep this body.',
+                'visual' => 'Talking head.',
+                'ending' => 'Keep this ending.',
+                'cta' => 'Keep this CTA.',
+            ],
+            'status' => 'ready',
+        ]);
+        $generator = \Mockery::mock(ContentGenerationService::class);
+        $generator->shouldReceive('regenerateBlock')
+            ->once()
+            ->with(\Mockery::on(fn (Remix $candidate): bool => $candidate->is($remix)), 'hook', null)
+            ->andReturn('A stronger hook.');
+        $this->app->instance(ContentGenerationService::class, $generator);
+
+        $this->actingAs($this->user)
+            ->postJson("/api/remixes/{$remix->id}/regenerate-block", ['block' => 'hook'])
+            ->assertOk()
+            ->assertJsonPath('status', 'draft')
+            ->assertJsonPath('generated_content.hook', 'A stronger hook.')
+            ->assertJsonPath('generated_content.script', 'Keep this body.')
+            ->assertJsonPath('generated_content.ending', 'Keep this ending.');
+    }
+
     public function test_personal_memory_is_editable(): void
     {
         $this->user->creatorProfile->update([

@@ -46,7 +46,7 @@ useHead({
               <LandingButtonLink to="/story" variant="ghost">
                 {{ $t('blog.empty.story') }}
               </LandingButtonLink>
-              <LandingButtonLink to="/login">
+              <LandingButtonLink to="/login?mode=register">
                 {{ $t('landing.nav.getAccess') }}
               </LandingButtonLink>
             </div>

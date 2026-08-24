@@ -10,6 +10,7 @@ use Anthropic\Core\Exceptions\APIException;
 use App\Exceptions\ContentGenerationException;
 use App\Models\ContentPost;
 use App\Models\LifeMoment;
+use App\Models\Remix;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 
@@ -33,6 +34,16 @@ class ClaudeContentGenerationService implements ContentGenerationService
         );
 
         return $this->assembler->assemble($text, $source, $user, $format, $moment);
+    }
+
+    public function regenerateBlock(Remix $remix, string $block, ?int $slideIndex = null): string
+    {
+        $text = $this->request(
+            $this->blueprint->blockBrief($remix, $block, $slideIndex),
+            $this->blueprint->blockSchema(),
+        );
+
+        return $this->assembler->block($text);
     }
 
     /** @param array<string, mixed> $schema */

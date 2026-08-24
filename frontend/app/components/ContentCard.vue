@@ -4,6 +4,7 @@ import { compactNumber, creatorProfileUrl, relativeDate } from '~/types/product'
 
 const props = defineProps<{ post: ContentPost }>()
 defineEmits<{ save: [post: ContentPost], remix: [post: ContentPost] }>()
+const { locale } = useI18n()
 
 const expanded = ref(false)
 const activeMediaIndex = ref(0)
@@ -79,7 +80,7 @@ watch(() => props.post.id, () => {
         </span>
         <span class="min-w-0 flex-1 leading-tight">
           <span class="block truncate text-[12px] font-semibold">
-            <span class="group-hover/creator:underline">{{ post.creator.username }}</span><span class="font-normal text-[var(--faint)]"> · {{ relativeDate(post.published_at) }}</span>
+            <span class="group-hover/creator:underline">{{ post.creator.username }}</span><span class="font-normal text-[var(--faint)]"> · {{ relativeDate(post.published_at, locale) }}</span>
           </span>
           <span class="block truncate text-[11px] text-[var(--faint)]">{{ $t('contentCard.followers', { count: compactNumber(post.creator.followers) }) }}</span>
         </span>
@@ -135,6 +136,16 @@ watch(() => props.post.id, () => {
       <AppIcon name="heart" :size="21" :stroke-width="1.6" />
       <AppIcon name="chat" :size="21" :stroke-width="1.6" class="-scale-x-100" />
       <AppIcon name="paper-plane" :size="21" :stroke-width="1.6" />
+      <a
+        v-if="post.source_url"
+        :href="post.source_url"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="transition hover:opacity-60"
+        :aria-label="$t('contentCard.openSource')"
+      >
+        <AppIcon name="arrow" :size="20" class="-rotate-45" />
+      </a>
       <button
         class="ml-auto transition hover:opacity-60"
         :aria-label="post.is_saved ? $t('contentCard.saved') : $t('contentCard.save')"

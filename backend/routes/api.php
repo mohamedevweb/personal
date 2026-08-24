@@ -79,6 +79,7 @@ Route::middleware(['auth:sanctum', 'verified'])->prefix('integrations/instagram'
 Route::middleware(['auth:sanctum', 'verified'])->group(function (): void {
     Route::get('/me/profile', [ProfileController::class, 'show']);
     Route::patch('/me/profile', [ProfileController::class, 'update']);
+    Route::get('/me/posts', [ProfileController::class, 'posts']);
     Route::get('/feed', [FeedController::class, 'index']);
     Route::get('/feed/global', [FeedController::class, 'global']);
     Route::get('/content/{content}', [ContentController::class, 'show']);
@@ -93,6 +94,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function (): void {
     Route::get('/remixes', [RemixController::class, 'index']);
     Route::get('/remixes/{remix}', [RemixController::class, 'show']);
     Route::patch('/remixes/{remix}', [RemixController::class, 'update']);
+    Route::post('/remixes/{remix}/copied', [RemixController::class, 'copied']);
     Route::get('/creator-inspirations', [CreatorInspirationController::class, 'index']);
     Route::put('/creator-inspirations', [CreatorInspirationController::class, 'update'])
         ->middleware('throttle:discovery');
@@ -109,6 +111,7 @@ Route::middleware(['auth:sanctum', 'verified', 'throttle:generation'])->group(fu
     Route::post('/content/{content}/remix', [ContentController::class, 'remix']);
     Route::post('/moments/{moment}/create-content', [MomentController::class, 'createContent']);
     Route::post('/remixes/{remix}/retry', [RemixController::class, 'retry']);
+    Route::post('/remixes/{remix}/regenerate-block', [RemixController::class, 'regenerateBlock']);
     Route::post('/chat', ChatController::class);
 });
 

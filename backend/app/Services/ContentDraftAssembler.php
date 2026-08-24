@@ -45,6 +45,18 @@ class ContentDraftAssembler
         ] + $this->formatPayload($format, $generated);
     }
 
+    public function block(?string $json): string
+    {
+        $generated = $this->decode($json);
+        $text = trim((string) ($generated['text'] ?? ''));
+
+        if ($text === '') {
+            throw new ContentGenerationException('Personal received an unusable rewrite. Please try again.');
+        }
+
+        return $text;
+    }
+
     /**
      * @param  array<string, mixed>  $generated
      * @return array<string, mixed>
@@ -53,7 +65,7 @@ class ContentDraftAssembler
     {
         if ($format !== 'carousel') {
             return array_intersect_key($generated, array_flip(match ($format) {
-                'reel' => ['hook', 'script', 'visual', 'cta'],
+                'reel' => ['hook', 'script', 'visual', 'ending', 'cta'],
                 default => ['caption'],
             }));
         }

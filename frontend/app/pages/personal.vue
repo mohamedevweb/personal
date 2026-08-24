@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { InstagramAccount } from '~/types/instagram'
-import type { PersonalProfile } from '~/types/product'
+import type { ContentPost, PersonalProfile } from '~/types/product'
 
 type PersonalProfileDraft = Pick<PersonalProfile,
   | 'niche'
@@ -19,6 +19,8 @@ const toast = useToast()
 const profile = ref<PersonalProfile | null>(null)
 const instagram = ref<Pick<InstagramAccount, 'username' | 'display_name' | 'profile_picture_url' | 'media_count'> | null>(null)
 const instagramAvatarFailed = ref(false)
+const posts = ref<ContentPost[]>([])
+const postsLoading = ref(true)
 const editing = ref(false)
 const saving = ref(false)
 const draft = reactive<PersonalProfileDraft>({
@@ -99,6 +101,16 @@ function beginEdit() {
   editing.value = true
 }
 
+function applyPositioningTemplate() {
+  draft.positioning ||= t('personal.template.positioningValue')
+  draft.audience_description ||= t('personal.template.audienceValue')
+  sectionText.topics ||= t('personal.template.topicsValue')
+  sectionText.tone ||= t('personal.template.toneValue')
+  sectionText.current_projects ||= t('personal.template.projectsValue')
+  sectionText.goals ||= t('personal.template.goalsValue')
+  sectionText.content_strengths ||= t('personal.template.strengthsValue')
+}
+
 async function saveProfile() {
   saving.value = true
   for (const key of sections) draft[key] = toList(sectionText[key])
@@ -113,12 +125,27 @@ async function saveProfile() {
 
 async function loadProfile() {
   try {
-    const response = await apiFetch<{ profile: PersonalProfile, instagram: typeof instagram.value }>('/api/me/profile')
+    const [response, postsResponse] = await Promise.all([
+      apiFetch<{ profile: PersonalProfile, instagram: typeof instagram.value }>('/api/me/profile'),
+      apiFetch<{ posts: ContentPost[] }>('/api/me/posts')
+    ])
     profile.value = response.profile
     instagram.value = response.instagram
+    posts.value = postsResponse.posts
     instagramAvatarFailed.value = false
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('personal.loadError')))
+  } finally {
+    postsLoading.value = false
+  }
+}
+
+async function toggleSaved(post: ContentPost) {
+  try {
+    const response = await apiFetch<{ saved: boolean }>(`/api/content/${post.id}/save`, { method: 'POST' })
+    post.is_saved = response.saved
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('personal.posts.saveError')))
   }
 }
 
@@ -176,6 +203,16 @@ onMounted(loadProfile)
         </div>
       </div>
 
+      <div v-if="editing" class="flex flex-col gap-3 border-b border-[var(--line)] bg-[var(--accent-soft)] px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p class="text-sm font-medium text-[var(--accent-ink)]">{{ $t('personal.template.title') }}</p>
+          <p class="mt-1 text-xs leading-5 text-[var(--muted)]">{{ $t('personal.template.copy') }}</p>
+        </div>
+        <button type="button" class="shrink-0 rounded-full border border-[var(--accent-line)] bg-[var(--surface)] px-4 py-2.5 text-sm font-medium transition hover:border-[var(--accent)]" @click="applyPositioningTemplate">
+          {{ $t('personal.template.action') }}
+        </button>
+      </div>
+
       <div class="grid md:grid-cols-2">
         <section class="border-b border-[var(--line-soft)] p-6 md:border-r"><p class="memory-label">{{ $t('personal.positioning') }}</p><textarea v-if="editing" v-model="draft.positioning" class="memory-input min-h-24" /><p v-else class="memory-copy" :class="{ 'text-[var(--faint)]': !profile.positioning }">{{ profile.positioning || $t('personal.notProvided') }}</p></section>
         <section class="border-b border-[var(--line-soft)] p-6"><p class="memory-label">{{ $t('personal.audience') }}</p><textarea v-if="editing" v-model="draft.audience_description" class="memory-input min-h-24" /><p v-else class="memory-copy" :class="{ 'text-[var(--faint)]': !profile.audience_description }">{{ profile.audience_description || $t('personal.notProvided') }}</p></section>
@@ -188,6 +225,27 @@ onMounted(loadProfile)
         </section>
       </div>
     </form>
+
+    <section v-if="instagram" class="mt-8">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p class="text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--faint)]">{{ $t('personal.posts.eyebrow') }}</p>
+          <h2 class="mt-2 font-serif text-[30px] tracking-[-.03em]">{{ $t('personal.posts.title') }}</h2>
+          <p class="mt-2 max-w-xl text-sm leading-6 text-[var(--muted)]">{{ $t('personal.posts.copy') }}</p>
+        </div>
+        <span v-if="posts.length" class="rounded-full border border-[var(--line)] bg-[var(--surface)] px-3 py-1.5 text-xs text-[var(--muted)]">{{ $t('personal.posts.count', { count: posts.length }) }}</span>
+      </div>
+
+      <div v-if="postsLoading" class="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div v-for="index in 3" :key="index" class="h-[520px] animate-pulse rounded-[20px] bg-[var(--sand-soft)]" />
+      </div>
+      <div v-else-if="posts.length" class="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <ContentCard v-for="post in posts" :key="post.id" :post="post" @save="toggleSaved" @remix="navigateTo(`/content/${post.id}`)" />
+      </div>
+      <div v-else class="mt-5 rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-6 text-sm text-[var(--muted)]">
+        {{ $t('personal.posts.empty') }}
+      </div>
+    </section>
   </main>
 </template>
 

@@ -22,9 +22,10 @@ export interface PerformanceBenchmark {
 
 export interface ContentPost {
   id: number
-  format: 'Reel' | 'Carousel'
+  format: 'Reel' | 'Carousel' | 'reel' | 'carousel' | 'image'
   hook: string
   caption: string
+  source_url: string | null
   thumbnail_url: string | null
   media_urls: string[]
   views: number
@@ -121,10 +122,13 @@ export interface Remix {
     hook?: string
     script?: string
     visual?: string
+    ending?: string
     cta?: string
     caption?: string
   }
   status: 'generating' | 'failed' | 'draft' | 'ready' | 'archived'
+  copy_count?: number
+  last_copied_at?: string | null
   created_at?: string
   updated_at?: string
   source_content?: ContentPost
@@ -148,9 +152,10 @@ export function compactNumber(value: number): string {
   return new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(value)
 }
 
-export function relativeDate(value: string): string {
+export function relativeDate(value: string, locale = 'en'): string {
   const hours = Math.max(1, Math.round((Date.now() - new Date(value).getTime()) / 3_600_000))
-  return hours < 24 ? `${hours}h ago` : `${Math.round(hours / 24)}d ago`
+  const formatter = new Intl.RelativeTimeFormat(locale, { numeric: 'always', style: 'short' })
+  return hours < 24 ? formatter.format(-hours, 'hour') : formatter.format(-Math.round(hours / 24), 'day')
 }
 
 // Creators come from Instagram, so their handle is all we need to point back at

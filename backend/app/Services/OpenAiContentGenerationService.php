@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Exceptions\ContentGenerationException;
 use App\Models\ContentPost;
 use App\Models\LifeMoment;
+use App\Models\Remix;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use OpenAI\Contracts\ClientContract;
@@ -40,6 +41,17 @@ class OpenAiContentGenerationService implements ContentGenerationService
         $this->guardAgainstUnusableResponse($response);
 
         return $this->assembler->assemble($response->outputText, $source, $user, $format, $moment);
+    }
+
+    public function regenerateBlock(Remix $remix, string $block, ?int $slideIndex = null): string
+    {
+        $response = $this->request(
+            $this->blueprint->blockBrief($remix, $block, $slideIndex),
+            $this->blueprint->blockSchema(),
+        );
+        $this->guardAgainstUnusableResponse($response);
+
+        return $this->assembler->block($response->outputText);
     }
 
     /** @param array<string, mixed> $schema */

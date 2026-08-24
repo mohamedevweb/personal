@@ -22,11 +22,18 @@ const config = useRuntimeConfig()
       </h2>
 
       <div data-reveal class="mt-11 flex flex-col items-center justify-center gap-3 sm:flex-row" style="--reveal-delay:160ms">
-        <LandingButtonLink to="/login" size="lg" class="w-full sm:w-auto">
+        <LandingButtonLink to="/login?mode=register" size="lg" class="w-full sm:w-auto">
           {{ $t('landing.cta.button') }}
           <AppIcon name="arrow" :size="17" class="transition-transform duration-300 group-hover:translate-x-1" />
         </LandingButtonLink>
-        <LandingButtonLink :to="config.public.demoBookingUrl" variant="light" size="lg" class="w-full sm:w-auto">
+        <LandingButtonLink
+          :to="config.public.demoBookingUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          variant="light"
+          size="lg"
+          class="w-full sm:w-auto"
+        >
           {{ $t('landing.cta.bookDemo') }}
         </LandingButtonLink>
       </div>

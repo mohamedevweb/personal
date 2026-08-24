@@ -25,6 +25,7 @@ const saving = ref(false)
 const switching = ref<Format | null>(null)
 const copied = ref(false)
 const retrying = ref(false)
+const regeneratingBlock = ref<string | null>(null)
 /** A rewrite discards the draft, so the button asks once before it fires. */
 const confirmingRedraft = ref(false)
 const sourceAvatarFailed = ref(false)
@@ -67,8 +68,8 @@ function timecode(seconds: number): string {
 const timing = computed(() => {
   const draft = remix.value?.generated_content
   let at = 0
-  const ranges = {} as Record<'hook' | 'script' | 'cta', string>
-  for (const key of ['hook', 'script', 'cta'] as const) {
+  const ranges = {} as Record<'hook' | 'script' | 'ending' | 'cta', string>
+  for (const key of ['hook', 'script', 'ending', 'cta'] as const) {
     const from = at
     at += spokenSeconds(draft?.[key])
     ranges[key] = `${timecode(from)}–${timecode(at)}`
@@ -93,9 +94,27 @@ function deleteSlide(index: number) {
   remix.value?.generated_content.slides?.splice(index, 1)
 }
 
-function regenerateSlide(index: number) {
-  const slide = remix.value?.generated_content.slides?.[index]
-  if (slide) slide.text = `${slide.text.replace(/[.!]$/, '')}${t('remix.regenerateAppend')}`
+async function regenerateBlock(block: 'hook' | 'script' | 'visual' | 'ending' | 'cta' | 'caption' | 'slide', slideIndex?: number) {
+  if (!remix.value || regeneratingBlock.value) return
+  const identity = slideIndex === undefined ? block : `${block}:${slideIndex}`
+  regeneratingBlock.value = identity
+  try {
+    if (dirty.value) {
+      const saved = await save(remix.value.status === 'ready' ? 'ready' : 'draft')
+      if (!saved) return
+    }
+    const response = await apiFetch<Pick<Remix, 'generated_content' | 'status'>>(
+      `/api/remixes/${remix.value.id}/regenerate-block`,
+      { method: 'POST', body: { block, slide_index: slideIndex } }
+    )
+    remix.value.generated_content = response.generated_content
+    remix.value.status = response.status
+    pristine.value = JSON.stringify(response.generated_content)
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('remix.rewriteError')))
+  } finally {
+    regeneratingBlock.value = null
+  }
 }
 
 async function addSlide() {
@@ -136,18 +155,42 @@ function plainText(): string {
     return (draft.slides || []).map((slide, index) => `${index + 1}. ${slide.text}`).join('\n\n')
   }
   if (remix.value?.format === 'reel') {
-    return [draft.hook, draft.script, draft.visual && `[${t('remix.shotIdea')}] ${draft.visual}`, draft.cta]
+    return [draft.hook, draft.script, draft.visual && `[${t('remix.shotIdea')}] ${draft.visual}`, draft.ending, draft.cta]
       .filter(Boolean).join('\n\n')
   }
   return draft.caption || ''
 }
 
+function fallbackCopy(text: string): boolean {
+  if (!import.meta.client) return false
+  const textarea = document.createElement('textarea')
+  textarea.value = text
+  textarea.setAttribute('readonly', '')
+  textarea.style.position = 'fixed'
+  textarea.style.opacity = '0'
+  document.body.appendChild(textarea)
+  textarea.select()
+  const copied = document.execCommand('copy')
+  textarea.remove()
+  return copied
+}
+
 async function copyDraft() {
+  if (!remix.value) return
+  const text = plainText()
   try {
-    await navigator.clipboard.writeText(plainText())
+    if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text)
+    else if (!fallbackCopy(text)) throw new Error('Clipboard unavailable')
     copied.value = true
     setTimeout(() => { copied.value = false }, 1800)
+    void apiFetch(`/api/remixes/${remix.value.id}/copied`, { method: 'POST' }).catch(() => undefined)
   } catch {
+    if (fallbackCopy(text)) {
+      copied.value = true
+      setTimeout(() => { copied.value = false }, 1800)
+      void apiFetch(`/api/remixes/${remix.value.id}/copied`, { method: 'POST' }).catch(() => undefined)
+      return
+    }
     toast.error(t('remix.copyError'))
   }
 }
@@ -311,11 +354,11 @@ onBeforeUnmount(() => {
       <!-- Everything that changes the draft's state lives in one bar that stays
            in reach while the editor scrolls. -->
       <div class="sticky top-16 z-10 border-b border-[var(--line)] bg-[var(--paper)]/92 backdrop-blur md:top-[74px]">
-        <div class="page-shell flex h-16 items-center gap-3">
+        <div class="page-shell flex h-16 items-center gap-3 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <NuxtLink
             :to="`/content/${remix.source_content?.id}`"
             :aria-label="$t('remix.backToAnalysis')"
-            class="b-focus -ml-1 flex items-center gap-1.5 rounded-full px-1 py-1 text-[13px] text-[var(--muted)] transition hover:text-[var(--ink)]"
+            class="b-focus -ml-1 flex shrink-0 items-center gap-1.5 rounded-full px-1 py-1 text-[13px] text-[var(--muted)] transition hover:text-[var(--ink)]"
           >
             <AppIcon name="chevron" :size="15" class="rotate-180" />
             <span class="hidden sm:inline">{{ $t('remix.backToAnalysis') }}</span>
@@ -329,7 +372,7 @@ onBeforeUnmount(() => {
             {{ saving ? $t('remix.saving') : dirty ? $t('remix.unsaved') : $t('remix.allSaved') }}
           </span>
 
-          <div class="ml-auto flex items-center gap-2">
+          <div class="ml-auto flex shrink-0 items-center gap-2">
             <button class="bar-button" :aria-label="$t('remix.copy')" @click="copyDraft">
               <AppIcon :name="copied ? 'check' : 'copy'" :size="15" />
               <span class="hidden sm:inline">{{ copied ? $t('remix.copied') : $t('remix.copy') }}</span>
@@ -447,8 +490,8 @@ onBeforeUnmount(() => {
                     <button class="editor-control" :class="index === 0 && 'control-dark'" :title="$t('remix.moveDown')" :aria-label="$t('remix.moveDown')" :disabled="index === slides.length - 1" @click="moveSlide(index, 1)">
                       <AppIcon name="arrow-up" :size="14" class="rotate-90" />
                     </button>
-                    <button class="editor-control" :class="index === 0 && 'control-dark'" :title="$t('remix.regenerate')" :aria-label="$t('remix.regenerate')" @click="regenerateSlide(index)">
-                      <AppIcon name="refresh" :size="14" />
+                    <button class="editor-control" :class="index === 0 && 'control-dark'" :title="$t('remix.regenerate')" :aria-label="$t('remix.regenerate')" :disabled="!!regeneratingBlock" @click="regenerateBlock('slide', index)">
+                      <AppIcon name="refresh" :size="14" :class="regeneratingBlock === `slide:${index}` && 'animate-spin'" />
                     </button>
                     <button class="editor-control" :class="index === 0 ? 'control-dark' : 'text-[var(--danger)]'" :title="$t('remix.delete')" :aria-label="$t('remix.delete')" @click="deleteSlide(index)">
                       <AppIcon name="trash" :size="14" />
@@ -482,35 +525,42 @@ onBeforeUnmount(() => {
               </div>
 
               <div class="mt-4 overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">
-                <label class="beat">
+                <div class="beat">
                   <span class="beat-stamp">{{ timing.ranges.hook }}</span>
                   <span class="beat-body">
-                    <span class="remix-label">{{ $t('remix.hook') }}</span>
-                    <textarea v-model="remix.generated_content.hook" v-autosize rows="1" :placeholder="$t('remix.hookPlaceholder')" class="editor-hook" />
+                    <span class="flex items-center justify-between gap-3"><span class="remix-label">{{ $t('remix.hook') }}</span><button type="button" class="block-rewrite" :disabled="!!regeneratingBlock" @click.prevent="regenerateBlock('hook')"><AppIcon name="refresh" :size="13" :class="regeneratingBlock === 'hook' && 'animate-spin'" />{{ $t('remix.rewriteBlock') }}</button></span>
+                    <textarea v-model="remix.generated_content.hook" v-autosize rows="1" :aria-label="$t('remix.hook')" :placeholder="$t('remix.hookPlaceholder')" class="editor-hook" />
                   </span>
-                </label>
-                <label class="beat">
+                </div>
+                <div class="beat">
                   <span class="beat-stamp">{{ timing.ranges.script }}</span>
                   <span class="beat-body">
-                    <span class="remix-label">{{ $t('remix.body') }}</span>
-                    <textarea v-model="remix.generated_content.script" v-autosize rows="3" :placeholder="$t('remix.scriptPlaceholder')" class="editor-textarea" />
+                    <span class="flex items-center justify-between gap-3"><span class="remix-label">{{ $t('remix.body') }}</span><button type="button" class="block-rewrite" :disabled="!!regeneratingBlock" @click.prevent="regenerateBlock('script')"><AppIcon name="refresh" :size="13" :class="regeneratingBlock === 'script' && 'animate-spin'" />{{ $t('remix.rewriteBlock') }}</button></span>
+                    <textarea v-model="remix.generated_content.script" v-autosize rows="3" :aria-label="$t('remix.body')" :placeholder="$t('remix.scriptPlaceholder')" class="editor-textarea" />
                   </span>
-                </label>
-                <label class="beat">
+                </div>
+                <div class="beat">
                   <!-- Not spoken, so it carries no timecode. -->
                   <span class="beat-stamp text-[var(--faint)]"><AppIcon name="eye" :size="14" /></span>
                   <span class="beat-body">
-                    <span class="remix-label">{{ $t('remix.onScreen') }}</span>
-                    <textarea v-model="remix.generated_content.visual" v-autosize rows="2" :placeholder="$t('remix.visualPlaceholder')" class="editor-textarea text-[var(--copy)]" />
+                    <span class="flex items-center justify-between gap-3"><span class="remix-label">{{ $t('remix.onScreen') }}</span><button type="button" class="block-rewrite" :disabled="!!regeneratingBlock" @click.prevent="regenerateBlock('visual')"><AppIcon name="refresh" :size="13" :class="regeneratingBlock === 'visual' && 'animate-spin'" />{{ $t('remix.rewriteBlock') }}</button></span>
+                    <textarea v-model="remix.generated_content.visual" v-autosize rows="2" :aria-label="$t('remix.onScreen')" :placeholder="$t('remix.visualPlaceholder')" class="editor-textarea text-[var(--copy)]" />
                   </span>
-                </label>
-                <label class="beat">
+                </div>
+                <div class="beat">
+                  <span class="beat-stamp">{{ timing.ranges.ending }}</span>
+                  <span class="beat-body">
+                    <span class="flex items-center justify-between gap-3"><span class="remix-label">{{ $t('remix.ending') }}</span><button type="button" class="block-rewrite" :disabled="!!regeneratingBlock" @click.prevent="regenerateBlock('ending')"><AppIcon name="refresh" :size="13" :class="regeneratingBlock === 'ending' && 'animate-spin'" />{{ $t('remix.rewriteBlock') }}</button></span>
+                    <textarea v-model="remix.generated_content.ending" v-autosize rows="1" :aria-label="$t('remix.ending')" :placeholder="$t('remix.endingPlaceholder')" class="editor-textarea" />
+                  </span>
+                </div>
+                <div class="beat">
                   <span class="beat-stamp">{{ timing.ranges.cta }}</span>
                   <span class="beat-body">
-                    <span class="remix-label">{{ $t('remix.cta') }}</span>
-                    <textarea v-model="remix.generated_content.cta" v-autosize rows="1" :placeholder="$t('remix.ctaPlaceholder')" class="editor-textarea" />
+                    <span class="flex items-center justify-between gap-3"><span class="remix-label">{{ $t('remix.cta') }}</span><button type="button" class="block-rewrite" :disabled="!!regeneratingBlock" @click.prevent="regenerateBlock('cta')"><AppIcon name="refresh" :size="13" :class="regeneratingBlock === 'cta' && 'animate-spin'" />{{ $t('remix.rewriteBlock') }}</button></span>
+                    <textarea v-model="remix.generated_content.cta" v-autosize rows="1" :aria-label="$t('remix.cta')" :placeholder="$t('remix.ctaPlaceholder')" class="editor-textarea" />
                   </span>
-                </label>
+                </div>
               </div>
             </div>
 
@@ -525,6 +575,10 @@ onBeforeUnmount(() => {
                     <span v-else class="text-[var(--faint)]">{{ $t('remix.beforeMoreEmpty') }}</span>
                     <span v-if="caption.length > CAPTION_FOLD" class="text-[var(--faint)]">… {{ $t('remix.more') }}</span>
                   </p>
+                </div>
+                <div class="flex items-center justify-between border-b border-[var(--line-soft)] px-6 py-3">
+                  <span class="remix-label">{{ $t('remix.captionPost') }}</span>
+                  <button type="button" class="block-rewrite" :disabled="!!regeneratingBlock" @click="regenerateBlock('caption')"><AppIcon name="refresh" :size="13" :class="regeneratingBlock === 'caption' && 'animate-spin'" />{{ $t('remix.rewriteBlock') }}</button>
                 </div>
                 <textarea
                   v-model="remix.generated_content.caption"
@@ -572,6 +626,17 @@ onBeforeUnmount(() => {
                 <AppIcon name="arrow" :size="15" class="shrink-0 -rotate-45 text-[var(--faint)]" />
               </a>
 
+              <a
+                v-if="remix.source_content?.source_url"
+                :href="remix.source_content.source_url"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex items-center justify-between border-b border-[var(--line-soft)] px-5 py-3 text-[12.5px] text-[var(--muted)] transition hover:bg-[var(--paper)] hover:text-[var(--ink)]"
+              >
+                {{ $t('remix.openSource') }}
+                <AppIcon name="arrow" :size="14" class="-rotate-45" />
+              </a>
+
               <div class="p-5">
                 <p class="remix-label">{{ $t('remix.originalPattern') }}</p>
                 <p class="mt-3 font-serif text-[21px] leading-[1.28] tracking-[-.01em]">“{{ remix.generated_content.original_pattern }}”</p>
@@ -590,7 +655,7 @@ onBeforeUnmount(() => {
             <div class="rounded-[18px] border border-[var(--accent-line)] bg-[var(--accent-soft)] p-5">
               <p class="remix-label text-[var(--accent-ink)]">{{ $t('remix.yourContext') }}</p>
               <p class="mt-2.5 text-[14px] leading-6 text-[var(--copy)]">{{ remix.generated_content.your_context }}</p>
-              <NuxtLink v-if="remix.life_moment" to="/moments" class="mt-3 inline-flex items-center gap-1.5 text-[12px] text-[var(--accent-ink)] transition hover:underline">
+              <NuxtLink v-if="remix.life_moment" to="/create" class="mt-3 inline-flex items-center gap-1.5 text-[12px] text-[var(--accent-ink)] transition hover:underline">
                 {{ $t('remix.editMoments') }}<AppIcon name="arrow" :size="13" />
               </NuxtLink>
             </div>
@@ -611,10 +676,11 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .remix-label { @apply text-[10px] font-semibold uppercase tracking-[.16em] text-[var(--faint)]; }
+.block-rewrite { @apply inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-[11px] text-[var(--muted)] transition hover:bg-[var(--paper)] hover:text-[var(--ink)] disabled:cursor-wait disabled:opacity-50; }
 
-.bar-button { @apply inline-flex h-9 items-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3.5 text-[12.5px] text-[var(--muted)] transition hover:text-[var(--ink)] disabled:opacity-50 sm:px-4; }
+.bar-button { @apply inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--line)] bg-[var(--surface)] px-3.5 text-[12.5px] text-[var(--muted)] transition hover:text-[var(--ink)] disabled:opacity-50 sm:px-4; }
 
-.status-chip { @apply inline-flex h-7 items-center gap-1.5 rounded-full border px-2.5 text-[11px] font-medium; }
+.status-chip { @apply inline-flex h-7 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 text-[11px] font-medium; }
 .status-draft { @apply border-[var(--line)] bg-[var(--surface)] text-[var(--muted)]; }
 .status-ready { @apply border-[var(--positive-line)] bg-[var(--positive-soft)] text-[var(--positive)]; }
 .status-dot { @apply h-1.5 w-1.5 rounded-full bg-current; }

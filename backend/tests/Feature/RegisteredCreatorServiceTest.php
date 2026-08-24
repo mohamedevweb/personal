@@ -29,6 +29,18 @@ class RegisteredCreatorServiceTest extends TestCase
         $this->assertSame(1900, $creator->average_views);
         $this->assertSame(84, $creator->average_likes);
         $this->assertTrue($user->creatorIdentity()->firstOrFail()->is($creator));
+        $this->assertDatabaseHas('content_posts', [
+            'creator_id' => $creator->id,
+            'instagram_media_id' => 'member-media',
+            'format' => 'reel',
+            'views' => 1900,
+        ]);
+        $this->actingAs($user)
+            ->getJson('/api/me/posts')
+            ->assertOk()
+            ->assertJsonCount(1, 'posts')
+            ->assertJsonPath('posts.0.instagram_media_id', null)
+            ->assertJsonPath('posts.0.views', 1900);
     }
 
     public function test_existing_catalog_creator_is_linked_without_losing_editorial_state(): void

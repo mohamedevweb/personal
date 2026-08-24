@@ -47,7 +47,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: 'http://localhost:8000',
-      demoBookingUrl: 'https://cal.com/usepersonal/demo',
+      demoBookingUrl: 'https://cal.com/mc-studio/demo-personal-app?overlayCalendar=true',
       googleAnalyticsId: 'G-2X3WXN19GF',
       sentry: {
         dsn: '',

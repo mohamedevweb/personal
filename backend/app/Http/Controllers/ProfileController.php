@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\CreatorProfile;
+use App\Services\ContentPostView;
 use App\Services\Discovery\CanonicalCreatorVerticals;
+use App\Services\RegisteredCreatorService;
 use App\Services\UserView;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -86,6 +88,41 @@ class ProfileController extends Controller
         $profile->save();
 
         return response()->json(['profile' => $profile]);
+    }
+
+    public function posts(
+        Request $request,
+        RegisteredCreatorService $creators,
+        ContentPostView $view,
+    ): JsonResponse {
+        $account = $request->user()->instagramAccount;
+        $creator = $request->user()->creatorIdentity;
+
+        if (! $account || ! $creator) {
+            return response()->json(['posts' => []]);
+        }
+
+        if (! $creator->posts()->whereNotNull('instagram_media_id')->exists() && $account->media()->exists()) {
+            $creators->syncPosts($account, $creator);
+        }
+
+        $posts = $creator->posts()
+            ->whereNotNull('instagram_media_id')
+            ->orderByDesc('outlier_score')
+            ->orderByDesc('published_at')
+            ->limit(24)
+            ->get();
+        $savedIds = $request->user()->savedContent()
+            ->whereIn('content_post_id', $posts->pluck('id'))
+            ->pluck('content_post_id')
+            ->flip();
+        $posts = $posts->map(fn ($post): array => $view->make(
+            $post,
+            $request->user(),
+            isSaved: $savedIds->has($post->id),
+        ));
+
+        return response()->json(['posts' => $posts]);
     }
 
     private function profile(Request $request): CreatorProfile

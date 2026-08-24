@@ -61,7 +61,7 @@
         </p>
 
         <div data-reveal data-reveal-now class="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row" style="--reveal-delay:180ms">
-          <LandingButtonLink to="/login" size="lg" class="w-full sm:w-auto">
+          <LandingButtonLink to="/login?mode=register" size="lg" class="w-full sm:w-auto">
             {{ $t('landing.hero.getAccess') }}
             <AppIcon name="arrow" :size="17" class="transition-transform duration-300 group-hover:translate-x-1" />
           </LandingButtonLink>
