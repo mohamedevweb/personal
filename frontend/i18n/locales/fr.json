@@ -157,6 +157,15 @@
       },
       "connect": {
         "patternQuote": "« La décision que j'ai failli ne pas prendre… »",
+        "source": {
+          "label": "Post gagnant",
+          "format": "Reel",
+          "outlier": "Outlier 8,4×",
+          "views": "126 k vues"
+        },
+        "join": "Structure éprouvée",
+        "momentLabel": "Ton Moment",
+        "result": "Sa structure. Ton histoire.",
         "moments": {
           "first": {
             "date": "mardi",
@@ -174,13 +183,25 @@
             "value": "« J'ai failli refuser mon premier client à 10 k€. »"
           }
         },
-        "marks": {
-          "caption": "Légende",
-          "carousel": "Couverture",
-          "reel": "0:00"
+        "carousel": {
+          "label": "Jeu de slides",
+          "count": "6 slides",
+          "cover": "Couverture",
+          "slide2": "Le mail est arrivé un mardi. Mon premier réflexe a été de dire non.",
+          "slide3": "Pas parce que le projet était mauvais. Parce que je ne me sentais pas prêt."
+        },
+        "reel": {
+          "label": "Script parlé",
+          "runtime": "0:47 estimé",
+          "script": "Le mail est arrivé un mardi. C’était la plus grosse opportunité que j’avais reçue, et mon premier réflexe a été de dire non. Je pensais avoir besoin de plus de preuves avant d’accepter une mission de ce niveau.",
+          "visual": "Face caméra, puis coupe sur le mail du client à l’écran.",
+          "cta": "Quelle opportunité attends-tu encore de te sentir prêt à saisir ?"
+        },
+        "caption": {
+          "preview": "J’ai failli refuser mon premier client à 10 k€ parce que j’attendais de me sentir prêt.",
+          "body": "Le mail est arrivé un mardi. Mon premier réflexe a été de dire non.\n\nPas parce que le projet était mauvais. Parce que je pensais que la confiance devait venir avant."
         }
-      },
-      "tryIt": "Tout ici est vivant. Essayez."
+      }
     },
     "faq": {
       "eyebrow": "FAQ",
@@ -549,32 +570,6 @@
     "saveMemory": "Enregistrer la mémoire",
     "loadError": "Personal n’a pas pu charger ta mémoire.",
     "saveError": "Personal n’a pas pu mettre à jour ta mémoire. Réessaie.",
-    "voice": {
-      "title": "Ta voix",
-      "ready": "Voix active",
-      "notReady": "À configurer",
-      "description": "Crée un voice.md avec ton assistant, puis importe-le ici.",
-      "privacy": "Relis le fichier et retire les informations sensibles.",
-      "chooseProvider": "Créer avec",
-      "import": "Importer voice.md",
-      "replace": "Remplacer voice.md",
-      "importing": "Import en cours…",
-      "download": "Télécharger",
-      "showPrompt": "Voir le prompt avant de continuer",
-      "hidePrompt": "Masquer le prompt",
-      "promptLabel": "Prompt Personal",
-      "copyPrompt": "Copier le prompt",
-      "promptCopied": "Le prompt Personal est copié.",
-      "providerOpened": "{provider} s’ouvre avec le prompt Personal. S’il n’apparaît pas, colle-le depuis ton presse-papiers.",
-      "copyError": "Le prompt n’a pas pu être copié. Tu peux le copier depuis l’aperçu.",
-      "promptError": "Personal n’a pas pu préparer le prompt.",
-      "retry": "Réessayer",
-      "invalidFile": "Choisis un fichier Markdown nommé voice.md.",
-      "fileTooLarge": "Ce fichier est trop volumineux. Choisis un fichier de moins de 50 Ko.",
-      "fileTooLong": "Ce fichier est trop long. Demande à ton assistant de garder les observations les plus utiles dans 12 000 caractères, puis importe-le à nouveau.",
-      "emptyFile": "Ce fichier est vide.",
-      "importError": "Personal n’a pas pu importer ce fichier. Réessaie."
-    },
     "sections": {
       "topics": "Sujets",
       "tone": "Ton",

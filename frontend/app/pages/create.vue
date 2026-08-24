@@ -11,6 +11,7 @@ const selectedAngleIndex = ref(0)
 const loading = ref(true)
 const drafting = ref(false)
 const composerOpen = ref(false)
+const expanded = ref(false)
 
 const opportunityKeys: Record<string, string> = {
   'Tell the story of your pivot using a failure → realization → new direction format.': 'pivot',
@@ -25,6 +26,7 @@ const pick = computed(() => opportunities.value.find(opportunity => opportunity.
 const hasMaterial = computed(() => moments.value.length > 0)
 const selectedMoment = computed(() => moments.value.find(moment => moment.id === selectedMomentId.value) || null)
 const visibleMoments = computed(() => {
+  if (expanded.value) return moments.value
   const firstMoments = moments.value.slice(0, 4)
   if (!selectedMoment.value || firstMoments.some(moment => moment.id === selectedMoment.value?.id)) return firstMoments
   return [selectedMoment.value, ...firstMoments.slice(0, 3)]
@@ -45,16 +47,21 @@ const angles = computed(() => [
 const selectedAngle = computed(() => angles.value[selectedAngleIndex.value]!)
 const selectedMomentIsPick = computed(() => selectedMoment.value?.id === pick.value?.life_moment?.id)
 
-/* Adding material used to hand the creator off to another page and drop them
-   back here. The composer opens in place instead, and what they just wrote is
-   selected so the next click is the one that matters. */
-function addMoment() {
-  composerOpen.value = true
-}
-
+/* Moments live here now. They are written in place, and what the creator just
+   wrote is selected so the next click is the one that matters. */
 function onMomentCreated(moment: LifeMoment) {
   moments.value.unshift(moment)
   selectedMomentId.value = moment.id
+}
+
+async function removeMoment(moment: LifeMoment) {
+  try {
+    await apiFetch(`/api/moments/${moment.id}`, { method: 'DELETE' })
+    moments.value = moments.value.filter(item => item.id !== moment.id)
+    if (selectedMomentId.value === moment.id) selectedMomentId.value = moments.value[0]?.id || null
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('moments.deleteError')))
+  }
 }
 
 async function createFromMoment(moment: LifeMoment, format: Remix['format']) {
@@ -95,22 +102,8 @@ onMounted(async () => {
 
 <template>
   <main class="page-shell pb-16 pt-2">
-    <header class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-      <div>
-        <p class="text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--faint)]">{{ $t('create.eyebrow') }}</p>
-        <h1 class="mt-3 max-w-2xl font-serif text-[34px] leading-[1.08] tracking-[-.03em] md:text-[42px]">{{ $t('create.title') }}</h1>
-        <p class="mt-3 max-w-2xl text-[15px] leading-6 text-[var(--muted)]">{{ $t('create.subtitle') }}</p>
-      </div>
-      <button
-        type="button"
-        class="inline-flex h-11 w-fit shrink-0 items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-[13px] font-medium transition hover:border-[var(--muted)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
-        @click="addMoment"
-      >
-        <AppIcon name="plus" :size="16" />{{ $t('create.addMoment') }}
-      </button>
-    </header>
 
-    <div v-if="loading" class="mt-7 overflow-hidden rounded-[20px] border border-[var(--line)] bg-[var(--surface)]">
+    <div v-if="loading" class="overflow-hidden rounded-[20px] border border-[var(--line)] bg-[var(--surface)]">
       <div class="space-y-3 p-5 md:p-7">
         <div class="h-5 w-52 animate-pulse rounded bg-[var(--sand-soft)]" />
         <div v-for="item in 3" :key="item" class="h-20 animate-pulse rounded-[14px] bg-[var(--sand-soft)]" />
@@ -122,33 +115,33 @@ onMounted(async () => {
 
     <section
       v-else-if="!hasMaterial"
-      class="mt-7 rounded-[20px] border border-dashed border-[var(--line)] bg-[var(--surface)] p-6 md:p-8"
+      class="rounded-[20px] border border-dashed border-[var(--line)] bg-[var(--surface)] p-6 md:p-8"
     >
       <span class="grid h-11 w-11 place-items-center rounded-[12px] bg-[var(--accent-soft)] text-[var(--accent-ink)]"><AppIcon name="moments" :size="19" /></span>
       <h2 class="mt-5 font-serif text-[28px] tracking-[-.03em]">{{ $t('create.empty.title') }}</h2>
       <p class="mt-3 max-w-xl text-[15px] leading-6 text-[var(--muted)]">{{ $t('create.empty.copy') }}</p>
-      <button type="button" class="b-btn-red mt-6 inline-flex h-11 items-center gap-2 rounded-full px-5 text-[14px] font-medium" @click="addMoment">
+      <button v-if="!composerOpen" type="button" class="b-btn-red mt-6 inline-flex h-11 items-center gap-2 rounded-full px-5 text-[14px] font-medium" @click="composerOpen = true">
         <AppIcon name="plus" :size="17" />{{ $t('create.empty.action') }}
       </button>
+      <MomentComposer
+        class="mt-6"
+        :open="composerOpen"
+        @close="composerOpen = false"
+        @created="onMomentCreated"
+      />
     </section>
 
     <section v-else class="mt-7 overflow-hidden rounded-[20px] border border-[var(--line)] bg-[var(--surface)] shadow-[0_1px_2px_rgba(23,23,26,.04)]">
       <div class="p-5 md:p-7">
-        <div class="flex items-start justify-between gap-5">
-          <div>
-            <p class="text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--accent-ink)]">{{ $t('create.stepMoment') }}</p>
-            <h2 class="mt-2 font-serif text-[26px] tracking-[-.025em]">{{ $t('create.chooseMoment') }}</h2>
-            <p class="mt-1 text-sm text-[var(--muted)]">{{ $t('create.momentHelp') }}</p>
-          </div>
-          <NuxtLink to="/moments" class="hidden shrink-0 text-xs text-[var(--muted)] underline-offset-4 transition hover:text-[var(--ink)] hover:underline sm:block">{{ $t('create.viewAllMoments') }}</NuxtLink>
-        </div>
+        <p class="text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--accent-ink)]">{{ $t('create.stepMoment') }}</p>
+        <h2 class="mt-2 font-serif text-[26px] tracking-[-.025em]">{{ $t('create.chooseMoment') }}</h2>
+        <p class="mt-1 text-sm text-[var(--muted)]">{{ $t('create.momentHelp') }}</p>
 
         <div class="mt-5 space-y-2">
+          <div v-for="moment in visibleMoments" :key="moment.id" class="group flex items-center gap-1.5">
           <button
-            v-for="moment in visibleMoments"
-            :key="moment.id"
             type="button"
-            class="flex w-full items-center gap-4 rounded-[14px] border p-4 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:cursor-wait disabled:opacity-70"
+            class="flex min-w-0 flex-1 items-center gap-4 rounded-[14px] border p-4 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:cursor-wait disabled:opacity-70"
             :class="selectedMomentId === moment.id ? 'border-[var(--accent)] bg-[var(--b-red-50)]' : 'border-[var(--line-soft)] hover:border-[var(--line)] hover:bg-[var(--paper)]'"
             :aria-pressed="selectedMomentId === moment.id"
             :disabled="drafting"
@@ -169,14 +162,47 @@ onMounted(async () => {
               <AppIcon name="sparkles" :size="12" />{{ $t('create.recommended') }}
             </span>
           </button>
+          <button
+            type="button"
+            class="grid h-9 w-9 shrink-0 place-items-center rounded-full text-[var(--faint)] transition hover:bg-[var(--paper)] hover:text-[var(--danger)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:opacity-50"
+            :aria-label="$t('moments.delete')"
+            :disabled="drafting"
+            @click="removeMoment(moment)"
+          >
+            <AppIcon name="trash" :size="15" />
+          </button>
+          </div>
+
+          <MomentComposer
+            :open="composerOpen"
+            @close="composerOpen = false"
+            @created="onMomentCreated"
+          />
+
+          <button
+            v-if="!composerOpen"
+            type="button"
+            class="flex w-full items-center gap-3 rounded-[14px] border border-dashed border-[var(--line)] p-4 text-left text-[14px] text-[var(--muted)] transition hover:border-[var(--muted)] hover:text-[var(--ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+            @click="composerOpen = true"
+          >
+            <span class="grid h-5 w-5 shrink-0 place-items-center rounded-full border border-[var(--line)]"><AppIcon name="plus" :size="12" :stroke-width="2.2" /></span>
+            {{ $t('create.addMoment') }}
+          </button>
         </div>
+
+        <button
+          v-if="moments.length > visibleMoments.length || expanded"
+          type="button"
+          class="mt-3 inline-flex items-center gap-1 text-xs text-[var(--muted)] underline-offset-4 transition hover:text-[var(--ink)] hover:underline"
+          @click="expanded = !expanded"
+        >
+          {{ expanded ? $t('create.showFewerMoments') : $t('create.showAllMoments', { count: moments.length }) }}
+        </button>
 
         <div v-if="selectedMomentIsPick" class="mt-3 flex items-start gap-3 rounded-[12px] bg-[var(--paper)] px-4 py-3 text-xs leading-5 text-[var(--muted)]">
           <AppIcon name="sparkles" :size="15" class="mt-0.5 shrink-0 text-[var(--accent)]" />
           <p><strong class="font-medium text-[var(--ink)]">{{ $t('create.whyRecommended') }}</strong> {{ pickCopy('explanation') }}</p>
         </div>
-
-        <NuxtLink to="/moments" class="mt-4 inline-block text-xs text-[var(--muted)] underline-offset-4 hover:text-[var(--ink)] hover:underline sm:hidden">{{ $t('create.viewAllMoments') }}</NuxtLink>
       </div>
 
       <div class="border-t border-[var(--line)] bg-[var(--paper)]/55 p-5 md:p-7">
@@ -224,10 +250,5 @@ onMounted(async () => {
       <p v-if="drafting" role="status" class="sr-only">{{ $t('create.drafting') }}</p>
     </section>
 
-    <MomentComposer
-      :open="composerOpen"
-      @close="composerOpen = false"
-      @created="onMomentCreated"
-    />
   </main>
 </template>

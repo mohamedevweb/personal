@@ -157,6 +157,15 @@
       },
       "connect": {
         "patternQuote": "“The decision I almost didn't make…”",
+        "source": {
+          "label": "Winning post",
+          "format": "Reel",
+          "outlier": "Outlier 8.4×",
+          "views": "126K views"
+        },
+        "join": "Proven structure",
+        "momentLabel": "Your Moment",
+        "result": "Its structure. Your story.",
         "moments": {
           "first": {
             "date": "Tuesday",
@@ -174,13 +183,25 @@
             "value": "“I almost turned down my first €10k client.”"
           }
         },
-        "marks": {
-          "caption": "Caption",
-          "carousel": "Cover",
-          "reel": "0:00"
+        "carousel": {
+          "label": "Slide deck",
+          "count": "6 slides",
+          "cover": "Cover",
+          "slide2": "The email arrived on a Tuesday. My first instinct was to say no.",
+          "slide3": "Not because the project was wrong. Because I did not feel ready."
+        },
+        "reel": {
+          "label": "Spoken script",
+          "runtime": "0:47 estimated",
+          "script": "The email arrived on a Tuesday. It was the biggest opportunity I had ever received, and my first instinct was to say no. I thought I needed more proof before I could take on work at that level.",
+          "visual": "Talking head, then cut to the client email on screen.",
+          "cta": "What opportunity are you still waiting to feel ready for?"
+        },
+        "caption": {
+          "preview": "I almost turned down my first €10k client because I was waiting to feel ready.",
+          "body": "The email arrived on a Tuesday. My first instinct was to say no.\n\nNot because the project was wrong. Because I thought confidence had to come first."
         }
-      },
-      "tryIt": "Everything here is live. Try it."
+      }
     },
     "faq": {
       "eyebrow": "FAQ",
@@ -549,32 +570,6 @@
     "saveMemory": "Save memory",
     "loadError": "Personal could not load your memory.",
     "saveError": "Personal could not update your memory. Please try again.",
-    "voice": {
-      "title": "Your voice",
-      "ready": "Voice active",
-      "notReady": "Set up needed",
-      "description": "Create a voice.md with your assistant, then import it here.",
-      "privacy": "Review the file and remove sensitive information.",
-      "chooseProvider": "Create with",
-      "import": "Import voice.md",
-      "replace": "Replace voice.md",
-      "importing": "Importing…",
-      "download": "Download",
-      "showPrompt": "Review the prompt first",
-      "hidePrompt": "Hide prompt",
-      "promptLabel": "Personal prompt",
-      "copyPrompt": "Copy prompt",
-      "promptCopied": "The Personal prompt is copied.",
-      "providerOpened": "{provider} opens with the Personal prompt. If it does not appear, paste it from your clipboard.",
-      "copyError": "The prompt could not be copied. You can copy it from the preview.",
-      "promptError": "Personal could not prepare the prompt.",
-      "retry": "Try again",
-      "invalidFile": "Choose a Markdown file named voice.md.",
-      "fileTooLarge": "This file is too large. Choose a file under 50 KB.",
-      "fileTooLong": "This file is too long. Ask your assistant to keep the most useful observations within 12,000 characters, then import it again.",
-      "emptyFile": "This file is empty.",
-      "importError": "Personal could not import this file. Please try again."
-    },
     "sections": {
       "topics": "Topics",
       "tone": "Tone",

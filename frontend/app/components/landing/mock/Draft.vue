@@ -1,11 +1,10 @@
 <script setup lang="ts">
 /**
- * 04 — one story, three shapes.
+ * 04 — one story, three production-ready drafts.
  *
- * The claim is that the format is only how the story is cut, so the switch
- * works and the line never changes. Pressing Reel stands the frame up;
- * pressing Légende lays it flat. Same words each time — which is the argument,
- * made without making it.
+ * This mirrors the remix editor closely enough to make the format switch
+ * honest: a carousel is a swipeable deck, a Reel is a timed script, and a
+ * caption shows the Instagram fold and character count.
  */
 const live = useScreenLive()
 
@@ -14,19 +13,15 @@ type Format = typeof FORMATS[number]
 
 const format = ref<Format>('carousel')
 
-// The frame each format is read in. Nothing else about the card changes.
-const SHAPE: Record<Format, string> = {
-  caption: 'aspect-[16/9] w-full',
-  carousel: 'aspect-[4/5] w-[188px]',
-  reel: 'aspect-[9/16] w-[152px]'
+const arrived = ref(true)
+
+function selectFormat(next: Format) {
+  format.value = next
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+  arrived.value = false
+  requestAnimationFrame(() => { arrived.value = true })
 }
 
-// The cover is the only slide that decides whether the rest gets swiped, so
-// the deck and the reel are read on the night ground; a caption is read on
-// paper, because that is where a caption is read.
-const onNight = computed(() => format.value !== 'caption')
-
-const arrived = ref(true)
 onMounted(() => {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   arrived.value = false
@@ -36,19 +31,23 @@ onMounted(() => {
 
 <template>
   <LandingMockStage>
-    <!-- The switch, as it sits in the app — and working the way it does there. -->
     <div class="flex justify-center">
-      <div class="inline-flex items-center gap-1 rounded-full border border-[var(--b-line)] bg-[var(--b-surface)] p-1">
+      <div
+        class="inline-flex items-center gap-1 rounded-full border border-[var(--b-line)] bg-[var(--b-surface)] p-1"
+        role="tablist"
+        :aria-label="$t('remix.formatLabel')"
+      >
         <button
           v-for="option in FORMATS"
           :key="option"
           type="button"
-          :aria-pressed="format === option"
+          role="tab"
+          :aria-selected="format === option"
           class="b-focus inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-[12.5px] transition-colors duration-300"
           :class="format === option
             ? 'bg-[var(--b-black)] font-medium text-[var(--b-ivory)]'
             : 'text-[var(--b-stone)] hover:text-[var(--b-black)]'"
-          @click="format = option"
+          @click="selectFormat(option)"
         >
           <AppIcon :name="option === 'caption' ? 'text' : option" :size="14" />
           {{ $t(`remix.formats.${option}`) }}
@@ -56,28 +55,104 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- The cut. One card, changing shape and ground, holding the same line. -->
-    <div class="mt-7 flex min-h-[236px] items-center justify-center">
-      <article
-        class="flex flex-col justify-end rounded-[16px] border p-4 transition-all duration-500 ease-out"
-        :class="[
-          SHAPE[format],
-          onNight ? 'b-night border-transparent text-white' : 'border-[var(--b-line)] bg-[var(--b-surface)]',
-          arrived ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
-        ]"
-      >
-        <span class="b-mono mb-auto" :class="onNight ? 'text-[var(--b-red-lit)]' : 'text-[var(--b-stone)]'">
-          {{ $t(`landing.how.draft.marks.${format}`) }}
-        </span>
+    <div
+      class="mt-6 flex min-h-[242px] items-center justify-center transition duration-500 ease-out"
+      :class="arrived ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'"
+    >
+      <!-- A carousel is read as a sequence, so the preview exposes the deck
+           instead of pretending the cover is the whole deliverable. -->
+      <div v-if="format === 'carousel'" class="w-full">
+        <div class="mb-2.5 flex items-center justify-between px-0.5">
+          <span class="b-mono text-[var(--b-stone)]">{{ $t('landing.how.draft.carousel.label') }}</span>
+          <span class="text-[10.5px] text-[var(--b-stone)]">{{ $t('landing.how.draft.carousel.count') }}</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <article class="b-night flex aspect-[4/5] min-w-0 flex-col rounded-[13px] p-3 text-white">
+            <span class="b-mono text-[var(--b-red-lit)]">{{ $t('landing.how.draft.carousel.cover') }}</span>
+            <p class="mt-auto font-display text-[15px] leading-[1.16] tracking-[-.01em]">
+              {{ $t('landing.how.draft.beats.hook.value') }}
+            </p>
+          </article>
+          <article class="flex aspect-[4/5] min-w-0 flex-col rounded-[13px] border border-[var(--b-line)] bg-[var(--b-surface)] p-3">
+            <span class="b-mono text-[var(--b-stone)]">02 / 06</span>
+            <p class="mt-auto text-[11.5px] leading-[1.35] text-[var(--copy)]">
+              {{ $t('landing.how.draft.carousel.slide2') }}
+            </p>
+          </article>
+          <article class="flex aspect-[4/5] min-w-0 flex-col rounded-[13px] border border-[var(--b-line)] bg-[var(--b-surface)] p-3">
+            <span class="b-mono text-[var(--b-stone)]">03 / 06</span>
+            <p class="mt-auto text-[11.5px] leading-[1.35] text-[var(--copy)]">
+              {{ $t('landing.how.draft.carousel.slide3') }}
+            </p>
+          </article>
+        </div>
+        <div class="mt-3 flex justify-center gap-1.5" aria-hidden="true">
+          <span class="h-1.5 w-4 rounded-full bg-[var(--b-black)]" />
+          <span v-for="dot in 5" :key="dot" class="h-1.5 w-1.5 rounded-full bg-[var(--b-line)]" />
+        </div>
+      </div>
 
-        <p class="font-display text-[18px] leading-[1.25] tracking-[-.01em]">
-          {{ $t('landing.how.draft.beats.hook.value') }}
-        </p>
-      </article>
+      <!-- The real Reel draft is an editable timeline, not a decorative video
+           frame. These are the same beats the product generates. -->
+      <div v-else-if="format === 'reel'" class="w-full overflow-hidden rounded-[15px] border border-[var(--b-line)] bg-[var(--b-surface)]">
+        <div class="flex items-center justify-between border-b border-[var(--b-line-soft)] px-4 py-3">
+          <span class="b-mono text-[var(--b-stone)]">{{ $t('landing.how.draft.reel.label') }}</span>
+          <span class="inline-flex items-center gap-1 text-[10.5px] tabular-nums text-[var(--b-stone)]">
+            <AppIcon name="clock" :size="12" />
+            {{ $t('landing.how.draft.reel.runtime') }}
+          </span>
+        </div>
+        <div class="grid grid-cols-[58px_1fr] border-b border-[var(--b-line-soft)] px-4 py-3">
+          <span class="font-mono text-[9.5px] tabular-nums text-[var(--b-stone)]">0:00 · 0:03</span>
+          <div>
+            <span class="b-mono text-[var(--b-red-600)]">{{ $t('remix.hook') }}</span>
+            <p class="mt-1 font-display text-[16px] leading-tight">{{ $t('landing.how.draft.beats.hook.value') }}</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-[58px_1fr] border-b border-[var(--b-line-soft)] px-4 py-3">
+          <span class="font-mono text-[9.5px] tabular-nums text-[var(--b-stone)]">0:03 · 0:42</span>
+          <div>
+            <span class="b-mono text-[var(--b-stone)]">{{ $t('remix.body') }}</span>
+            <p class="mt-1 line-clamp-2 text-[11.5px] leading-[1.45] text-[var(--copy)]">{{ $t('landing.how.draft.reel.script') }}</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-[58px_1fr] border-b border-[var(--b-line-soft)] px-4 py-3">
+          <span class="text-[var(--b-stone)]"><AppIcon name="eye" :size="13" /></span>
+          <div>
+            <span class="b-mono text-[var(--b-stone)]">{{ $t('remix.onScreen') }}</span>
+            <p class="mt-1 text-[11.5px] leading-[1.4] text-[var(--copy)]">{{ $t('landing.how.draft.reel.visual') }}</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-[58px_1fr] px-4 py-3">
+          <span class="font-mono text-[9.5px] tabular-nums text-[var(--b-stone)]">0:42 · 0:47</span>
+          <div>
+            <span class="b-mono text-[var(--b-stone)]">{{ $t('remix.cta') }}</span>
+            <p class="mt-1 text-[11.5px] leading-[1.4] text-[var(--copy)]">{{ $t('landing.how.draft.reel.cta') }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- The caption preview reproduces the useful publishing constraints
+           shown by the product: the fold and Instagram's character ceiling. -->
+      <div v-else class="w-full overflow-hidden rounded-[15px] border border-[var(--b-line)] bg-[var(--b-surface)]">
+        <div class="border-b border-[var(--b-line-soft)] bg-[var(--b-ivory)] px-4 py-3">
+          <span class="b-mono text-[var(--b-stone)]">{{ $t('remix.beforeMore') }}</span>
+          <p class="mt-1.5 text-[11.5px] leading-[1.45] text-[var(--copy)]">
+            {{ $t('landing.how.draft.caption.preview') }}
+            <span class="text-[var(--b-stone)]">… {{ $t('remix.more') }}</span>
+          </p>
+        </div>
+        <div class="min-h-[116px] px-4 py-3.5">
+          <p class="whitespace-pre-line text-[12px] leading-[1.55] text-[var(--copy)]">{{ $t('landing.how.draft.caption.body') }}</p>
+        </div>
+        <div class="flex items-center justify-between border-t border-[var(--b-line-soft)] px-4 py-2.5">
+          <span class="b-mono text-[var(--b-stone)]">{{ $t('remix.captionPost') }}</span>
+          <span class="text-[10.5px] tabular-nums text-[var(--b-stone)]">347 / 2 200</span>
+        </div>
+      </div>
     </div>
 
-    <!-- The one control that is a decision rather than an edit. -->
-    <div class="mt-7 flex justify-center">
+    <div class="mt-6 flex justify-center">
       <LandingMockAction class="b-btn-red inline-flex h-10 items-center gap-2 rounded-full px-5 text-[13px] font-medium">
         {{ $t('remix.markReady') }}
         <AppIcon name="arrow" :size="14" />

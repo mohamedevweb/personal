@@ -15,7 +15,6 @@ use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RemixController;
 use App\Http\Controllers\SavedContentController;
-use App\Http\Controllers\VoiceProfileController;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
@@ -80,7 +79,6 @@ Route::middleware(['auth:sanctum', 'verified'])->prefix('integrations/instagram'
 Route::middleware(['auth:sanctum', 'verified'])->group(function (): void {
     Route::get('/me/profile', [ProfileController::class, 'show']);
     Route::patch('/me/profile', [ProfileController::class, 'update']);
-    Route::get('/me/voice-prompt', VoiceProfileController::class);
     Route::get('/feed', [FeedController::class, 'index']);
     Route::get('/feed/global', [FeedController::class, 'global']);
     Route::get('/content/{content}', [ContentController::class, 'show']);

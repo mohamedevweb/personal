@@ -530,29 +530,6 @@ class PersonalMvpTest extends TestCase
         $this->assertNull($profile->discovery_refreshed_at);
     }
 
-    public function test_a_creator_can_export_a_prompt_for_their_voice_profile(): void
-    {
-        $this->user->creatorProfile->update([
-            'positioning' => 'I build calm tools for independent creators.',
-            'topics' => ['Creator tools'],
-        ]);
-
-        $response = $this->actingAs($this->user)
-            ->withHeader('Accept-Language', 'fr')
-            ->getJson('/api/me/voice-prompt')
-            ->assertOk()
-            ->assertJsonPath('filename', 'voice.md');
-
-        $prompt = $response->json('prompt');
-        $this->assertStringContainsString('usepersonal.app', $prompt);
-        $this->assertStringContainsString('voice.md', $prompt);
-        $this->assertStringContainsString('Création de contenu et personal branding', $prompt);
-        $this->assertStringNotContainsString($this->user->name, $prompt);
-        $this->assertStringNotContainsString('I build calm tools for independent creators.', $prompt);
-        $this->assertStringContainsString('N’inclus aucun secret', $prompt);
-        $this->assertStringContainsString('au maximum 12 000 caractères', $prompt);
-    }
-
     public function test_a_voice_profile_has_a_bounded_length(): void
     {
         $this->actingAs($this->user)->patchJson('/api/me/profile', [

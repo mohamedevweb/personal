@@ -21,12 +21,6 @@ const instagram = ref<Pick<InstagramAccount, 'username' | 'display_name' | 'prof
 const instagramAvatarFailed = ref(false)
 const editing = ref(false)
 const saving = ref(false)
-const voicePrompt = ref('')
-const voicePromptLoading = ref(true)
-const voicePromptError = ref(false)
-const importingVoice = ref(false)
-const showingVoicePrompt = ref(false)
-const voiceFileInput = ref<HTMLInputElement | null>(null)
 const draft = reactive<PersonalProfileDraft>({
   niche: null,
   audience_description: null,
@@ -54,15 +48,8 @@ const sectionText = reactive<Record<(typeof sections)[number], string>>({
 function toList(value: string): string[] {
   return value.split(',').map(item => item.trim()).filter(Boolean)
 }
-const voiceProviders = [
-  { name: 'ChatGPT', url: 'https://chatgpt.com/', promptParameter: 'q', icon: 'chatgpt' },
-  { name: 'Claude', url: 'https://claude.ai/new', promptParameter: 'q', icon: 'claude' },
-  { name: 'Gemini', url: 'https://gemini.google.com/app', promptParameter: 'q', icon: 'gemini' },
-  { name: 'Perplexity', url: 'https://www.perplexity.ai/search', promptParameter: 'q', icon: 'perplexity' },
-  { name: 'Grok', url: 'https://grok.com/', promptParameter: 'q', icon: 'grok' }
-] as const
+
 const analysisStatus = computed(() => profile.value?.creator_dna?.analysis_status)
-const hasVoiceProfile = computed(() => Boolean(profile.value?.voice_profile?.trim()))
 const analysisMessage = computed(() => {
   if (analysisStatus.value === 'insufficient_evidence') return t('personal.analysis.insufficient')
   if (analysisStatus.value === 'partial') return t('personal.analysis.partial')
@@ -135,172 +122,12 @@ async function loadProfile() {
   }
 }
 
-async function loadVoicePrompt() {
-  voicePromptLoading.value = true
-  voicePromptError.value = false
-  try {
-    const response = await apiFetch<{ prompt: string, filename: string }>('/api/me/voice-prompt')
-    voicePrompt.value = response.prompt
-  } catch {
-    voicePromptError.value = true
-  } finally {
-    voicePromptLoading.value = false
-  }
-}
-
-async function writeVoicePrompt() {
-  if (!import.meta.client || !voicePrompt.value) return false
-
-  try {
-    await navigator.clipboard.writeText(voicePrompt.value)
-    return true
-  } catch {
-    showingVoicePrompt.value = true
-    return false
-  }
-}
-
-async function copyVoicePrompt() {
-  if (await writeVoicePrompt()) toast.success(t('personal.voice.promptCopied'))
-  else toast.error(t('personal.voice.copyError'))
-}
-
-function voiceProviderUrl(provider: typeof voiceProviders[number]) {
-  if (!voicePrompt.value) return provider.url
-
-  const url = new URL(provider.url)
-  url.searchParams.set(provider.promptParameter, voicePrompt.value)
-  return url.toString()
-}
-
-async function prepareVoiceProvider(event: MouseEvent, provider: typeof voiceProviders[number]) {
-  if (!import.meta.client || !voicePrompt.value) {
-    event.preventDefault()
-    return
-  }
-
-  if (await writeVoicePrompt()) toast.success(t('personal.voice.providerOpened', { provider: provider.name }))
-  else toast.error(t('personal.voice.copyError'))
-}
-
-function chooseVoiceFile() {
-  voiceFileInput.value?.click()
-}
-
-async function importVoiceFile(event: Event) {
-  const input = event.target as HTMLInputElement
-  const file = input.files?.[0]
-  input.value = ''
-  if (!file) return
-
-  if (file.name.toLowerCase() !== 'voice.md') {
-    toast.error(t('personal.voice.invalidFile'))
-    return
-  }
-
-  if (file.size > 50000) {
-    toast.error(t('personal.voice.fileTooLarge'))
-    return
-  }
-
-  importingVoice.value = true
-  try {
-    const contents = (await file.text()).trim()
-    if (!contents) {
-      toast.error(t('personal.voice.emptyFile'))
-      return
-    }
-    if (contents.length > 12000) {
-      toast.error(t('personal.voice.fileTooLong'))
-      return
-    }
-
-    const response = await apiFetch<{ profile: PersonalProfile }>('/api/me/profile', {
-      method: 'PATCH',
-      body: { voice_profile: contents }
-    })
-    profile.value = response.profile
-  } catch (exception: unknown) {
-    toast.error(apiErrorMessage(exception, t('personal.voice.importError')))
-  } finally {
-    importingVoice.value = false
-  }
-}
-
-function downloadVoiceProfile() {
-  if (!import.meta.client || !profile.value?.voice_profile) return
-
-  const url = URL.createObjectURL(new Blob([profile.value.voice_profile], { type: 'text/markdown;charset=utf-8' }))
-  const link = document.createElement('a')
-  link.href = url
-  link.download = 'voice.md'
-  link.click()
-  URL.revokeObjectURL(url)
-}
-
-onMounted(async () => {
-  await Promise.all([loadProfile(), loadVoicePrompt()])
-})
+onMounted(loadProfile)
 </script>
 
 <template>
   <main class="page-shell pb-16 pt-2">
-    <section v-if="profile" class="overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">
-      <div class="p-6 md:p-8">
-        <div class="flex flex-wrap items-center gap-3">
-          <span class="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-[var(--paper)] text-[var(--ai)]"><AppIcon name="sparkles" :size="19" /></span>
-          <div>
-            <h2 class="font-serif text-[26px] tracking-[-.03em]">{{ $t('personal.voice.title') }}</h2>
-            <p class="mt-1 text-sm text-[var(--muted)]">{{ $t('personal.voice.description') }}</p>
-          </div>
-          <span class="ml-auto inline-flex items-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--paper)] px-3 py-1.5 text-xs" :class="hasVoiceProfile ? 'text-[var(--positive)]' : 'text-[var(--muted)]'">
-            <AppIcon :name="hasVoiceProfile ? 'check' : 'draft'" :size="13" />
-            {{ $t(hasVoiceProfile ? 'personal.voice.ready' : 'personal.voice.notReady') }}
-          </span>
-        </div>
-
-        <div class="mt-6 grid gap-6 border-t border-[var(--line-soft)] pt-6 md:grid-cols-[minmax(0,1fr)_minmax(260px,320px)] md:gap-8">
-          <div>
-            <p class="memory-label">{{ $t('personal.voice.chooseProvider') }}</p>
-            <div v-if="voicePromptError" role="alert" class="mt-4 rounded-[12px] border border-[var(--line)] bg-[var(--surface)] p-4 text-sm text-[var(--muted)]">
-              <p>{{ $t('personal.voice.promptError') }}</p>
-              <button type="button" class="mt-3 font-medium text-[var(--ink)] underline underline-offset-4" @click="loadVoicePrompt">{{ $t('personal.voice.retry') }}</button>
-            </div>
-            <div v-else class="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-5">
-              <a v-for="provider in voiceProviders" :key="provider.name" :href="voiceProviderUrl(provider)" target="_blank" rel="noopener noreferrer" class="group flex min-w-0 flex-col items-center gap-2 rounded-[13px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ai)]" :class="voicePromptLoading || !voicePrompt ? 'pointer-events-none opacity-50' : ''" :aria-disabled="voicePromptLoading || !voicePrompt" :tabindex="voicePromptLoading || !voicePrompt ? -1 : undefined" @click="prepareVoiceProvider($event, provider)">
-                <span class="grid h-12 w-12 place-items-center rounded-[13px] border border-[var(--line)] bg-[var(--paper)] text-[var(--ink)] transition group-hover:border-[var(--muted)]">
-                  <AppIcon :name="provider.icon" :size="23" :stroke-width="1.5" />
-                </span>
-                <span class="max-w-full truncate text-[11px] font-medium text-[var(--muted)] transition group-hover:text-[var(--ink)]">{{ provider.name }}</span>
-              </a>
-            </div>
-          </div>
-
-          <div class="md:border-l md:border-[var(--line-soft)] md:pl-8">
-            <input ref="voiceFileInput" type="file" accept=".md,text/markdown,text/plain" class="sr-only" @change="importVoiceFile">
-            <div class="flex flex-wrap gap-2">
-              <button type="button" class="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-full b-btn-red px-5 text-[14px] font-medium transition disabled:cursor-not-allowed disabled:opacity-60" :disabled="importingVoice" @click="chooseVoiceFile">
-                <AppIcon name="draft" :size="16" />
-                {{ importingVoice ? $t('personal.voice.importing') : $t(hasVoiceProfile ? 'personal.voice.replace' : 'personal.voice.import') }}
-              </button>
-              <button v-if="hasVoiceProfile" type="button" class="inline-flex h-11 items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 text-sm font-medium transition hover:border-[var(--muted)]" @click="downloadVoiceProfile">{{ $t('personal.voice.download') }}</button>
-            </div>
-            <p class="mt-3 text-xs leading-5 text-[var(--faint)]">{{ $t('personal.voice.privacy') }}</p>
-            <button v-if="voicePrompt" type="button" class="mt-2 text-xs text-[var(--muted)] underline underline-offset-4 transition hover:text-[var(--ink)]" @click="showingVoicePrompt = !showingVoicePrompt">{{ $t(showingVoicePrompt ? 'personal.voice.hidePrompt' : 'personal.voice.showPrompt') }}</button>
-          </div>
-        </div>
-      </div>
-
-      <div v-if="showingVoicePrompt && voicePrompt" class="border-t border-[var(--line)] bg-[var(--paper)] p-6">
-        <div class="flex items-center justify-between gap-4">
-          <p class="memory-label">{{ $t('personal.voice.promptLabel') }}</p>
-          <button type="button" class="inline-flex items-center gap-2 text-xs font-medium text-[var(--muted)] transition hover:text-[var(--ink)]" @click="copyVoicePrompt"><AppIcon name="copy" :size="14" />{{ $t('personal.voice.copyPrompt') }}</button>
-        </div>
-        <textarea :value="voicePrompt" readonly :aria-label="$t('personal.voice.promptLabel')" class="mt-4 min-h-64 w-full resize-y rounded-[12px] border border-[var(--line)] bg-[var(--surface)] p-4 font-mono text-xs leading-5 text-[var(--muted)] outline-none focus:border-[var(--muted)]" />
-      </div>
-    </section>
-
-    <form v-if="profile" class="mt-5 overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]" @submit.prevent="saveProfile">
+    <form v-if="profile" class="overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]" @submit.prevent="saveProfile">
       <div class="flex flex-wrap items-center gap-3 border-b border-[var(--line)] px-6 py-5">
         <template v-if="instagram">
           <img
