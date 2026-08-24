@@ -13,7 +13,44 @@ export type OutlierRow = {
   age: string;
 };
 
+export type FeedPost = {
+  handle: string;
+  followers: string;
+  age: string;
+  caption: string;
+  likes: string;
+  comments: string;
+  views: string;
+  /** The ratio against that account's own average. */
+  ratio: string;
+  /** Only one card in the shot is allowed to be the lit one. */
+  lit?: boolean;
+};
+
 export type Copy = {
+  /** The app itself, as it appears in the Discover shot. */
+  dashboard: {
+    nav: {
+      discover: string;
+      forYou: string;
+      bookmark: string;
+      studio: string;
+      create: string;
+      drafts: string;
+      moments: string;
+      personal: string;
+    };
+    account: string;
+    title: string;
+    refresh: string;
+    ratio: string;
+    views: string;
+    viewComments: string;
+    save: string;
+    remix: string;
+    followers: string;
+    posts: FeedPost[];
+  };
   coldOpen: {
     /** The category, stated once, before anything is argued. */
     category: string;
@@ -79,6 +116,60 @@ export type Copy = {
 };
 
 const en: Copy = {
+  dashboard: {
+    nav: {
+      discover: 'Discover',
+      forYou: 'For You',
+      bookmark: 'Bookmark',
+      studio: 'Studio',
+      create: 'Create',
+      drafts: 'Drafts',
+      moments: 'Moments',
+      personal: 'Personal',
+    },
+    account: '@mohamed.chettahh',
+    title: 'For You',
+    refresh: 'Refresh my feed',
+    ratio: '{ratio}× normal for this account',
+    views: '{count} views',
+    viewComments: 'View all {count} comments',
+    save: 'Save',
+    remix: 'Remix for me',
+    followers: '{count} followers',
+    posts: [
+      {
+        handle: 'founderframes',
+        followers: '84.2K',
+        age: '2d',
+        caption: 'The pricing mistake that cost me 8 months',
+        likes: '66.7K',
+        comments: '1K',
+        views: '352K',
+        ratio: '8.4',
+        lit: true,
+      },
+      {
+        handle: 'lena.builds',
+        followers: '212K',
+        age: '4d',
+        caption: 'Nobody tells you this about your first 1,000',
+        likes: '22.7K',
+        comments: '284',
+        views: '180K',
+        ratio: '5.1',
+      },
+      {
+        handle: 'marc.oss',
+        followers: '46.8K',
+        age: '5d',
+        caption: 'I rebuilt my whole onboarding in a weekend',
+        likes: '11.4K',
+        comments: '96',
+        views: '121K',
+        ratio: '3.7',
+      },
+    ],
+  },
   coldOpen: {
     category: 'Claude for personal brand.',
   },
@@ -181,6 +272,60 @@ const en: Copy = {
 };
 
 const fr: Copy = {
+  dashboard: {
+    nav: {
+      discover: 'Découvrir',
+      forYou: 'Pour toi',
+      bookmark: 'Enregistrés',
+      studio: 'Studio',
+      create: 'Créer',
+      drafts: 'Brouillons',
+      moments: 'Moments',
+      personal: 'Personal',
+    },
+    account: '@mohamed.chettahh',
+    title: 'Pour toi',
+    refresh: 'Rafraîchir mon feed',
+    ratio: '{ratio}× la normale de ce compte',
+    views: '{count} vues',
+    viewComments: 'Voir les {count} commentaires',
+    save: 'Enregistrer',
+    remix: 'Remixer pour moi',
+    followers: '{count} abonnés',
+    posts: [
+      {
+        handle: 'founderframes',
+        followers: '84.2K',
+        age: '2d',
+        caption: 'L’erreur de prix qui m’a coûté 8 mois',
+        likes: '66.7K',
+        comments: '1K',
+        views: '352K',
+        ratio: '8,4',
+        lit: true,
+      },
+      {
+        handle: 'lena.builds',
+        followers: '212K',
+        age: '4d',
+        caption: 'Personne ne te dit ça sur tes 1 000 premiers',
+        likes: '22.7K',
+        comments: '284',
+        views: '180K',
+        ratio: '5,1',
+      },
+      {
+        handle: 'marc.oss',
+        followers: '46.8K',
+        age: '5d',
+        caption: 'J’ai refait tout mon onboarding en un week-end',
+        likes: '11.4K',
+        comments: '96',
+        views: '121K',
+        ratio: '3,7',
+      },
+    ],
+  },
   coldOpen: {
     category: 'Claude pour la marque personnelle.',
   },

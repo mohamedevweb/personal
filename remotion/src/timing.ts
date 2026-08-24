@@ -22,7 +22,7 @@ const durations = {
   claim: 92,
   wipe: 42,
   understand: 138,
-  discover: 190,
+  discover: 245,
   connect: 158,
   write: 168,
   endCard: 100,

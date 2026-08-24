@@ -1,4 +1,5 @@
 export {Card, CardHeader} from './Card';
+export {Dashboard} from './Dashboard';
 export {Eyebrow} from './Eyebrow';
 export {DotMatrix, GuideRails, NightGround, PaperGround, ParticleField} from './Ground';
 export type {Ignition} from './Ground';

@@ -42,7 +42,25 @@ export const alpha = {
   bar: 'rgba(119, 115, 109, 0.38)',
   chipIdle: 'rgba(119, 115, 109, 0.10)',
   scrim: 'rgba(13, 12, 10, 0)',
+  /** The signature at the strength the outlier pill wants on paper. */
+  signatureWash: 'rgba(224, 79, 54, 0.09)',
+  navActive: 'rgba(119, 115, 109, 0.12)',
 } as const;
+
+/**
+ * Stand-in tones for the media in the feed mock. Real posts cannot be shown —
+ * Instagram's CDN blocks hotlinking and a render must never reach the network —
+ * so each thumbnail is a warm two-stop wash. They read as photography at a
+ * glance without pretending to be anyone's actual post.
+ */
+export const media = [
+  ['#3a3128', '#6d5b45'],
+  ['#5c4433', '#a07a54'],
+  ['#2f3330', '#5f6a5c'],
+  ['#4a3a3a', '#8f6a63'],
+  ['#3d3527', '#7d6a43'],
+  ['#33303a', '#635d76'],
+] as const;
 
 export const font = {
   /** Display face. Set tight; the turn in a sentence takes the italic. */

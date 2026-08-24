@@ -48,7 +48,7 @@
           <span class="block" v-html="$t('landing.hero.titleLineOne')" />
           <!-- The turn in the sentence is the negative, so it gets the italic.
                It is a type decision, not a colour one. -->
-          <span class="block italic">{{ $t('landing.hero.titleLineTwo') }}</span>
+          <span class="block">{{ $t('landing.hero.titleLineTwo') }}</span>
         </h1>
 
         <p
