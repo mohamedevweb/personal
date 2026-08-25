@@ -2,7 +2,9 @@
 import type { ContentPost } from '~/types/product'
 import { compactNumber, creatorProfileUrl, relativeDate } from '~/types/product'
 
-const props = defineProps<{ post: ContentPost }>()
+const props = withDefaults(defineProps<{ post: ContentPost, remixing?: boolean }>(), {
+  remixing: false
+})
 defineEmits<{ save: [post: ContentPost], remix: [post: ContentPost] }>()
 const { locale } = useI18n()
 
@@ -190,6 +192,8 @@ watch(() => props.post.id, () => {
         <button
           type="button"
           class="inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-4 text-[12.5px] font-medium text-[var(--paper)] transition hover:bg-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+          :disabled="remixing"
+          :aria-busy="remixing"
           @click="$emit('remix', post)"
         >
           {{ $t('contentCard.remixForMe') }}

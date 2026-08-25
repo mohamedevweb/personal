@@ -2,6 +2,7 @@
 import type { LifeMoment, Opportunity, Remix } from '~/types/product'
 
 const { apiFetch } = usePersonalApi()
+const { openWhenReady } = useRemixOpening()
 const { t } = useI18n()
 const toast = useToast()
 const opportunities = ref<Opportunity[]>([])
@@ -68,8 +69,8 @@ async function createFromMoment(moment: LifeMoment, format: Remix['format']) {
   if (drafting.value) return
   drafting.value = true
   try {
-    const response = await apiFetch<{ remix: { id: number } }>(`/api/moments/${moment.id}/create-content`, { method: 'POST', body: { format } })
-    await navigateTo(`/remix/${response.remix.id}`)
+    const response = await apiFetch<{ remix: Pick<Remix, 'id' | 'status'> }>(`/api/moments/${moment.id}/create-content`, { method: 'POST', body: { format } })
+    if (await openWhenReady(response.remix) === 'failed') toast.error(t('create.draftError'))
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('create.draftError')))
   } finally {
@@ -141,7 +142,7 @@ onMounted(async () => {
           <div v-for="moment in visibleMoments" :key="moment.id" class="group flex items-center gap-1.5">
           <button
             type="button"
-            class="flex min-w-0 flex-1 items-center gap-4 rounded-[14px] border p-4 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:cursor-wait disabled:opacity-70"
+            class="flex min-w-0 flex-1 items-center gap-4 rounded-[14px] border p-4 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:cursor-default"
             :class="selectedMomentId === moment.id ? 'border-[var(--accent)] bg-[var(--b-red-50)]' : 'border-[var(--line-soft)] hover:border-[var(--line)] hover:bg-[var(--paper)]'"
             :aria-pressed="selectedMomentId === moment.id"
             :disabled="drafting"
@@ -164,7 +165,7 @@ onMounted(async () => {
           </button>
           <button
             type="button"
-            class="grid h-9 w-9 shrink-0 place-items-center rounded-full text-[var(--faint)] transition hover:bg-[var(--paper)] hover:text-[var(--danger)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:opacity-50"
+            class="grid h-9 w-9 shrink-0 place-items-center rounded-full text-[var(--faint)] transition hover:bg-[var(--paper)] hover:text-[var(--danger)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:cursor-default"
             :aria-label="$t('moments.delete')"
             :disabled="drafting"
             @click="removeMoment(moment)"
@@ -215,7 +216,7 @@ onMounted(async () => {
             v-for="(angle, index) in angles"
             :key="angle.title"
             type="button"
-            class="flex items-center gap-3 rounded-[14px] border p-4 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:cursor-wait disabled:opacity-70"
+            class="flex items-center gap-3 rounded-[14px] border p-4 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:cursor-default"
             :class="selectedAngleIndex === index ? 'border-[var(--accent)] bg-[var(--surface)] shadow-[0_1px_2px_rgba(23,23,26,.04)]' : 'border-[var(--line)] bg-transparent hover:bg-[var(--surface)]'"
             :aria-pressed="selectedAngleIndex === index"
             :disabled="drafting"
@@ -239,12 +240,12 @@ onMounted(async () => {
         </div>
         <button
           type="button"
-          class="b-btn-red inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-full px-6 text-[14px] font-medium transition disabled:cursor-wait disabled:opacity-70"
+          class="b-btn-red inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-full px-6 text-[14px] font-medium transition disabled:cursor-default"
           :disabled="drafting || !selectedMoment"
           @click="createSelected"
         >
-          {{ drafting ? $t('create.drafting') : $t('create.transform') }}
-          <AppIcon v-if="!drafting" name="arrow" :size="16" />
+          {{ $t('create.transform') }}
+          <AppIcon name="arrow" :size="16" />
         </button>
       </div>
       <p v-if="drafting" role="status" class="sr-only">{{ $t('create.drafting') }}</p>

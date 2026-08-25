@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import type { ContentPost, LifeMoment } from '~/types/product'
+import type { ContentPost, LifeMoment, Remix } from '~/types/product'
 import { compactNumber, creatorProfileUrl, relativeDate } from '~/types/product'
 
 const route = useRoute()
 const { apiFetch } = usePersonalApi()
+const { openWhenReady } = useRemixOpening()
 const { locale, t } = useI18n()
 const toast = useToast()
 const post = ref<ContentPost | null>(null)
@@ -43,10 +44,10 @@ async function createRemix() {
   if (!post.value) return
   generating.value = true
   try {
-    const response = await apiFetch<{ remix: { id: number } }>(`/api/content/${post.value.id}/remix`, {
+    const response = await apiFetch<{ remix: Pick<Remix, 'id' | 'status'> }>(`/api/content/${post.value.id}/remix`, {
       method: 'POST', body: { format: format.value, life_moment_id: selectedMoment.value }
     })
-    await navigateTo(`/remix/${response.remix.id}`)
+    if (await openWhenReady(response.remix) === 'failed') toast.error(t('feed.remixError'))
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('feed.remixError')))
   } finally { generating.value = false }
@@ -165,14 +166,15 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
 
           <div class="border-t border-[var(--line-soft)] px-6 py-5">
             <button
-              class="flex h-12 w-full items-center justify-center gap-2 rounded-full b-btn-red text-[15px] font-medium transition disabled:cursor-wait disabled:opacity-60"
+              class="flex h-12 w-full items-center justify-center gap-2 rounded-full b-btn-red text-[15px] font-medium transition disabled:cursor-default"
               :disabled="generating"
+              :aria-busy="generating"
               @click="createRemix"
             >
-              {{ generating ? $t('content.creating') : $t('content.remixForMe') }}
-              <AppIcon name="sparkles" :size="16" :class="generating && 'animate-breathe'" />
+              {{ $t('content.remixForMe') }}
+              <AppIcon name="sparkles" :size="16" />
             </button>
-            <p class="mt-3 text-center text-[12px] text-[var(--faint)]">{{ generating ? $t('content.creatingCopy') : $t('content.remixFooter') }}</p>
+            <p class="mt-3 text-center text-[12px] text-[var(--faint)]">{{ $t('content.remixFooter') }}</p>
           </div>
         </div>
       </section>

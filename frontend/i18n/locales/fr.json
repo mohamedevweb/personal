@@ -589,9 +589,7 @@
     }
   },
   "saved": {
-    "eyebrow": "Votre bibliothèque",
     "title": "Enregistré pour plus tard.",
-    "subtitle": "Les schémas et les histoires sur lesquels vous voulez revenir.",
     "emptyTitle": "Rien d’enregistré pour l’instant.",
     "emptyCopy": "Enregistrez un schéma solide quand il vous paraît utile, pas seulement intéressant.",
     "exploreFeed": "Explorer votre feed",

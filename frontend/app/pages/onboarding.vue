@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { CreatorInspiration, CreatorInspirationResponse, InstagramSyncStatus } from '~/types/instagram'
+import { groupCreatorOptions } from '~/utils/creatorInspirationOptions'
 
 definePageMeta({ layout: false })
 
@@ -102,13 +103,50 @@ const minimum = computed(() => inspirationData.value?.minimum ?? 3)
 const maximum = computed(() => inspirationData.value?.maximum ?? 6)
 const suggestionLimit = computed(() => inspirationData.value?.suggestion_limit ?? 6)
 
-// Suggestions and search hits already picked live in the favorites card, so the
-// browsable grid only offers what is still addable.
-const availableCreators = computed(() => {
-  const creators = hasSearched.value ? searchResults.value : (inspirationData.value?.suggestions || [])
-  return Array.from(new Map(creators.map(creator => [creator.username.toLowerCase(), creator])).values())
-    .filter(creator => !isSelected(creator.username))
-    .slice(0, suggestionLimit.value)
+// Search results supplement the curated suggestions instead of replacing them.
+// The reserve returned by the API keeps six suggestions visible even when a
+// searched account was already present in that list.
+const creatorOptions = computed(() => groupCreatorOptions(
+  searchResults.value,
+  inspirationData.value?.suggestions || [],
+  selected.value.map(creator => creator.username),
+  suggestionLimit.value
+))
+
+interface CreatorOptionGroup {
+  key: 'results' | 'suggestions'
+  label: string
+  creators: CreatorInspiration[]
+  loading: boolean
+  empty: string | null
+}
+
+const creatorOptionGroups = computed<CreatorOptionGroup[]>(() => {
+  const groups: CreatorOptionGroup[] = []
+
+  if (hasSearched.value && (searching.value || searchResults.value.length === 0 || creatorOptions.value.results.length > 0)) {
+    groups.push({
+      key: 'results',
+      label: t('onboarding.inspirations.resultsLabel'),
+      creators: creatorOptions.value.results,
+      loading: searching.value,
+      empty: !searching.value && searchResults.value.length === 0
+        ? t('onboarding.inspirations.noResults')
+        : null
+    })
+  }
+
+  groups.push({
+    key: 'suggestions',
+    label: t('onboarding.inspirations.suggestionsLabel'),
+    creators: creatorOptions.value.suggestions,
+    loading: inspirationLoading.value,
+    empty: !inspirationLoading.value && creatorOptions.value.suggestions.length === 0
+      ? t('onboarding.inspirations.noResults')
+      : null
+  })
+
+  return groups
 })
 
 const canContinue = computed(() => selected.value.length >= minimum.value && selected.value.length <= maximum.value)
@@ -185,6 +223,7 @@ async function addHandle() {
 
   searching.value = true
   hasSearched.value = true
+  searchResults.value = []
 
   try {
     const response = await apiFetch<{ items: CreatorInspiration[] }>(`/api/creator-inspirations/search?q=${encodeURIComponent(handle)}`)
@@ -233,6 +272,7 @@ async function searchCreators() {
 
   searching.value = true
   hasSearched.value = true
+  searchResults.value = []
 
   try {
     const response = await apiFetch<{ items: CreatorInspiration[] }>(`/api/creator-inspirations/search?q=${encodeURIComponent(query)}`)
@@ -489,34 +529,36 @@ onMounted(async () => {
                 {{ $t('onboarding.inspirations.empty') }}
               </p>
 
-              <p class="mt-5 text-xs font-medium uppercase tracking-[0.14em] text-[var(--faint)]">
-                {{ hasSearched ? $t('onboarding.inspirations.resultsLabel') : $t('onboarding.inspirations.suggestionsLabel') }}
-              </p>
+              <section v-for="group in creatorOptionGroups" :key="group.key" class="mt-5">
+                <h3 class="text-xs font-medium uppercase tracking-[0.14em] text-[var(--faint)]">
+                  {{ group.label }}
+                </h3>
 
-              <div v-if="inspirationLoading" class="mt-3 grid grid-cols-2 gap-2">
-                <div v-for="i in 4" :key="i" class="h-16 animate-pulse rounded-[16px] bg-[var(--line-soft)]" />
-              </div>
-              <div v-else-if="availableCreators.length" class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                <button
-                  v-for="creator in availableCreators"
-                  :key="creator.username"
-                  type="button"
-                  class="flex min-w-0 items-center gap-3 rounded-[16px] border border-[var(--line)] bg-[var(--paper)] p-3 text-left transition hover:border-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"
-                  :disabled="selected.length >= maximum"
-                  @click="toggleCreator(creator)"
-                >
-                  <img v-if="creator.avatar_url" :src="creator.avatar_url" :alt="creator.display_name" class="h-10 w-10 shrink-0 rounded-full object-cover">
-                  <span v-else class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[var(--surface)] text-xs font-semibold">{{ initials(creator) }}</span>
-                  <span class="min-w-0 flex-1">
-                    <span class="block truncate text-sm font-medium">{{ creator.display_name }}</span>
-                    <span class="block truncate text-xs text-[var(--faint)]">@{{ creator.username }}</span>
-                  </span>
-                  <span class="grid h-6 w-6 shrink-0 place-items-center rounded-full border border-[var(--line)] text-xs text-[var(--faint)]">+</span>
-                </button>
-              </div>
-              <p v-else class="mt-3 text-[13px] text-[var(--faint)]">
-                {{ $t('onboarding.inspirations.noResults') }}
-              </p>
+                <div v-if="group.loading" class="mt-3 grid grid-cols-2 gap-2">
+                  <div v-for="i in 4" :key="i" class="h-16 animate-pulse rounded-[16px] bg-[var(--line-soft)]" />
+                </div>
+                <div v-else-if="group.creators.length" class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <button
+                    v-for="creator in group.creators"
+                    :key="creator.username"
+                    type="button"
+                    class="flex min-w-0 items-center gap-3 rounded-[16px] border border-[var(--line)] bg-[var(--paper)] p-3 text-left transition hover:border-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="selected.length >= maximum"
+                    @click="toggleCreator(creator)"
+                  >
+                    <img v-if="creator.avatar_url" :src="creator.avatar_url" :alt="creator.display_name" class="h-10 w-10 shrink-0 rounded-full object-cover">
+                    <span v-else class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[var(--surface)] text-xs font-semibold">{{ initials(creator) }}</span>
+                    <span class="min-w-0 flex-1">
+                      <span class="block truncate text-sm font-medium">{{ creator.display_name }}</span>
+                      <span class="block truncate text-xs text-[var(--faint)]">@{{ creator.username }}</span>
+                    </span>
+                    <span class="grid h-6 w-6 shrink-0 place-items-center rounded-full border border-[var(--line)] text-xs text-[var(--faint)]">+</span>
+                  </button>
+                </div>
+                <p v-else-if="group.empty" class="mt-3 text-[13px] text-[var(--faint)]">
+                  {{ group.empty }}
+                </p>
+              </section>
             </section>
 
             <button

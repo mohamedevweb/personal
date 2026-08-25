@@ -589,9 +589,7 @@
     }
   },
   "saved": {
-    "eyebrow": "Your library",
     "title": "Saved for later.",
-    "subtitle": "The patterns and stories you want to return to.",
     "emptyTitle": "Nothing saved yet.",
     "emptyCopy": "Save a strong pattern when it feels useful, not just interesting.",
     "exploreFeed": "Explore your feed",

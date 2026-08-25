@@ -6,6 +6,7 @@ const { locale, t } = useI18n()
 const remixes = ref<RemixSummary[]>([])
 const loading = ref(true)
 const error = ref('')
+let refreshTimer: ReturnType<typeof setTimeout> | undefined
 
 function preview(remix: RemixSummary): string {
   if (remix.status === 'generating') return t('drafts.preparing')
@@ -29,16 +30,26 @@ function formattedDate(value: string): string {
   })
 }
 
-onMounted(async () => {
+async function loadDrafts(showError = true) {
+  clearTimeout(refreshTimer)
+
   try {
     const response = await apiFetch<{ remixes: RemixSummary[] }>('/api/remixes')
     remixes.value = response.remixes
+    error.value = ''
+    if (remixes.value.some(remix => remix.status === 'generating')) {
+      refreshTimer = setTimeout(() => loadDrafts(false), 1200)
+    }
   } catch (exception: unknown) {
-    error.value = apiErrorMessage(exception, t('drafts.loadError'))
+    if (showError) error.value = apiErrorMessage(exception, t('drafts.loadError'))
+    else refreshTimer = setTimeout(() => loadDrafts(false), 2500)
   } finally {
     loading.value = false
   }
-})
+}
+
+onMounted(loadDrafts)
+onBeforeUnmount(() => clearTimeout(refreshTimer))
 </script>
 
 <template>
@@ -71,7 +82,10 @@ onMounted(async () => {
         v-for="remix in remixes"
         :key="remix.id"
         :to="`/remix/${remix.id}`"
+        :aria-disabled="remix.status === 'generating'"
         class="group flex min-h-56 flex-col rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-5 shadow-[0_1px_2px_rgba(23,23,26,.04)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_30px_rgba(23,23,26,.07)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+        :class="remix.status === 'generating' && 'cursor-default hover:translate-y-0 hover:shadow-[0_1px_2px_rgba(23,23,26,.04)]'"
+        @click="remix.status === 'generating' && $event.preventDefault()"
       >
         <div class="flex items-center justify-between gap-3">
           <span class="inline-flex items-center gap-2 text-[12px] font-medium text-[var(--muted)]">
@@ -97,7 +111,7 @@ onMounted(async () => {
             <p class="truncate text-[12px] text-[var(--muted)]">@{{ remix.source_content.creator.username }}</p>
             <p class="mt-1 text-[10.5px] text-[var(--faint)]">{{ $t('drafts.updated', { date: formattedDate(remix.updated_at) }) }}</p>
           </div>
-          <span class="inline-flex shrink-0 items-center gap-1 text-[12px] font-medium text-[var(--ink)]">
+          <span v-if="remix.status !== 'generating'" class="inline-flex shrink-0 items-center gap-1 text-[12px] font-medium text-[var(--ink)]">
             {{ $t('drafts.open') }}<AppIcon name="arrow" :size="14" class="transition group-hover:translate-x-0.5" />
           </span>
         </div>

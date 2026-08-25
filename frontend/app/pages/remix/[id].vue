@@ -16,6 +16,7 @@ const WORDS_PER_SECOND = 2.6
 
 const route = useRoute()
 const { apiFetch } = usePersonalApi()
+const { waitForRemix } = useRemixOpening()
 const { t } = useI18n()
 const toast = useToast()
 
@@ -31,7 +32,6 @@ const confirmingRedraft = ref(false)
 const sourceAvatarFailed = ref(false)
 /** The last payload the server acknowledged, used to tell edited from saved. */
 const pristine = ref('')
-let remixTimer: ReturnType<typeof setTimeout> | undefined
 let confirmTimer: ReturnType<typeof setTimeout> | undefined
 
 const tabs = ref<HTMLButtonElement[]>([])
@@ -40,13 +40,6 @@ const slideInputs = ref<HTMLTextAreaElement[]>([])
 const slides = computed(() => remix.value?.generated_content.slides ?? [])
 const caption = computed(() => remix.value?.generated_content.caption ?? '')
 const isReady = computed(() => remix.value?.status === 'ready')
-/* Loading the page and waiting on the writer look the same to a reader, so they
-   are one state: the draft, greyed out, in the shape it is about to take. */
-const pending = computed(() => loading.value
-  || Boolean(switching.value)
-  || retrying.value
-  || remix.value?.status === 'generating')
-const pendingFormat = computed(() => switching.value || remix.value?.format || 'carousel')
 const sourceCreatorInitial = computed(() => remix.value?.source_content?.creator.username.charAt(0).toUpperCase() || '')
 const dirty = computed(() => {
   if (!remix.value || !['draft', 'ready'].includes(remix.value.status)) return false
@@ -211,9 +204,18 @@ async function switchFormat(format: Format) {
       `/api/content/${remix.value.source_content?.id}/remix`,
       { method: 'POST', body: { format, life_moment_id: remix.value.life_moment?.id ?? null } }
     )
-    await navigateTo(`/remix/${response.remix.id}`)
+    const generated = response.remix.status === 'generating'
+      ? await waitForRemix(response.remix.id)
+      : response.remix
+    if (!generated) return
+    if (generated.status === 'failed') {
+      toast.error(t('remix.switchError'))
+      return
+    }
+    await navigateTo(`/remix/${generated.id}`)
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('remix.switchError')))
+  } finally {
     switching.value = null
   }
 }
@@ -251,29 +253,22 @@ function guardUnload(event: BeforeUnloadEvent) {
   event.returnValue = ''
 }
 
-function scheduleRemixPoll(delay = 650) {
-  clearTimeout(remixTimer)
-  remixTimer = setTimeout(() => loadRemix(false), delay)
-}
-
-async function loadRemix(initial = true) {
+async function loadRemix() {
   try {
     const response = await apiFetch<{ remix: Remix }>(`/api/remixes/${route.params.id}`)
+    if (response.remix.status === 'generating') {
+      await navigateTo('/drafts')
+      return
+    }
     remix.value = response.remix
     sourceAvatarFailed.value = false
-    if (response.remix.status === 'generating') {
-      scheduleRemixPoll()
-    } else if (response.remix.status !== 'failed') {
+    if (response.remix.status !== 'failed') {
       pristine.value = JSON.stringify(response.remix.generated_content)
     }
   } catch (exception: unknown) {
-    if (initial) {
-      toast.error(apiErrorMessage(exception, t('remix.loadError')))
-    } else {
-      scheduleRemixPoll(2500)
-    }
+    toast.error(apiErrorMessage(exception, t('remix.loadError')))
   } finally {
-    if (initial) loading.value = false
+    loading.value = false
   }
 }
 
@@ -282,8 +277,12 @@ async function retryGeneration() {
   retrying.value = true
   try {
     const response = await apiFetch<{ remix: Remix }>(`/api/remixes/${remix.value.id}/retry`, { method: 'POST' })
-    remix.value = response.remix
-    scheduleRemixPoll(500)
+    const generated = response.remix.status === 'generating'
+      ? await waitForRemix(response.remix.id)
+      : response.remix
+    if (!generated) return
+    remix.value = generated
+    if (generated.status !== 'failed') pristine.value = JSON.stringify(generated.generated_content)
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('remix.retryError')))
   } finally {
@@ -312,7 +311,6 @@ onMounted(async () => {
 
 watch(() => route.params.id, async (id, previousId) => {
   if (id === previousId) return
-  clearTimeout(remixTimer)
   loading.value = true
   remix.value = null
   switching.value = null
@@ -322,18 +320,13 @@ watch(() => route.params.id, async (id, previousId) => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('beforeunload', guardUnload)
-  clearTimeout(remixTimer)
   clearTimeout(confirmTimer)
 })
 </script>
 
 <template>
   <main class="pb-24">
-    <RemixDraftSkeleton
-      v-if="pending"
-      :format="pendingFormat"
-      :generating="!loading || remix?.status === 'generating'"
-    />
+    <div v-if="loading" />
 
     <section v-else-if="remix?.status === 'failed'" class="page-shell pt-16 text-center">
       <span class="mx-auto grid h-12 w-12 place-items-center rounded-[16px] bg-[var(--accent-soft)] text-[var(--accent-ink)]">
@@ -350,7 +343,7 @@ onBeforeUnmount(() => {
       </button>
     </section>
 
-    <template v-else-if="remix">
+    <div v-else-if="remix" :inert="retrying || !!switching" :aria-busy="retrying || !!switching">
       <!-- Everything that changes the draft's state lives in one bar that stays
            in reach while the editor scrolls. -->
       <div class="sticky top-16 z-10 border-b border-[var(--line)] bg-[var(--paper)]/92 backdrop-blur md:top-[74px]">
@@ -662,7 +655,7 @@ onBeforeUnmount(() => {
           </aside>
         </div>
       </div>
-    </template>
+    </div>
 
     <div v-else class="page-shell pt-16 text-center">
       <p class="font-serif text-[30px] tracking-[-.02em]">{{ $t('remix.loadError') }}</p>

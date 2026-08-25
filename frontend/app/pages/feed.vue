@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import type { ContentPost } from '~/types/product'
+import type { ContentPost, Remix } from '~/types/product'
 
 const { apiFetch } = usePersonalApi()
+const { openWhenReady } = useRemixOpening()
 const { t } = useI18n()
 const toast = useToast()
 const loading = ref(true)
 const refreshing = ref(false)
+const remixingPostId = ref<number | null>(null)
 const data = ref<{ items: ContentPost[] } | null>(null)
 const seenIds = new Set<number>()
 let requestId = 0
@@ -63,13 +65,18 @@ async function save(post: ContentPost) {
 }
 
 async function remix(post: ContentPost) {
+  if (remixingPostId.value !== null) return
+  remixingPostId.value = post.id
+
   try {
-    const response = await apiFetch<{ remix: { id: number } }>(`/api/content/${post.id}/remix`, {
+    const response = await apiFetch<{ remix: Pick<Remix, 'id' | 'status'> }>(`/api/content/${post.id}/remix`, {
       method: 'POST', body: { format: 'carousel' }
     })
-    await navigateTo(`/remix/${response.remix.id}`)
+    if (await openWhenReady(response.remix) === 'failed') toast.error(t('feed.remixError'))
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('feed.remixError')))
+  } finally {
+    remixingPostId.value = null
   }
 }
 
@@ -99,7 +106,7 @@ onMounted(loadFeed)
       </button>
     </div>
     <div v-else class="mt-7 grid auto-rows-fr gap-5 sm:grid-cols-2 xl:grid-cols-3">
-      <ContentCard v-for="post in data?.items" :key="post.id" :post="post" @save="save" @remix="remix" />
+      <ContentCard v-for="post in data?.items" :key="post.id" :post="post" :remixing="remixingPostId === post.id" @save="save" @remix="remix" />
     </div>
   </main>
 </template>
