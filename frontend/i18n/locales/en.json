@@ -344,7 +344,22 @@
     "signIn": "Sign in",
     "invalidTitle": "This link is no longer valid.",
     "invalidCopy": "It is incomplete or has expired. Request a new link to continue.",
-    "requestAnother": "Send me a new link"
+    "requestAnother": "Send me a new link",
+    "aside": {
+      "titleLineOne": "One link. One simple step.",
+      "titleLineTwo": "Then your workspace is yours again.",
+      "proof": "Secure · valid for 60 minutes",
+      "card": {
+        "eyebrow": "Email from Personal",
+        "sender": "personal.app",
+        "title": "Your link is ready.",
+        "copy": "Create a new password and pick up where you left off.",
+        "action": "Create a new password",
+        "singleUse": "Single use",
+        "duration": "60 min",
+        "label": "Preview of the secure email sent by Personal."
+      }
+    }
   },
   "onboarding": {
     "eyebrow": "First, let’s understand you",

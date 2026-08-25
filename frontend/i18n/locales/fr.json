@@ -344,7 +344,22 @@
     "signIn": "Se connecter",
     "invalidTitle": "Ce lien n’est plus valide.",
     "invalidCopy": "Il est incomplet ou a expiré. Demande un nouveau lien pour continuer.",
-    "requestAnother": "Recevoir un nouveau lien"
+    "requestAnother": "Recevoir un nouveau lien",
+    "aside": {
+      "titleLineOne": "Un lien. Une seule étape.",
+      "titleLineTwo": "Et tu retrouves ton espace.",
+      "proof": "Sécurisé · valable 60 minutes",
+      "card": {
+        "eyebrow": "E-mail de Personal",
+        "sender": "personal.app",
+        "title": "Ton lien est prêt.",
+        "copy": "Crée un nouveau mot de passe pour reprendre là où tu t’étais arrêté.",
+        "action": "Créer un nouveau mot de passe",
+        "singleUse": "Une seule utilisation",
+        "duration": "60 min",
+        "label": "Aperçu de l’e-mail sécurisé envoyé par Personal."
+      }
+    }
   },
   "onboarding": {
     "eyebrow": "D’abord, apprenons à vous connaître",
