@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ContentPost, LifeMoment, Remix } from '~/types/product'
+import type { ContentPost, LifeMoment, PersonalProfile, Remix } from '~/types/product'
 import { compactNumber, creatorProfileUrl, relativeDate } from '~/types/product'
 
 const route = useRoute()
@@ -9,12 +9,24 @@ const { locale, t } = useI18n()
 const toast = useToast()
 const post = ref<ContentPost | null>(null)
 const moments = ref<LifeMoment[]>([])
+const profile = ref<PersonalProfile | null>(null)
 const format = ref<'reel' | 'carousel' | 'caption'>('carousel')
 const selectedMoment = ref<number | null>(null)
+const composerOpen = ref(false)
 const generating = ref(false)
 const loading = ref(true)
 let analysisTimer: ReturnType<typeof setTimeout> | undefined
 let analysisAttempts = 0
+
+const voiceSummary = computed(() => t('content.voiceSummary', {
+  niche: profile.value?.niche || t('content.voiceFallbackNiche'),
+  tone: profile.value?.tone?.slice(0, 2).join(', ') || t('content.voiceFallbackTone')
+}))
+
+function onMomentCreated(moment: LifeMoment) {
+  moments.value.unshift(moment)
+  selectedMoment.value = moment.id
+}
 
 async function pollAnalysis() {
   try {
@@ -55,12 +67,14 @@ async function createRemix() {
 
 onMounted(async () => {
   try {
-    const [contentResponse, momentsResponse] = await Promise.all([
+    const [contentResponse, momentsResponse, profileResponse] = await Promise.all([
       apiFetch<{ content: ContentPost }>(`/api/content/${route.params.id}`),
-      apiFetch<{ moments: LifeMoment[] }>('/api/moments')
+      apiFetch<{ moments: LifeMoment[] }>('/api/moments'),
+      apiFetch<{ profile: PersonalProfile }>('/api/me/profile')
     ])
     post.value = contentResponse.content
     moments.value = momentsResponse.moments
+    profile.value = profileResponse.profile
     selectedMoment.value = moments.value[0]?.id || null
     if (contentResponse.content.analysis_status === 'pending') requestAnalysis()
   } catch (exception: unknown) {
@@ -101,13 +115,17 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
           <div class="py-6"><p class="text-xs font-semibold uppercase tracking-widest text-[var(--faint)]">{{ $t('content.hook') }}</p><p class="mt-2 text-[17px] leading-7">{{ post.hook_analysis }}</p></div>
           <div class="py-6"><p class="text-xs font-semibold uppercase tracking-widest text-[var(--faint)]">{{ $t('content.structure') }}</p><p class="mt-2 text-[17px] leading-7">{{ post.structure_analysis }}</p></div>
           <div class="py-6"><p class="text-xs font-semibold uppercase tracking-widest text-[var(--faint)]">{{ $t('content.whyOutperforming') }}</p><p class="mt-2 text-[17px] leading-7">{{ post.why_it_works }}<template v-if="post.views > 0 && post.creator.average_views > 0"> {{ $t('content.whyOutperformingSuffix', { average: compactNumber(post.creator.average_views), views: compactNumber(post.views) }) }}</template></p></div>
-          <div class="py-6"><p class="text-xs font-semibold uppercase tracking-widest text-[var(--faint)]">{{ $t('content.whyFitsYou') }}</p><p class="mt-2 text-[17px] leading-7">{{ $t('content.whyFitsYouCopy') }}</p></div>
+          <div class="py-6"><p class="text-xs font-semibold uppercase tracking-widest text-[var(--faint)]">{{ $t('content.whyFitsYou') }}</p><p class="mt-2 text-[17px] leading-7">{{ voiceSummary }}</p></div>
         </div>
 
         <div class="mt-8 overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">
           <div class="border-b border-[var(--line-soft)] px-6 py-5">
             <h2 class="font-serif text-[26px] tracking-[-.02em]">{{ $t('content.makeItYours') }}</h2>
             <p class="mt-1.5 text-[13.5px] leading-6 text-[var(--muted)]">{{ $t('content.makeItYoursCopy') }}</p>
+            <div class="mt-4 flex items-start gap-3 rounded-[13px] border border-[var(--positive-line)] bg-[var(--positive-soft)] p-3 text-[var(--positive)]">
+              <span class="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-[var(--positive-line)] bg-white"><AppIcon name="check" :size="13" /></span>
+              <span><span class="block text-[12px] font-semibold">{{ $t('content.voiceLocked') }}</span><span class="mt-0.5 block text-[11.5px] leading-5 opacity-80">{{ voiceSummary }}</span></span>
+            </div>
           </div>
 
           <!-- The three shapes, each saying what you actually get, so the choice
@@ -136,9 +154,20 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
 
           <!-- Grounding is what keeps the draft yours, so the moments are shown
                rather than hidden behind a dropdown. -->
-          <div v-if="moments.length" class="border-t border-[var(--line-soft)] px-6 py-5">
-            <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[var(--faint)]">{{ $t('content.groundInMoment') }}</p>
-            <div class="mt-3 max-h-52 space-y-1.5 overflow-y-auto pr-1">
+          <div class="border-t border-[var(--line-soft)] px-6 py-5">
+            <div class="flex items-center justify-between gap-4">
+              <div>
+                <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[var(--faint)]">{{ $t('content.groundInMoment') }}</p>
+                <p class="mt-1 text-[12px] text-[var(--muted)]">{{ $t('content.groundInMomentHelp') }}</p>
+              </div>
+              <button type="button" class="shrink-0 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3 py-2 text-[11.5px] font-medium transition hover:bg-[var(--paper)]" @click="composerOpen = !composerOpen">
+                {{ composerOpen ? $t('common.cancel') : $t('content.addMoment') }}
+              </button>
+            </div>
+
+            <MomentComposer class="mt-4" :open="composerOpen" @close="composerOpen = false" @created="onMomentCreated" />
+
+            <div v-if="moments.length && !composerOpen" class="mt-3 max-h-52 space-y-1.5 overflow-y-auto pr-1">
               <button
                 class="moment-row"
                 :class="selectedMoment === null ? 'moment-row-on' : 'moment-row-off'"
@@ -162,6 +191,10 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
                 <span class="flex-1 truncate text-[13.5px]">{{ moment.content }}</span>
               </button>
             </div>
+            <button v-else-if="!composerOpen" type="button" class="mt-3 flex w-full items-center gap-3 rounded-[12px] border border-dashed border-[var(--line)] bg-[var(--paper)] p-3 text-left transition hover:border-[var(--muted)]" @click="composerOpen = true">
+              <span class="grid h-8 w-8 shrink-0 place-items-center rounded-[9px] bg-[var(--accent-soft)] text-[var(--accent-ink)]"><AppIcon name="plus" :size="14" /></span>
+              <span><span class="block text-[13px] font-medium">{{ $t('content.firstMomentTitle') }}</span><span class="mt-0.5 block text-[11.5px] text-[var(--muted)]">{{ $t('content.firstMomentCopy') }}</span></span>
+            </button>
           </div>
 
           <div class="border-t border-[var(--line-soft)] px-6 py-5">

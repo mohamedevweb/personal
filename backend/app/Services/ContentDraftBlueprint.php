@@ -28,9 +28,16 @@ class ContentDraftBlueprint
         from the creator's own material — if their material is thin, write something
         smaller and true rather than inventing detail, numbers, or anecdotes.
 
+        The source is never a voice reference. Its cadence, vocabulary and persona
+        belong to someone else. The creator voice profile and explicit tone are the
+        authority for style. Match their sentence length, point of view, pacing,
+        degree of formality and way of landing a conclusion. If the voice evidence
+        is thin, prefer the explicit tone and audience instead of imitating the source.
+
         Write in the creator's voice, in first person, at the tone and reading level
         their audience already expects. Plain sentences, no hype, no emoji, no
-        hashtags, no "in today's fast-paced world" openings.
+        hashtags, no "in today's fast-paced world" openings. Read the finished draft
+        once as a voice consistency pass before returning it.
         PROMPT;
 
     public function system(): string

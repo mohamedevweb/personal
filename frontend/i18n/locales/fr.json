@@ -362,12 +362,65 @@
     }
   },
   "onboarding": {
-    "eyebrow": "D’abord, apprenons à vous connaître",
-    "connectTitle": "Connectez votre<br>Instagram.",
-    "connectCopy": "Personal utilise votre compte Instagram pour comprendre votre contenu, votre niche et ce qui marche déjà pour vous.",
+    "eyebrow": "D’abord, apprenons à te connaître",
+    "connectTitle": "Connecte ton<br>Instagram.",
+    "connectCopy": "Personal utilise ton compte Instagram pour comprendre ton contenu, ta niche et ce qui marche déjà pour toi.",
     "preparing": "Préparation d’Instagram…",
     "continueWithInstagram": "Continuer avec Instagram",
-    "tokenNote": "Votre jeton d’accès reste chiffré sur le serveur de Personal.",
+    "tokenNote": "Ton jeton d’accès reste chiffré sur le serveur de Personal.",
+    "flow": {
+      "label": "Progression de la personnalisation",
+      "understand": "Comprendre",
+      "context": "Ton contexte",
+      "discover": "Découvrir"
+    },
+    "brief": {
+      "eyebrow": "Ton brief créatif",
+      "title": "Dis à Personal ce qui doit te ressembler.",
+      "copy": "Confirme ce que l’analyse a compris. Deux réponses suffisent pour rendre chaque recommandation et chaque brouillon plus juste.",
+      "nicheLabel": "De quoi parles tu ?",
+      "nicheHelp": "Sois précis. Tu pourras toujours l’ajuster plus tard.",
+      "nichePlaceholder": "Exemple : nutrition simple pour les jeunes parents",
+      "audienceLabel": "Pour qui crées tu ?",
+      "audienceHelp": "Décris la personne que tu veux vraiment aider.",
+      "audiencePlaceholder": "Exemple : des parents actifs qui manquent de temps",
+      "goalLabel": "Que veux tu publier en premier ?",
+      "goals": {
+        "carousel": {
+          "title": "Carousel",
+          "copy": "Une idée claire à faire défiler",
+          "saved": "Créer des carousels clairs et utiles"
+        },
+        "reel": {
+          "title": "Reel",
+          "copy": "Un script naturel à filmer",
+          "saved": "Créer des Reels naturels et faciles à filmer"
+        },
+        "both": {
+          "title": "Les deux",
+          "copy": "Choisir selon la meilleure idée",
+          "saved": "Créer des carousels et des Reels selon la meilleure idée"
+        }
+      },
+      "toneLabel": "Comment dois tu sonner ?",
+      "toneHelp": "Choisis jusqu’à deux tonalités.",
+      "tones": {
+        "direct": "Direct",
+        "warm": "Chaleureux",
+        "educational": "Pédagogique",
+        "bold": "Tranché"
+      },
+      "continue": "Trouver mes meilleures références",
+      "saving": "Création de ton profil…",
+      "loadError": "Personal n’a pas pu charger ton profil créatif.",
+      "saveError": "Personal n’a pas pu enregistrer ton brief. Réessaie.",
+      "previewTitle": "Ton filtre créatif prend forme.",
+      "previewCopy": "Ces signaux servent à trier les contenus et à écrire avec ta voix, pas à t’enfermer dans une case.",
+      "previewNiche": "Univers",
+      "previewVoice": "Voix recherchée",
+      "previewWaiting": "En attente de ton contexte",
+      "previewNote": "Ton contenu reste le tien. Personal emprunte des structures, jamais les idées ni les mots d’un autre créateur."
+    },
     "or": "ou",
     "handleTitle": "Renseigne simplement ton handle",
     "handleCopy": "Personal l’utilisera pour identifier ton univers, sans accéder à ton compte Instagram.",
@@ -435,6 +488,42 @@
   "feed": {
     "forYou": "Pour toi",
     "global": "Global",
+    "workspaceEyebrow": "Ton radar créatif",
+    "workspaceTitle": "Une bonne idée, choisie pour toi, prête à devenir la tienne.",
+    "contextSummary": "Personal cherche dans {niche} et écrira avec une voix {tone}.",
+    "contextFallback": "ton univers",
+    "voiceFallback": "naturelle",
+    "adjustContext": "Ajuster mon profil",
+    "steps": {
+      "understand": {
+        "title": "Compris",
+        "copy": "Ton univers et ta voix"
+      },
+      "discover": {
+        "title": "Découvert",
+        "copy": "{count} références fortes"
+      },
+      "remix": {
+        "title": "À toi de jouer",
+        "copy": "Choisis ton format"
+      }
+    },
+    "featured": {
+      "eyebrow": "Meilleur point de départ",
+      "title": "Commence par ce schéma.",
+      "outlier": "{ratio}× au dessus de sa norme",
+      "reason": "Ce post a réalisé {ratio}× la norme de {'@'}{creator}. La force vient de l’idée, pas seulement de son audience.",
+      "proof": "{views} vues mesurées",
+      "analyze": "Voir l’analyse",
+      "carousel": "Créer mon Carousel",
+      "carouselShort": "Carousel",
+      "reel": "Créer mon Reel",
+      "reelShort": "Reel",
+      "creating": "Création en cours…",
+      "voiceNote": "Le schéma vient de cette référence. Les mots, le ton et le point de vue viennent de toi."
+    },
+    "moreEyebrow": "À explorer",
+    "moreTitle": "D’autres schémas forts pour ton univers",
     "loadError": "Personal n’a pas pu charger les opportunités du jour.",
     "remixError": "Personal n’a pas pu rédiger ceci pour l’instant. Veuillez réessayer.",
     "rotationComplete": "Tu as vu tous les contenus éligibles pour l’instant. Les nouvelles publications arriveront avec le cycle habituel.",
@@ -675,7 +764,7 @@
     "error": "Impossible d’envoyer le lien. Réessayez."
   },
   "content": {
-    "backToFeed": "← Retour à votre feed",
+    "backToFeed": "← Retour à ton feed",
     "analysis": "Analyse Personal",
     "analysisImproving": "Analyse approfondie en cours",
     "loadError": "Personal n’a pas pu ouvrir ce format.",
@@ -684,25 +773,33 @@
     "structure": "Structure",
     "whyOutperforming": "Pourquoi il surperforme",
     "whyOutperformingSuffix": "Le créateur atteint normalement {average} vues ; ce post en a atteint {views}.",
-    "whyFitsYou": "Pourquoi il vous correspond",
-    "whyFitsYouCopy": "Vous parlez souvent de création de produits, d’insight client et de leçons honnêtes de fondateur.",
-    "makeItYours": "Rendez-le vôtre",
-    "makeItYoursCopy": "Choisissez la forme. Personal adaptera le schéma à votre contexte, sans le copier.",
-    "groundInMoment": "Ancrez-le dans un moment de vie",
+    "whyFitsYou": "Pourquoi il te correspond",
+    "whyFitsYouCopy": "Ce schéma correspond à ton univers et peut être réécrit avec ta voix.",
+    "voiceSummary": "Ce schéma peut parler de {niche} avec une voix {tone}.",
+    "voiceFallbackNiche": "ton univers",
+    "voiceFallbackTone": "naturelle",
+    "voiceLocked": "Ta voix est verrouillée",
+    "makeItYours": "Rends le tien",
+    "makeItYoursCopy": "Choisis la forme. Personal adaptera le schéma à ton contexte, sans le copier.",
+    "groundInMoment": "Ancre le dans un moment réel",
+    "groundInMomentHelp": "Une expérience précise rendra le brouillon nettement plus personnel.",
+    "addMoment": "Ajouter un moment",
+    "firstMomentTitle": "Donne une matière réelle à Personal",
+    "firstMomentCopy": "Une décision, une leçon ou une opinion suffit.",
     "letPersonalChoose": "Laisser Personal choisir",
-    "creating": "Création de votre version…",
-    "remixForMe": "Remixer pour moi",
+    "creating": "Création de ta version…",
+    "remixForMe": "Créer ma version",
     "followers": "{count} abonnés",
     "views": "{count} vues",
     "openSource": "Voir le post original",
     "formatBlurb": {
       "reel": "Une accroche, un script parlé et le plan à filmer.",
       "carousel": "Une couverture qui arrête le scroll, puis les slides.",
-      "caption": "Un post écrit, dans votre voix."
+      "caption": "Un post écrit, dans ta voix."
     },
     "storyScore": "Score d’histoire",
-    "creatingCopy": "Personal lit le schéma et votre moment.",
-    "remixFooter": "Vous pourrez changer de format et modifier chaque mot ensuite."
+    "creatingCopy": "Personal lit le schéma et ton moment.",
+    "remixFooter": "Tu pourras changer de format et modifier chaque mot ensuite."
   },
   "remix": {
     "backToAnalysis": "Retour au schéma",
@@ -729,7 +826,6 @@
     "generatingEyebrow": "Brouillon en préparation",
     "generatingTitle": "Ta page est prête. Personal écrit maintenant.",
     "generatingCopy": "Le schéma, ton moment et ta voix sont réunis en arrière-plan.",
-    "generatingLeave": "Tu peux quitter cette page. Le brouillon continuera à se préparer.",
     "generatingSteps": {
       "1": {
         "title": "Lecture du schéma"

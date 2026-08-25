@@ -37,7 +37,7 @@ class PersonalMvpTest extends TestCase
         $response->assertOk()
             ->assertJsonMissingPath('greeting_name')
             ->assertJsonCount(24, 'items')
-            ->assertJsonStructure(['featured_opportunity', 'items' => [[
+            ->assertJsonStructure(['personalization' => ['niche', 'tone'], 'featured_opportunity', 'items' => [[
                 'id', 'hook', 'performance_ratio', 'recommendation_score', 'why_recommended', 'creator',
             ]]]);
 

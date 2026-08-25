@@ -90,6 +90,7 @@ class AnalyzeCreatorHandle implements ShouldQueue
                 'positioning' => $signals['primary_niche'] ? $scraped->bio : null,
                 'topics' => $signals['topics'],
                 'tone' => $signals['tone'],
+                'voice_profile' => $signals['voice_profile'],
                 'audience_description' => $signals['audience'] === [] ? null : implode(', ', $signals['audience']),
                 'creator_dna' => $signals,
                 'primary_vertical' => $verticals->fromSignals([

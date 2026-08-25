@@ -51,6 +51,16 @@ export interface ContentPost {
   creator: Creator
 }
 
+export interface FeedResponse {
+  opportunity_count: number
+  personalization: {
+    niche: string | null
+    tone: string[]
+  }
+  featured_opportunity?: Opportunity | null
+  items: ContentPost[]
+}
+
 export interface LifeMoment {
   id: number
   content: string
@@ -99,6 +109,7 @@ export interface PersonalProfile {
     language: string
     content_pillars: string[]
     tone: string[]
+    voice_profile?: string | null
     analysis_status?: 'complete' | 'partial' | 'insufficient_evidence'
     analysis_method?: 'llm' | 'heuristic' | 'manual' | 'none'
     confidence?: number

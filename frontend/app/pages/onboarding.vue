@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { CreatorInspiration, CreatorInspirationResponse, InstagramSyncStatus } from '~/types/instagram'
+import type { PersonalProfile } from '~/types/product'
 import { groupCreatorOptions } from '~/utils/creatorInspirationOptions'
 
 definePageMeta({ layout: false })
@@ -20,6 +21,15 @@ const inspirationsLoaded = ref(false)
 const handleInput = ref('')
 const accountHandleInput = ref('')
 const handleSaving = ref(false)
+const briefLoading = ref(false)
+const briefSaving = ref(false)
+const briefConfirmed = ref(false)
+const brief = reactive({
+  niche: '',
+  audience: '',
+  goal: 'both' as 'carousel' | 'reel' | 'both',
+  tone: ['direct', 'warm'] as string[]
+})
 // Choosing inspirations does not need Instagram: a creator who skips the
 // connection still gets this step, so the first feed has something to build on.
 const connectionSkipped = ref(false)
@@ -98,6 +108,43 @@ const onboarded = useState('personal-onboarded', () => false)
 const showInspirations = computed(() => (status.value.connected && status.value.account?.sync_status === 'completed')
   || (!status.value.connected && Boolean(status.value.instagram_username))
   || (!status.value.connected && connectionSkipped.value))
+
+const onboardingSteps = computed(() => [
+  {
+    key: 'understand',
+    label: t('onboarding.flow.understand'),
+    complete: showInspirations.value,
+    active: !showInspirations.value
+  },
+  {
+    key: 'context',
+    label: t('onboarding.flow.context'),
+    complete: briefConfirmed.value,
+    active: showInspirations.value && !briefConfirmed.value
+  },
+  {
+    key: 'discover',
+    label: t('onboarding.flow.discover'),
+    complete: false,
+    active: showInspirations.value && briefConfirmed.value
+  }
+])
+
+const goalOptions = computed(() => (['carousel', 'reel', 'both'] as const).map(value => ({
+  value,
+  icon: value === 'both' ? 'sparkles' : value,
+  title: t(`onboarding.brief.goals.${value}.title`),
+  copy: t(`onboarding.brief.goals.${value}.copy`)
+})))
+
+const toneOptions = computed(() => (['direct', 'warm', 'educational', 'bold'] as const).map(value => ({
+  value,
+  label: t(`onboarding.brief.tones.${value}`)
+})))
+
+const canSaveBrief = computed(() => brief.niche.trim().length >= 2
+  && brief.audience.trim().length >= 2
+  && brief.tone.length > 0)
 
 const minimum = computed(() => inspirationData.value?.minimum ?? 3)
 const maximum = computed(() => inspirationData.value?.maximum ?? 6)
@@ -263,6 +310,57 @@ async function loadInspirations() {
   }
 }
 
+async function loadCreativeBrief() {
+  if (briefLoading.value || briefConfirmed.value) return
+  briefLoading.value = true
+
+  try {
+    const response = await apiFetch<{ profile: PersonalProfile }>('/api/me/profile')
+    brief.niche = response.profile.niche || ''
+    brief.audience = response.profile.audience_description || ''
+    if (response.profile.niche && response.profile.audience_description && response.profile.tone?.length && response.profile.goals?.length) {
+      briefConfirmed.value = true
+      await loadInspirations()
+    }
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('onboarding.brief.loadError')))
+  } finally {
+    briefLoading.value = false
+  }
+}
+
+function toggleTone(tone: string) {
+  if (brief.tone.includes(tone)) {
+    if (brief.tone.length > 1) brief.tone = brief.tone.filter(item => item !== tone)
+    return
+  }
+
+  brief.tone = brief.tone.length >= 2 ? [brief.tone[1]!, tone] : [...brief.tone, tone]
+}
+
+async function saveCreativeBrief() {
+  if (!canSaveBrief.value || briefSaving.value) return
+  briefSaving.value = true
+
+  try {
+    await apiFetch('/api/me/profile', {
+      method: 'PATCH',
+      body: {
+        niche: brief.niche.trim(),
+        audience_description: brief.audience.trim(),
+        tone: brief.tone.map(tone => t(`onboarding.brief.tones.${tone}`)),
+        goals: [t(`onboarding.brief.goals.${brief.goal}.saved`)]
+      }
+    })
+    briefConfirmed.value = true
+    await loadInspirations()
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('onboarding.brief.saveError')))
+  } finally {
+    briefSaving.value = false
+  }
+}
+
 async function searchCreators() {
   const query = parsedHandle.value
   if (!query || searching.value) {
@@ -316,7 +414,7 @@ async function saveAccountHandle() {
       body: { username }
     })
     status.value.instagram_username = response.instagram_username
-    await loadInspirations()
+    await loadCreativeBrief()
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('onboarding.handleSaveError')))
   } finally {
@@ -325,7 +423,7 @@ async function saveAccountHandle() {
 }
 
 watch(() => status.value.account?.sync_status, (syncStatus) => {
-  if (status.value.connected && syncStatus === 'completed') void loadInspirations()
+  if (status.value.connected && syncStatus === 'completed') void loadCreativeBrief()
 })
 
 // Let the user into the app without connecting Instagram. The cookie makes the
@@ -335,7 +433,7 @@ const skipped = useCookie<boolean>('personal-onboarding-skipped', { maxAge: 60 *
 
 function skipConnection() {
   connectionSkipped.value = true
-  void loadInspirations()
+  void loadCreativeBrief()
 }
 
 function enterApp() {
@@ -351,7 +449,7 @@ function skipInspirations() {
 onMounted(async () => {
   await loadStatus()
   if (showInspirations.value) {
-    await loadInspirations()
+    await loadCreativeBrief()
   }
   if (route.query.instagram === 'connected' || (status.value.connected && status.value.account?.sync_status !== 'completed')) {
     startPolling()
@@ -373,10 +471,14 @@ onMounted(async () => {
 
     <section class="mx-auto grid min-h-[calc(100vh-5rem)] max-w-6xl items-center gap-14 px-6 py-14 md:grid-cols-[1fr_0.88fr] md:px-10 md:py-20">
       <div class="max-w-xl animate-rise">
-        <div class="mb-8 flex items-center gap-2 text-xs font-medium uppercase tracking-[0.16em] text-[var(--faint)]">
-          <span class="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
-          {{ $t('onboarding.eyebrow') }}
-        </div>
+        <ol class="mb-9 grid grid-cols-3 gap-2" :aria-label="$t('onboarding.flow.label')">
+          <li v-for="(step, index) in onboardingSteps" :key="step.key" class="min-w-0">
+            <div class="mb-2 h-1 rounded-full transition" :class="step.complete || step.active ? 'bg-[var(--accent)]' : 'bg-[var(--line)]'" />
+            <p class="truncate text-[10px] font-semibold uppercase tracking-[.12em]" :class="step.active ? 'text-[var(--ink)]' : 'text-[var(--faint)]'">
+              {{ index + 1 }}. {{ step.label }}
+            </p>
+          </li>
+        </ol>
 
         <template v-if="!status.connected && !status.instagram_username && !connectionSkipped">
           <h1 class="font-serif text-5xl leading-[1.02] tracking-[-0.045em] md:text-7xl" v-html="$t('onboarding.connectTitle')" />
@@ -459,7 +561,77 @@ onMounted(async () => {
             <span class="text-[var(--positive)]">✓</span>
           </div>
 
-          <template v-if="showInspirations">
+          <template v-if="showInspirations && !briefConfirmed">
+            <p class="text-[11px] font-semibold uppercase tracking-[.16em] text-[var(--accent)]">{{ $t('onboarding.brief.eyebrow') }}</p>
+            <h1 class="mt-4 font-serif text-4xl leading-[1.02] tracking-[-0.045em] md:text-6xl">
+              {{ $t('onboarding.brief.title') }}
+            </h1>
+            <p class="mt-5 max-w-lg text-[16px] leading-7 text-[var(--muted)]">
+              {{ $t('onboarding.brief.copy') }}
+            </p>
+
+            <div v-if="briefLoading" class="mt-7 space-y-3 rounded-[24px] border border-[var(--line)] bg-[var(--surface)] p-5 md:p-6">
+              <div v-for="item in 4" :key="item" class="h-16 animate-pulse rounded-[14px] bg-[var(--line-soft)]" />
+            </div>
+
+            <form v-else class="mt-7 space-y-6 rounded-[24px] border border-[var(--line)] bg-[var(--surface)] p-5 md:p-6" @submit.prevent="saveCreativeBrief">
+              <div>
+                <label for="creator-niche" class="text-sm font-semibold">{{ $t('onboarding.brief.nicheLabel') }}</label>
+                <p class="mt-1 text-[12.5px] leading-5 text-[var(--muted)]">{{ $t('onboarding.brief.nicheHelp') }}</p>
+                <input id="creator-niche" v-model="brief.niche" type="text" maxlength="160" class="mt-3 w-full rounded-[13px] border border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-sm outline-none transition focus:border-[var(--ink)]" :placeholder="$t('onboarding.brief.nichePlaceholder')">
+              </div>
+
+              <div>
+                <label for="creator-audience" class="text-sm font-semibold">{{ $t('onboarding.brief.audienceLabel') }}</label>
+                <p class="mt-1 text-[12.5px] leading-5 text-[var(--muted)]">{{ $t('onboarding.brief.audienceHelp') }}</p>
+                <input id="creator-audience" v-model="brief.audience" type="text" maxlength="1000" class="mt-3 w-full rounded-[13px] border border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-sm outline-none transition focus:border-[var(--ink)]" :placeholder="$t('onboarding.brief.audiencePlaceholder')">
+              </div>
+
+              <fieldset>
+                <legend class="text-sm font-semibold">{{ $t('onboarding.brief.goalLabel') }}</legend>
+                <div class="mt-3 grid gap-2 sm:grid-cols-3">
+                  <button
+                    v-for="option in goalOptions"
+                    :key="option.value"
+                    type="button"
+                    class="rounded-[15px] border p-3 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+                    :class="brief.goal === option.value ? 'border-[var(--ink)] bg-[var(--paper)]' : 'border-[var(--line)] hover:border-[var(--muted)]'"
+                    :aria-pressed="brief.goal === option.value"
+                    @click="brief.goal = option.value"
+                  >
+                    <AppIcon :name="option.icon" :size="16" :class="brief.goal === option.value ? 'text-[var(--accent)]' : 'text-[var(--faint)]'" />
+                    <span class="mt-3 block text-[13px] font-medium">{{ option.title }}</span>
+                    <span class="mt-1 block text-[11.5px] leading-4 text-[var(--muted)]">{{ option.copy }}</span>
+                  </button>
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend class="text-sm font-semibold">{{ $t('onboarding.brief.toneLabel') }}</legend>
+                <p class="mt-1 text-[12.5px] leading-5 text-[var(--muted)]">{{ $t('onboarding.brief.toneHelp') }}</p>
+                <div class="mt-3 flex flex-wrap gap-2">
+                  <button
+                    v-for="option in toneOptions"
+                    :key="option.value"
+                    type="button"
+                    class="rounded-full border px-4 py-2 text-[12.5px] transition"
+                    :class="brief.tone.includes(option.value) ? 'border-[var(--ink)] bg-[var(--ink)] text-white' : 'border-[var(--line)] bg-[var(--paper)] text-[var(--muted)] hover:text-[var(--ink)]'"
+                    :aria-pressed="brief.tone.includes(option.value)"
+                    @click="toggleTone(option.value)"
+                  >
+                    {{ option.label }}
+                  </button>
+                </div>
+              </fieldset>
+
+              <button type="submit" class="inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-full b-btn-red px-7 text-[15px] font-medium transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40" :disabled="!canSaveBrief || briefSaving">
+                {{ briefSaving ? $t('onboarding.brief.saving') : $t('onboarding.brief.continue') }}
+                <AppIcon name="arrow" :size="16" />
+              </button>
+            </form>
+          </template>
+
+          <template v-else-if="showInspirations">
             <h1 class="font-serif text-4xl leading-[1.02] tracking-[-0.045em] md:text-6xl">
               {{ $t('onboarding.inspirations.title') }}
             </h1>
@@ -610,7 +782,22 @@ onMounted(async () => {
           {{ status.connected ? $t('onboarding.profileLive') : status.instagram_username ? $t('onboarding.profileProvided') : $t('onboarding.preview.label') }}
         </p>
 
-        <div v-if="status.connected" class="mt-12 space-y-1">
+        <div v-if="showInspirations && !briefConfirmed" class="mt-10">
+          <p class="font-serif text-[32px] leading-tight tracking-[-.03em]">{{ $t('onboarding.brief.previewTitle') }}</p>
+          <p class="mt-3 text-[13px] leading-6 text-white/50">{{ $t('onboarding.brief.previewCopy') }}</p>
+          <div class="panel-night mt-8 rounded-[20px] p-5">
+            <p class="text-[10px] font-semibold uppercase tracking-[.18em] text-white/35">{{ $t('onboarding.brief.previewNiche') }}</p>
+            <p class="mt-2 text-[17px] text-white">{{ brief.niche || $t('onboarding.brief.previewWaiting') }}</p>
+            <div class="my-5 h-px bg-white/10" />
+            <p class="text-[10px] font-semibold uppercase tracking-[.18em] text-white/35">{{ $t('onboarding.brief.previewVoice') }}</p>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <span v-for="tone in brief.tone" :key="tone" class="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/70">{{ $t(`onboarding.brief.tones.${tone}`) }}</span>
+            </div>
+          </div>
+          <p class="mt-6 flex items-start gap-2 text-[12px] leading-5 text-white/45"><AppIcon name="shield" :size="15" class="mt-0.5 shrink-0 text-[var(--b-red-lit)]" />{{ $t('onboarding.brief.previewNote') }}</p>
+        </div>
+
+        <div v-else-if="status.connected" class="mt-12 space-y-1">
           <div
             v-for="(stage, index) in stages"
             :key="stage.key"

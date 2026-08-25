@@ -24,6 +24,7 @@ use Throwable;
  *   language: string,
  *   content_pillars: list<string>,
  *   tone: list<string>,
+ *   voice_profile: ?string,
  *   analysis_status: string,
  *   analysis_method: string,
  *   confidence: float,
@@ -106,14 +107,16 @@ class NicheDetectionService
         $result = $this->llm->object(
             'Build a precise Creator DNA from an Instagram profile. Identify the narrowest defensible primary niche, '
             .'then its adjacent sub-niches, concrete topics, intended audiences, main content pillars, language and '
-            .'tone. Preserve useful hierarchy: for example business, entrepreneurship, SaaS, AI SaaS, build in public. '
+            .'tone and a concise voice profile. The voice profile must describe observable writing habits such as '
+            .'sentence length, point of view, pacing, openings and how conclusions land. Preserve useful hierarchy: '
+            .'for example business, entrepreneurship, SaaS, AI SaaS, build in public. '
             .'Base every field on the bio, link metadata, captions and available profile evidence, never guesses. '
             .'Return a confidence from 0 to 1 based on how consistently the evidence supports the result.',
             $input,
             [
                 'type' => 'object',
                 'additionalProperties' => false,
-                'required' => ['primary_niche', 'sub_niches', 'topics', 'audience', 'language', 'content_pillars', 'tone', 'confidence'],
+                'required' => ['primary_niche', 'sub_niches', 'topics', 'audience', 'language', 'content_pillars', 'tone', 'voice_profile', 'confidence'],
                 'properties' => [
                     'primary_niche' => ['type' => 'string'],
                     'sub_niches' => ['type' => 'array', 'items' => ['type' => 'string']],
@@ -122,6 +125,10 @@ class NicheDetectionService
                     'language' => ['type' => 'string'],
                     'content_pillars' => ['type' => 'array', 'items' => ['type' => 'string']],
                     'tone' => ['type' => 'array', 'items' => ['type' => 'string']],
+                    'voice_profile' => [
+                        'type' => 'string',
+                        'description' => 'Three to six concise, evidence-based observations about how this creator writes. No advice and no invented traits.',
+                    ],
                     'confidence' => ['type' => 'number', 'minimum' => 0, 'maximum' => 1],
                 ],
             ],
@@ -145,6 +152,7 @@ class NicheDetectionService
             'language' => trim((string) ($result['language'] ?? 'und')) ?: 'und',
             'content_pillars' => $this->stringList($result['content_pillars'] ?? [], 8),
             'tone' => $this->stringList($result['tone'] ?? [], 3),
+            'voice_profile' => Str::limit(trim((string) ($result['voice_profile'] ?? '')), 2000) ?: null,
             'confidence' => (float) ($result['confidence'] ?? 0.0),
         ];
     }
@@ -231,6 +239,7 @@ class NicheDetectionService
             'language' => $this->language($captions.' '.$bio),
             'content_pillars' => array_slice($topics, 0, 5),
             'tone' => array_values(array_unique($tone)),
+            'voice_profile' => $this->heuristicVoiceProfile($captions, $media, $tone),
             'analysis_status' => 'partial',
             'analysis_method' => 'heuristic',
             'confidence' => $confidence,
@@ -303,6 +312,7 @@ class NicheDetectionService
             'language' => 'und',
             'content_pillars' => [],
             'tone' => [],
+            'voice_profile' => null,
             'analysis_status' => $status,
             'analysis_method' => $method,
             'confidence' => 0.0,
@@ -316,6 +326,30 @@ class NicheDetectionService
         $englishSignals = preg_match_all('/\b(with|this|that|your|how|why|from|into|building)\b/iu', $text);
 
         return $frenchSignals > $englishSignals ? 'fr' : ($englishSignals > 0 ? 'en' : 'und');
+    }
+
+    /** @param list<array<string, mixed>> $media */
+    private function heuristicVoiceProfile(string $captions, array $media, array $tone): ?string
+    {
+        if ($captions === '') {
+            return null;
+        }
+
+        $observations = [];
+        if (preg_match('/\b(i|my|me|we|our)\b/i', $captions)) {
+            $observations[] = 'Writes in the first person and speaks from direct experience.';
+        }
+
+        $averageLength = Str::length($captions) / max(count($media), 1);
+        $observations[] = $averageLength < 350
+            ? 'Uses concise captions and reaches the point quickly.'
+            : 'Develops ideas through longer, story-led captions.';
+
+        if (in_array('Educational', $tone, true)) {
+            $observations[] = 'Frames ideas as practical lessons for the audience.';
+        }
+
+        return implode(' ', $observations);
     }
 
     /**

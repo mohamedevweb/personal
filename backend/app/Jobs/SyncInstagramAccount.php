@@ -93,6 +93,7 @@ class SyncInstagramAccount implements ShouldQueue
                     'positioning' => $signals['primary_niche'] ? $account->bio : null,
                     'topics' => $signals['topics'],
                     'tone' => $signals['tone'],
+                    'voice_profile' => $signals['voice_profile'],
                     'audience_description' => $signals['audience'] === [] ? null : implode(', ', $signals['audience']),
                     'creator_dna' => $signals,
                     'primary_vertical' => $primaryVertical,

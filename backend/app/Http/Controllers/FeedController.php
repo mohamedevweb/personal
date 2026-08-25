@@ -30,8 +30,14 @@ class FeedController extends Controller
     /** @param Collection<int, array<string, mixed>> $items */
     private function response(Request $request, Collection $items): JsonResponse
     {
+        $profile = $request->user()->creatorProfile;
+
         return response()->json([
             'opportunity_count' => $items->count(),
+            'personalization' => [
+                'niche' => $profile?->niche,
+                'tone' => $profile?->tone ?? [],
+            ],
             'featured_opportunity' => $request->user()->opportunities()
                 ->with(['contentPost.creator', 'lifeMoment'])
                 ->orderByDesc('relevance_score')

@@ -50,6 +50,7 @@ class NicheDetectionServiceTest extends TestCase
         $this->assertSame('partial', $signals['analysis_status']);
         $this->assertSame('heuristic', $signals['analysis_method']);
         $this->assertContains('Saas', $signals['topics']);
+        $this->assertStringContainsString('concise captions', $signals['voice_profile']);
         $this->assertNotContains('Http', $signals['topics']);
         $this->assertNotContains('2026', $signals['topics']);
     }

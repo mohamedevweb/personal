@@ -59,7 +59,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   // The user can choose to skip connecting Instagram; that choice (persisted in
   // a cookie) is enough to let them past the gate.
-  if (useCookie<boolean>('personal-onboarding-skipped').value) {
+  if (to.query.qa_new === '1') {
+    onboarded.value = false
+  } else if (useCookie<boolean>('personal-onboarding-skipped').value) {
     onboarded.value = true
   }
 

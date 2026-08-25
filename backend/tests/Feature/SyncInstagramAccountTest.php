@@ -92,6 +92,7 @@ class SyncInstagramAccountTest extends TestCase
         $this->assertSame($creatorProfile->niche, $creatorProfile->creator_dna['primary_niche']);
         $this->assertSame('partial', $creatorProfile->creator_dna['analysis_status']);
         $this->assertSame('heuristic', $creatorProfile->creator_dna['analysis_method']);
+        $this->assertStringContainsString('first person', $creatorProfile->voice_profile);
         $this->assertNotNull($creatorProfile->dna_analyzed_at);
         $creator = Creator::query()->where('instagram_user_id', '123')->firstOrFail();
         $this->assertSame($user->id, $creator->user_id);
