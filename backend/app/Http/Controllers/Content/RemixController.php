@@ -72,6 +72,21 @@ class RemixController extends Controller
         return response()->json(['remix' => $remix->fresh()]);
     }
 
+    /**
+     * Deleting is final: a draft carries the creator's own words, so only a
+     * generation that is not in flight can be removed and the row goes with
+     * it rather than lingering as archived.
+     */
+    public function destroy(Request $request, Remix $remix, RemixDraftService $drafts): Response
+    {
+        $this->ensureOwner($request, $remix);
+        $remix = $drafts->failIfStale($remix);
+        abort_if($remix->status === 'generating', Response::HTTP_CONFLICT);
+        $remix->delete();
+
+        return response()->noContent();
+    }
+
     public function copied(Request $request, Remix $remix): Response
     {
         $this->ensureOwner($request, $remix);

@@ -26,13 +26,17 @@ const saving = ref(false)
 const switching = ref<Format | null>(null)
 const copied = ref(false)
 const retrying = ref(false)
+const deleting = ref(false)
 const regeneratingBlock = ref<string | null>(null)
 /** A rewrite discards the draft, so the button asks once before it fires. */
 const confirmingRedraft = ref(false)
+/** Deleting has no undo, so it asks the same way. */
+const confirmingDelete = ref(false)
 const sourceAvatarFailed = ref(false)
 /** The last payload the server acknowledged, used to tell edited from saved. */
 const pristine = ref('')
 let confirmTimer: ReturnType<typeof setTimeout> | undefined
+let deleteTimer: ReturnType<typeof setTimeout> | undefined
 
 const tabs = ref<HTMLButtonElement[]>([])
 const slideInputs = ref<HTMLTextAreaElement[]>([])
@@ -310,6 +314,32 @@ function askRedraft() {
   retryGeneration()
 }
 
+function askDelete() {
+  if (!confirmingDelete.value) {
+    confirmingDelete.value = true
+    clearTimeout(deleteTimer)
+    deleteTimer = setTimeout(() => { confirmingDelete.value = false }, 4000)
+    return
+  }
+  clearTimeout(deleteTimer)
+  confirmingDelete.value = false
+  deleteDraft()
+}
+
+async function deleteDraft() {
+  if (!remix.value || deleting.value) return
+  deleting.value = true
+  try {
+    await apiFetch(`/api/remixes/${remix.value.id}`, { method: 'DELETE' })
+    toast.success(t('remix.deleted'))
+    await navigateTo('/drafts')
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('remix.deleteError')))
+  } finally {
+    deleting.value = false
+  }
+}
+
 onMounted(async () => {
   window.addEventListener('beforeunload', guardUnload)
   await loadRemix()
@@ -321,12 +351,14 @@ watch(() => route.params.id, async (id, previousId) => {
   remix.value = null
   switching.value = null
   confirmingRedraft.value = false
+  confirmingDelete.value = false
   await loadRemix()
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('beforeunload', guardUnload)
   clearTimeout(confirmTimer)
+  clearTimeout(deleteTimer)
 })
 </script>
 
@@ -340,16 +372,26 @@ onBeforeUnmount(() => {
       </span>
       <h1 class="mt-6 font-serif text-[34px] tracking-[-.03em]">{{ $t('remix.generationFailed') }}</h1>
       <p class="mx-auto mt-3 max-w-[42ch] text-sm leading-6 text-[var(--muted)]">{{ $t('remix.generationFailedCopy') }}</p>
-      <button
-        class="mt-7 inline-flex h-11 items-center rounded-full b-btn-red px-5 text-[14px] font-medium transition disabled:opacity-60"
-        :disabled="retrying"
-        @click="retryGeneration"
-      >
-        {{ retrying ? $t('remix.retrying') : $t('remix.retry') }}
-      </button>
+      <div class="mt-7 flex flex-wrap items-center justify-center gap-3">
+        <button
+          class="inline-flex h-11 items-center rounded-full b-btn-red px-5 text-[14px] font-medium transition disabled:opacity-60"
+          :disabled="retrying || deleting"
+          @click="retryGeneration"
+        >
+          {{ retrying ? $t('remix.retrying') : $t('remix.retry') }}
+        </button>
+        <button
+          class="inline-flex h-11 items-center rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-[14px] text-[var(--muted)] transition hover:text-[var(--danger)] disabled:opacity-60"
+          :class="confirmingDelete ? 'text-[var(--danger)]' : ''"
+          :disabled="retrying || deleting"
+          @click="askDelete"
+        >
+          {{ confirmingDelete ? $t('remix.deleteConfirm') : $t('remix.delete') }}
+        </button>
+      </div>
     </section>
 
-    <div v-else-if="remix" :inert="retrying || !!switching" :aria-busy="retrying || !!switching">
+    <div v-else-if="remix" :inert="retrying || deleting || !!switching" :aria-busy="retrying || deleting || !!switching">
       <!-- Everything that changes the draft's state lives in one bar that stays
            in reach while the editor scrolls. -->
       <div class="sticky top-16 z-10 border-b border-[var(--line)] bg-[var(--paper)]/92 backdrop-blur md:top-[74px]">
@@ -372,6 +414,19 @@ onBeforeUnmount(() => {
           </span>
 
           <div class="ml-auto flex shrink-0 items-center gap-2">
+            <button
+              class="bar-button"
+              :class="confirmingDelete ? 'text-[var(--danger)]' : 'hover:text-[var(--danger)]'"
+              :disabled="deleting || saving"
+              :aria-label="$t('remix.delete')"
+              @click="askDelete"
+            >
+              <AppIcon name="trash" :size="15" />
+              <!-- Armed, the question has to be readable on a phone too. -->
+              <span :class="confirmingDelete ? '' : 'hidden sm:inline'">
+                {{ confirmingDelete ? $t('remix.deleteConfirm') : $t('remix.delete') }}
+              </span>
+            </button>
             <button class="bar-button" :aria-label="$t('remix.copy')" @click="copyDraft">
               <AppIcon :name="copied ? 'check' : 'copy'" :size="15" />
               <span class="hidden sm:inline">{{ copied ? $t('remix.copied') : $t('remix.copy') }}</span>

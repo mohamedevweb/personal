@@ -314,7 +314,6 @@
     "aside": {
       "titleLineOne": "Live an interesting life.",
       "titleLineTwo": "Personal is paying attention.",
-      "proof": "Early access · 180+ creators",
       "card": {
         "eyebrow": "Engagement this month",
         "metric": "8.4×",
@@ -627,7 +626,11 @@
     "emptyTitle": "No drafts yet.",
     "emptyCopy": "Start from a moment or a strong pattern. Your work will stay here while you shape it.",
     "createFirst": "Create your first draft",
-    "loadError": "Personal could not load your drafts. Please try again."
+    "loadError": "Personal could not load your drafts. Please try again.",
+    "delete": "Delete draft",
+    "deleteConfirm": "Delete?",
+    "deleted": "Draft deleted.",
+    "deleteError": "Personal could not delete this draft. Please try again."
   },
   "settings": {
     "eyebrow": "Settings",
@@ -764,6 +767,10 @@
     "retrying": "Trying again…",
     "redraft": "Rewrite",
     "redraftConfirm": "Replace draft?",
+    "delete": "Delete",
+    "deleteConfirm": "Delete draft?",
+    "deleted": "Draft deleted.",
+    "deleteError": "Personal could not delete this draft. Try again.",
     "retryError": "Personal could not restart this draft. Try again.",
     "statusDraft": "Draft",
     "statusReady": "Draft ready to copy",

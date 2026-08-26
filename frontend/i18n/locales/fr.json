@@ -314,7 +314,6 @@
     "aside": {
       "titleLineOne": "Vivez une vie intéressante.",
       "titleLineTwo": "Personal y prête attention.",
-      "proof": "Accès anticipé · 180+ créateurs",
       "card": {
         "eyebrow": "Engagement ce mois-ci",
         "metric": "8,4×",
@@ -627,7 +626,11 @@
     "emptyTitle": "Aucun brouillon pour l’instant.",
     "emptyCopy": "Pars d’un moment ou d’un schéma fort. Ton travail restera ici pendant que tu l’affines.",
     "createFirst": "Créer ton premier brouillon",
-    "loadError": "Personal n’a pas pu charger tes brouillons. Réessaie."
+    "loadError": "Personal n’a pas pu charger tes brouillons. Réessaie.",
+    "delete": "Supprimer le brouillon",
+    "deleteConfirm": "Supprimer ?",
+    "deleted": "Brouillon supprimé.",
+    "deleteError": "Personal n’a pas pu supprimer ce brouillon. Réessaie."
   },
   "settings": {
     "eyebrow": "Réglages",
@@ -764,6 +767,10 @@
     "retrying": "Relance en cours…",
     "redraft": "Régénérer",
     "redraftConfirm": "Écraser le brouillon ?",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer le brouillon ?",
+    "deleted": "Brouillon supprimé.",
+    "deleteError": "Personal n’a pas pu supprimer ce brouillon. Réessaie.",
     "retryError": "Personal n’a pas pu relancer ce brouillon. Réessaie.",
     "statusDraft": "Brouillon",
     "statusReady": "Brouillon prêt à copier",

@@ -405,6 +405,63 @@ class PersonalMvpTest extends TestCase
             ]]]);
     }
 
+    public function test_a_draft_can_be_deleted_by_its_owner(): void
+    {
+        $post = ContentPost::query()->firstOrFail();
+        $remix = Remix::query()->create([
+            'user_id' => $this->user->id,
+            'source_content_id' => $post->id,
+            'life_moment_id' => null,
+            'format' => 'caption',
+            'generated_content' => ['caption' => 'A draft I no longer want.'],
+            'status' => 'draft',
+        ]);
+
+        $this->actingAs($this->user)
+            ->deleteJson("/api/remixes/{$remix->id}")
+            ->assertNoContent();
+
+        $this->assertDatabaseMissing('remixes', ['id' => $remix->id]);
+    }
+
+    public function test_a_draft_cannot_be_deleted_by_another_creator(): void
+    {
+        $post = ContentPost::query()->firstOrFail();
+        $remix = Remix::query()->create([
+            'user_id' => $this->user->id,
+            'source_content_id' => $post->id,
+            'life_moment_id' => null,
+            'format' => 'caption',
+            'generated_content' => ['caption' => 'Not yours.'],
+            'status' => 'draft',
+        ]);
+
+        $this->actingAs(User::factory()->create())
+            ->deleteJson("/api/remixes/{$remix->id}")
+            ->assertNotFound();
+
+        $this->assertDatabaseHas('remixes', ['id' => $remix->id]);
+    }
+
+    public function test_a_draft_being_written_cannot_be_deleted(): void
+    {
+        $post = ContentPost::query()->firstOrFail();
+        $remix = Remix::query()->create([
+            'user_id' => $this->user->id,
+            'source_content_id' => $post->id,
+            'life_moment_id' => null,
+            'format' => 'reel',
+            'generated_content' => [],
+            'status' => 'generating',
+        ]);
+
+        $this->actingAs($this->user)
+            ->deleteJson("/api/remixes/{$remix->id}")
+            ->assertConflict();
+
+        $this->assertDatabaseHas('remixes', ['id' => $remix->id]);
+    }
+
     public function test_a_failed_remix_can_be_retried_without_losing_its_selection(): void
     {
         Queue::fake();

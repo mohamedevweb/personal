@@ -96,6 +96,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function (): void {
     Route::get('/remixes', [RemixController::class, 'index']);
     Route::get('/remixes/{remix}', [RemixController::class, 'show']);
     Route::patch('/remixes/{remix}', [RemixController::class, 'update']);
+    Route::delete('/remixes/{remix}', [RemixController::class, 'destroy']);
     Route::post('/remixes/{remix}/copied', [RemixController::class, 'copied']);
     Route::get('/creator-inspirations', [CreatorInspirationController::class, 'index']);
     Route::put('/creator-inspirations', [CreatorInspirationController::class, 'update'])

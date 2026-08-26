@@ -8,7 +8,6 @@ const props = withDefaults(defineProps<{ post: ContentPost, remixing?: boolean }
 defineEmits<{ save: [post: ContentPost], remix: [post: ContentPost] }>()
 const { locale } = useI18n()
 
-const expanded = ref(false)
 const activeMediaIndex = ref(0)
 const mediaKind = computed(() => {
   const format = (props.post.format || '').toLowerCase()
@@ -24,10 +23,11 @@ const activeMediaUrl = computed(() => mediaUrls.value[activeMediaIndex.value] ||
 const hasPreviousMedia = computed(() => activeMediaIndex.value > 0)
 const hasNextMedia = computed(() => activeMediaIndex.value < mediaUrls.value.length - 1)
 // Instagram cuts the caption after a couple of lines and reveals the rest behind
-// an inline "more", so we truncate on length to keep that button on the line.
+// an inline "more", so we truncate on length to keep that link on the line. Here
+// the link opens the post's analysis rather than unfolding the caption in place.
 const caption = computed(() => [props.post.hook, props.post.caption].filter(Boolean).join(' '))
 const isLongCaption = computed(() => caption.value.length > 80)
-const visibleCaption = computed(() => (expanded.value || !isLongCaption.value ? caption.value : `${caption.value.slice(0, 80).trimEnd()}… `))
+const visibleCaption = computed(() => (isLongCaption.value ? `${caption.value.slice(0, 80).trimEnd()}… ` : caption.value))
 const engagement = computed(() => (props.post.likes || 0) + (props.post.comments || 0) + (props.post.shares || 0))
 
 let touchStart: { x: number, y: number } | null = null
@@ -161,7 +161,7 @@ watch(() => props.post.id, () => {
       <p class="font-semibold">{{ $t('contentCard.likes', { count: compactNumber(post.likes) }) }}</p>
       <p class="mt-1">
         <span class="font-semibold">{{ post.creator.username }}</span>
-        {{ ' ' }}{{ visibleCaption }}<button v-if="isLongCaption && !expanded" class="text-[var(--faint)] transition hover:text-[var(--ink)]" @click="expanded = true">{{ $t('contentCard.more') }}</button>
+        {{ ' ' }}{{ visibleCaption }}<NuxtLink v-if="isLongCaption" :to="`/content/${post.id}`" class="text-[var(--faint)] transition hover:text-[var(--ink)]">{{ $t('contentCard.more') }}</NuxtLink>
       </p>
       <p v-if="post.comments" class="mt-1 text-[var(--faint)]">{{ $t('contentCard.viewComments', { count: compactNumber(post.comments) }) }}</p>
     </div>

@@ -144,10 +144,6 @@ function toggleMode() {
             <span class="block">{{ $t('login.aside.titleLineTwo') }}</span>
           </h2>
 
-          <p class="mt-6 text-[12px] font-semibold uppercase tracking-[.18em] text-[#a8a196]">
-            {{ $t('login.aside.proof') }}
-          </p>
-
           <figure class="panel-night mt-12 rounded-[18px] px-5 pb-4 pt-5 text-left backdrop-blur-sm">
             <figcaption class="sr-only">{{ $t('login.aside.card.label') }}</figcaption>
 

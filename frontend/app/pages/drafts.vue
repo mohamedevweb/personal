@@ -3,10 +3,15 @@ import type { RemixSummary } from '~/types/product'
 
 const { apiFetch } = usePersonalApi()
 const { locale, t } = useI18n()
+const toast = useToast()
 const remixes = ref<RemixSummary[]>([])
 const loading = ref(true)
 const error = ref('')
+/** A draft holds the creator's own words, so the trash asks once before it fires. */
+const confirmingDeleteId = ref<number | null>(null)
+const deletingId = ref<number | null>(null)
 let refreshTimer: ReturnType<typeof setTimeout> | undefined
+let confirmTimer: ReturnType<typeof setTimeout> | undefined
 
 function preview(remix: RemixSummary): string {
   if (remix.status === 'generating') return t('drafts.preparing')
@@ -48,8 +53,39 @@ async function loadDrafts(showError = true) {
   }
 }
 
+/** First click arms the delete, second one runs it. It disarms on its own so a
+    stray click never sits there waiting to wipe a draft. */
+function askDelete(remix: RemixSummary) {
+  if (confirmingDeleteId.value !== remix.id) {
+    confirmingDeleteId.value = remix.id
+    clearTimeout(confirmTimer)
+    confirmTimer = setTimeout(() => { confirmingDeleteId.value = null }, 4000)
+    return
+  }
+  clearTimeout(confirmTimer)
+  confirmingDeleteId.value = null
+  void deleteDraft(remix)
+}
+
+async function deleteDraft(remix: RemixSummary) {
+  if (deletingId.value) return
+  deletingId.value = remix.id
+  try {
+    await apiFetch(`/api/remixes/${remix.id}`, { method: 'DELETE' })
+    remixes.value = remixes.value.filter(item => item.id !== remix.id)
+    toast.success(t('drafts.deleted'))
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('drafts.deleteError')))
+  } finally {
+    deletingId.value = null
+  }
+}
+
 onMounted(loadDrafts)
-onBeforeUnmount(() => clearTimeout(refreshTimer))
+onBeforeUnmount(() => {
+  clearTimeout(refreshTimer)
+  clearTimeout(confirmTimer)
+})
 </script>
 
 <template>
@@ -78,14 +114,13 @@ onBeforeUnmount(() => clearTimeout(refreshTimer))
     </div>
 
     <div v-else-if="remixes.length" class="mt-5 grid auto-rows-fr gap-5 sm:grid-cols-2 xl:grid-cols-3">
-      <NuxtLink
+      <!-- The card holds two actions now, so opening the draft is a link stretched
+           over it and the trash stays a button of its own above that surface. -->
+      <article
         v-for="remix in remixes"
         :key="remix.id"
-        :to="`/remix/${remix.id}`"
-        :aria-disabled="remix.status === 'generating'"
-        class="group flex min-h-56 flex-col rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-5 shadow-[0_1px_2px_rgba(23,23,26,.04)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_30px_rgba(23,23,26,.07)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
-        :class="remix.status === 'generating' && 'cursor-default hover:translate-y-0 hover:shadow-[0_1px_2px_rgba(23,23,26,.04)]'"
-        @click="remix.status === 'generating' && $event.preventDefault()"
+        class="group relative flex min-h-56 flex-col rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-5 shadow-[0_1px_2px_rgba(23,23,26,.04)] transition focus-within:ring-2 focus-within:ring-[var(--accent)]"
+        :class="remix.status !== 'generating' && 'hover:-translate-y-0.5 hover:shadow-[0_12px_30px_rgba(23,23,26,.07)]'"
       >
         <div class="flex items-center justify-between gap-3">
           <span class="inline-flex items-center gap-2 text-[12px] font-medium text-[var(--muted)]">
@@ -111,11 +146,27 @@ onBeforeUnmount(() => clearTimeout(refreshTimer))
             <p class="truncate text-[12px] text-[var(--muted)]">@{{ remix.source_content.creator.username }}</p>
             <p class="mt-1 text-[10.5px] text-[var(--faint)]">{{ $t('drafts.updated', { date: formattedDate(remix.updated_at) }) }}</p>
           </div>
-          <span v-if="remix.status !== 'generating'" class="inline-flex shrink-0 items-center gap-1 text-[12px] font-medium text-[var(--ink)]">
-            {{ $t('drafts.open') }}<AppIcon name="arrow" :size="14" class="transition group-hover:translate-x-0.5" />
-          </span>
+          <div v-if="remix.status !== 'generating'" class="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              class="relative z-10 inline-flex h-8 items-center gap-1.5 rounded-full px-2 text-[12px] font-medium text-[var(--faint)] transition hover:bg-[var(--danger-soft)] hover:text-[var(--danger)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:opacity-60"
+              :class="confirmingDeleteId === remix.id && 'bg-[var(--danger-soft)] text-[var(--danger)]'"
+              :aria-label="$t('drafts.delete')"
+              :disabled="deletingId === remix.id"
+              @click="askDelete(remix)"
+            >
+              <AppIcon name="trash" :size="15" />
+              <span v-if="confirmingDeleteId === remix.id">{{ $t('drafts.deleteConfirm') }}</span>
+            </button>
+            <NuxtLink
+              :to="`/remix/${remix.id}`"
+              class="inline-flex items-center gap-1 rounded-full text-[12px] font-medium text-[var(--ink)] after:absolute after:inset-0 after:rounded-[18px] after:content-[''] focus-visible:outline-none"
+            >
+              {{ $t('drafts.open') }}<AppIcon name="arrow" :size="14" class="transition group-hover:translate-x-0.5" />
+            </NuxtLink>
+          </div>
         </div>
-      </NuxtLink>
+      </article>
     </div>
 
     <div v-else class="mt-5 rounded-[18px] border border-dashed border-[var(--line)] bg-[var(--surface)] px-6 py-16 text-center">
