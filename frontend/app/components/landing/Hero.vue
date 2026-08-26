@@ -5,10 +5,8 @@
  * posts Personal read overnight drifting past, with the outliers lit in the
  * signature.
  *
- * One claim, centred on the field, the two ways in under it, and the launch
- * film under those — wide, on its own, clear of the reading measure. The film is
- * silent and loops: it has to read with the sound off, so it carries no audio
- * track at all rather than a muted one.
+ * One claim, centred on the field, with the two ways in under it. Nothing else
+ * shares the fold.
  */
 </script>
 
@@ -80,28 +78,6 @@
           <span class="h-[3px] w-[3px] rounded-full bg-white/30" aria-hidden="true" />
           <span>{{ $t('landing.hero.reassuranceTwo') }}</span>
         </p>
-      </div>
-
-      <!-- The launch film, under the copy rather than inside it: the claim and
-           the two ways in keep the fold to themselves, and the film gets the
-           full width of the stage instead of the reading measure. Silent by
-           construction — every claim in it is on screen as type — so it loops
-           without ever asking for sound. It reveals on scroll like any other
-           below-the-fold block. -->
-      <div data-reveal class="mx-auto mt-16 w-full max-w-[68rem] md:mt-20">
-        <div class="overflow-hidden rounded-[20px] shadow-[0_36px_100px_rgba(0,0,0,.6)] ring-1 ring-white/10">
-          <video
-            class="block aspect-video w-full"
-            :aria-label="$t('landing.hero.videoLabel')"
-            :src="'/launch-film.mp4'"
-            :poster="'/launch-film-poster.jpg'"
-            autoplay
-            muted
-            loop
-            playsinline
-            preload="metadata"
-          />
-        </div>
       </div>
     </div>
   </section>
