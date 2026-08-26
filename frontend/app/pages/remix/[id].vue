@@ -648,11 +648,19 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
-            <div class="rounded-[18px] border border-[var(--accent-line)] bg-[var(--accent-soft)] p-5">
-              <p class="remix-label text-[var(--accent-ink)]">{{ $t('remix.yourContext') }}</p>
-              <p class="mt-2.5 text-[14px] leading-6 text-[var(--copy)]">{{ remix.generated_content.your_context }}</p>
-              <NuxtLink v-if="remix.life_moment" to="/create" class="mt-3 inline-flex items-center gap-1.5 text-[12px] text-[var(--accent-ink)] transition hover:underline">
-                {{ $t('remix.editMoments') }}<AppIcon name="arrow" :size="13" />
+            <div class="overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">
+              <div class="p-5">
+                <p class="remix-label">{{ $t('remix.yourContext') }}</p>
+                <p class="mt-2.5 flex gap-2.5 text-[14px] leading-6 text-[var(--copy)]">
+                  <span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" />{{ remix.generated_content.your_context }}
+                </p>
+              </div>
+              <NuxtLink
+                v-if="remix.life_moment"
+                to="/create"
+                class="flex items-center justify-between border-t border-[var(--line-soft)] px-5 py-3 text-[12.5px] text-[var(--muted)] transition hover:bg-[var(--paper)] hover:text-[var(--ink)]"
+              >
+                {{ $t('remix.editMoments') }}<AppIcon name="arrow" :size="14" />
               </NuxtLink>
             </div>
           </aside>

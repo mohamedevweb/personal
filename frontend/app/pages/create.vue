@@ -14,13 +14,6 @@ const drafting = ref(false)
 const composerOpen = ref(false)
 const expanded = ref(false)
 
-const opportunityKeys: Record<string, string> = {
-  'Tell the story of your pivot using a failure → realization → new direction format.': 'pivot',
-  'Turn one customer sentence into a sharp problem-awareness carousel.': 'customerSentence',
-  'Build anticipation around the incubator decision before the outcome is known.': 'incubator',
-  'Turn this moment into a story your audience can use': 'lifeMoment'
-}
-
 // A recommendation without a moment cannot be drafted, so it should not
 // influence the selection or appear as an actionable suggestion.
 const pick = computed(() => opportunities.value.find(opportunity => opportunity.life_moment))
@@ -33,20 +26,12 @@ const visibleMoments = computed(() => {
   return [selectedMoment.value, ...firstMoments.slice(0, 3)]
 })
 
-function pickCopy(type: 'title' | 'explanation'): string | undefined {
-  const opportunity = pick.value
-  if (!opportunity) return undefined
-  const key = opportunityKeys[opportunity.title]
-  return key ? t(`create.opportunities.${key}.${type}`) : opportunity[type]
-}
-
 const formats = computed(() => [
   { title: t('create.cards.reel.title'), copy: t('create.cards.reel.copy'), format: 'reel', icon: 'reel' },
   { title: t('create.cards.carousel.title'), copy: t('create.cards.carousel.copy'), format: 'carousel', icon: 'carousel' },
   { title: t('create.cards.post.title'), copy: t('create.cards.post.copy'), format: 'caption', icon: 'text' }
 ] as const)
 const selectedFormat = computed(() => formats.value[selectedFormatIndex.value]!)
-const selectedMomentIsPick = computed(() => selectedMoment.value?.id === pick.value?.life_moment?.id)
 
 /* Moments live here now. They are written in place, and what the creator just
    wrote is selected so the next click is the one that matters. */
@@ -198,11 +183,6 @@ onMounted(async () => {
         >
           {{ expanded ? $t('create.showFewerMoments') : $t('create.showAllMoments', { count: moments.length }) }}
         </button>
-
-        <div v-if="selectedMomentIsPick" class="mt-3 flex items-start gap-3 rounded-[12px] bg-[var(--paper)] px-4 py-3 text-xs leading-5 text-[var(--muted)]">
-          <AppIcon name="sparkles" :size="15" class="mt-0.5 shrink-0 text-[var(--accent)]" />
-          <p><strong class="font-medium text-[var(--ink)]">{{ $t('create.whyRecommended') }}</strong> {{ pickCopy('explanation') }}</p>
-        </div>
       </div>
 
       <div class="border-t border-[var(--line)] bg-[var(--paper)]/55 p-5 md:p-7">

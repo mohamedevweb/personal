@@ -499,29 +499,10 @@
     "chooseMoment": "Choisis le moment à transformer",
     "momentHelp": "Le brouillon sera écrit à partir du moment sélectionné.",
     "recommended": "Recommandé",
-    "whyRecommended": "Pourquoi ce moment ?",
     "stepAngle": "Étape 2",
     "chooseAngle": "Choisis ton format",
     "angleHelp": "Le format détermine la structure du brouillon.",
     "transform": "Transformer ce moment",
-    "opportunities": {
-      "pivot": {
-        "title": "Raconte ton pivot avec une structure en trois temps : échec, prise de conscience, nouvelle direction.",
-        "explanation": "Ce format fonctionne en ce moment et ton histoire s’y prête parfaitement."
-      },
-      "customerSentence": {
-        "title": "Transforme une phrase de client en carrousel clair sur le problème qu’il rencontre.",
-        "explanation": "Cette citation rend le problème concret et montre naturellement pourquoi Personal doit exister."
-      },
-      "incubator": {
-        "title": "Crée de l’attente autour de ta décision pour l’incubateur avant de connaître le résultat.",
-        "explanation": "Partager ton cheminement maintenant donne à ton audience une raison de suivre le prochain chapitre."
-      },
-      "lifeMoment": {
-        "title": "Transforme ce moment en histoire utile pour ton audience.",
-        "explanation": "Ce moment contient une transformation personnelle et une leçon concrète, deux signaux forts pour un contenu authentique."
-      }
-    },
     "cards": {
       "reel": {
         "title": "Reel",
@@ -724,11 +705,9 @@
     "makeItYours": "Crée ta version",
     "makeItYoursCopy": "Choisis la forme. Personal adaptera le schéma à ton contexte, sans le copier.",
     "groundInMoment": "Choisis un moment réel",
-    "groundInMomentHelp": "Ce choix est obligatoire. Une expérience précise rendra le brouillon vraiment personnel.",
     "addMoment": "Ajouter un moment",
     "firstMomentTitle": "Donne une matière réelle à Personal",
     "firstMomentCopy": "Une décision, une leçon ou une opinion suffit.",
-    "selectMomentRequired": "Choisis le moment que Personal doit utiliser.",
     "chooseMomentFirst": "Choisis un moment pour continuer",
     "creating": "Création de ta version…",
     "remixForMe": "Créer ma version",

@@ -153,10 +153,7 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
                rather than hidden behind a dropdown. -->
           <div class="border-t border-[var(--line-soft)] px-6 py-5">
             <div class="flex items-center justify-between gap-4">
-              <div>
-                <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[var(--faint)]">{{ $t('content.groundInMoment') }}</p>
-                <p class="mt-1 text-[12px] text-[var(--muted)]">{{ $t('content.groundInMomentHelp') }}</p>
-              </div>
+              <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[var(--faint)]">{{ $t('content.groundInMoment') }}</p>
               <button type="button" class="shrink-0 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3 py-2 text-[11.5px] font-medium transition hover:bg-[var(--paper)]" @click="composerOpen = !composerOpen">
                 {{ composerOpen ? $t('common.cancel') : $t('content.addMoment') }}
               </button>
@@ -183,10 +180,6 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
               <span class="grid h-8 w-8 shrink-0 place-items-center rounded-[9px] bg-[var(--accent-soft)] text-[var(--accent-ink)]"><AppIcon name="plus" :size="14" /></span>
               <span><span class="block text-[13px] font-medium">{{ $t('content.firstMomentTitle') }}</span><span class="mt-0.5 block text-[11.5px] text-[var(--muted)]">{{ $t('content.firstMomentCopy') }}</span></span>
             </button>
-            <p v-if="moments.length && selectedMoment === null && !composerOpen" id="moment-required" class="mt-3 flex items-center gap-2 text-[12px] font-medium text-[var(--accent-ink)]">
-              <AppIcon name="sparkles" :size="14" />
-              {{ $t('content.selectMomentRequired') }}
-            </p>
           </div>
 
           <div class="border-t border-[var(--line-soft)] px-6 py-5">
@@ -194,7 +187,6 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
               class="flex h-12 w-full items-center justify-center gap-2 rounded-full b-btn-red text-[15px] font-medium transition disabled:cursor-default disabled:opacity-45"
               :disabled="generating || selectedMoment === null"
               :aria-busy="generating"
-              :aria-describedby="selectedMoment === null && moments.length ? 'moment-required' : undefined"
               @click="createRemix"
             >
               {{ selectedMoment === null ? $t('content.chooseMomentFirst') : $t('content.remixForMe') }}
