@@ -85,6 +85,7 @@ export interface Opportunity {
 export interface PersonalProfile {
   id?: number
   instagram_username?: string | null
+  avatar_url?: string | null
   display_name: string | null
   bio: string | null
   niche: string | null

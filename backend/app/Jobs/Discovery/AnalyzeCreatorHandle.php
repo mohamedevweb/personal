@@ -92,6 +92,7 @@ class AnalyzeCreatorHandle implements ShouldQueue
             'display_name' => $profile->display_name ?: $scraped->displayName,
             'bio' => $scraped->bio,
             'followers_count' => $scraped->followers,
+            'avatar_url' => $scraped->avatarUrl,
         ])->save();
 
         $this->stage($profile, 'importing_posts');

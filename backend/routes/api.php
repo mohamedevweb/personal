@@ -58,6 +58,8 @@ Route::middleware(['signed:relative', 'throttle:media'])->group(function (): voi
         ->name('media.content.item');
     Route::get('/media/creator/{creator}', [MediaController::class, 'creator'])
         ->name('media.creator');
+    Route::get('/media/creator-profile/{profile}', [MediaController::class, 'creatorProfile'])
+        ->name('media.creator-profile');
     Route::get('/media/creator-preview/{username}', [MediaController::class, 'creatorPreview'])
         ->where('username', '[A-Za-z0-9._]+')
         ->name('media.creator-preview');

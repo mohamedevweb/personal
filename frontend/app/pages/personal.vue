@@ -19,6 +19,12 @@ const toast = useToast()
 const profile = ref<PersonalProfile | null>(null)
 const instagram = ref<Pick<InstagramAccount, 'username' | 'display_name' | 'profile_picture_url' | 'media_count'> | null>(null)
 const instagramAvatarFailed = ref(false)
+const avatarFailed = ref(false)
+/* The picture the creator recognises themselves by: the connected account's when
+   there is one, otherwise the one read off the public profile behind their
+   handle. Both arrive already proxied, since the Instagram CDN refuses to be
+   embedded from another origin. */
+const avatarUrl = computed(() => profile.value?.avatar_url || null)
 const posts = ref<ContentPost[]>([])
 const postsLoading = ref(true)
 const editing = ref(false)
@@ -133,6 +139,7 @@ async function loadProfile() {
     instagram.value = response.instagram
     posts.value = postsResponse.posts
     instagramAvatarFailed.value = false
+    avatarFailed.value = false
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('personal.loadError')))
   } finally {
@@ -170,11 +177,17 @@ onMounted(loadProfile)
             <p class="text-xs text-[var(--faint)]">{{ $t('personal.liveContext', { count: instagram.media_count || 0 }) }}</p>
             <p v-if="analysisMessage" class="mt-1 text-xs text-[var(--accent-ink)]">{{ analysisMessage }}</p>
           </div>
-          <span class="hidden text-xs text-[var(--positive)] sm:inline">{{ $t('personal.connected') }}</span>
         </template>
 
         <template v-else>
-          <div class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[var(--paper)] text-xs">IG</div>
+          <img
+            v-if="avatarUrl && !avatarFailed"
+            :src="avatarUrl"
+            :alt="handle ? `@${handle}` : ''"
+            class="h-10 w-10 shrink-0 rounded-full object-cover"
+            @error="avatarFailed = true"
+          >
+          <div v-else class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[var(--paper)] text-xs">IG</div>
           <div v-if="editingHandle" class="flex min-w-0 flex-1 flex-wrap items-center gap-2">
             <input
               v-model="handleDraft"

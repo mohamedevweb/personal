@@ -190,6 +190,19 @@ class AnalyzeCreatorHandleTest extends TestCase
         $this->assertNotNull($profile->dna_analyzed_at);
     }
 
+    public function test_the_public_profile_picture_is_kept(): void
+    {
+        $user = User::factory()->create();
+        CreatorProfile::query()->create([
+            'user_id' => $user->id,
+            'instagram_username' => 'founder.creator',
+        ]);
+
+        $this->runJob($user);
+
+        $this->assertNotNull($user->creatorProfile()->firstOrFail()->avatar_url);
+    }
+
     public function test_a_memory_written_by_hand_is_not_overwritten(): void
     {
         $user = User::factory()->create();

@@ -371,55 +371,7 @@
     "flow": {
       "label": "Personalization progress",
       "understand": "Understand",
-      "context": "Your context",
       "discover": "Discover"
-    },
-    "brief": {
-      "eyebrow": "Your creative brief",
-      "title": "Tell Personal what needs to sound like you.",
-      "copy": "Confirm what the analysis understood. Two answers are enough to make every recommendation and draft more precise.",
-      "nicheLabel": "What do you talk about?",
-      "nicheHelp": "Be specific. You can always adjust this later.",
-      "nichePlaceholder": "Example: simple nutrition for young parents",
-      "audienceLabel": "Who do you create for?",
-      "audienceHelp": "Describe the person you genuinely want to help.",
-      "audiencePlaceholder": "Example: busy parents who are short on time",
-      "goalLabel": "What do you want to publish first?",
-      "goals": {
-        "carousel": {
-          "title": "Carousel",
-          "copy": "One clear idea people can swipe through",
-          "saved": "Create clear and useful carousels"
-        },
-        "reel": {
-          "title": "Reel",
-          "copy": "A natural script that is easy to film",
-          "saved": "Create natural Reels that are easy to film"
-        },
-        "both": {
-          "title": "Both",
-          "copy": "Choose the best shape for each idea",
-          "saved": "Create carousels and Reels based on the strongest idea"
-        }
-      },
-      "toneLabel": "How should you sound?",
-      "toneHelp": "Choose up to two tones.",
-      "tones": {
-        "direct": "Direct",
-        "warm": "Warm",
-        "educational": "Educational",
-        "bold": "Bold"
-      },
-      "continue": "Find my best references",
-      "saving": "Building your profile…",
-      "loadError": "Personal could not load your creative profile.",
-      "saveError": "Personal could not save your brief. Please try again.",
-      "previewTitle": "Your creative filter is taking shape.",
-      "previewCopy": "These signals rank content and guide your voice. They never lock you into a category.",
-      "previewNiche": "Universe",
-      "previewVoice": "Target voice",
-      "previewWaiting": "Waiting for your context",
-      "previewNote": "Your content stays yours. Personal borrows structures, never another creator’s ideas or words."
     },
     "or": "or",
     "handleTitle": "Enter your handle instead",
@@ -432,11 +384,8 @@
     "handleSaveError": "Personal could not save your Instagram handle. Please try again.",
     "handleSuffix": "provided",
     "analysis": {
-      "eyebrow": "Reading your profile",
       "previewLabel": "Reading · public profile",
       "previewFailedLabel": "Profile not read",
-      "title": "Personal is reading your account.",
-      "copy": "We’re pulling your profile, your last 30 posts, your tone and your audience. Stay on this screen: the next step opens as soon as everything is in.",
       "progress": "{done} of {total}",
       "working": "Working…",
       "steps": {
@@ -618,7 +567,6 @@
     "editMemory": "Edit memory",
     "liveContext": "Live Instagram context · {count} posts",
     "instagramAccount": "Connected Instagram account",
-    "connected": "Connected ✓",
     "positioning": "Positioning",
     "audience": "Audience",
     "yourNiche": "Your niche",

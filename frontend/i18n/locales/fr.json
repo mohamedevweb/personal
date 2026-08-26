@@ -371,55 +371,7 @@
     "flow": {
       "label": "Progression de la personnalisation",
       "understand": "Comprendre",
-      "context": "Ton contexte",
       "discover": "Découvrir"
-    },
-    "brief": {
-      "eyebrow": "Ton brief créatif",
-      "title": "Dis à Personal ce qui doit te ressembler.",
-      "copy": "Confirme ce que l’analyse a compris. Deux réponses suffisent pour rendre chaque recommandation et chaque brouillon plus juste.",
-      "nicheLabel": "De quoi parles tu ?",
-      "nicheHelp": "Sois précis. Tu pourras toujours l’ajuster plus tard.",
-      "nichePlaceholder": "Exemple : nutrition simple pour les jeunes parents",
-      "audienceLabel": "Pour qui crées tu ?",
-      "audienceHelp": "Décris la personne que tu veux vraiment aider.",
-      "audiencePlaceholder": "Exemple : des parents actifs qui manquent de temps",
-      "goalLabel": "Que veux tu publier en premier ?",
-      "goals": {
-        "carousel": {
-          "title": "Carousel",
-          "copy": "Une idée claire à faire défiler",
-          "saved": "Créer des carousels clairs et utiles"
-        },
-        "reel": {
-          "title": "Reel",
-          "copy": "Un script naturel à filmer",
-          "saved": "Créer des Reels naturels et faciles à filmer"
-        },
-        "both": {
-          "title": "Les deux",
-          "copy": "Choisir selon la meilleure idée",
-          "saved": "Créer des carousels et des Reels selon la meilleure idée"
-        }
-      },
-      "toneLabel": "Comment dois tu sonner ?",
-      "toneHelp": "Choisis jusqu’à deux tonalités.",
-      "tones": {
-        "direct": "Direct",
-        "warm": "Chaleureux",
-        "educational": "Pédagogique",
-        "bold": "Tranché"
-      },
-      "continue": "Trouver mes meilleures références",
-      "saving": "Création de ton profil…",
-      "loadError": "Personal n’a pas pu charger ton profil créatif.",
-      "saveError": "Personal n’a pas pu enregistrer ton brief. Réessaie.",
-      "previewTitle": "Ton filtre créatif prend forme.",
-      "previewCopy": "Ces signaux servent à trier les contenus et à écrire avec ta voix, pas à t’enfermer dans une case.",
-      "previewNiche": "Univers",
-      "previewVoice": "Voix recherchée",
-      "previewWaiting": "En attente de ton contexte",
-      "previewNote": "Ton contenu reste le tien. Personal emprunte des structures, jamais les idées ni les mots d’un autre créateur."
     },
     "or": "ou",
     "handleTitle": "Renseigne simplement ton handle",
@@ -432,11 +384,8 @@
     "handleSaveError": "Personal n’a pas pu enregistrer ton handle Instagram. Réessaie.",
     "handleSuffix": "renseigné",
     "analysis": {
-      "eyebrow": "Lecture de ton profil",
       "previewLabel": "Lecture en cours · profil public",
       "previewFailedLabel": "Profil non lu",
-      "title": "Personal lit ton compte.",
-      "copy": "On récupère ton profil, tes 30 derniers posts, ton ton et ton audience. Reste sur cet écran : l’étape suivante s’ouvre dès que tout est là.",
       "progress": "{done} sur {total}",
       "working": "En cours…",
       "steps": {
@@ -618,7 +567,6 @@
     "editMemory": "Modifier la mémoire",
     "liveContext": "Contexte Instagram en direct · {count} posts",
     "instagramAccount": "Compte Instagram connecté",
-    "connected": "Connecté ✓",
     "positioning": "Positionnement",
     "audience": "Audience",
     "yourNiche": "Votre niche",

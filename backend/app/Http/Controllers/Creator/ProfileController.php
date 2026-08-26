@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Creator;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\Discovery\RefreshCreatorAvatar;
 use App\Models\CreatorProfile;
 use App\Services\Creator\RegisteredCreatorService;
 use App\Services\Discovery\CanonicalCreatorVerticals;
@@ -10,16 +11,19 @@ use App\Services\View\ContentPostView;
 use App\Services\View\UserView;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ProfileController extends Controller
 {
     public function show(Request $request, UserView $view): JsonResponse
     {
         $account = $request->user()->instagramAccount;
+        $profile = $this->profile($request);
+        $this->ensureAvatar($request, $account !== null, $profile);
 
         return response()->json([
             'user' => $request->user()->only(['id', 'name', 'email']),
-            'profile' => $this->profile($request),
+            'profile' => $this->render($profile, $view->avatarUrl($request->user())),
             'instagram' => $account ? [
                 ...$account->only(['username', 'display_name', 'account_type', 'followers_count', 'media_count', 'sync_status']),
                 'profile_picture_url' => $view->avatarUrl($request->user()),
@@ -27,7 +31,7 @@ class ProfileController extends Controller
         ]);
     }
 
-    public function update(Request $request, CanonicalCreatorVerticals $verticals): JsonResponse
+    public function update(Request $request, CanonicalCreatorVerticals $verticals, UserView $view): JsonResponse
     {
         $data = $request->validate([
             'display_name' => ['sometimes', 'nullable', 'string', 'max:120'],
@@ -88,7 +92,7 @@ class ProfileController extends Controller
 
         $profile->save();
 
-        return response()->json(['profile' => $profile]);
+        return response()->json(['profile' => $this->render($profile, $view->avatarUrl($request->user()))]);
     }
 
     public function posts(
@@ -124,6 +128,33 @@ class ProfileController extends Controller
         ));
 
         return response()->json(['posts' => $posts]);
+    }
+
+    /**
+     * The stored avatar_url is an Instagram CDN link the browser cannot load, so
+     * the payload carries the proxied one instead of the raw column.
+     *
+     * @return array<string, mixed>
+     */
+    private function render(CreatorProfile $profile, ?string $avatarUrl): array
+    {
+        return [...$profile->toArray(), 'avatar_url' => $avatarUrl];
+    }
+
+    /**
+     * Handles read before the picture was kept, and links that stopped resolving,
+     * are filled in behind the page. Once an hour at most, so opening the memory
+     * page never turns into a scrape per view.
+     */
+    private function ensureAvatar(Request $request, bool $connected, CreatorProfile $profile): void
+    {
+        if ($connected || $profile->avatar_url || ! $profile->instagram_username) {
+            return;
+        }
+
+        if (Cache::add("creator-avatar-refresh:{$request->user()->id}", true, now()->addHour())) {
+            RefreshCreatorAvatar::dispatch($request->user()->id);
+        }
     }
 
     private function profile(Request $request): CreatorProfile
