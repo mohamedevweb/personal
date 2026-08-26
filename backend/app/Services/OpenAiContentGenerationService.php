@@ -122,7 +122,7 @@ class OpenAiContentGenerationService implements ContentGenerationService
             ]);
 
             throw new ContentGenerationException(
-                'Personal ran out of room drafting this. Try a shorter moment, or raise OPENAI_REMIX_MAX_OUTPUT_TOKENS.'
+                'Personal ran out of room drafting this. Try a different moment.'
             );
         }
     }

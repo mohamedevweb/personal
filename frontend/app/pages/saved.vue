@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import type { ContentPost, Remix } from '~/types/product'
+import type { ContentPost } from '~/types/product'
 
 const { apiFetch } = usePersonalApi()
-const { openWhenReady } = useRemixOpening()
 const { t } = useI18n()
 const toast = useToast()
 const items = ref<ContentPost[]>([])
 const loading = ref(true)
-const remixingPostId = ref<number | null>(null)
 
 async function unsave(post: ContentPost) {
   try {
@@ -18,18 +16,8 @@ async function unsave(post: ContentPost) {
   }
 }
 
-async function remix(post: ContentPost) {
-  if (remixingPostId.value !== null) return
-  remixingPostId.value = post.id
-
-  try {
-    const response = await apiFetch<{ remix: Pick<Remix, 'id' | 'status'> }>(`/api/content/${post.id}/remix`, { method: 'POST', body: { format: 'carousel' } })
-    if (await openWhenReady(response.remix) === 'failed') toast.error(t('feed.remixError'))
-  } catch (exception: unknown) {
-    toast.error(apiErrorMessage(exception, t('feed.remixError')))
-  } finally {
-    remixingPostId.value = null
-  }
+function openRemix(post: ContentPost) {
+  return navigateTo(`/content/${post.id}`)
 }
 
 onMounted(async () => {
@@ -48,7 +36,7 @@ onMounted(async () => {
   <main class="page-shell pb-16 pt-2">
     <div v-if="loading" class="h-96 animate-pulse rounded-[18px] bg-[var(--sand-soft)]" />
     <div v-else-if="items.length" class="grid auto-rows-fr gap-5 sm:grid-cols-2 xl:grid-cols-3">
-      <ContentCard v-for="post in items" :key="post.id" :post="post" :remixing="remixingPostId === post.id" @save="unsave" @remix="remix" />
+      <ContentCard v-for="post in items" :key="post.id" :post="post" @save="unsave" @remix="openRemix" />
     </div>
     <div v-else class="rounded-[18px] border border-dashed border-[var(--line)] bg-[var(--surface)] px-6 py-16 text-center">
       <p class="font-serif text-[26px] tracking-[-.02em]">{{ $t('saved.emptyTitle') }}</p>

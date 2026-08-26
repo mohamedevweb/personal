@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Jobs\AnalyzeContentPost;
 use App\Models\ContentPost;
 use App\Models\DismissedContent;
-use App\Models\LifeMoment;
 use App\Models\SavedContent;
 use App\Services\ContentPostView;
 use App\Services\Discovery\PostInsightService;
@@ -75,11 +74,9 @@ class ContentController extends Controller
     ): JsonResponse {
         $data = $request->validate([
             'format' => ['required', 'in:reel,carousel,caption'],
-            'life_moment_id' => ['nullable', 'integer'],
+            'life_moment_id' => ['required', 'integer'],
         ]);
-        $moment = isset($data['life_moment_id'])
-            ? LifeMoment::query()->where('user_id', $request->user()->id)->findOrFail($data['life_moment_id'])
-            : $request->user()->moments()->orderByDesc('story_score')->first();
+        $moment = $request->user()->moments()->findOrFail($data['life_moment_id']);
         $remix = $drafts->start($content, $request->user(), $data['format'], $moment, app()->getLocale());
 
         return response()->json(['remix' => $remix], Response::HTTP_ACCEPTED);

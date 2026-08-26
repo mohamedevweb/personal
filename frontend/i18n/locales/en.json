@@ -55,7 +55,7 @@
     "title": "Assistant",
     "subtitle": "Brainstorm your next post",
     "greeting": "Hi, I'm your creative assistant. What moment or idea do you want to turn into content?",
-    "placeholder": "Ask about hooks, angles, captions…",
+    "placeholder": "Ask about hooks, angles and posts…",
     "send": "Send",
     "thinking": "Thinking…",
     "error": "Something went wrong. Please try again.",
@@ -66,7 +66,7 @@
     "starters": {
       "hooks": "Give me 3 hook ideas",
       "repurpose": "Turn my latest moment into a Reel",
-      "caption": "Write a caption in my voice"
+      "caption": "Write a post in my voice"
     }
   },
   "landing": {
@@ -100,7 +100,7 @@
       "scanned": "Your last 40 posts, read once",
       "outliers": "Outliers, not top posts",
       "niches": "Your niche, not the internet",
-      "voice": "Your voice, learned from your captions",
+      "voice": "Your voice, learned from your posts",
       "minutes": "Draft to post in one minute"
     },
     "stat": {
@@ -137,7 +137,7 @@
         },
         "write": {
           "title": "Write",
-          "body": "Reel, carousel or caption. Your structure, your voice, your story. One minute to posted.",
+          "body": "Reel, Carousel or Post. Your structure, your voice, your story. One minute to posted.",
           "caption": "A draft, never a post"
         }
       },
@@ -209,7 +209,7 @@
       "items": {
         "sound": {
           "q": "Will it sound like me?",
-          "a": "That's the whole point. Personal learns your tone from your own captions and shows you what it understood before writing a line. Every draft starts from your stories, and you correct it in plain language."
+          "a": "That's the whole point. Personal learns your tone from your own posts and shows you what it understood before writing a line. Every draft starts from your stories, and you correct it in plain language."
         },
         "different": {
           "q": "Another AI content generator?",
@@ -488,26 +488,7 @@
   "feed": {
     "forYou": "For you",
     "global": "Global",
-    "workspaceEyebrow": "Your creative radar",
-    "workspaceTitle": "One strong idea, selected for you, ready to become yours.",
-    "contextSummary": "Personal is searching within {niche} and will write in a {tone} voice.",
-    "contextFallback": "your universe",
-    "voiceFallback": "natural",
     "adjustContext": "Adjust my profile",
-    "steps": {
-      "understand": {
-        "title": "Understood",
-        "copy": "Your universe and voice"
-      },
-      "discover": {
-        "title": "Discovered",
-        "copy": "{count} strong references"
-      },
-      "remix": {
-        "title": "Make it yours",
-        "copy": "Choose your format"
-      }
-    },
     "featured": {
       "eyebrow": "Best starting point",
       "title": "Start with this pattern.",
@@ -519,8 +500,7 @@
       "carouselShort": "Carousel",
       "reel": "Create my Reel",
       "reelShort": "Reel",
-      "creating": "Creating…",
-      "voiceNote": "The pattern comes from this reference. The words, tone and point of view come from you."
+      "voiceNote": "Next, choose a real moment. Personal will use your voice and point of view."
     },
     "moreEyebrow": "Explore",
     "moreTitle": "More strong patterns for your universe",
@@ -536,7 +516,7 @@
   "create": {
     "eyebrow": "Studio",
     "title": "Turn a moment into content.",
-    "subtitle": "Choose something you lived through, then the angle that will make it clear, personal and useful to your audience.",
+    "subtitle": "Choose something you lived through, then the format that will bring your idea to life.",
     "addMoment": "Add a moment",
     "drafting": "Creating your draft…",
     "draftError": "Personal could not draft this right now. Please try again.",
@@ -553,8 +533,8 @@
     "recommended": "Recommended",
     "whyRecommended": "Why this moment?",
     "stepAngle": "Step 2",
-    "chooseAngle": "Choose what to make from it",
-    "angleHelp": "The angle determines the structure of your draft.",
+    "chooseAngle": "Choose your format",
+    "angleHelp": "The format determines the structure of your draft.",
     "selectedMoment": "Selected moment",
     "transform": "Turn this moment into content",
     "opportunities": {
@@ -576,20 +556,17 @@
       }
     },
     "cards": {
-      "story": {
-        "title": "Tell a story",
-        "copy": "A personal narrative people remember.",
-        "output": "Carousel"
+      "reel": {
+        "title": "Reel",
+        "copy": "A hook, a spoken script and the shot to film."
       },
-      "teach": {
-        "title": "Teach",
-        "copy": "A concrete lesson your audience can apply.",
-        "output": "Carousel"
+      "carousel": {
+        "title": "Carousel",
+        "copy": "A strong cover, followed by the slides."
       },
-      "opinion": {
-        "title": "Take a position",
-        "copy": "A clear, credible point of view on camera.",
-        "output": "Reel"
+      "post": {
+        "title": "Post",
+        "copy": "A written post, in your voice."
       }
     }
   },
@@ -781,12 +758,13 @@
     "voiceLocked": "Your voice is locked in",
     "makeItYours": "Make it yours",
     "makeItYoursCopy": "Choose the form. Personal will adapt the pattern to your context, not copy it.",
-    "groundInMoment": "Ground it in a life moment",
-    "groundInMomentHelp": "One precise experience will make the draft distinctly more personal.",
+    "groundInMoment": "Choose a real moment",
+    "groundInMomentHelp": "This choice is required. One precise experience will make the draft distinctly more personal.",
     "addMoment": "Add a moment",
     "firstMomentTitle": "Give Personal something real",
     "firstMomentCopy": "A decision, a lesson or an opinion is enough.",
-    "letPersonalChoose": "Let Personal choose",
+    "selectMomentRequired": "Choose the moment Personal should use.",
+    "chooseMomentFirst": "Choose a moment to continue",
     "creating": "Creating your version…",
     "remixForMe": "Remix for me",
     "followers": "{count} followers",
@@ -863,7 +841,7 @@
     "formats": {
       "reel": "Reel",
       "carousel": "Carousel",
-      "caption": "Caption"
+      "caption": "Post"
     },
     "switchNote": "Each format keeps its own draft. Your edits are saved before you switch.",
     "switching": "Switching to {format}…",
@@ -892,7 +870,7 @@
     "beforeMore": "What shows before “more”",
     "beforeMoreEmpty": "The first 125 characters land here.",
     "more": "more",
-    "captionPost": "Caption",
+    "captionPost": "Post",
     "captionPlaceholder": "Write the post.",
     "borrowedFrom": "Borrowed from",
     "openSource": "View original Instagram post",
@@ -1022,7 +1000,7 @@
             },
             "creations": {
               "term": "Content you produce",
-              "detail": "The Reel, carousel and caption drafts generated for you, the versions you edit, and the posts you save or dismiss in the feed."
+              "detail": "The Reel, carousel and post drafts generated for you, the versions you edit, and the posts you save or dismiss in the feed."
             },
             "chat": {
               "term": "Assistant conversations",
@@ -1048,7 +1026,7 @@
             },
             "mediaFields": {
               "term": "Recent posts",
-              "detail": "Up to your 25 most recent posts: caption, media type (image, video, Reel, carousel), permalink, media and thumbnail URL, publication date, like count and comment count."
+              "detail": "Up to your 25 most recent posts: post text, media type (image, video, Reel, carousel), permalink, media and thumbnail URL, publication date, like count and comment count."
             },
             "insights": {
               "term": "Post insights",
@@ -1114,7 +1092,7 @@
           "title": "Other creators' posts",
           "p": {
             "what": "The For You feed is built from public posts by other Instagram accounts in your niche. We collect them through our provider Apify, from hashtag pages and public profiles.",
-            "fields": "We keep what makes a post comparable: public username, display name, profile picture, biography, follower count and the account's average engagement, and for each post its hook, caption, thumbnail, date and public counters.",
+            "fields": "We keep what makes a post comparable: public username, display name, profile picture, biography, follower count and the account's average engagement, and for each post its hook, post text, thumbnail, date and public counters.",
             "basis": "The legal basis is our legitimate interest in producing trend analysis from information their authors have made public. We access no private account, no message and no data that is not already visible to everyone. This information serves performance analysis only: it is never used to contact those creators, nor to republish their content.",
             "rights": "If you are a creator and do not want your posts analysed by Personal, write to privacy{'@'}usepersonal.app: we remove your account and your posts from our database and prevent them from reappearing."
           }
@@ -1416,7 +1394,7 @@
             },
             "chat": {
               "term": "A creative assistant",
-              "detail": "A conversation to sharpen an angle, a hook or a caption."
+              "detail": "A conversation to sharpen an angle, a hook or a post."
             },
             "profile": {
               "term": "A creator profile",

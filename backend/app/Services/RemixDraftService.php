@@ -34,7 +34,7 @@ class RemixDraftService
         ContentPost $source,
         User $user,
         string $format,
-        ?LifeMoment $moment,
+        LifeMoment $moment,
         string $locale,
     ): Remix {
         $existing = $this->existingDraft($source, $user, $format, $moment);
@@ -48,7 +48,7 @@ class RemixDraftService
         $remix = Remix::query()->create([
             'user_id' => $user->id,
             'source_content_id' => $source->id,
-            'life_moment_id' => $moment?->id,
+            'life_moment_id' => $moment->id,
             'format' => $format,
             'generated_content' => [],
             'status' => 'generating',
@@ -79,7 +79,7 @@ class RemixDraftService
         ContentPost $source,
         User $user,
         string $format,
-        ?LifeMoment $moment,
+        LifeMoment $moment,
     ): ?Remix {
         $query = $user->remixes()
             ->where('source_content_id', $source->id)
@@ -87,9 +87,7 @@ class RemixDraftService
             ->where('status', '!=', 'archived')
             ->latest('updated_at');
 
-        $moment
-            ? $query->where('life_moment_id', $moment->id)
-            : $query->whereNull('life_moment_id');
+        $query->where('life_moment_id', $moment->id);
 
         $existing = $query->first();
 

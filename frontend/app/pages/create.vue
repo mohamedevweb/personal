@@ -8,7 +8,7 @@ const toast = useToast()
 const opportunities = ref<Opportunity[]>([])
 const moments = ref<LifeMoment[]>([])
 const selectedMomentId = ref<number | null>(null)
-const selectedAngleIndex = ref(0)
+const selectedFormatIndex = ref(0)
 const loading = ref(true)
 const drafting = ref(false)
 const composerOpen = ref(false)
@@ -40,12 +40,12 @@ function pickCopy(type: 'title' | 'explanation'): string | undefined {
   return key ? t(`create.opportunities.${key}.${type}`) : opportunity[type]
 }
 
-const angles = computed(() => [
-  { title: t('create.cards.story.title'), copy: t('create.cards.story.copy'), format: 'carousel', icon: 'moments' },
-  { title: t('create.cards.teach.title'), copy: t('create.cards.teach.copy'), format: 'carousel', icon: 'carousel' },
-  { title: t('create.cards.opinion.title'), copy: t('create.cards.opinion.copy'), format: 'reel', icon: 'reel' }
+const formats = computed(() => [
+  { title: t('create.cards.reel.title'), copy: t('create.cards.reel.copy'), format: 'reel', icon: 'reel' },
+  { title: t('create.cards.carousel.title'), copy: t('create.cards.carousel.copy'), format: 'carousel', icon: 'carousel' },
+  { title: t('create.cards.post.title'), copy: t('create.cards.post.copy'), format: 'caption', icon: 'text' }
 ] as const)
-const selectedAngle = computed(() => angles.value[selectedAngleIndex.value]!)
+const selectedFormat = computed(() => formats.value[selectedFormatIndex.value]!)
 const selectedMomentIsPick = computed(() => selectedMoment.value?.id === pick.value?.life_moment?.id)
 
 /* Moments live here now. They are written in place, and what the creator just
@@ -80,7 +80,7 @@ async function createFromMoment(moment: LifeMoment, format: Remix['format']) {
 
 function createSelected() {
   if (!selectedMoment.value) return
-  return createFromMoment(selectedMoment.value, selectedAngle.value.format)
+  return createFromMoment(selectedMoment.value, selectedFormat.value.format)
 }
 
 onMounted(async () => {
@@ -213,21 +213,21 @@ onMounted(async () => {
 
         <div class="mt-5 grid gap-2.5 md:grid-cols-3">
           <button
-            v-for="(angle, index) in angles"
-            :key="angle.title"
+            v-for="(formatOption, index) in formats"
+            :key="formatOption.format"
             type="button"
             class="flex items-center gap-3 rounded-[14px] border p-4 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:cursor-default"
-            :class="selectedAngleIndex === index ? 'border-[var(--accent)] bg-[var(--surface)] shadow-[0_1px_2px_rgba(23,23,26,.04)]' : 'border-[var(--line)] bg-transparent hover:bg-[var(--surface)]'"
-            :aria-pressed="selectedAngleIndex === index"
+            :class="selectedFormatIndex === index ? 'border-[var(--accent)] bg-[var(--surface)] shadow-[0_1px_2px_rgba(23,23,26,.04)]' : 'border-[var(--line)] bg-transparent hover:bg-[var(--surface)]'"
+            :aria-pressed="selectedFormatIndex === index"
             :disabled="drafting"
-            @click="selectedAngleIndex = index"
+            @click="selectedFormatIndex = index"
           >
-            <span class="grid h-10 w-10 shrink-0 place-items-center rounded-[11px]" :class="selectedAngleIndex === index ? 'bg-[var(--accent-soft)] text-[var(--accent-ink)]' : 'bg-[var(--sand-soft)] text-[var(--muted)]'">
-              <AppIcon :name="angle.icon" :size="18" />
+            <span class="grid h-10 w-10 shrink-0 place-items-center rounded-[11px]" :class="selectedFormatIndex === index ? 'bg-[var(--accent-soft)] text-[var(--accent-ink)]' : 'bg-[var(--sand-soft)] text-[var(--muted)]'">
+              <AppIcon :name="formatOption.icon" :size="18" />
             </span>
             <span class="min-w-0 flex-1">
-              <strong class="text-sm font-medium">{{ angle.title }}</strong>
-              <span class="mt-1 block text-xs leading-5 text-[var(--muted)]">{{ angle.copy }}</span>
+              <strong class="text-sm font-medium">{{ formatOption.title }}</strong>
+              <span class="mt-1 block text-xs leading-5 text-[var(--muted)]">{{ formatOption.copy }}</span>
             </span>
           </button>
         </div>

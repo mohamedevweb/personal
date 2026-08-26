@@ -10,7 +10,9 @@ const toast = useToast()
 const post = ref<ContentPost | null>(null)
 const moments = ref<LifeMoment[]>([])
 const profile = ref<PersonalProfile | null>(null)
-const format = ref<'reel' | 'carousel' | 'caption'>('carousel')
+type RemixFormat = 'reel' | 'carousel' | 'caption'
+const requestedFormat = Array.isArray(route.query.format) ? route.query.format[0] : route.query.format
+const format = ref<RemixFormat>(['reel', 'carousel', 'caption'].includes(requestedFormat || '') ? requestedFormat as RemixFormat : 'carousel')
 const selectedMoment = ref<number | null>(null)
 const composerOpen = ref(false)
 const generating = ref(false)
@@ -53,7 +55,7 @@ async function requestAnalysis() {
 }
 
 async function createRemix() {
-  if (!post.value) return
+  if (!post.value || selectedMoment.value === null) return
   generating.value = true
   try {
     const response = await apiFetch<{ remix: Pick<Remix, 'id' | 'status'> }>(`/api/content/${post.value.id}/remix`, {
@@ -75,7 +77,6 @@ onMounted(async () => {
     post.value = contentResponse.content
     moments.value = momentsResponse.moments
     profile.value = profileResponse.profile
-    selectedMoment.value = moments.value[0]?.id || null
     if (contentResponse.content.analysis_status === 'pending') requestAnalysis()
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('content.loadError')))
@@ -91,12 +92,12 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
   <main v-if="post" class="page-shell pb-16 pt-2">
     <NuxtLink to="/feed" class="text-sm text-[var(--muted)]">{{ $t('content.backToFeed') }}</NuxtLink>
     <div class="mt-6 grid gap-10 lg:grid-cols-[.88fr_1.12fr]">
-      <section class="lg:sticky lg:top-8 lg:self-start">
+      <section class="min-w-0 lg:sticky lg:top-8 lg:self-start">
         <div class="relative aspect-[4/5] overflow-hidden rounded-[18px] bg-[var(--sand)]"><img :src="post.thumbnail_url || ''" :alt="post.hook" class="h-full w-full object-cover"><div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/5 to-transparent"/><div class="absolute inset-x-6 bottom-6"><span class="rounded-full bg-white/15 px-3 py-1.5 text-[11px] text-white backdrop-blur">{{ post.format }}</span><h1 class="mt-4 text-[28px] font-medium leading-[1.12] tracking-[-.03em] text-white">{{ post.hook }}</h1></div></div>
         <div class="mt-4 flex items-center gap-3"><a :href="creatorProfileUrl(post.creator.username)" target="_blank" rel="noopener noreferrer" class="flex flex-1 items-center gap-3"><img :src="post.creator.avatar_url || ''" alt="" class="h-9 w-9 rounded-full"><div class="flex-1"><p class="text-sm font-medium hover:underline">@{{ post.creator.username }}</p><p class="text-xs text-[var(--faint)]">{{ $t('content.followers', { count: compactNumber(post.creator.followers) }) }} · {{ relativeDate(post.published_at, locale) }}</p></div></a><a v-if="post.source_url" :href="post.source_url" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs text-[var(--muted)] transition hover:text-[var(--ink)]">{{ $t('content.openSource') }}<AppIcon name="arrow" :size="13" class="-rotate-45" /></a><p v-if="post.views > 0" class="text-xs text-[var(--muted)]">{{ $t('content.views', { count: compactNumber(post.views) }) }}</p></div>
       </section>
 
-      <section>
+      <section class="min-w-0">
         <div class="flex items-center justify-between gap-4">
           <p class="text-[11px] font-semibold uppercase tracking-[.16em] text-[var(--faint)]">{{ $t('content.analysis') }}</p>
           <p v-if="post.analysis_status === 'pending'" class="inline-flex items-center gap-2 text-[11px] text-[var(--muted)]">
@@ -169,14 +170,6 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
 
             <div v-if="moments.length && !composerOpen" class="mt-3 max-h-52 space-y-1.5 overflow-y-auto pr-1">
               <button
-                class="moment-row"
-                :class="selectedMoment === null ? 'moment-row-on' : 'moment-row-off'"
-                @click="selectedMoment = null"
-              >
-                <span class="grid h-8 w-8 shrink-0 place-items-center rounded-[9px] bg-[var(--sand-soft)] text-[var(--muted)]"><AppIcon name="sparkles" :size="14" /></span>
-                <span class="flex-1 text-[13.5px]">{{ $t('content.letPersonalChoose') }}</span>
-              </button>
-              <button
                 v-for="moment in moments"
                 :key="moment.id"
                 class="moment-row"
@@ -195,16 +188,21 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
               <span class="grid h-8 w-8 shrink-0 place-items-center rounded-[9px] bg-[var(--accent-soft)] text-[var(--accent-ink)]"><AppIcon name="plus" :size="14" /></span>
               <span><span class="block text-[13px] font-medium">{{ $t('content.firstMomentTitle') }}</span><span class="mt-0.5 block text-[11.5px] text-[var(--muted)]">{{ $t('content.firstMomentCopy') }}</span></span>
             </button>
+            <p v-if="moments.length && selectedMoment === null && !composerOpen" id="moment-required" class="mt-3 flex items-center gap-2 text-[12px] font-medium text-[var(--accent-ink)]">
+              <AppIcon name="sparkles" :size="14" />
+              {{ $t('content.selectMomentRequired') }}
+            </p>
           </div>
 
           <div class="border-t border-[var(--line-soft)] px-6 py-5">
             <button
-              class="flex h-12 w-full items-center justify-center gap-2 rounded-full b-btn-red text-[15px] font-medium transition disabled:cursor-default"
-              :disabled="generating"
+              class="flex h-12 w-full items-center justify-center gap-2 rounded-full b-btn-red text-[15px] font-medium transition disabled:cursor-default disabled:opacity-45"
+              :disabled="generating || selectedMoment === null"
               :aria-busy="generating"
+              :aria-describedby="selectedMoment === null && moments.length ? 'moment-required' : undefined"
               @click="createRemix"
             >
-              {{ $t('content.remixForMe') }}
+              {{ selectedMoment === null ? $t('content.chooseMomentFirst') : $t('content.remixForMe') }}
               <AppIcon name="sparkles" :size="16" />
             </button>
             <p class="mt-3 text-center text-[12px] text-[var(--faint)]">{{ $t('content.remixFooter') }}</p>

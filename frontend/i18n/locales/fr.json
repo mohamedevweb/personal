@@ -55,7 +55,7 @@
     "title": "Assistant",
     "subtitle": "Imagine ton prochain post",
     "greeting": "Salut, je suis ton assistant créatif. Quel moment ou quelle idée veux-tu transformer en contenu ?",
-    "placeholder": "Demande des accroches, des angles, des légendes…",
+    "placeholder": "Demande des accroches, des angles, des posts…",
     "send": "Envoyer",
     "thinking": "Réflexion…",
     "error": "Une erreur est survenue. Réessaie.",
@@ -66,7 +66,7 @@
     "starters": {
       "hooks": "Donne-moi 3 idées d'accroche",
       "repurpose": "Transforme mon dernier moment en Reel",
-      "caption": "Écris une légende dans mon ton"
+      "caption": "Écris un post dans mon ton"
     }
   },
   "landing": {
@@ -100,7 +100,7 @@
       "scanned": "Vos 40 derniers posts, lus une fois",
       "outliers": "Des outliers, pas des top posts",
       "niches": "Votre niche, pas internet",
-      "voice": "Votre voix, apprise de vos légendes",
+      "voice": "Votre voix, apprise de vos posts",
       "minutes": "Du brouillon au post en une minute"
     },
     "stat": {
@@ -137,7 +137,7 @@
         },
         "write": {
           "title": "Écrire",
-          "body": "Reel, carrousel ou légende. Votre structure, votre voix, votre histoire. Une minute jusqu'à la publication.",
+          "body": "Reel, Carousel ou Post. Votre structure, votre voix, votre histoire. Une minute jusqu'à la publication.",
           "caption": "Un brouillon, jamais un post"
         }
       },
@@ -209,7 +209,7 @@
       "items": {
         "sound": {
           "q": "Est-ce que ça va me ressembler ?",
-          "a": "C'est tout l'enjeu. Personal apprend votre ton à partir de vos propres légendes et vous montre ce qu'il a compris avant d'écrire une ligne. Chaque brouillon part de vos histoires, et vous le corrigez en langage courant."
+          "a": "C'est tout l'enjeu. Personal apprend votre ton à partir de vos propres posts et vous montre ce qu'il a compris avant d'écrire une ligne. Chaque brouillon part de vos histoires, et vous le corrigez en langage courant."
         },
         "different": {
           "q": "Encore un générateur de contenu IA ?",
@@ -488,26 +488,7 @@
   "feed": {
     "forYou": "Pour toi",
     "global": "Global",
-    "workspaceEyebrow": "Ton radar créatif",
-    "workspaceTitle": "Une bonne idée, choisie pour toi, prête à devenir la tienne.",
-    "contextSummary": "Personal cherche dans {niche} et écrira avec une voix {tone}.",
-    "contextFallback": "ton univers",
-    "voiceFallback": "naturelle",
     "adjustContext": "Ajuster mon profil",
-    "steps": {
-      "understand": {
-        "title": "Compris",
-        "copy": "Ton univers et ta voix"
-      },
-      "discover": {
-        "title": "Découvert",
-        "copy": "{count} références fortes"
-      },
-      "remix": {
-        "title": "À toi de jouer",
-        "copy": "Choisis ton format"
-      }
-    },
     "featured": {
       "eyebrow": "Meilleur point de départ",
       "title": "Commence par ce schéma.",
@@ -519,8 +500,7 @@
       "carouselShort": "Carousel",
       "reel": "Créer mon Reel",
       "reelShort": "Reel",
-      "creating": "Création en cours…",
-      "voiceNote": "Le schéma vient de cette référence. Les mots, le ton et le point de vue viennent de toi."
+      "voiceNote": "Choisis ensuite un moment réel. Personal utilisera ta voix et ton point de vue."
     },
     "moreEyebrow": "À explorer",
     "moreTitle": "D’autres schémas forts pour ton univers",
@@ -536,7 +516,7 @@
   "create": {
     "eyebrow": "Studio",
     "title": "Transforme un moment en contenu.",
-    "subtitle": "Choisis ce que tu as vécu, puis l’angle qui donnera une idée claire et personnelle à ton audience.",
+    "subtitle": "Choisis ce que tu as vécu, puis le format qui donnera vie à ton idée.",
     "addMoment": "Ajouter un moment",
     "drafting": "Création du brouillon…",
     "draftError": "Personal n’a pas pu rédiger ceci pour l’instant. Réessaie.",
@@ -553,8 +533,8 @@
     "recommended": "Recommandé",
     "whyRecommended": "Pourquoi ce moment ?",
     "stepAngle": "Étape 2",
-    "chooseAngle": "Choisis ce que tu veux en faire",
-    "angleHelp": "L’angle détermine la structure du brouillon.",
+    "chooseAngle": "Choisis ton format",
+    "angleHelp": "Le format détermine la structure du brouillon.",
     "selectedMoment": "Moment sélectionné",
     "transform": "Transformer ce moment",
     "opportunities": {
@@ -576,20 +556,17 @@
       }
     },
     "cards": {
-      "story": {
-        "title": "Raconter",
-        "copy": "Un récit personnel dont on se souvient.",
-        "output": "Carrousel"
+      "reel": {
+        "title": "Reel",
+        "copy": "Une accroche, un script parlé et le plan à filmer."
       },
-      "teach": {
-        "title": "Enseigner",
-        "copy": "Une leçon concrète que ton audience peut appliquer.",
-        "output": "Carrousel"
+      "carousel": {
+        "title": "Carousel",
+        "copy": "Une couverture forte, puis les slides."
       },
-      "opinion": {
-        "title": "Prendre position",
-        "copy": "Un point de vue clair et crédible face caméra.",
-        "output": "Reel"
+      "post": {
+        "title": "Post",
+        "copy": "Un post écrit, dans ta voix."
       }
     }
   },
@@ -779,14 +756,15 @@
     "voiceFallbackNiche": "ton univers",
     "voiceFallbackTone": "naturelle",
     "voiceLocked": "Ta voix est verrouillée",
-    "makeItYours": "Rends le tien",
+    "makeItYours": "Crée ta version",
     "makeItYoursCopy": "Choisis la forme. Personal adaptera le schéma à ton contexte, sans le copier.",
-    "groundInMoment": "Ancre le dans un moment réel",
-    "groundInMomentHelp": "Une expérience précise rendra le brouillon nettement plus personnel.",
+    "groundInMoment": "Choisis un moment réel",
+    "groundInMomentHelp": "Ce choix est obligatoire. Une expérience précise rendra le brouillon vraiment personnel.",
     "addMoment": "Ajouter un moment",
     "firstMomentTitle": "Donne une matière réelle à Personal",
     "firstMomentCopy": "Une décision, une leçon ou une opinion suffit.",
-    "letPersonalChoose": "Laisser Personal choisir",
+    "selectMomentRequired": "Choisis le moment que Personal doit utiliser.",
+    "chooseMomentFirst": "Choisis un moment pour continuer",
     "creating": "Création de ta version…",
     "remixForMe": "Créer ma version",
     "followers": "{count} abonnés",
@@ -863,7 +841,7 @@
     "formats": {
       "reel": "Reel",
       "carousel": "Carrousel",
-      "caption": "Légende"
+      "caption": "Post"
     },
     "switchNote": "Chaque format garde son propre brouillon. Vos modifications sont enregistrées avant de changer.",
     "switching": "Passage en {format}…",
@@ -892,7 +870,7 @@
     "beforeMore": "Ce qui s’affiche avant « plus »",
     "beforeMoreEmpty": "Les 125 premiers caractères arrivent ici.",
     "more": "plus",
-    "captionPost": "Légende",
+    "captionPost": "Post",
     "captionPlaceholder": "Écrivez le post.",
     "borrowedFrom": "Emprunté à",
     "openSource": "Voir le post Instagram original",
@@ -1022,7 +1000,7 @@
             },
             "creations": {
               "term": "Contenus produits",
-              "detail": "Les brouillons de Reels, carrousels et légendes générés pour vous, leurs versions que vous modifiez, ainsi que les publications que vous enregistrez ou écartez dans le fil."
+              "detail": "Les brouillons de Reels, carrousels et posts générés pour vous, leurs versions que vous modifiez, ainsi que les publications que vous enregistrez ou écartez dans le fil."
             },
             "chat": {
               "term": "Conversations avec l’assistant",
@@ -1048,7 +1026,7 @@
             },
             "mediaFields": {
               "term": "Publications récentes",
-              "detail": "Vos 25 dernières publications au maximum : légende, type de média (image, vidéo, Reel, carrousel), lien permanent, URL du média et de sa miniature, date de publication, nombre de j’aime et de commentaires."
+              "detail": "Vos 25 dernières publications au maximum : texte du post, type de média (image, vidéo, Reel, carrousel), lien permanent, URL du média et de sa miniature, date de publication, nombre de j’aime et de commentaires."
             },
             "insights": {
               "term": "Statistiques de publication",
@@ -1114,7 +1092,7 @@
           "title": "Les publications d’autres créateurs",
           "p": {
             "what": "Le fil « For You » s’appuie sur des publications publiques d’autres comptes Instagram de votre niche. Nous les collectons via notre prestataire Apify, à partir de pages de hashtags et de profils publics.",
-            "fields": "Nous conservons ce qui rend une publication comparable : nom d’utilisateur public, nom affiché, photo de profil, biographie, nombre d’abonnés et engagement moyen du compte, et pour chaque publication son accroche, sa légende, sa miniature, sa date et ses compteurs publics.",
+            "fields": "Nous conservons ce qui rend une publication comparable : nom d’utilisateur public, nom affiché, photo de profil, biographie, nombre d’abonnés et engagement moyen du compte, et pour chaque publication son accroche, le texte de son post, sa miniature, sa date et ses compteurs publics.",
             "basis": "La base légale est notre intérêt légitime à produire une analyse de tendances à partir d’informations rendues publiques par leurs auteurs. Nous n’accédons à aucun compte privé, à aucun message et à aucune donnée qui ne soit pas déjà visible de tous. Ces informations servent uniquement à l’analyse de performance : elles ne servent jamais à contacter ces créateurs, ni à republier leurs contenus.",
             "rights": "Si vous êtes créateur et ne souhaitez pas que vos publications soient analysées par Personal, écrivez à privacy{'@'}usepersonal.app : nous supprimons votre compte et vos publications de notre base et empêchons leur réapparition."
           }
@@ -1416,7 +1394,7 @@
             },
             "chat": {
               "term": "Un assistant créatif",
-              "detail": "Une conversation pour affiner un angle, une accroche ou une légende."
+              "detail": "Une conversation pour affiner un angle, une accroche ou un post."
             },
             "profile": {
               "term": "Un profil créateur",

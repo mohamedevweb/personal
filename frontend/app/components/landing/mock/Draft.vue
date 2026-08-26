@@ -8,7 +8,7 @@
  */
 const live = useScreenLive()
 
-const FORMATS = ['caption', 'carousel', 'reel'] as const
+const FORMATS = ['reel', 'carousel', 'caption'] as const
 type Format = typeof FORMATS[number]
 
 const format = ref<Format>('carousel')

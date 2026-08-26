@@ -191,6 +191,8 @@ async function copyDraft() {
 /** A new shape means a new draft, so the current one is saved before leaving. */
 async function switchFormat(format: Format) {
   if (!remix.value || remix.value.format === format || switching.value) return
+  const sourceId = remix.value.source_content?.id
+  if (!sourceId) return
   switching.value = format
   try {
     if (dirty.value) {
@@ -200,9 +202,13 @@ async function switchFormat(format: Format) {
         return
       }
     }
+    if (!remix.value.life_moment?.id) {
+      await navigateTo({ path: `/content/${sourceId}`, query: { format } })
+      return
+    }
     const response = await apiFetch<{ remix: Remix }>(
-      `/api/content/${remix.value.source_content?.id}/remix`,
-      { method: 'POST', body: { format, life_moment_id: remix.value.life_moment?.id ?? null } }
+      `/api/content/${sourceId}/remix`,
+      { method: 'POST', body: { format, life_moment_id: remix.value.life_moment.id } }
     )
     const generated = response.remix.status === 'generating'
       ? await waitForRemix(response.remix.id)

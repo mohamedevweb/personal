@@ -255,6 +255,39 @@ class PersonalMvpTest extends TestCase
         $this->assertSame($moment->content, $remix->generated_content['your_context']);
     }
 
+    public function test_a_remix_requires_a_personal_moment(): void
+    {
+        Queue::fake();
+        $post = ContentPost::query()->firstOrFail();
+
+        $this->actingAs($this->user)->postJson("/api/content/{$post->id}/remix", [
+            'format' => 'carousel',
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors('life_moment_id');
+
+        Queue::assertNothingPushed();
+    }
+
+    public function test_a_remix_cannot_use_another_creators_moment(): void
+    {
+        Queue::fake();
+        $post = ContentPost::query()->firstOrFail();
+        $otherUser = User::factory()->create();
+        $otherMoment = $otherUser->moments()->create([
+            'content' => 'A private moment that belongs to another creator.',
+            'category' => 'Lesson',
+            'story_score' => 5,
+            'story_reasons' => [],
+        ]);
+
+        $this->actingAs($this->user)->postJson("/api/content/{$post->id}/remix", [
+            'format' => 'carousel',
+            'life_moment_id' => $otherMoment->id,
+        ])->assertNotFound();
+
+        Queue::assertNothingPushed();
+    }
+
     public function test_remixing_the_same_source_and_format_returns_the_existing_draft(): void
     {
         Queue::fake();
@@ -310,15 +343,18 @@ class PersonalMvpTest extends TestCase
     {
         Queue::fake();
         $post = ContentPost::query()->firstOrFail();
+        $moment = $this->user->moments()->firstOrFail();
 
         $first = $this->actingAs($this->user)->postJson("/api/content/{$post->id}/remix", [
             'format' => 'caption',
+            'life_moment_id' => $moment->id,
         ])->assertAccepted();
 
         Remix::query()->findOrFail($first->json('remix.id'))->update(['status' => 'archived']);
 
         $second = $this->actingAs($this->user)->postJson("/api/content/{$post->id}/remix", [
             'format' => 'caption',
+            'life_moment_id' => $moment->id,
         ])->assertAccepted();
 
         $this->assertNotSame($first->json('remix.id'), $second->json('remix.id'));
