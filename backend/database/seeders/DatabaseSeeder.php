@@ -181,9 +181,9 @@ class DatabaseSeeder extends Seeder
 
         $user->moments()->delete();
         $moments = collect([
-            ['J’ai transformé des questions fréquentes de mon audience en une semaine de contenus pédagogiques.', 'Win', 9, ['strong transformation', 'personal', 'creates authority']],
-            ['Je prépare une ressource gratuite pour aider les créateurs à structurer leurs idées.', 'Upcoming event', 7, ['future tension', 'creates anticipation', 'invites the audience into the journey']],
-            ['Un échange client m’a montré qu’un exemple concret vaut mieux qu’une longue explication.', 'Meeting', 8, ['real customer insight', 'specific pain point', 'supports your positioning']],
+            ['J’ai transformé des questions fréquentes de mon audience en une semaine de contenus pédagogiques.', 'Win'],
+            ['Je prépare une ressource gratuite pour aider les créateurs à structurer leurs idées.', 'Upcoming event'],
+            ['Un échange client m’a montré qu’un exemple concret vaut mieux qu’une longue explication.', 'Meeting'],
         ])->map(fn (array $item, int $index) => LifeMoment::query()->create(
             [
                 'user_id' => $user->id,
@@ -191,8 +191,6 @@ class DatabaseSeeder extends Seeder
                 'category' => $item[1],
                 'happened_at' => now()->subDays($index * 4)->toDateString(),
                 'upcoming_at' => $item[1] === 'Upcoming event' ? now()->addMonth()->toDateString() : null,
-                'story_score' => $item[2],
-                'story_reasons' => $item[3],
             ],
         ));
 

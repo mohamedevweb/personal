@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import type { CreatorInspiration, CreatorInspirationResponse, InstagramSyncStatus } from '~/types/instagram'
+import type { CreatorInspiration, CreatorInspirationResponse, HandleAnalysis, HandleAnalysisStage, InstagramSyncStatus } from '~/types/instagram'
 import type { PersonalProfile } from '~/types/product'
 import { groupCreatorOptions } from '~/utils/creatorInspirationOptions'
 
 definePageMeta({ layout: false })
 
 const route = useRoute()
-const { t, locale } = useI18n()
-const { status, loading, error, connect, loadStatus, startPolling } = useInstagram()
+const { t, te, locale } = useI18n()
+const { status, loading, error, connect, loadStatus, startPolling, stopPolling } = useInstagram()
 const { apiFetch } = usePersonalApi()
 const toast = useToast()
 const inspirationData = ref<CreatorInspirationResponse | null>(null)
@@ -33,6 +33,11 @@ const brief = reactive({
 // Choosing inspirations does not need Instagram: a creator who skips the
 // connection still gets this step, so the first feed has something to build on.
 const connectionSkipped = ref(false)
+// A profile that could not be read (a private account, a provider outage) must
+// not lock a creator out of their own onboarding, so the failure screen offers
+// a way through. Nothing else lets the flow past an unfinished analysis.
+const analysisDismissed = ref(false)
+const analysisRetrying = ref(false)
 
 // The card on the right stands in for the thing being connected: an Instagram
 // profile with no face on it, because the only part Personal reads is what the
@@ -92,6 +97,84 @@ const activeStage = computed(() => {
   return Math.max(stages.value.findIndex(stage => stage.key === status.value.account?.sync_status), 0)
 })
 
+// The handle a creator types is only useful once Personal has actually read the
+// profile behind it, so onboarding shows that reading happening — profile,
+// posts, voice, audience — and holds the next step until it is done.
+const analysis = computed(() => status.value.analysis ?? null)
+
+const analysisStages = computed<HandleAnalysisStage[]>(() => analysis.value?.stages?.length
+  ? analysis.value.stages
+  : ['reading_profile', 'importing_posts', 'reading_voice', 'mapping_audience'])
+
+// 'idle' is a profile that predates the analysis: nothing is running, so nothing
+// is worth waiting for either.
+const analysisComplete = computed(() => analysis.value?.status === 'completed' || (analysis.value?.status ?? 'idle') === 'idle')
+const analysisFailed = computed(() => analysis.value?.status === 'failed')
+
+const analysisIndex = computed(() => {
+  if (analysis.value?.status === 'completed') return analysisStages.value.length
+  const index = analysisStages.value.indexOf(analysis.value?.status as HandleAnalysisStage)
+  // 'queued' sits before the first step rather than outside the list.
+  return index < 0 ? 0 : index
+})
+
+const postsTarget = computed(() => analysis.value?.posts_target ?? 30)
+
+function formatCount(value: number) {
+  return new Intl.NumberFormat(locale.value).format(value)
+}
+
+// What each step found, written the moment it lands so the wait shows real
+// progress instead of four spinners in a row.
+function analysisDetail(stage: HandleAnalysisStage): string | null {
+  const found = analysis.value
+  if (!found) return null
+
+  if (stage === 'reading_profile') {
+    return found.followers_count === null
+      ? null
+      : t('onboarding.analysis.details.profile', {
+        handle: status.value.instagram_username || '',
+        followers: formatCount(found.followers_count)
+      })
+  }
+
+  if (stage === 'importing_posts') {
+    return found.analyzed_posts_count === null
+      ? null
+      : t('onboarding.analysis.details.posts', { count: found.analyzed_posts_count, target: postsTarget.value })
+  }
+
+  if (stage === 'reading_voice') {
+    return found.tone?.length ? found.tone.join(' · ') : null
+  }
+
+  return found.audience_description || found.niche || null
+}
+
+const analysisSteps = computed(() => analysisStages.value.map((stage, index) => ({
+  key: stage,
+  label: t(`onboarding.analysis.steps.${stage}`),
+  detail: analysisDetail(stage),
+  done: index < analysisIndex.value,
+  active: index === analysisIndex.value && !analysisFailed.value
+})))
+
+const analysisErrorMessage = computed(() => {
+  const reason = analysis.value?.error
+  if (!reason) return null
+  const key = `onboarding.analysis.errors.${reason}`
+  // Unknown reasons still say something useful rather than echoing a raw key.
+  return te(key) ? t(key) : t('onboarding.analysis.errors.analysis_unavailable')
+})
+
+// The creator is held here until every piece is in, which is the whole point of
+// the step: the brief that follows is prefilled from what this found.
+const showAnalysis = computed(() => !status.value.connected
+  && Boolean(status.value.instagram_username)
+  && !analysisComplete.value
+  && !analysisDismissed.value)
+
 const callbackError = computed(() => route.query.instagram === 'error'
   ? String(route.query.message || t('onboarding.cancelledError'))
   : null)
@@ -106,7 +189,7 @@ const onboarded = useState('personal-onboarded', () => false)
 // The favorites step opens once the import is done, or right away when a
 // creator provided their handle or chose not to connect Instagram.
 const showInspirations = computed(() => (status.value.connected && status.value.account?.sync_status === 'completed')
-  || (!status.value.connected && Boolean(status.value.instagram_username))
+  || (!status.value.connected && Boolean(status.value.instagram_username) && !showAnalysis.value)
   || (!status.value.connected && connectionSkipped.value))
 
 const onboardingSteps = computed(() => [
@@ -409,12 +492,7 @@ async function saveAccountHandle() {
   handleSaving.value = true
 
   try {
-    const response = await apiFetch<{ instagram_username: string }>('/api/integrations/instagram/handle', {
-      method: 'PUT',
-      body: { username }
-    })
-    status.value.instagram_username = response.instagram_username
-    await loadCreativeBrief()
+    await submitHandle(username)
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('onboarding.handleSaveError')))
   } finally {
@@ -422,8 +500,52 @@ async function saveAccountHandle() {
   }
 }
 
+// Saving the handle starts the reading of the public profile behind it. The
+// loader takes over from here and polling drives it to the next step.
+async function submitHandle(username: string) {
+  const response = await apiFetch<{ instagram_username: string, analysis: HandleAnalysis }>('/api/integrations/instagram/handle', {
+    method: 'PUT',
+    body: { username }
+  })
+  status.value.instagram_username = response.instagram_username
+  status.value.analysis = response.analysis
+  analysisDismissed.value = false
+  startPolling()
+}
+
+// Sending the same handle again is what re-runs a reading that failed.
+async function retryAnalysis() {
+  const username = status.value.instagram_username
+  if (!username || analysisRetrying.value) return
+
+  analysisRetrying.value = true
+
+  try {
+    await submitHandle(username)
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('onboarding.handleSaveError')))
+  } finally {
+    analysisRetrying.value = false
+  }
+}
+
+// Only reachable once the reading has failed for good: the creator fills the
+// brief in themselves rather than being stuck behind a profile Personal cannot
+// read.
+function continueWithoutAnalysis() {
+  stopPolling()
+  analysisDismissed.value = true
+  void loadCreativeBrief()
+}
+
 watch(() => status.value.account?.sync_status, (syncStatus) => {
   if (status.value.connected && syncStatus === 'completed') void loadCreativeBrief()
+})
+
+// The brief that follows is the analysis read back to the creator, so it is only
+// fetched once there is something to read back.
+watch(() => analysis.value?.status, (analysisStatus) => {
+  if (analysisStatus === 'completed' && !status.value.connected) void loadCreativeBrief()
 })
 
 // Let the user into the app without connecting Instagram. The cookie makes the
@@ -451,7 +573,10 @@ onMounted(async () => {
   if (showInspirations.value) {
     await loadCreativeBrief()
   }
-  if (route.query.instagram === 'connected' || (status.value.connected && status.value.account?.sync_status !== 'completed')) {
+  if (route.query.instagram === 'connected'
+    || (status.value.connected && status.value.account?.sync_status !== 'completed')
+    // A reload during the reading picks it back up where it was.
+    || showAnalysis.value) {
     startPolling()
   }
 })
@@ -561,7 +686,91 @@ onMounted(async () => {
             <span class="text-[var(--positive)]">✓</span>
           </div>
 
-          <template v-if="showInspirations && !briefConfirmed">
+          <template v-if="showAnalysis">
+            <p class="text-[11px] font-semibold uppercase tracking-[.16em] text-[var(--accent)]">{{ $t('onboarding.analysis.eyebrow') }}</p>
+            <h1 class="mt-4 font-serif text-4xl leading-[1.02] tracking-[-0.045em] md:text-6xl">
+              {{ analysisFailed ? $t('onboarding.analysis.failedTitle') : $t('onboarding.analysis.title') }}
+            </h1>
+            <p class="mt-5 max-w-lg text-[16px] leading-7 text-[var(--muted)]">
+              {{ analysisFailed ? analysisErrorMessage : $t('onboarding.analysis.copy') }}
+            </p>
+
+            <section
+              class="mt-7 rounded-[24px] border border-[var(--line)] bg-[var(--surface)] p-5 md:p-6"
+              aria-live="polite"
+              :aria-busy="!analysisFailed"
+            >
+              <div class="flex items-center justify-between gap-3">
+                <h2 class="truncate text-sm font-semibold">{{ '@' + status.instagram_username }}</h2>
+                <span class="shrink-0 text-xs tabular-nums text-[var(--faint)]">
+                  {{ $t('onboarding.analysis.progress', { done: analysisIndex, total: analysisSteps.length }) }}
+                </span>
+              </div>
+
+              <div class="mt-3 h-1 overflow-hidden rounded-full bg-[var(--line)]">
+                <div
+                  class="h-full rounded-full bg-[var(--accent)] transition-all duration-700"
+                  :style="{ width: `${(analysisIndex / analysisSteps.length) * 100}%` }"
+                />
+              </div>
+
+              <ol class="mt-5 space-y-1">
+                <li
+                  v-for="(step, index) in analysisSteps"
+                  :key="step.key"
+                  class="flex items-start gap-3 rounded-[14px] px-3 py-3 transition"
+                  :class="step.active ? 'bg-[var(--paper)]' : ''"
+                >
+                  <span
+                    class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full border text-[11px] transition"
+                    :class="step.done ? 'border-[var(--accent)] bg-[var(--accent)] text-white' : step.active ? 'animate-breathe border-[var(--accent)] text-[var(--accent)]' : 'border-[var(--line)] text-[var(--faint)]'"
+                  >
+                    {{ step.done ? '✓' : index + 1 }}
+                  </span>
+                  <span class="min-w-0 flex-1">
+                    <span class="block text-[13.5px] font-medium" :class="step.done || step.active ? 'text-[var(--ink)]' : 'text-[var(--faint)]'">
+                      {{ step.label }}
+                    </span>
+                    <span v-if="step.detail" class="mt-1 block truncate text-[12.5px] text-[var(--muted)]">{{ step.detail }}</span>
+                    <span v-else-if="step.active" class="mt-1 block text-[12.5px] text-[var(--faint)]">{{ $t('onboarding.analysis.working') }}</span>
+                  </span>
+                </li>
+              </ol>
+
+              <div v-if="analysisFailed" class="mt-5 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  class="rounded-full bg-[var(--ink)] px-5 py-2.5 text-sm font-medium text-white transition hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-50"
+                  :disabled="analysisRetrying"
+                  @click="retryAnalysis"
+                >
+                  {{ analysisRetrying ? $t('onboarding.analysis.retrying') : $t('onboarding.analysis.retry') }}
+                </button>
+                <button
+                  type="button"
+                  class="rounded-full border border-[var(--line)] bg-[var(--paper)] px-5 py-2.5 text-sm font-medium transition hover:border-[var(--muted)]"
+                  @click="continueWithoutAnalysis"
+                >
+                  {{ $t('onboarding.analysis.continueAnyway') }}
+                </button>
+              </div>
+              <p v-else class="mt-4 flex items-start gap-2 text-[12px] leading-5 text-[var(--faint)]">
+                <AppIcon name="shield" :size="14" class="mt-0.5 shrink-0 text-[var(--accent)]" />
+                {{ $t('onboarding.analysis.lockNote') }}
+              </p>
+            </section>
+
+            <button
+              v-if="!analysisFailed"
+              type="button"
+              class="mt-7 inline-flex h-[52px] cursor-not-allowed items-center gap-2 rounded-full b-btn-red px-7 text-[15px] font-medium opacity-40"
+              disabled
+            >
+              {{ $t('onboarding.analysis.locked') }}
+            </button>
+          </template>
+
+          <template v-else-if="showInspirations && !briefConfirmed">
             <p class="text-[11px] font-semibold uppercase tracking-[.16em] text-[var(--accent)]">{{ $t('onboarding.brief.eyebrow') }}</p>
             <h1 class="mt-4 font-serif text-4xl leading-[1.02] tracking-[-0.045em] md:text-6xl">
               {{ $t('onboarding.brief.title') }}
@@ -779,10 +988,48 @@ onMounted(async () => {
         </div>
 
         <p class="text-[10px] font-semibold uppercase tracking-[.22em] text-[var(--b-red-lit)]">
-          {{ status.connected ? $t('onboarding.profileLive') : status.instagram_username ? $t('onboarding.profileProvided') : $t('onboarding.preview.label') }}
+          {{ showAnalysis ? $t('onboarding.analysis.previewLabel') : status.connected ? $t('onboarding.profileLive') : status.instagram_username ? $t('onboarding.profileProvided') : $t('onboarding.preview.label') }}
         </p>
 
-        <div v-if="showInspirations && !briefConfirmed" class="mt-10">
+        <!-- The same reading as the list on the left, seen from the profile's
+             side: the counters and the bio fill in as they are found, and
+             nothing is drawn until it is real. -->
+        <div v-if="showAnalysis" class="mt-10">
+          <p class="font-display text-[26px] leading-none tracking-[-.02em]">{{ '@' + status.instagram_username }}</p>
+
+          <p v-if="analysis?.bio" class="mt-4 max-w-[19rem] whitespace-pre-line text-[12.5px] leading-[1.6] text-white/60">{{ analysis.bio }}</p>
+          <div v-else class="mt-5 space-y-2.5">
+            <div class="h-2.5 w-56 max-w-full animate-pulse rounded-full bg-white/10" />
+            <div class="h-2.5 w-40 max-w-full animate-pulse rounded-full bg-white/10" />
+          </div>
+
+          <dl class="mt-7 flex gap-8 border-y border-white/10 py-4">
+            <div>
+              <dd class="font-display text-[21px] leading-none tabular-nums">
+                {{ analysis?.followers_count == null ? '—' : formatCount(analysis.followers_count) }}
+              </dd>
+              <dt class="b-mono mt-2 text-white/35">{{ $t('onboarding.preview.followers') }}</dt>
+            </div>
+            <div>
+              <dd class="font-display text-[21px] leading-none tabular-nums">
+                {{ analysis?.analyzed_posts_count == null ? '—' : `${analysis.analyzed_posts_count}/${postsTarget}` }}
+              </dd>
+              <dt class="b-mono mt-2 text-white/35">{{ $t('onboarding.analysis.postsRead') }}</dt>
+            </div>
+          </dl>
+
+          <p class="b-mono mt-6 text-white/35">{{ $t('onboarding.analysis.previewVoice') }}</p>
+          <div v-if="analysis?.tone?.length" class="mt-3 flex flex-wrap gap-2">
+            <span v-for="tone in analysis.tone" :key="tone" class="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/70">{{ tone }}</span>
+          </div>
+          <div v-else class="mt-3 flex gap-2">
+            <div v-for="i in 3" :key="i" class="h-7 w-20 animate-pulse rounded-full bg-white/[.07]" />
+          </div>
+
+          <p class="mt-7 font-serif text-xl leading-7 text-white/45">{{ $t('onboarding.analysis.previewNote') }}</p>
+        </div>
+
+        <div v-else-if="showInspirations && !briefConfirmed" class="mt-10">
           <p class="font-serif text-[32px] leading-tight tracking-[-.03em]">{{ $t('onboarding.brief.previewTitle') }}</p>
           <p class="mt-3 text-[13px] leading-6 text-white/50">{{ $t('onboarding.brief.previewCopy') }}</p>
           <div class="panel-night mt-8 rounded-[20px] p-5">

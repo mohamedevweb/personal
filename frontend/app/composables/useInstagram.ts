@@ -1,4 +1,13 @@
-import type { InstagramStatusResponse } from '~/types/instagram'
+import type { HandleAnalysisStatus, InstagramStatusResponse } from '~/types/instagram'
+
+// Everything between the handle being saved and the profile being understood.
+const RUNNING_ANALYSIS: HandleAnalysisStatus[] = [
+  'queued',
+  'reading_profile',
+  'importing_posts',
+  'reading_voice',
+  'mapping_audience'
+]
 
 export function useInstagram() {
   const { apiFetch } = usePersonalApi()
@@ -36,19 +45,30 @@ export function useInstagram() {
     }
   }
 
+  // True while the public profile behind a saved handle is still being read.
+  const analysisRunning = computed(() => RUNNING_ANALYSIS.includes(status.value.analysis?.status ?? 'idle'))
+
+  function importing() {
+    const syncStatus = status.value.account?.sync_status
+    const syncing = status.value.connected && syncStatus !== 'completed' && syncStatus !== 'failed'
+
+    return syncing || analysisRunning.value
+  }
+
   function startPolling() {
     clearTimeout(pollTimer)
     const poll = async () => {
       await loadStatus()
-      const syncStatus = status.value.account?.sync_status
-      if (status.value.connected && syncStatus !== 'completed' && syncStatus !== 'failed') {
-        pollTimer = setTimeout(poll, 1400)
-      }
+      if (importing()) pollTimer = setTimeout(poll, 1400)
     }
     void poll()
   }
 
-  onBeforeUnmount(() => clearTimeout(pollTimer))
+  function stopPolling() {
+    clearTimeout(pollTimer)
+  }
 
-  return { status, loading, error, connect, loadStatus, startPolling }
+  onBeforeUnmount(stopPolling)
+
+  return { status, loading, error, analysisRunning, connect, loadStatus, startPolling, stopPolling }
 }

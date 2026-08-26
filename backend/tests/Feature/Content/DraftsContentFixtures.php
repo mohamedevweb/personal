@@ -59,8 +59,6 @@ trait DraftsContentFixtures
             'user_id' => $user->id,
             'content' => 'I decided to pivot my creator partnership product after four months of research.',
             'category' => 'Failure',
-            'story_score' => 9,
-            'story_reasons' => ['strong transformation'],
         ]);
 
         return [$user, $post, $moment];

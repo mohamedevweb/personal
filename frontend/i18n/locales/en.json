@@ -431,6 +431,38 @@
     "handleError": "Enter a valid Instagram handle.",
     "handleSaveError": "Personal could not save your Instagram handle. Please try again.",
     "handleSuffix": "provided",
+    "analysis": {
+      "eyebrow": "Reading your profile",
+      "previewLabel": "Reading · public profile",
+      "title": "Personal is reading your account.",
+      "copy": "We’re pulling your profile, your last 30 posts, your tone and your audience. Stay on this screen: the next step opens as soon as everything is in.",
+      "progress": "{done} of {total}",
+      "working": "Working…",
+      "steps": {
+        "reading_profile": "Fetching your profile, bio and followers",
+        "importing_posts": "Reading your last 30 posts",
+        "reading_voice": "Analysing your tone and how you write",
+        "mapping_audience": "Identifying your audience and your niche"
+      },
+      "details": {
+        "profile": "{'@'}{handle} · {followers} followers",
+        "posts": "{count} of {target} posts read"
+      },
+      "postsRead": "posts read",
+      "previewVoice": "Your voice",
+      "previewNote": "Nothing is published, nothing is changed. Personal reads what anyone can already see.",
+      "lockNote": "The next step opens on its own once everything has been retrieved.",
+      "locked": "Retrieving…",
+      "failedTitle": "Personal could not read this account.",
+      "retry": "Try again",
+      "retrying": "Trying again…",
+      "continueAnyway": "Continue without the analysis",
+      "errors": {
+        "profile_not_found": "No public Instagram account matches that handle. Check the spelling and try again.",
+        "private_account": "This account is private, so Personal cannot read its posts. Make it public, or continue without the analysis.",
+        "analysis_unavailable": "Reading your profile did not go through. Please try again in a moment."
+      }
+    },
     "profileProvided": "Instagram profile provided",
     "connectedSuffix": "connected",
     "readyTitle": "You’re ready.",
@@ -489,21 +521,8 @@
     "forYou": "For you",
     "global": "Global",
     "adjustContext": "Adjust my profile",
-    "featured": {
-      "eyebrow": "Best starting point",
-      "title": "Start with this pattern.",
-      "outlier": "{ratio}× above its baseline",
-      "reason": "This post reached {ratio}× {'@'}{creator}’s baseline. The idea made the difference, not only the audience size.",
-      "proof": "{views} measured views",
-      "analyze": "See the analysis",
-      "carousel": "Create my Carousel",
-      "carouselShort": "Carousel",
-      "reel": "Create my Reel",
-      "reelShort": "Reel",
-      "voiceNote": "Next, choose a real moment. Personal will use your voice and point of view."
-    },
     "moreEyebrow": "Explore",
-    "moreTitle": "More strong patterns for your universe",
+    "moreTitle": "Strong patterns for your universe",
     "loadError": "Personal could not load today’s opportunities.",
     "remixError": "Personal could not draft this right now. Please try again.",
     "rotationComplete": "You have seen all currently eligible content. New publications arrive through the regular refresh cycle.",
@@ -529,13 +548,11 @@
     "stepMoment": "Step 1",
     "chooseMoment": "Choose the moment to transform",
     "momentHelp": "The draft will be written from the moment you select.",
-    "storyScore": "Story potential {score}/10",
     "recommended": "Recommended",
     "whyRecommended": "Why this moment?",
     "stepAngle": "Step 2",
     "chooseAngle": "Choose your format",
     "angleHelp": "The format determines the structure of your draft.",
-    "selectedMoment": "Selected moment",
     "transform": "Turn this moment into content",
     "opportunities": {
       "pivot": {
@@ -775,7 +792,6 @@
       "carousel": "A cover that stops the scroll, then the slides.",
       "caption": "One written post, in your voice."
     },
-    "storyScore": "Story score",
     "creatingCopy": "Personal is reading the pattern and your moment.",
     "remixFooter": "You can change the format and edit every word afterwards."
   },
@@ -835,8 +851,6 @@
     "copyError": "Your browser blocked the copy. Select the text and copy it manually.",
     "markReady": "Ready to copy",
     "backToDraft": "Back to draft",
-    "madeFromStory": "Made from your story.",
-    "madeFromStoryCopy": "The pattern is borrowed. The experience, the point of view and the words are yours.",
     "formatLabel": "Format",
     "formats": {
       "reel": "Reel",

@@ -20,6 +20,7 @@ class CreatorProfile extends Model
             'creator_dna' => 'array',
             'discovery_queries' => 'array',
             'dna_analyzed_at' => 'datetime',
+            'analysis_started_at' => 'datetime',
             'discovery_refreshed_at' => 'datetime',
             'market_confidence' => 'float',
         ];

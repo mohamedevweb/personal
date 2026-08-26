@@ -13,7 +13,6 @@ class LifeMoment extends Model
         return [
             'happened_at' => 'date',
             'upcoming_at' => 'date',
-            'story_reasons' => 'array',
         ];
     }
 }

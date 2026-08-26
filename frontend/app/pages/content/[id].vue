@@ -177,10 +177,9 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
                 @click="selectedMoment = moment.id"
               >
                 <span
-                  class="grid h-8 w-8 shrink-0 place-items-center rounded-[9px] font-serif text-[15px]"
-                  :class="selectedMoment === moment.id ? 'bg-[var(--ink)] text-[var(--paper)]' : 'bg-[var(--accent-soft)] text-[var(--accent-ink)]'"
-                  :title="$t('content.storyScore')"
-                >{{ moment.story_score }}</span>
+                  class="grid h-5 w-5 shrink-0 place-items-center rounded-full border transition"
+                  :class="selectedMoment === moment.id ? 'border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]' : 'border-[var(--line)] text-transparent'"
+                ><AppIcon name="check" :size="12" :stroke-width="2.2" /></span>
                 <span class="flex-1 truncate text-[13.5px]">{{ moment.content }}</span>
               </button>
             </div>

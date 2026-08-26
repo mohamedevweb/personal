@@ -420,10 +420,7 @@ onBeforeUnmount(() => {
           <!-- The draft comes first: on a phone you land on your own words, not
                on the post they were borrowed from. -->
           <section class="min-w-0">
-            <h1 class="font-serif text-[38px] leading-[1.05] tracking-[-.035em] md:text-[46px]">{{ $t('remix.madeFromStory') }}</h1>
-            <p class="mt-3 max-w-[46ch] text-[14.5px] leading-6 text-[var(--muted)]">{{ $t('remix.madeFromStoryCopy') }}</p>
-
-            <div class="mt-7 flex flex-wrap items-center gap-3">
+            <div class="flex flex-wrap items-center gap-3">
               <div
                 class="inline-flex items-center gap-1 rounded-full border border-[var(--line)] bg-[var(--surface)] p-1"
                 role="tablist"

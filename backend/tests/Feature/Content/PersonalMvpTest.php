@@ -164,7 +164,7 @@ class PersonalMvpTest extends TestCase
         $this->assertSame(['fr', 'en'], array_keys($post->analysis_translations));
     }
 
-    public function test_french_requests_localize_moment_intelligence_and_mock_drafts(): void
+    public function test_french_requests_localize_mock_drafts(): void
     {
         Queue::fake();
         config()->set('services.openai.api_key', null);
@@ -177,10 +177,7 @@ class PersonalMvpTest extends TestCase
                 'category' => 'Lesson',
                 'happened_at' => now()->toDateString(),
             ])
-            ->assertCreated()
-            ->assertJsonPath('moment.story_score', 7)
-            ->assertJsonPath('moment.story_reasons.0', 'personnel et précis')
-            ->assertJsonPath('moment.story_reasons.1', 'transformation forte');
+            ->assertCreated();
 
         $post = ContentPost::query()->firstOrFail();
 
@@ -206,7 +203,7 @@ class PersonalMvpTest extends TestCase
         );
     }
 
-    public function test_new_moment_gets_story_intelligence_and_an_opportunity(): void
+    public function test_new_moment_creates_an_opportunity(): void
     {
         $response = $this->actingAs($this->user)->postJson('/api/moments', [
             'content' => 'I realized our best marketing idea was hiding in a customer complaint after three months of building.',
@@ -214,7 +211,7 @@ class PersonalMvpTest extends TestCase
             'happened_at' => now()->toDateString(),
         ]);
 
-        $response->assertCreated()->assertJsonPath('moment.story_score', 7);
+        $response->assertCreated();
         $this->assertDatabaseHas('content_opportunities', [
             'user_id' => $this->user->id,
             'life_moment_id' => $response->json('moment.id'),
@@ -276,8 +273,6 @@ class PersonalMvpTest extends TestCase
         $otherMoment = $otherUser->moments()->create([
             'content' => 'A private moment that belongs to another creator.',
             'category' => 'Lesson',
-            'story_score' => 5,
-            'story_reasons' => [],
         ]);
 
         $this->actingAs($this->user)->postJson("/api/content/{$post->id}/remix", [

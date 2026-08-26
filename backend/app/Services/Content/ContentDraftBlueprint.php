@@ -84,7 +84,6 @@ class ContentDraftBlueprint
             $sections = [...$sections, '', 'THE MOMENT TO BUILD ON (the only source of facts)',
                 "Category: {$moment->category}",
                 "What happened: {$moment->content}",
-                'Why it has story potential: '.$this->list($moment->story_reasons),
             ];
         } else {
             $sections = [...$sections, '', 'No specific life moment was selected. Build on the creator profile above and keep every claim general enough to be true of it.'];

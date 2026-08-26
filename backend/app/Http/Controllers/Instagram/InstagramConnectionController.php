@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Instagram;
 use App\Http\Controllers\Controller;
 use App\Jobs\Discovery\AnalyzeCreatorHandle;
 use App\Jobs\Instagram\SyncInstagramAccount;
+use App\Models\CreatorProfile;
 use App\Services\Creator\CreatorInspirationService;
 use App\Services\Instagram\InstagramAuthService;
 use App\Services\View\UserView;
@@ -32,8 +33,12 @@ class InstagramConnectionController extends Controller
                 'connected' => false,
                 'instagram_username' => $profile?->instagram_username,
                 'inspiration_count' => $inspirationCount,
+                // Onboarding itself holds the creator on the loader until the
+                // reading is done; the gate stays on what they chose, so a
+                // profile that could not be read never locks them out.
                 'onboarding_complete' => filled($profile?->instagram_username)
                     && $inspirationCount >= CreatorInspirationService::MINIMUM_SELECTION,
+                'analysis' => $this->analysis($profile),
             ]);
         }
 
@@ -42,6 +47,7 @@ class InstagramConnectionController extends Controller
             'instagram_username' => $account->username,
             'inspiration_count' => $inspirationCount,
             'onboarding_complete' => $account->sync_status === 'completed' && $inspirationCount >= CreatorInspirationService::MINIMUM_SELECTION,
+            'analysis' => $this->analysis($profile),
             'account' => [
                 'username' => $account->username,
                 'display_name' => $account->display_name,
@@ -74,19 +80,28 @@ class InstagramConnectionController extends Controller
         $username = ltrim($data['username'], '@');
         $profile = $request->user()->creatorProfile()->first();
         $changed = $profile?->instagram_username !== $username;
+        // A handle that has already been read is left alone; one whose reading
+        // never got anywhere is retried, which is what the loader's retry does.
+        $analyze = $changed || in_array($profile?->analysis_status, [null, 'failed'], true);
 
-        $request->user()->creatorProfile()->updateOrCreate(
+        $profile = $request->user()->creatorProfile()->updateOrCreate(
             ['user_id' => $request->user()->id],
-            ['instagram_username' => $username],
+            [
+                'instagram_username' => $username,
+                ...($analyze ? ['analysis_status' => 'queued', 'analysis_error' => null] : []),
+            ],
         );
 
         // Reading the public profile is what makes the app personal, so it starts
         // here rather than waiting for the creator to find the memory page.
-        if ($changed) {
+        if ($analyze) {
             AnalyzeCreatorHandle::dispatch($request->user()->id);
         }
 
-        return response()->json(['instagram_username' => $username]);
+        return response()->json([
+            'instagram_username' => $username,
+            'analysis' => $this->analysis($profile),
+        ]);
     }
 
     public function sync(Request $request): JsonResponse
@@ -106,5 +121,28 @@ class InstagramConnectionController extends Controller
         }
 
         return response()->noContent();
+    }
+
+    /**
+     * Where the public-profile reading is, and what it has found so far.
+     * Onboarding holds the creator on the loader until this says completed.
+     *
+     * @return array<string, mixed>
+     */
+    private function analysis(?CreatorProfile $profile): array
+    {
+        return [
+            'status' => $profile?->analysis_status ?? 'idle',
+            // A stable key, so onboarding says it in the creator's own language.
+            'error' => $profile?->analysis_error,
+            'stages' => AnalyzeCreatorHandle::STAGES,
+            'posts_target' => AnalyzeCreatorHandle::POSTS_READ,
+            'followers_count' => $profile?->followers_count,
+            'analyzed_posts_count' => $profile?->analyzed_posts_count,
+            'bio' => $profile?->bio,
+            'niche' => $profile?->niche,
+            'tone' => $profile?->tone,
+            'audience_description' => $profile?->audience_description,
+        ];
     }
 }

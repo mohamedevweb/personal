@@ -67,8 +67,6 @@ export interface LifeMoment {
   category: string
   happened_at: string | null
   upcoming_at: string | null
-  story_score: number
-  story_reasons: string[]
   created_at: string
 }
 

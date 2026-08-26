@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\ContentOpportunity;
 use App\Models\ContentPost;
 use App\Models\LifeMoment;
-use App\Services\Content\MomentIntelligenceService;
 use App\Services\Content\RemixDraftService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -14,6 +13,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 class MomentController extends Controller
 {
+    /**
+     * A moment the creator just wrote is fresh material, so it enters the feed high
+     * without pretending we can rank it against the older opportunities yet.
+     */
+    private const NEW_MOMENT_RELEVANCE = 80;
+
     public function index(Request $request): JsonResponse
     {
         return response()->json([
@@ -21,37 +26,27 @@ class MomentController extends Controller
         ]);
     }
 
-    public function store(Request $request, MomentIntelligenceService $intelligence): JsonResponse
+    public function store(Request $request): JsonResponse
     {
         $data = $this->validated($request);
-        $analysis = $intelligence->analyze($data['content'], $data['category']);
-        $moment = $request->user()->moments()->create([
-            ...$data,
-            'story_score' => $analysis['score'],
-            'story_reasons' => $analysis['reasons'],
-        ]);
+        $moment = $request->user()->moments()->create($data);
 
         ContentOpportunity::query()->create([
             'user_id' => $request->user()->id,
             'life_moment_id' => $moment->id,
             'title' => 'Turn this moment into a story your audience can use',
             'explanation' => 'This moment has a personal transformation and a concrete lesson—two strong signals for an authentic founder post.',
-            'relevance_score' => $analysis['score'] * 10,
+            'relevance_score' => self::NEW_MOMENT_RELEVANCE,
             'origin' => 'life_moment',
         ]);
 
         return response()->json(['moment' => $moment], 201);
     }
 
-    public function update(Request $request, LifeMoment $moment, MomentIntelligenceService $intelligence): JsonResponse
+    public function update(Request $request, LifeMoment $moment): JsonResponse
     {
         $this->ensureOwner($request, $moment);
-        $data = $this->validated($request, partial: true);
-        $analysis = $intelligence->analyze(
-            $data['content'] ?? $moment->content,
-            $data['category'] ?? $moment->category,
-        );
-        $moment->update([...$data, 'story_score' => $analysis['score'], 'story_reasons' => $analysis['reasons']]);
+        $moment->update($this->validated($request, partial: true));
 
         return response()->json(['moment' => $moment->fresh()]);
     }

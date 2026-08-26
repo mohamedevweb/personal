@@ -431,6 +431,38 @@
     "handleError": "Saisis un handle Instagram valide.",
     "handleSaveError": "Personal n’a pas pu enregistrer ton handle Instagram. Réessaie.",
     "handleSuffix": "renseigné",
+    "analysis": {
+      "eyebrow": "Lecture de ton profil",
+      "previewLabel": "Lecture en cours · profil public",
+      "title": "Personal lit ton compte.",
+      "copy": "On récupère ton profil, tes 30 derniers posts, ton ton et ton audience. Reste sur cet écran : l’étape suivante s’ouvre dès que tout est là.",
+      "progress": "{done} sur {total}",
+      "working": "En cours…",
+      "steps": {
+        "reading_profile": "Récupération de ton profil, ta bio et tes abonnés",
+        "importing_posts": "Lecture de tes 30 derniers posts",
+        "reading_voice": "Analyse de ton ton et de ta façon d’écrire",
+        "mapping_audience": "Identification de ton audience et de ta niche"
+      },
+      "details": {
+        "profile": "{'@'}{handle} · {followers} abonnés",
+        "posts": "{count} posts lus sur {target}"
+      },
+      "postsRead": "posts lus",
+      "previewVoice": "Ta voix",
+      "previewNote": "Rien n’est publié, rien n’est modifié. Personal lit ce que tout le monde peut déjà voir.",
+      "lockNote": "L’étape suivante s’ouvre automatiquement une fois la récupération terminée.",
+      "locked": "Récupération en cours…",
+      "failedTitle": "Personal n’a pas pu lire ce compte.",
+      "retry": "Réessayer",
+      "retrying": "Nouvelle tentative…",
+      "continueAnyway": "Continuer sans analyse",
+      "errors": {
+        "profile_not_found": "Aucun compte Instagram public ne correspond à ce handle. Vérifie l’orthographe et réessaie.",
+        "private_account": "Ce compte est privé, Personal ne peut donc pas lire ses posts. Passe le compte en public ou continue sans analyse.",
+        "analysis_unavailable": "La lecture de ton profil n’a pas abouti. Réessaie dans un instant."
+      }
+    },
     "profileProvided": "Profil Instagram renseigné",
     "connectedSuffix": "connecté",
     "readyTitle": "Vous êtes prêt.",
@@ -489,21 +521,8 @@
     "forYou": "Pour toi",
     "global": "Global",
     "adjustContext": "Ajuster mon profil",
-    "featured": {
-      "eyebrow": "Meilleur point de départ",
-      "title": "Commence par ce schéma.",
-      "outlier": "{ratio}× au dessus de sa norme",
-      "reason": "Ce post a réalisé {ratio}× la norme de {'@'}{creator}. La force vient de l’idée, pas seulement de son audience.",
-      "proof": "{views} vues mesurées",
-      "analyze": "Voir l’analyse",
-      "carousel": "Créer mon Carousel",
-      "carouselShort": "Carousel",
-      "reel": "Créer mon Reel",
-      "reelShort": "Reel",
-      "voiceNote": "Choisis ensuite un moment réel. Personal utilisera ta voix et ton point de vue."
-    },
     "moreEyebrow": "À explorer",
-    "moreTitle": "D’autres schémas forts pour ton univers",
+    "moreTitle": "Des schémas forts pour ton univers",
     "loadError": "Personal n’a pas pu charger les opportunités du jour.",
     "remixError": "Personal n’a pas pu rédiger ceci pour l’instant. Veuillez réessayer.",
     "rotationComplete": "Tu as vu tous les contenus éligibles pour l’instant. Les nouvelles publications arriveront avec le cycle habituel.",
@@ -529,13 +548,11 @@
     "stepMoment": "Étape 1",
     "chooseMoment": "Choisis le moment à transformer",
     "momentHelp": "Le brouillon sera écrit à partir du moment sélectionné.",
-    "storyScore": "Potentiel narratif {score}/10",
     "recommended": "Recommandé",
     "whyRecommended": "Pourquoi ce moment ?",
     "stepAngle": "Étape 2",
     "chooseAngle": "Choisis ton format",
     "angleHelp": "Le format détermine la structure du brouillon.",
-    "selectedMoment": "Moment sélectionné",
     "transform": "Transformer ce moment",
     "opportunities": {
       "pivot": {
@@ -775,7 +792,6 @@
       "carousel": "Une couverture qui arrête le scroll, puis les slides.",
       "caption": "Un post écrit, dans ta voix."
     },
-    "storyScore": "Score d’histoire",
     "creatingCopy": "Personal lit le schéma et ton moment.",
     "remixFooter": "Tu pourras changer de format et modifier chaque mot ensuite."
   },
@@ -835,8 +851,6 @@
     "copyError": "Votre navigateur a bloqué la copie. Sélectionnez le texte et copiez-le à la main.",
     "markReady": "Prêt à copier",
     "backToDraft": "Repasser en brouillon",
-    "madeFromStory": "Fait à partir de votre histoire.",
-    "madeFromStoryCopy": "Le schéma est emprunté. L’expérience, le point de vue et les mots sont les vôtres.",
     "formatLabel": "Format",
     "formats": {
       "reel": "Reel",

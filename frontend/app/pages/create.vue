@@ -156,7 +156,6 @@ onMounted(async () => {
               <span class="line-clamp-2 text-[14px] leading-5 text-[var(--copy)] md:text-[15px]">{{ moment.content }}</span>
               <span class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-[var(--faint)]">
                 <span>{{ $t(`moments.categories.${moment.category}`) }}</span>
-                <span>{{ $t('create.storyScore', { score: moment.story_score }) }}</span>
               </span>
             </span>
             <span v-if="pick?.life_moment?.id === moment.id" class="hidden shrink-0 items-center gap-1.5 rounded-full bg-[var(--accent-soft)] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[.1em] text-[var(--accent-ink)] sm:inline-flex">
@@ -233,11 +232,7 @@ onMounted(async () => {
         </div>
       </div>
 
-      <div class="flex flex-col gap-4 border-t border-[var(--line)] px-5 py-4 sm:flex-row sm:items-center sm:justify-between md:px-7">
-        <div class="min-w-0">
-          <p class="text-[10px] font-semibold uppercase tracking-[.14em] text-[var(--faint)]">{{ $t('create.selectedMoment') }}</p>
-          <p class="mt-1 truncate text-sm text-[var(--muted)]">{{ selectedMoment?.content }}</p>
-        </div>
+      <div class="flex flex-col gap-4 border-t border-[var(--line)] px-5 py-4 sm:flex-row sm:items-center sm:justify-end md:px-7">
         <button
           type="button"
           class="b-btn-red inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-full px-6 text-[14px] font-medium transition disabled:cursor-default"
