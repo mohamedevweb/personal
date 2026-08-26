@@ -152,6 +152,12 @@ return [
             'outlier_ceiling' => (float) env('FEED_OUTLIER_CEILING', 3.0),
             'reach_ceiling' => (float) env('FEED_REACH_CEILING', 6.0),
         ],
+        // A post must first clear every performance and safety guard. Creator
+        // affinity then reorders that qualified pool from the member's DNA.
+        'personalization' => [
+            'performance_weight' => (float) env('FEED_WEIGHT_PERFORMANCE', 0.75),
+            'affinity_weight' => (float) env('FEED_WEIGHT_CREATOR_AFFINITY', 0.25),
+        ],
         // Reach-bait tags. These are not niches — they are what accounts with no
         // audience post under in order to be seen, so scraping them returns spam by
         // construction. Stripped from every hashtag expansion.

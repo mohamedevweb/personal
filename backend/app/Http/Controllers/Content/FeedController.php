@@ -37,6 +37,8 @@ class FeedController extends Controller
             'opportunity_count' => $items->count(),
             'personalization' => [
                 'niche' => $profile?->niche,
+                'primary_vertical' => $profile?->primary_vertical,
+                'topics' => $profile?->topics ?? [],
                 'tone' => $profile?->tone ?? [],
             ],
             'featured_opportunity' => $request->user()->opportunities()

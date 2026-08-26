@@ -151,7 +151,7 @@ onBeforeUnmount(() => {
               type="button"
               class="relative z-10 inline-flex h-8 items-center gap-1.5 rounded-full px-2 text-[12px] font-medium text-[var(--faint)] transition hover:bg-[var(--danger-soft)] hover:text-[var(--danger)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:opacity-60"
               :class="confirmingDeleteId === remix.id && 'bg-[var(--danger-soft)] text-[var(--danger)]'"
-              :aria-label="$t('drafts.delete')"
+              :aria-label="confirmingDeleteId === remix.id ? $t('drafts.deleteConfirm') : $t('drafts.delete')"
               :disabled="deletingId === remix.id"
               @click="askDelete(remix)"
             >

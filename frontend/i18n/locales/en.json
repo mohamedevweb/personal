@@ -841,6 +841,7 @@
     "followers": "{count} followers",
     "views": "{count} views",
     "engagements": "{count} interactions",
+    "creatorFit": "Matches your world",
     "likes": "{count} likes",
     "saved": "Saved ✓",
     "save": "Save",

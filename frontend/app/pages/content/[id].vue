@@ -152,12 +152,7 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
           <!-- Grounding is what keeps the draft yours, so the moments are shown
                rather than hidden behind a dropdown. -->
           <div class="border-t border-[var(--line-soft)] px-6 py-5">
-            <div class="flex items-center justify-between gap-4">
-              <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[var(--faint)]">{{ $t('content.groundInMoment') }}</p>
-              <button type="button" class="shrink-0 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3 py-2 text-[11.5px] font-medium transition hover:bg-[var(--paper)]" @click="composerOpen = !composerOpen">
-                {{ composerOpen ? $t('common.cancel') : $t('content.addMoment') }}
-              </button>
-            </div>
+            <p class="text-[10px] font-semibold uppercase tracking-[.16em] text-[var(--faint)]">{{ $t('content.groundInMoment') }}</p>
 
             <MomentComposer class="mt-4" :open="composerOpen" @close="composerOpen = false" @created="onMomentCreated" />
 

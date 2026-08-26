@@ -66,6 +66,27 @@ class CreatorInspirationTest extends TestCase
             ->assertJsonCount(12, 'suggestions');
     }
 
+    public function test_suggestions_use_creator_dna_topics_inside_the_primary_vertical(): void
+    {
+        $this->user->creatorProfile()->update([
+            'creator_dna' => [
+                'primary_niche' => 'AI SaaS',
+                'sub_niches' => ['B2B SaaS'],
+                'topics' => ['product building', 'automation'],
+                'content_pillars' => ['build in public'],
+            ],
+        ]);
+        $broad = $this->creator('smartphone.news', followers: 2000000);
+        $broad->update(['niche_topics' => ['smartphones', 'hardware reviews']]);
+        $closest = $this->creator('saas.builder', followers: 50000);
+        $closest->update(['niche_topics' => ['AI SaaS', 'product building', 'build in public']]);
+
+        $this->actingAs($this->user)
+            ->getJson('/api/creator-inspirations')
+            ->assertOk()
+            ->assertJsonPath('suggestions.0.username', $closest->username);
+    }
+
     public function test_explicit_search_uses_the_provider_without_writing_to_the_database(): void
     {
         config(['app.url' => 'https://api.personal.test']);

@@ -45,6 +45,8 @@ export interface ContentPost {
   structure_analysis: string
   analysis_status?: 'pending' | 'complete'
   recommendation_score?: number | null
+  /** Match between this post's creator/topics and the member's Creator DNA. */
+  creator_fit_score?: number | null
   why_recommended?: string
   signals?: string[]
   is_saved: boolean
@@ -55,6 +57,8 @@ export interface FeedResponse {
   opportunity_count: number
   personalization: {
     niche: string | null
+    primary_vertical: PersonalProfile['primary_vertical']
+    topics: string[]
     tone: string[]
   }
   featured_opportunity?: Opportunity | null

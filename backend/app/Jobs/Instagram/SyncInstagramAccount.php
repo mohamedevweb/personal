@@ -99,6 +99,9 @@ class SyncInstagramAccount implements ShouldQueue
                     'creator_dna' => $signals,
                     'primary_vertical' => $primaryVertical,
                     'dna_analyzed_at' => now(),
+                    'discovery_queries' => null,
+                    'discovery_hashtags' => null,
+                    'discovery_refreshed_at' => null,
                 ]);
             }
 

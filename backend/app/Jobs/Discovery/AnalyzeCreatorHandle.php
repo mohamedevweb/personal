@@ -47,7 +47,10 @@ class AnalyzeCreatorHandle implements ShouldQueue
     /** @var list<int> */
     public array $backoff = [30, 180];
 
-    public function __construct(public readonly int $userId) {}
+    public function __construct(
+        public readonly int $userId,
+        public readonly ?string $username = null,
+    ) {}
 
     public function handle(
         InstagramDataProvider $instagram,
@@ -56,9 +59,9 @@ class AnalyzeCreatorHandle implements ShouldQueue
         CanonicalCreatorVerticals $verticals,
     ): void {
         $profile = CreatorProfile::query()->where('user_id', $this->userId)->first();
-        $username = $profile?->instagram_username;
+        $username = $this->username ?? $profile?->instagram_username;
 
-        if (! $profile || ! $username) {
+        if (! $profile || ! $username || ! $this->isCurrent($profile, $username)) {
             return;
         }
 
@@ -73,6 +76,10 @@ class AnalyzeCreatorHandle implements ShouldQueue
         $this->stage($profile, 'reading_profile', started: true);
 
         $scraped = $instagram->getProfile($username);
+
+        if (! $this->isCurrent($profile, $username)) {
+            return;
+        }
 
         if (! $scraped) {
             $this->stop($profile, 'profile_not_found');
@@ -98,6 +105,10 @@ class AnalyzeCreatorHandle implements ShouldQueue
         $this->stage($profile, 'importing_posts');
 
         $posts = $this->recentPosts($instagram, $scraped->username, $scraped->posts);
+
+        if (! $this->isCurrent($profile, $username)) {
+            return;
+        }
         $profile->forceFill(['analyzed_posts_count' => $posts->count()])->save();
 
         $this->stage($profile, 'reading_voice');
@@ -115,6 +126,10 @@ class AnalyzeCreatorHandle implements ShouldQueue
 
         $signals = $niche->detect($account, $media);
 
+        if (! $this->isCurrent($profile, $username)) {
+            return;
+        }
+
         $this->stage($profile, 'mapping_audience');
 
         $market = $markets->detect(implode("\n", [
@@ -122,6 +137,10 @@ class AnalyzeCreatorHandle implements ShouldQueue
             $scraped->bio ?? '',
             $posts->pluck('caption')->filter()->implode("\n"),
         ]));
+
+        if (! $this->isCurrent($profile, $username)) {
+            return;
+        }
 
         $profile->fill([
             'market' => $market['market'],
@@ -145,6 +164,9 @@ class AnalyzeCreatorHandle implements ShouldQueue
                     ...$signals['topics'],
                 ]),
                 'dna_analyzed_at' => now(),
+                'discovery_queries' => null,
+                'discovery_hashtags' => null,
+                'discovery_refreshed_at' => null,
             ]);
         }
 
@@ -215,6 +237,12 @@ class AnalyzeCreatorHandle implements ShouldQueue
     {
         CreatorProfile::query()
             ->where('user_id', $this->userId)
+            ->when($this->username, fn ($query) => $query->where('instagram_username', $this->username))
             ->update(['analysis_status' => 'failed', 'analysis_error' => 'analysis_unavailable']);
+    }
+
+    private function isCurrent(CreatorProfile $profile, string $username): bool
+    {
+        return strcasecmp((string) $profile->fresh()?->instagram_username, $username) === 0;
     }
 }

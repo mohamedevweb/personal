@@ -3,6 +3,7 @@
 namespace Tests\Feature\Discovery;
 
 use App\Jobs\Discovery\AnalyzeCreatorHandle;
+use App\Jobs\Discovery\DiscoverNicheContent;
 use App\Models\CreatorProfile;
 use App\Models\InstagramAccount;
 use App\Models\User;
@@ -174,6 +175,60 @@ class AnalyzeCreatorHandleTest extends TestCase
         Queue::assertPushed(AnalyzeCreatorHandle::class, 1);
     }
 
+    public function test_changing_handle_invalidates_the_previous_dna_and_discovery_cache(): void
+    {
+        Queue::fake();
+        $user = User::factory()->create();
+        CreatorProfile::query()->create([
+            'user_id' => $user->id,
+            'instagram_username' => 'old.creator',
+            'niche' => 'Old niche',
+            'topics' => ['old topic'],
+            'creator_dna' => ['primary_niche' => 'Old niche', 'analysis_method' => 'llm'],
+            'discovery_queries' => ['old creator query'],
+            'discovery_hashtags' => ['oldtopic'],
+            'discovery_refreshed_at' => now(),
+            'analysis_status' => 'completed',
+        ]);
+
+        $this->actingAs($user)
+            ->putJson('/api/integrations/instagram/handle', ['username' => 'new.creator'])
+            ->assertOk()
+            ->assertJsonPath('analysis.status', 'queued');
+
+        $profile = $user->creatorProfile()->firstOrFail();
+        $this->assertNull($profile->creator_dna);
+        $this->assertNull($profile->niche);
+        $this->assertNull($profile->discovery_queries);
+        $this->assertNull($profile->discovery_hashtags);
+        Queue::assertPushed(
+            AnalyzeCreatorHandle::class,
+            fn (AnalyzeCreatorHandle $job): bool => $job->username === 'new.creator',
+        );
+    }
+
+    public function test_an_old_queued_job_cannot_overwrite_a_new_handle(): void
+    {
+        $user = User::factory()->create();
+        CreatorProfile::query()->create([
+            'user_id' => $user->id,
+            'instagram_username' => 'new.creator',
+            'analysis_status' => 'queued',
+        ]);
+
+        (new AnalyzeCreatorHandle($user->id, 'old.creator'))->handle(
+            app(InstagramDataProvider::class),
+            app(NicheDetectionService::class),
+            app(CreatorMarketDetector::class),
+            app(CanonicalCreatorVerticals::class),
+        );
+
+        $profile = $user->creatorProfile()->firstOrFail();
+        $this->assertSame('new.creator', $profile->instagram_username);
+        $this->assertSame('queued', $profile->analysis_status);
+        $this->assertNull($profile->creator_dna);
+    }
+
     public function test_the_public_profile_fills_the_memory(): void
     {
         $user = User::factory()->create();
@@ -188,6 +243,23 @@ class AnalyzeCreatorHandleTest extends TestCase
         $this->assertSame('Sample bio for founder.creator', $profile->bio);
         $this->assertNotNull($profile->creator_dna);
         $this->assertNotNull($profile->dna_analyzed_at);
+    }
+
+    public function test_a_completed_handle_analysis_starts_the_personalized_feed_discovery(): void
+    {
+        Queue::fake();
+        $user = User::factory()->create();
+        CreatorProfile::query()->create([
+            'user_id' => $user->id,
+            'instagram_username' => 'saas.founder',
+        ]);
+
+        $this->runJob($user);
+
+        Queue::assertPushed(
+            DiscoverNicheContent::class,
+            fn (DiscoverNicheContent $job): bool => $job->userId === $user->id,
+        );
     }
 
     public function test_the_public_profile_picture_is_kept(): void

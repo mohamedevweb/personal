@@ -82,7 +82,7 @@ php artisan personal:compare-instagram-providers "fitness coach"
 
 The command reports creator and Reel counts, metric coverage, failures, execution time, and samples of the returned profiles and content. Run only one provider with `--provider=hiker` or `--provider=scrapecreators`; use `--creators` and `--posts` to control the size and cost of the benchmark.
 
-**Creator DNA.** `SyncInstagramAccount` reads the connected profile and recent media, then stores a structured `creator_dna` with primary niche, sub-niches, topics, audience, language, content pillars and tone. The model-backed analysis has a deterministic fallback, so Instagram sync does not depend on an LLM being available.
+**Creator DNA.** A public handle is enough to start: `AnalyzeCreatorHandle` reads the public profile and up to 30 recent captions, then stores a structured `creator_dna` with primary niche, sub-niches, topics, audience, language, content pillars and tone. `SyncInstagramAccount` enriches the same profile later when the member connects through OAuth. The model-backed analysis has a deterministic fallback, so neither path depends on an LLM being available.
 
 **Stage 1, `DiscoverNicheContent`.** The Creator DNA becomes precise account-search phrases. HikerAPI finds seed creators, then Instagram suggested accounts expand each seed into a reusable creator graph. Creators are upserted by Instagram ID when available, relationships are refreshed rather than duplicated, and global query cooldowns avoid paying twice for a niche Personal already knows.
 
@@ -104,7 +104,7 @@ A lift is a ratio, and a ratio has no sense of scale: an account whose median po
 
 There is deliberately **no fallback**. An unmeasured post carries no evidence, so when measurement has not run yet — or has failed in the queue — the feed shows its empty state rather than degrading to raw scrape output. A page of two-like posts is worth less than an honest empty one.
 
-`FeedRanker` then combines outlier score, reach and freshness. The same global ordering is used for every creator, apart from content each user has dismissed. Every weight and ceiling lives under `services.discovery.ranking`, so the formula can be tuned without being duplicated across jobs or controllers. Niche relevance can be added later when the shared catalogue covers enough distinct niches to support a useful personalized feed.
+`FeedRanker` first combines outlier score, reach and freshness. The personalized feed then compares each qualified creator and post with the member's Creator DNA, using the primary vertical, sub-niches, topics, content pillars and audience. Performance remains the main weight and Creator affinity reorders only content that already cleared measurement, engagement, freshness and safety guards. The same affinity also orders onboarding creator suggestions. The blend is configurable through `FEED_WEIGHT_PERFORMANCE` and `FEED_WEIGHT_CREATOR_AFFINITY`; the Global feed keeps the performance-only ordering.
 
 Niche is read from the account itself. `CreatorNicheService` classifies a discovered creator from their bio, their recurring hashtags and a sample of captions, and the result is cached on the creator so the model is not re-run on every measurement. Discovery previously stamped every account with the niche of whichever user found them, which described the searcher rather than the creator.
 

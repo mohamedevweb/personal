@@ -187,4 +187,32 @@ class FeedRankingTest extends TestCase
         $this->assertFalse($veganFeed->pluck('signals')->flatten()->contains('Great fit for you'));
         $this->assertFalse($veganFeed->pluck('signals')->flatten()->contains('Similar creator'));
     }
+
+    public function test_creator_dna_topics_prioritize_the_closest_creator_inside_the_same_vertical(): void
+    {
+        $this->user->creatorProfile()->update([
+            'creator_dna' => [
+                'primary_niche' => 'Vegan cooking',
+                'sub_niches' => ['Meal prep'],
+                'topics' => ['Vegan recipes', 'Plant protein'],
+                'content_pillars' => ['Quick meals'],
+            ],
+        ]);
+
+        $relevantCreator = $this->creator('plant.prep', 20000, 900);
+        $relevantCreator->update(['niche_topics' => ['vegan recipes', 'meal prep', 'plant protein']]);
+        $otherCreator = $this->creator('pastry.school', 20000, 900);
+        $otherCreator->update(['niche_topics' => ['pastry', 'bread', 'desserts']]);
+
+        $relevant = $this->storePost($relevantCreator, 2.0, ['tags' => ['vegan', 'quick meals']]);
+        $strongerButGeneric = $this->storePost($otherCreator, 2.2, ['tags' => ['pastry', 'desserts']]);
+
+        $feed = app(RecommendationService::class)->forUser($this->user);
+
+        $this->assertSame($relevant->hook, $feed->first()['hook']);
+        $this->assertGreaterThan(
+            $feed->firstWhere('id', $strongerButGeneric->id)['creator_fit_score'],
+            $feed->firstWhere('id', $relevant->id)['creator_fit_score'],
+        );
+    }
 }

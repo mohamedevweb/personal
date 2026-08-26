@@ -10,6 +10,7 @@ use App\Services\Discovery\ContentSafetyDecision;
 use App\Services\Discovery\CreatorScrapeSchedule;
 use App\Services\Discovery\DiscoveredProfile;
 use App\Services\Discovery\InstagramDataProviderManager;
+use App\Services\Feed\CreatorAffinity;
 use App\Services\Instagram\InstagramMediaProxy;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
@@ -30,6 +31,7 @@ class CreatorInspirationService
     public function __construct(
         private readonly InstagramDataProviderManager $providers,
         private readonly CanonicalCreatorVerticals $verticals,
+        private readonly CreatorAffinity $affinity,
         private readonly InstagramMediaProxy $media,
         private readonly CreatorScrapeSchedule $scrapeSchedule,
     ) {}
@@ -43,7 +45,6 @@ class CreatorInspirationService
             })
             ->get();
         $selectedIds = $selected->pluck('id');
-        $vertical = $this->primaryVertical($user);
         $market = $user->creatorProfile?->market;
 
         $pool = Creator::query()
@@ -57,8 +58,8 @@ class CreatorInspirationService
             ->get();
 
         $suggestions = $pool
-            ->sortByDesc(fn (Creator $creator): int => ($vertical && $creator->niche === $vertical ? 4 : 0)
-                + ($market && $creator->market === $market ? 2 : 0)
+            ->sortByDesc(fn (Creator $creator): float => (($this->affinity->score($user->creatorProfile, $creator) ?? 0) * 100)
+                + ($market && $creator->market === $market ? 10 : 0)
                 + ($creator->is_catalog_seed ? 1 : 0)
             )
             // The client keeps only six cards visible. The reserve lets it replace

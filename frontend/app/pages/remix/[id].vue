@@ -418,7 +418,7 @@ onBeforeUnmount(() => {
               class="bar-button"
               :class="confirmingDelete ? 'text-[var(--danger)]' : 'hover:text-[var(--danger)]'"
               :disabled="deleting || saving"
-              :aria-label="$t('remix.delete')"
+              :aria-label="confirmingDelete ? $t('remix.deleteConfirm') : $t('remix.delete')"
               @click="askDelete"
             >
               <AppIcon name="trash" :size="15" />

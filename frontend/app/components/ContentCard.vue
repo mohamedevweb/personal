@@ -173,6 +173,9 @@ watch(() => props.post.id, () => {
       <div class="flex flex-nowrap items-center gap-1">
         <PerformanceBadge :post="post" />
         <div class="flex flex-nowrap items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <span v-if="(post.creator_fit_score ?? 0) >= 55" class="shrink-0 whitespace-nowrap rounded-full border border-[var(--accent-line)] bg-[var(--accent-soft)] px-2.5 py-1.5 text-[12px] text-[var(--accent-ink)]">
+            {{ $t('contentCard.creatorFit') }}
+          </span>
           <span class="shrink-0 whitespace-nowrap rounded-full border border-[var(--line)] px-2.5 py-1.5 text-[12px] text-[var(--muted)]">
             {{ mediaKind === 'reel' && post.views > 0 ? $t('contentCard.views', { count: compactNumber(post.views) }) : $t('contentCard.engagements', { count: compactNumber(engagement) }) }}
           </span>

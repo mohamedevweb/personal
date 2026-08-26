@@ -30,6 +30,7 @@ class RecommendationService
     public function __construct(
         private readonly ContentPostView $view,
         private readonly FeedRanker $ranker,
+        private readonly CreatorAffinity $affinity,
         private readonly MarketFeedAllocator $markets,
         private readonly CanonicalCreatorVerticals $verticals,
     ) {}
@@ -43,7 +44,10 @@ class RecommendationService
         $inspirationIds = $user->inspirationCreators()->pluck('creators.id');
 
         $ranked = $this->candidates($user, $limit, $primaryVertical, $inspirationIds, $excludeIds)
-            ->map(fn (ContentPost $post): array => ['post' => $post, 'ranking' => $this->ranker->rank($post)])
+            ->map(fn (ContentPost $post): array => [
+                'post' => $post,
+                'ranking' => $this->personalizedRanking($post, $user),
+            ])
             ->sortByDesc('ranking.score')
             ->values();
 
@@ -86,7 +90,7 @@ class RecommendationService
     }
 
     /**
-     * @param  Collection<int, array{post: ContentPost, ranking: array<string, float>}>  $ranked
+     * @param  Collection<int, array{post: ContentPost, ranking: array<string, float|null>}>  $ranked
      * @param  Collection<int, mixed>  $savedIds
      * @return Collection<int, array<string, mixed>>
      */
@@ -97,6 +101,9 @@ class RecommendationService
             $ranking = $item['ranking'];
 
             return $this->view->make($post, $user, $ranking['score'], $savedIds->has($post->id)) + [
+                'creator_fit_score' => ($ranking['creator_fit'] ?? null) === null
+                    ? null
+                    : round((float) $ranking['creator_fit'] * 100),
                 'why_recommended' => $this->reason($post),
                 'signals' => array_values(array_filter([
                     // The lift itself is already on the card as a localized badge,
@@ -221,6 +228,29 @@ class RecommendationService
         }
 
         return "Above {$normal} ({$lift}×), with enough engagement to make it a useful global benchmark.";
+    }
+
+    /** @return array<string, float|null> */
+    private function personalizedRanking(ContentPost $post, User $user): array
+    {
+        $ranking = $this->ranker->rank($post);
+        $affinity = $this->affinity->score($user->creatorProfile, $post->creator, $post);
+
+        if ($affinity === null) {
+            return [...$ranking, 'creator_fit' => null];
+        }
+
+        $performanceWeight = max(0.0, (float) config('services.discovery.personalization.performance_weight'));
+        $affinityWeight = max(0.0, (float) config('services.discovery.personalization.affinity_weight'));
+        $total = $performanceWeight + $affinityWeight;
+
+        return [
+            ...$ranking,
+            'score' => round($total > 0
+                ? (($ranking['score'] * $performanceWeight) + ($affinity * 100 * $affinityWeight)) / $total
+                : $ranking['score'], 1),
+            'creator_fit' => $affinity,
+        ];
     }
 
     private function primaryVertical(User $user): ?string

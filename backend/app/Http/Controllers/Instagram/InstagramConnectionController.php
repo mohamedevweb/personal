@@ -84,18 +84,50 @@ class InstagramConnectionController extends Controller
         // never got anywhere is retried, which is what the loader's retry does.
         $analyze = $changed || in_array($profile?->analysis_status, [null, 'failed'], true);
 
+        $analysis = $analyze ? ['analysis_status' => 'queued', 'analysis_error' => null] : [];
+
+        if ($changed) {
+            $analysis += [
+                'analysis_started_at' => null,
+                'followers_count' => null,
+                'analyzed_posts_count' => null,
+                'avatar_url' => null,
+                'bio' => null,
+                'market' => null,
+                'market_confidence' => null,
+                'discovery_queries' => null,
+                'discovery_hashtags' => null,
+                'discovery_refreshed_at' => null,
+            ];
+
+            if (data_get($profile?->creator_dna, 'analysis_method') !== 'manual') {
+                $analysis += [
+                    'display_name' => null,
+                    'niche' => null,
+                    'audience_description' => null,
+                    'positioning' => null,
+                    'topics' => null,
+                    'tone' => null,
+                    'voice_profile' => null,
+                    'creator_dna' => null,
+                    'primary_vertical' => null,
+                    'dna_analyzed_at' => null,
+                ];
+            }
+        }
+
         $profile = $request->user()->creatorProfile()->updateOrCreate(
             ['user_id' => $request->user()->id],
             [
                 'instagram_username' => $username,
-                ...($analyze ? ['analysis_status' => 'queued', 'analysis_error' => null] : []),
+                ...$analysis,
             ],
         );
 
         // Reading the public profile is what makes the app personal, so it starts
         // here rather than waiting for the creator to find the memory page.
         if ($analyze) {
-            AnalyzeCreatorHandle::dispatch($request->user()->id);
+            AnalyzeCreatorHandle::dispatch($request->user()->id, $username);
         }
 
         return response()->json([
