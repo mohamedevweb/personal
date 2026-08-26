@@ -3,7 +3,7 @@
 namespace App\Services\Instagram;
 
 use App\Exceptions\InstagramIntegrationException;
-use App\Jobs\SyncInstagramAccount;
+use App\Jobs\Instagram\SyncInstagramAccount;
 use App\Models\InstagramAccount;
 use App\Models\InstagramOauthState;
 use App\Models\User;

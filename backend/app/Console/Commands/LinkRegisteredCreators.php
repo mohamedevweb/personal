@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\InstagramAccount;
-use App\Services\RegisteredCreatorService;
+use App\Services\Creator\RegisteredCreatorService;
 use Illuminate\Console\Command;
 
 class LinkRegisteredCreators extends Command

@@ -2,7 +2,7 @@
 
 namespace App\Services\Discovery;
 
-use App\Services\InstagramMediaProxy;
+use App\Services\Instagram\InstagramMediaProxy;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use OpenAI\Contracts\ClientContract as OpenAiClient;

@@ -2,7 +2,7 @@
 
 namespace App\Services\Discovery;
 
-use App\Jobs\MeasureAccountEngagement;
+use App\Jobs\Discovery\MeasureAccountEngagement;
 use App\Models\Creator;
 use Illuminate\Support\Facades\DB;
 

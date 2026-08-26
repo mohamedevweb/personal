@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\InstagramCallbackController;
+use App\Http\Controllers\Instagram\InstagramCallbackController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {

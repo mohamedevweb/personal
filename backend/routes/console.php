@@ -1,6 +1,6 @@
 <?php
 
-use App\Jobs\SyncInstagramAccount;
+use App\Jobs\Instagram\SyncInstagramAccount;
 use App\Models\InstagramAccount;
 use App\Models\InstagramOauthState;
 use Illuminate\Foundation\Inspiring;

@@ -1,20 +1,20 @@
 <?php
 
-use App\Http\Controllers\AccountController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ChatController;
-use App\Http\Controllers\ContentController;
-use App\Http\Controllers\CreatorInspirationController;
-use App\Http\Controllers\EmailVerificationController;
-use App\Http\Controllers\FeedController;
-use App\Http\Controllers\InstagramConnectionController;
-use App\Http\Controllers\MediaController;
-use App\Http\Controllers\MomentController;
-use App\Http\Controllers\OpportunityController;
-use App\Http\Controllers\PasswordResetController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\RemixController;
-use App\Http\Controllers\SavedContentController;
+use App\Http\Controllers\Auth\AccountController;
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\Content\ChatController;
+use App\Http\Controllers\Content\ContentController;
+use App\Http\Controllers\Content\FeedController;
+use App\Http\Controllers\Content\OpportunityController;
+use App\Http\Controllers\Content\RemixController;
+use App\Http\Controllers\Content\SavedContentController;
+use App\Http\Controllers\Creator\CreatorInspirationController;
+use App\Http\Controllers\Creator\MomentController;
+use App\Http\Controllers\Creator\ProfileController;
+use App\Http\Controllers\Instagram\InstagramConnectionController;
+use App\Http\Controllers\Instagram\MediaController;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;

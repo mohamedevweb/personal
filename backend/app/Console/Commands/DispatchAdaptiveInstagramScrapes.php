@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\MeasureAccountEngagement;
-use App\Jobs\RefreshCreatorPostMetrics;
+use App\Jobs\Discovery\MeasureAccountEngagement;
+use App\Jobs\Discovery\RefreshCreatorPostMetrics;
 use App\Models\Creator;
 use App\Services\Discovery\ContentSafetyDecision;
 use Illuminate\Console\Command;
