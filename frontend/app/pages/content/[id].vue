@@ -123,10 +123,6 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
           <div class="border-b border-[var(--line-soft)] px-6 py-5">
             <h2 class="font-serif text-[26px] tracking-[-.02em]">{{ $t('content.makeItYours') }}</h2>
             <p class="mt-1.5 text-[13.5px] leading-6 text-[var(--muted)]">{{ $t('content.makeItYoursCopy') }}</p>
-            <div class="mt-4 flex items-start gap-3 rounded-[13px] border border-[var(--positive-line)] bg-[var(--positive-soft)] p-3 text-[var(--positive)]">
-              <span class="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-[var(--positive-line)] bg-white"><AppIcon name="check" :size="13" /></span>
-              <span><span class="block text-[12px] font-semibold">{{ $t('content.voiceLocked') }}</span><span class="mt-0.5 block text-[11.5px] leading-5 opacity-80">{{ voiceSummary }}</span></span>
-            </div>
           </div>
 
           <!-- The three shapes, each saying what you actually get, so the choice

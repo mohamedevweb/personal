@@ -434,6 +434,7 @@
     "analysis": {
       "eyebrow": "Reading your profile",
       "previewLabel": "Reading · public profile",
+      "previewFailedLabel": "Profile not read",
       "title": "Personal is reading your account.",
       "copy": "We’re pulling your profile, your last 30 posts, your tone and your audience. Stay on this screen: the next step opens as soon as everything is in.",
       "progress": "{done} of {total}",
@@ -772,7 +773,6 @@
     "voiceSummary": "This pattern can speak about {niche} in a {tone} voice.",
     "voiceFallbackNiche": "your universe",
     "voiceFallbackTone": "natural",
-    "voiceLocked": "Your voice is locked in",
     "makeItYours": "Make it yours",
     "makeItYoursCopy": "Choose the form. Personal will adapt the pattern to your context, not copy it.",
     "groundInMoment": "Choose a real moment",

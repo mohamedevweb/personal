@@ -988,7 +988,7 @@ onMounted(async () => {
         </div>
 
         <p class="text-[10px] font-semibold uppercase tracking-[.22em] text-[var(--b-red-lit)]">
-          {{ showAnalysis ? $t('onboarding.analysis.previewLabel') : status.connected ? $t('onboarding.profileLive') : status.instagram_username ? $t('onboarding.profileProvided') : $t('onboarding.preview.label') }}
+          {{ showAnalysis ? (analysisFailed ? $t('onboarding.analysis.previewFailedLabel') : $t('onboarding.analysis.previewLabel')) : status.connected ? $t('onboarding.profileLive') : status.instagram_username ? $t('onboarding.profileProvided') : $t('onboarding.preview.label') }}
         </p>
 
         <!-- The same reading as the list on the left, seen from the profile's
@@ -999,8 +999,7 @@ onMounted(async () => {
 
           <p v-if="analysis?.bio" class="mt-4 max-w-[19rem] whitespace-pre-line text-[12.5px] leading-[1.6] text-white/60">{{ analysis.bio }}</p>
           <div v-else class="mt-5 space-y-2.5">
-            <div class="h-2.5 w-56 max-w-full animate-pulse rounded-full bg-white/10" />
-            <div class="h-2.5 w-40 max-w-full animate-pulse rounded-full bg-white/10" />
+            <div v-for="width in ['w-56', 'w-40']" :key="width" class="h-2.5 max-w-full rounded-full bg-white/10" :class="[width, analysisFailed ? '' : 'animate-pulse']" />
           </div>
 
           <dl class="mt-7 flex gap-8 border-y border-white/10 py-4">
@@ -1023,7 +1022,7 @@ onMounted(async () => {
             <span v-for="tone in analysis.tone" :key="tone" class="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/70">{{ tone }}</span>
           </div>
           <div v-else class="mt-3 flex gap-2">
-            <div v-for="i in 3" :key="i" class="h-7 w-20 animate-pulse rounded-full bg-white/[.07]" />
+            <div v-for="i in 3" :key="i" class="h-7 w-20 rounded-full bg-white/[.07]" :class="analysisFailed ? '' : 'animate-pulse'" />
           </div>
 
           <p class="mt-7 font-serif text-xl leading-7 text-white/45">{{ $t('onboarding.analysis.previewNote') }}</p>

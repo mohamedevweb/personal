@@ -434,6 +434,7 @@
     "analysis": {
       "eyebrow": "Lecture de ton profil",
       "previewLabel": "Lecture en cours · profil public",
+      "previewFailedLabel": "Profil non lu",
       "title": "Personal lit ton compte.",
       "copy": "On récupère ton profil, tes 30 derniers posts, ton ton et ton audience. Reste sur cet écran : l’étape suivante s’ouvre dès que tout est là.",
       "progress": "{done} sur {total}",
@@ -772,7 +773,6 @@
     "voiceSummary": "Ce schéma peut parler de {niche} avec une voix {tone}.",
     "voiceFallbackNiche": "ton univers",
     "voiceFallbackTone": "naturelle",
-    "voiceLocked": "Ta voix est verrouillée",
     "makeItYours": "Crée ta version",
     "makeItYoursCopy": "Choisis la forme. Personal adaptera le schéma à ton contexte, sans le copier.",
     "groundInMoment": "Choisis un moment réel",
