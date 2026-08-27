@@ -191,7 +191,7 @@ watch(() => props.post.id, () => {
     </div>
 
     <!-- Everything Personal adds on top of the post lives below the fold line. -->
-    <div class="flex flex-1 flex-col border-t border-[var(--line)] bg-[var(--paper)] px-2.5 py-3.5">
+    <div class="flex flex-1 flex-col border-t border-[var(--line)] bg-[var(--paper)] px-2.5 py-3">
       <!-- Only the outlier ratio: the raw counts were already in the post above,
            and crowding them next to the badge pushed it into a clipped scroller.
            Saving rides on the same line and wraps to its own only when the chip
@@ -208,7 +208,7 @@ watch(() => props.post.id, () => {
         </button>
       </div>
 
-      <div class="mt-auto grid gap-2 pt-3">
+      <div class="grid gap-2 pt-2.5">
         <button
           type="button"
           class="inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-4 text-[12.5px] font-medium text-[var(--paper)] transition hover:bg-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
