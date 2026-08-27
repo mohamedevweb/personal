@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 
 /**
  * Deterministic sample profiles so account-level engagement is testable without
- * a paid Apify run. Metrics are derived from a hash of the username, so the same
+ * a paid provider request. Metrics are derived from a hash of the username, so the same
  * account always yields the same, stable engagement rate.
  */
 class MockProfileScraperService implements ProfileDiscoveryService

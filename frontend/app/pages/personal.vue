@@ -14,6 +14,12 @@ type PersonalProfileDraft = Pick<PersonalProfile,
 >
 
 const { apiFetch } = usePersonalApi()
+const {
+  status: instagramStatus,
+  analysisRunning,
+  loadStatus: loadInstagramStatus,
+  startPolling: startInstagramPolling
+} = useInstagram()
 const { t } = useI18n()
 const toast = useToast()
 const profile = ref<PersonalProfile | null>(null)
@@ -88,6 +94,7 @@ async function saveHandle() {
     })
     if (profile.value) profile.value.instagram_username = response.instagram_username
     editingHandle.value = false
+    await loadProfile()
     toast.success(t('personal.handle.saved'))
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('personal.handle.error')))
@@ -140,6 +147,8 @@ async function loadProfile() {
     posts.value = postsResponse.posts
     instagramAvatarFailed.value = false
     avatarFailed.value = false
+    await loadInstagramStatus()
+    if (analysisRunning.value) startInstagramPolling()
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('personal.loadError')))
   } finally {
@@ -155,6 +164,12 @@ async function toggleSaved(post: ContentPost) {
     toast.error(apiErrorMessage(exception, t('personal.posts.saveError')))
   }
 }
+
+watch(() => instagramStatus.value.analysis?.status, async (status, previousStatus) => {
+  if (status !== previousStatus && (status === 'completed' || status === 'failed')) {
+    await loadProfile()
+  }
+})
 
 onMounted(loadProfile)
 </script>

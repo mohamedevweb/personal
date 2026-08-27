@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 
 /**
  * Deterministic sample posts so the feed is testable end to end without a paid
- * Apify run. Metrics are derived from a hash of the hashtag, so the same niche
+ * provider request. Metrics are derived from a hash of the hashtag, so the same niche
  * always produces the same, stable feed.
  */
 class MockInstagramDiscoveryService implements ContentDiscoveryService

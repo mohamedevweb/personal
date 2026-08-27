@@ -715,6 +715,7 @@
     "remixForMe": "Créer ma version",
     "followers": "{count} abonnés",
     "views": "{count} vues",
+    "playReel": "Lire le Reel de {'@'}{username}",
     "openSource": "Voir le post original",
     "formatBlurb": {
       "reel": "Une accroche, un script parlé et le plan à filmer.",
@@ -849,6 +850,7 @@
     "viewComments": "Voir les {count} commentaires",
     "openProfile": "Voir le compte de {'@'}{username} sur Instagram",
     "openSource": "Voir le post original sur Instagram",
+    "playReel": "Lire le Reel de {'@'}{username}",
     "previousSlide": "Diapositive précédente",
     "nextSlide": "Diapositive suivante",
     "goToSlide": "Aller à la diapositive {slide}",
@@ -1039,7 +1041,7 @@
         "discovery": {
           "title": "Les publications d’autres créateurs",
           "p": {
-            "what": "Le fil « For You » s’appuie sur des publications publiques d’autres comptes Instagram de votre niche. Nous les collectons via notre prestataire Apify, à partir de pages de hashtags et de profils publics.",
+            "what": "Le fil « For You » s’appuie sur des publications publiques d’autres comptes Instagram de votre niche. Nous les collectons via Scrape Creators à partir de profils et de résultats de recherche Instagram publics.",
             "fields": "Nous conservons ce qui rend une publication comparable : nom d’utilisateur public, nom affiché, photo de profil, biographie, nombre d’abonnés et engagement moyen du compte, et pour chaque publication son accroche, le texte de son post, sa miniature, sa date et ses compteurs publics.",
             "basis": "La base légale est notre intérêt légitime à produire une analyse de tendances à partir d’informations rendues publiques par leurs auteurs. Nous n’accédons à aucun compte privé, à aucun message et à aucune donnée qui ne soit pas déjà visible de tous. Ces informations servent uniquement à l’analyse de performance : elles ne servent jamais à contacter ces créateurs, ni à republier leurs contenus.",
             "rights": "Si vous êtes créateur et ne souhaitez pas que vos publications soient analysées par Personal, écrivez à privacy{'@'}usepersonal.app : nous supprimons votre compte et vos publications de notre base et empêchons leur réapparition."
@@ -1063,9 +1065,9 @@
               "term": "Anthropic",
               "detail": "Génération de contenu lorsque ce moteur est sélectionné. États-Unis."
             },
-            "apify": {
-              "term": "Apify",
-              "detail": "Collecte des publications publiques utilisées pour l’analyse de tendances. République tchèque, Union européenne."
+            "scrapecreators": {
+              "term": "Scrape Creators (Web Scraping Guy LLC)",
+              "detail": "Collecte des publications publiques utilisées pour l’analyse de tendances. États-Unis."
             },
             "resend": {
               "term": "Resend",
@@ -1543,7 +1545,7 @@
         "thirdParty": {
           "title": "Les services tiers",
           "p": {
-            "list": "Personal s’appuie sur Meta pour la connexion Instagram, sur OpenAI et Anthropic pour la génération, sur Apify pour la collecte des publications publiques et sur Resend pour les e-mails de service. Utiliser Personal implique ces services, chacun sous ses propres conditions.",
+            "list": "Personal s’appuie sur Meta pour la connexion Instagram, sur OpenAI et Anthropic pour la génération, sur Scrape Creators pour la collecte des publications publiques et sur Resend pour les e-mails de service. Utiliser Personal implique ces services, chacun sous ses propres conditions.",
             "links": "Le service peut renvoyer vers des sites que nous n’exploitons pas. Nous ne sommes pas responsables de ce qui s’y trouve."
           }
         },

@@ -43,17 +43,9 @@ return [
     ],
 
     'discovery' => [
-        // HikerAPI is the default public-data provider. ScrapeCreators can feed
-        // the same normalized pipeline, Apify remains available as a fallback,
-        // and mock keeps local development deterministic.
-        'driver' => env('DISCOVERY_DRIVER', 'hiker'),
-        'hiker' => [
-            'api_key' => env('HIKER_API_KEY'),
-            'base_url' => env('HIKER_BASE_URL', 'https://api.hikerapi.com'),
-            'timeout' => (int) env('HIKER_TIMEOUT', 30),
-            'retries' => (int) env('HIKER_RETRIES', 3),
-            'retry_delay_ms' => (int) env('HIKER_RETRY_DELAY_MS', 500),
-        ],
+        // ScrapeCreators is the only real-data provider. Mock keeps local
+        // development and automated tests deterministic.
+        'driver' => env('DISCOVERY_DRIVER', 'scrapecreators'),
         'scrapecreators' => [
             'api_key' => env('SCRAPECREATORS_API_KEY'),
             'base_url' => env('SCRAPECREATORS_BASE_URL', 'https://api.scrapecreators.com'),
@@ -64,19 +56,6 @@ return [
             // matches the account measurement cooldown and avoids duplicate cost.
             'cache_max_age' => env('SCRAPECREATORS_CACHE_MAX_AGE', '3d'),
         ],
-        'apify' => [
-            'token' => env('APIFY_TOKEN'),
-            'actor' => env('APIFY_INSTAGRAM_ACTOR', 'apify~instagram-scraper'),
-            // Scrapes whole accounts (real follower count + recent posts) so the
-            // engagement rate can be measured per account.
-            'profile_actor' => env('APIFY_PROFILE_ACTOR', 'apify~instagram-profile-scraper'),
-            // Cost knob: Apify bills per result written to the dataset.
-            'results_limit' => (int) env('APIFY_RESULTS_LIMIT', 30),
-            // Re-scrape post URLs to recover likes/views (hashtag pages hide them).
-            // Doubles the result count; set false for engagement-blind, half-price runs.
-            'enrich_metrics' => (bool) env('APIFY_ENRICH_METRICS', true),
-            'timeout' => (int) env('APIFY_TIMEOUT', 120),
-        ],
         // Recent posts pulled per account to average the engagement rate over.
         'profile_posts' => (int) env('DISCOVERY_PROFILE_POSTS', 12),
         'search_query_limit' => (int) env('DISCOVERY_SEARCH_QUERY_LIMIT', 6),
@@ -86,11 +65,10 @@ return [
         // Legacy recovery cutoff used while discovery resumes accounts that were
         // never measured. Ongoing refreshes use config/instagram_scraping.php.
         'measure_cooldown_days' => (int) env('DISCOVERY_MEASURE_COOLDOWN_DAYS', 3),
-        // Cap on accounts measured per job run, so a large niche can't blow the
-        // Apify budget in one pass.
+        // Cap on accounts measured per job run, so a large niche cannot consume
+        // the whole provider budget in one pass.
         'measure_batch' => (int) env('DISCOVERY_MEASURE_BATCH', 30),
-        // Accounts per Apify call. A synchronous run is capped at five minutes and a
-        // whole batch does not reliably fit, so the batch is scraped in chunks.
+        // Accounts per measurement job, keeping each queue payload bounded.
         'measure_chunk' => (int) env('DISCOVERY_MEASURE_CHUNK', 10),
         // How many hashtags an expansion produces and how long the cache holds.
         'hashtag_limit' => (int) env('DISCOVERY_HASHTAG_LIMIT', 10),
@@ -177,6 +155,7 @@ return [
         'signature_hours' => (int) env('INSTAGRAM_MEDIA_SIGNATURE_HOURS', 24),
         'timeout' => (int) env('INSTAGRAM_MEDIA_TIMEOUT', 15),
         'max_bytes' => (int) env('INSTAGRAM_MEDIA_MAX_BYTES', 10_485_760),
+        'max_video_bytes' => (int) env('INSTAGRAM_VIDEO_MAX_BYTES', 104_857_600),
     ],
 
     'openai' => [

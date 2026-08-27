@@ -40,7 +40,7 @@ The goal of this stage is one sentence: *what shape does a winning post have in
 our niche this week.* Not "what should we say" — what **form** wins.
 
 **We can run this with our own pipeline.** `InstagramDataProvider` already
-abstracts ScrapeCreators and Apify, and both have X/Twitter endpoints. Pointing
+abstracts ScrapeCreators, which also has X/Twitter endpoints. Pointing
 the existing outlier maths at ~50 X accounts is a driver, not a new system. The
 ratio logic — a post beating *its own account's* average — is exactly the right
 metric here too, and it is more honest than raw view counts.

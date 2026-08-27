@@ -5,6 +5,7 @@ namespace App\Jobs\Instagram;
 use App\Jobs\Discovery\DiscoverNicheContent;
 use App\Models\CreatorProfile;
 use App\Models\InstagramAccount;
+use App\Services\Creator\CreatorProfileDnaWriter;
 use App\Services\Creator\RegisteredCreatorService;
 use App\Services\Discovery\CanonicalCreatorVerticals;
 use App\Services\Discovery\CreatorMarketDetector;
@@ -41,10 +42,12 @@ class SyncInstagramAccount implements ShouldQueue
         ?CreatorMarketDetector $markets = null,
         ?CanonicalCreatorVerticals $verticals = null,
         ?RegisteredCreatorService $registeredCreators = null,
+        ?CreatorProfileDnaWriter $dnaWriter = null,
     ): void {
         $markets ??= app(CreatorMarketDetector::class);
         $verticals ??= app(CanonicalCreatorVerticals::class);
         $registeredCreators ??= app(RegisteredCreatorService::class);
+        $dnaWriter ??= app(CreatorProfileDnaWriter::class);
         $account = InstagramAccount::query()->findOrFail($this->instagramAccountId);
 
         try {
@@ -79,7 +82,6 @@ class SyncInstagramAccount implements ShouldQueue
             ]);
 
             $creatorProfile = CreatorProfile::query()->firstOrNew(['user_id' => $account->user_id]);
-            $manualProfile = data_get($creatorProfile->creator_dna, 'analysis_method') === 'manual';
             $creatorProfile->fill([
                 'instagram_username' => $account->username,
                 'display_name' => $account->display_name,
@@ -88,22 +90,7 @@ class SyncInstagramAccount implements ShouldQueue
                 'market_confidence' => $market['confidence'],
             ]);
 
-            if (! $manualProfile) {
-                $creatorProfile->fill([
-                    'niche' => $signals['primary_niche'],
-                    'positioning' => $signals['primary_niche'] ? $account->bio : null,
-                    'topics' => $signals['topics'],
-                    'tone' => $signals['tone'],
-                    'voice_profile' => $signals['voice_profile'],
-                    'audience_description' => $signals['audience'] === [] ? null : implode(', ', $signals['audience']),
-                    'creator_dna' => $signals,
-                    'primary_vertical' => $primaryVertical,
-                    'dna_analyzed_at' => now(),
-                    'discovery_queries' => null,
-                    'discovery_hashtags' => null,
-                    'discovery_refreshed_at' => null,
-                ]);
-            }
+            $dnaWriter->apply($creatorProfile, $signals, $primaryVertical);
 
             if ($this->hasLegacyPlaceholderContext($creatorProfile)) {
                 $creatorProfile->fill([

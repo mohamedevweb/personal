@@ -43,7 +43,7 @@ const SECTIONS: Section[] = [
   {
     id: 'sharing',
     p: ['intro'],
-    items: ['meta', 'openai', 'anthropic', 'apify', 'resend', 'google', 'hosting'],
+    items: ['meta', 'openai', 'anthropic', 'scrapecreators', 'resend', 'google', 'hosting'],
     note: true
   },
   { id: 'transfers', p: ['text'] },

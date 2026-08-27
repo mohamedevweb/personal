@@ -27,6 +27,7 @@ export interface ContentPost {
   caption: string
   source_url: string | null
   thumbnail_url: string | null
+  video_url: string | null
   media_urls: string[]
   views: number
   likes: number
@@ -104,15 +105,21 @@ export interface PersonalProfile {
   goals: string[] | null
   content_strengths: string[] | null
   voice_profile: string | null
+  analysis_status?: 'idle' | 'queued' | 'reading_profile' | 'importing_posts' | 'reading_voice' | 'mapping_audience' | 'completed' | 'failed'
   creator_dna?: {
     primary_niche: string | null
     sub_niches: string[]
     topics: string[]
     audience: string[]
+    positioning?: string | null
     language: string
     content_pillars: string[]
     tone: string[]
+    current_projects?: string[]
+    goals?: string[]
+    content_strengths?: string[]
     voice_profile?: string | null
+    analysis_version?: number
     analysis_status?: 'complete' | 'partial' | 'insufficient_evidence'
     analysis_method?: 'llm' | 'heuristic' | 'manual' | 'none'
     confidence?: number

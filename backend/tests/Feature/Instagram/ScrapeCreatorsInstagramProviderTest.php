@@ -106,6 +106,7 @@ class ScrapeCreatorsInstagramProviderTest extends TestCase
                                     'edge_media_to_comment' => ['count' => 80],
                                     'video_view_count' => 45_000,
                                     'thumbnail_src' => 'https://cdn.example.test/reel.jpg',
+                                    'video_url' => 'https://cdn.example.test/reel.mp4',
                                 ],
                             ]],
                         ],
@@ -133,6 +134,7 @@ class ScrapeCreatorsInstagramProviderTest extends TestCase
         $this->assertSame('media-1', $profile?->posts->first()?->externalId);
         $this->assertSame('reel', $profile?->posts->first()?->format);
         $this->assertSame(45_000, $profile?->posts->first()?->views);
+        $this->assertSame('https://cdn.example.test/reel.mp4', $profile?->posts->first()?->videoUrl);
         $this->assertSame(['aisaas'], $profile?->posts->first()?->hashtags);
         $this->assertSame('media-2', $posts->first()?->externalId);
         $this->assertSame('carousel', $posts->first()?->format);

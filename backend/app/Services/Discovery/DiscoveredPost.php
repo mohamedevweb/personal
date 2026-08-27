@@ -34,6 +34,7 @@ class DiscoveredPost
         public readonly int $shares = 0,
         public readonly array $metadata = [],
         public readonly array $mediaUrls = [],
+        public readonly ?string $videoUrl = null,
     ) {}
 
     /**

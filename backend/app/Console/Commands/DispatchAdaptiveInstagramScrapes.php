@@ -6,6 +6,7 @@ use App\Jobs\Discovery\MeasureAccountEngagement;
 use App\Jobs\Discovery\RefreshCreatorPostMetrics;
 use App\Models\Creator;
 use App\Services\Discovery\ContentSafetyDecision;
+use App\Services\Discovery\CreatorNicheService;
 use Illuminate\Console\Command;
 
 class DispatchAdaptiveInstagramScrapes extends Command
@@ -20,7 +21,13 @@ class DispatchAdaptiveInstagramScrapes extends Command
         $dueCreators = Creator::query()
             ->when(config('creator_catalog.curated_only'), fn ($query) => $query->where('curation_status', 'approved'))
             ->where('safety_status', '!=', ContentSafetyDecision::BLOCKED)
-            ->where('next_scrape_at', '<=', $now)
+            ->where(function ($query) use ($now): void {
+                $query->where('next_scrape_at', '<=', $now)
+                    ->orWhere(function ($query): void {
+                        $query->where('is_catalog_seed', false)
+                            ->where('niche_analysis_version', '<', CreatorNicheService::ANALYSIS_VERSION);
+                    });
+            })
             ->orderByDesc('scrape_priority')
             ->orderBy('next_scrape_at')
             ->limit((int) config('instagram_scraping.creator_batch'))

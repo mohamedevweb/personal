@@ -6,6 +6,8 @@ use Illuminate\Http\Client\Response as ClientResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Psr\Http\Message\StreamInterface;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
 class InstagramMediaProxy
@@ -35,6 +37,61 @@ class InstagramMediaProxy
         $image = $this->image($sourceUrl, $cacheKey);
 
         return $image ? $this->imageResponse($image['body'], $image['content_type']) : null;
+    }
+
+    public function videoResponse(string $sourceUrl, ?string $range = null): ?StreamedResponse
+    {
+        if (! $this->supports($sourceUrl)) {
+            return null;
+        }
+
+        $headers = [
+            'Accept' => 'video/mp4,video/*',
+            'User-Agent' => 'PersonalMediaProxy/1.0',
+        ];
+
+        if (is_string($range) && preg_match('/^bytes=(?:\d+-\d*|-\d+)$/', $range) === 1) {
+            $headers['Range'] = $range;
+        }
+
+        try {
+            $upstream = Http::withHeaders($headers)
+                ->timeout((int) config('services.instagram_media_proxy.timeout'))
+                ->withOptions(['allow_redirects' => false, 'stream' => true])
+                ->get($sourceUrl);
+        } catch (Throwable) {
+            return null;
+        }
+
+        if (! in_array($upstream->status(), [Response::HTTP_OK, Response::HTTP_PARTIAL_CONTENT], true)) {
+            return null;
+        }
+
+        $contentType = strtolower(trim((string) $upstream->header('Content-Type')));
+        $contentLength = filter_var($upstream->header('Content-Length'), FILTER_VALIDATE_INT);
+        $maxBytes = max(1, (int) config('services.instagram_media_proxy.max_video_bytes'));
+
+        if (! str_starts_with($contentType, 'video/') || ($contentLength !== false && $contentLength > $maxBytes)) {
+            return null;
+        }
+
+        $body = $upstream->toPsrResponse()->getBody();
+        $responseHeaders = array_filter([
+            'Accept-Ranges' => $upstream->header('Accept-Ranges') ?: 'bytes',
+            'Access-Control-Allow-Origin' => '*',
+            'Cache-Control' => 'private, max-age=3600',
+            'Content-Length' => $contentLength === false ? null : (string) $contentLength,
+            'Content-Range' => $upstream->header('Content-Range') ?: null,
+            'Content-Type' => $contentType,
+            'Cross-Origin-Resource-Policy' => 'cross-origin',
+            'X-Content-Type-Options' => 'nosniff',
+        ], fn (?string $value): bool => $value !== null);
+
+        return response()->stream(
+            fn () => $this->stream($body, $maxBytes),
+            $upstream->status(),
+            $responseHeaders,
+        );
     }
 
     public function moderationDataUrl(string $sourceUrl): ?string
@@ -142,5 +199,27 @@ class InstagramMediaProxy
             'Cross-Origin-Resource-Policy' => 'cross-origin',
             'X-Content-Type-Options' => 'nosniff',
         ]);
+    }
+
+    private function stream(StreamInterface $body, int $maxBytes): void
+    {
+        $sent = 0;
+
+        while (! $body->eof() && $sent < $maxBytes) {
+            $chunk = $body->read(min(65_536, $maxBytes - $sent));
+
+            if ($chunk === '') {
+                break;
+            }
+
+            echo $chunk;
+            $sent += strlen($chunk);
+
+            if (connection_aborted()) {
+                break;
+            }
+        }
+
+        $body->close();
     }
 }

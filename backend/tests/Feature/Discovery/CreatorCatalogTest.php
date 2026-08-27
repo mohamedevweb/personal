@@ -115,7 +115,7 @@ class CreatorCatalogTest extends TestCase
         Creator::query()->create([
             'username' => 'old_coach', 'instagram_user_id' => 'instagram-1', 'display_name' => 'Old',
             'niche' => 'fitness', 'followers' => 1, 'average_views' => 0, 'average_likes' => 0,
-            'metadata' => ['providers' => ['hiker' => ['seen' => true]]],
+            'metadata' => ['providers' => ['legacy' => ['seen' => true]]],
         ]);
 
         $importer = app(CreatorCatalogImporter::class);
@@ -132,7 +132,7 @@ class CreatorCatalogTest extends TestCase
         $this->assertSame('approved', $creator->curation_status);
         $this->assertSame('established', $creator->recognition_tier);
         $this->assertTrue($creator->is_catalog_seed);
-        $this->assertTrue(data_get($creator->metadata, 'providers.hiker.seen'));
+        $this->assertTrue(data_get($creator->metadata, 'providers.legacy.seen'));
         $this->assertSame('scrapecreators', data_get($creator->metadata, 'providers.scrapecreators.provider'));
         $this->assertEqualsCanonicalizing(['sport-fitness', 'running', 'coaching'], $creator->niches()->pluck('slug')->all());
         Queue::assertPushed(MeasureAccountEngagement::class, 1);

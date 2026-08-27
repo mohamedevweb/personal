@@ -20,6 +20,7 @@ class Creator extends Model
             'avg_engagement_rate' => 'float',
             'baseline_engagement' => 'integer',
             'niche_topics' => 'array',
+            'niche_analysis_version' => 'integer',
             'metadata' => 'array',
             'performance_baselines' => 'array',
             'safety_reasons' => 'array',

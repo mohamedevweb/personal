@@ -4,19 +4,12 @@ namespace App\Providers;
 
 use Anthropic\Client as AnthropicClient;
 use Anthropic\RequestOptions;
-use App\Exceptions\ContentDiscoveryException;
 use App\Services\Content\ClaudeContentGenerationService;
 use App\Services\Content\ContentGenerationService;
 use App\Services\Content\MockContentGenerationService;
 use App\Services\Content\OpenAiContentGenerationService;
-use App\Services\Discovery\ApifyInstagramDiscoveryService;
-use App\Services\Discovery\ApifyProfileScraperService;
-use App\Services\Discovery\ContentDiscoveryService;
 use App\Services\Discovery\InstagramDataProvider;
 use App\Services\Discovery\InstagramDataProviderManager;
-use App\Services\Discovery\MockInstagramDiscoveryService;
-use App\Services\Discovery\MockProfileScraperService;
-use App\Services\Discovery\ProfileDiscoveryService;
 use GuzzleHttp\Client as GuzzleClient;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -45,30 +38,6 @@ class AppServiceProvider extends ServiceProvider
                     && (bool) config('services.anthropic.api_key') => $this->app->make(ClaudeContentGenerationService::class),
 
                 default => $this->app->make(MockContentGenerationService::class),
-            };
-        });
-
-        $this->app->bind(ContentDiscoveryService::class, function (): ContentDiscoveryService {
-            return match (true) {
-                config('services.discovery.driver') === 'apify'
-                    && (bool) config('services.discovery.apify.token') => $this->app->make(ApifyInstagramDiscoveryService::class),
-
-                config('services.discovery.driver') === 'mock'
-                    && ! $this->app->environment('production') => $this->app->make(MockInstagramDiscoveryService::class),
-
-                default => throw new ContentDiscoveryException('Content discovery is not configured for the selected provider.'),
-            };
-        });
-
-        $this->app->bind(ProfileDiscoveryService::class, function (): ProfileDiscoveryService {
-            return match (true) {
-                config('services.discovery.driver') === 'apify'
-                    && (bool) config('services.discovery.apify.token') => $this->app->make(ApifyProfileScraperService::class),
-
-                config('services.discovery.driver') === 'mock'
-                    && ! $this->app->environment('production') => $this->app->make(MockProfileScraperService::class),
-
-                default => throw new ContentDiscoveryException('Profile discovery is not configured for the selected provider.'),
             };
         });
 

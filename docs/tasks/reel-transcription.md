@@ -10,8 +10,8 @@ Le pipeline de remix ne lit jamais la vidéo d'un reel. Il ne voit que des méta
 
 Sur un reel, la caption est souvent 2 émojis et 3 hashtags. `structure_analysis` et `hook_analysis` sont
 donc largement inventés, et le draft « imite la structure » d'un contenu que personne n'a lu. Les
-providers exposent pourtant l'URL vidéo (`video_versions` / `video_url`) : elle est ignorée au mapping
-(`HikerInstagramProvider::normalizePost()`, `ScrapeCreatorsInstagramProvider::normalizePost()`).
+Le provider expose pourtant l'URL vidéo (`video_versions` / `video_url`) : elle est ignorée au mapping
+(`ScrapeCreatorsInstagramProvider::normalizePost()`).
 
 **Objectif** : capturer le script parlé d'un reel, le stocker sur `content_posts`, et l'injecter dans
 l'analyse et dans le brief de génération.
@@ -23,9 +23,7 @@ l'analyse et dans le brief de génération.
 - Ajouter `?string $videoUrl = null` à `App\Services\Discovery\DiscoveredPost` (constructeur promu,
   comme les autres champs). **Ne pas** le pousser dans `mediaUrls` : ce tableau alimente le carrousel
   côté front via `ContentPostView::contentMediaUrls()` et n'accepte que des images.
-- `HikerInstagramProvider` : `data_get($row, 'video_versions.0.url')` puis `$row['video_url']`.
 - `ScrapeCreatorsInstagramProvider` : `$row['video_url']` puis `data_get($row, 'video_versions.0.url')`.
-- `ApifyInstagramDataProvider` : `videoUrl` (clé Apify), même normalisation.
 - `MockInstagramDataProvider` : renvoyer une URL factice sur les reels pour garder les tests locaux verts.
 - Renseigner uniquement quand `format === 'reel'`. Ajouter `video_duration` est déjà fait dans
   `metadata` — le réutiliser, pas le redupliquer.
@@ -164,11 +162,10 @@ ce qui rend visible la valeur ajoutée. Si c'est reporté, le dire explicitement
 ## Tests
 
 `backend/tests/Feature/` — conventions existantes, PHPUnit, `Http::fake()` + `OpenAI::fake()`
-(voir `ContentSafetyPolicyTest.php` pour le fake OpenAI, `HikerInstagramProviderTest.php` pour les
-fixtures provider).
+(voir `ContentSafetyPolicyTest.php` pour le fake OpenAI et `ScrapeCreatorsInstagramProviderTest.php`
+pour les fixtures provider).
 
-1. `HikerInstagramProviderTest` / `ScrapeCreatorsInstagramProviderTest` : `videoUrl` extrait d'un reel,
-   `null` sur une image.
+1. `ScrapeCreatorsInstagramProviderTest` : `videoUrl` extrait d'un reel, `null` sur une image.
 2. `TranscribeContentPostTest` (nouveau) :
    - reel → transcript stocké, `transcript_status = 'done'`, `transcribed_at` renseigné ;
    - post image → aucun appel HTTP ni OpenAI, statut `unavailable` ;

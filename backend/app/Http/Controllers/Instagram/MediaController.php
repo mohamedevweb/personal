@@ -9,7 +9,9 @@ use App\Models\CreatorProfile;
 use App\Models\InstagramAccount;
 use App\Services\Creator\CreatorInspirationService;
 use App\Services\Instagram\InstagramMediaProxy;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class MediaController extends Controller
 {
@@ -27,6 +29,16 @@ class MediaController extends Controller
         abort_unless(is_string($sourceUrl), 404);
 
         $response = $media->response($sourceUrl, "content:{$content->id}:{$position}");
+        abort_if($response === null, 404);
+
+        return $response;
+    }
+
+    public function contentVideo(ContentPost $content, Request $request, InstagramMediaProxy $media): StreamedResponse
+    {
+        abort_unless(is_string($content->video_url), 404);
+
+        $response = $media->videoResponse($content->video_url, $request->header('Range'));
         abort_if($response === null, 404);
 
         return $response;

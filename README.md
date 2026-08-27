@@ -1,6 +1,6 @@
 # Personal
 
-Personal is a Nuxt 3 + Laravel 12 MVP foundation. The authenticated creator's Instagram connection is real, content generation runs on OpenAI, and the For You feed is ranked from public Instagram data fetched through HikerAPI, ScrapeCreators, or Apify. A deterministic mock discovery driver is available for tests and unconfigured development.
+Personal is a Nuxt 3 + Laravel 12 MVP foundation. The authenticated creator's Instagram connection is real, content generation runs on OpenAI, and the For You feed is ranked from public Instagram data fetched through ScrapeCreators. A deterministic mock discovery driver is available for tests and unconfigured development.
 
 PostgreSQL is the configured application database. PHPUnit uses an isolated in-memory SQLite database for fast integration tests.
 
@@ -57,7 +57,7 @@ Remix latency, cost and depth are tunable with `OPENAI_REMIX_MODEL`, `OPENAI_REM
 
 ## How the For You feed ranks
 
-A post earns its place by beating the account that published it, not by coming from a large one. The connected account still comes from Meta's official Instagram API. Public discovery goes through `InstagramDataProvider`, with HikerAPI as the default driver, ScrapeCreators as a second real-data driver, Apify as a fallback, and a deterministic mock for tests and unconfigured development.
+A post earns its place by beating the account that published it, not by coming from a large one. The connected account still comes from Meta's official Instagram API. Public discovery goes through `InstagramDataProvider`, with ScrapeCreators as the only real-data driver and a deterministic mock for tests and local development.
 
 After the first Instagram import, onboarding asks the user to choose three to five creators who genuinely inspire their work. Personal suggests safe approved accounts from the detected vertical and only calls the discovery provider when the user explicitly searches or pastes a handle. This private selection leads that user's feed, with at most two posts per inspiration for diversity. The approved catalogue fills every remaining place while newly selected accounts are measured and checked for safety. A user-selected account stays `discovered` and never becomes part of the global catalogue without the normal editorial approval.
 
@@ -71,20 +71,11 @@ After deploying the creator identity migration, link members who completed Insta
 docker compose exec app php artisan personal:link-registered-creators
 ```
 
-Set `DISCOVERY_DRIVER=scrapecreators` and `SCRAPECREATORS_API_KEY` to run the normal creator discovery and account measurement jobs through ScrapeCreators. Profile responses use ScrapeCreators' provider-side cache for the same three-day window as account measurement by default. Change `SCRAPECREATORS_CACHE_MAX_AGE` when testing freshness versus cost.
+Set `DISCOVERY_DRIVER=scrapecreators` and `SCRAPECREATORS_API_KEY` to run creator discovery and account measurement through ScrapeCreators. Profile responses use ScrapeCreators' provider-side cache for the same three-day window as account measurement by default. Change `SCRAPECREATORS_CACHE_MAX_AGE` when testing freshness versus cost.
 
-To compare HikerAPI and ScrapeCreators on the same niche without writing to the database, run:
+**Creator DNA.** A public handle is enough to start: `AnalyzeCreatorHandle` reads the public profile and up to 30 recent captions, then stores a structured `creator_dna` with positioning, primary niche, sub-niches, topics, audience, language, content pillars, tone, explicit current projects and goals, observable content strengths and voice. These signals fill the member's Personal memory automatically. `SyncInstagramAccount` enriches the same profile later when the member connects through OAuth, while a memory edited manually is never overwritten. The model-backed analysis has a deterministic fallback, so neither path depends on an LLM being available.
 
-```bash
-cd backend
-php artisan personal:compare-instagram-providers "fitness coach"
-```
-
-The command reports creator and Reel counts, metric coverage, failures, execution time, and samples of the returned profiles and content. Run only one provider with `--provider=hiker` or `--provider=scrapecreators`; use `--creators` and `--posts` to control the size and cost of the benchmark.
-
-**Creator DNA.** A public handle is enough to start: `AnalyzeCreatorHandle` reads the public profile and up to 30 recent captions, then stores a structured `creator_dna` with primary niche, sub-niches, topics, audience, language, content pillars and tone. `SyncInstagramAccount` enriches the same profile later when the member connects through OAuth. The model-backed analysis has a deterministic fallback, so neither path depends on an LLM being available.
-
-**Stage 1, `DiscoverNicheContent`.** The Creator DNA becomes precise account-search phrases. HikerAPI finds seed creators, then Instagram suggested accounts expand each seed into a reusable creator graph. Creators are upserted by Instagram ID when available, relationships are refreshed rather than duplicated, and global query cooldowns avoid paying twice for a niche Personal already knows.
+**Stage 1, `DiscoverNicheContent`.** The Creator DNA becomes precise account-search phrases. ScrapeCreators finds seed creators, then Instagram suggested accounts expand each seed into a reusable creator graph. Creators are upserted by Instagram ID when available, relationships are refreshed rather than duplicated, and global query cooldowns avoid paying twice for a niche Personal already knows.
 
 **Stage 2, `MeasureAccountEngagement`.** Each discovered account is fetched with its recent posts. Its own bio and captions classify its niche, normalized niches are attached in `creator_niches`, and its recent performance establishes the baseline used to score every post from that account.
 
@@ -106,11 +97,11 @@ There is deliberately **no fallback**. An unmeasured post carries no evidence, s
 
 `FeedRanker` first combines outlier score, reach and freshness. The personalized feed then compares each qualified creator and post with the member's Creator DNA, using the primary vertical, sub-niches, topics, content pillars and audience. Performance remains the main weight and Creator affinity reorders only content that already cleared measurement, engagement, freshness and safety guards. The same affinity also orders onboarding creator suggestions. The blend is configurable through `FEED_WEIGHT_PERFORMANCE` and `FEED_WEIGHT_CREATOR_AFFINITY`; the Global feed keeps the performance-only ordering.
 
-Niche is read from the account itself. `CreatorNicheService` classifies a discovered creator from their bio, their recurring hashtags and a sample of captions, and the result is cached on the creator so the model is not re-run on every measurement. Discovery previously stamped every account with the niche of whichever user found them, which described the searcher rather than the creator.
+Niche is read from the account itself. `CreatorNicheService` classifies a discovered creator from profile metadata, recurring hashtags and a balanced multi-post caption sample. Topics must be supported by the profile or repeated across distinct posts, so an isolated campaign prop or food mention cannot become part of the niche. The versioned result is cached on the creator and recalculated only when the analysis contract changes. Discovery previously stamped every account with the niche of whichever user found them, which described the searcher rather than the creator.
 
 **Content safety.** Every measured account is checked before its publications can enter the shared catalogue. A deterministic French and English policy rejects explicit and abusive profile text, captions, hashtags and provider safety flags. When an OpenAI key is configured, `omni-moderation-latest` also checks each caption and thumbnail for sexual, hateful, harassing, violent, self-harm and illicit material. Blocked creators are not scraped again, blocked posts are never scored, and an unavailable moderation check leaves content pending by default instead of admitting it. Existing catalogue rows are also marked pending by the migration and disappear from the feed until the scheduler rechecks them in bounded batches. The policy can be configured with the `DISCOVERY_CONTENT_SAFETY_*` variables in `backend/.env.example`.
 
-Instagram CDN images are exposed to the frontend through signed API URLs. The API fetches each image server-side and keeps a temporary local cache under `storage/app/private/instagram-media`, which avoids browser blocking caused by Instagram's cross-origin resource policy. `APP_URL` must be the public HTTPS URL of the backend so the generated media URLs are reachable from the frontend. Cache duration, signature lifetime, request timeout and maximum image size are configurable with the `INSTAGRAM_MEDIA_PROXY_*` variables documented in `backend/.env.example`.
+Instagram CDN images and Reel videos are exposed to the frontend through signed API URLs. The API fetches each image server-side and keeps a temporary local cache under `storage/app/private/instagram-media`, which avoids browser blocking caused by Instagram's cross-origin resource policy. Reel videos are streamed on demand with byte-range support so the native player can start and seek without downloading the whole file first. `APP_URL` must be the public HTTPS URL of the backend so the generated media URLs are reachable from the frontend. Cache duration, signature lifetime, request timeout and media size limits are configurable with the `INSTAGRAM_MEDIA_*` variables documented in `backend/.env.example`.
 
 Docker stores that cache in the shared `instagram-media-cache` volume. The API and queue workers therefore reuse the same files, and rebuilding a container does not discard the only usable copy after an Instagram CDN URL expires.
 

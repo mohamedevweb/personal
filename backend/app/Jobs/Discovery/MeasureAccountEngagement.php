@@ -169,7 +169,7 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
     /**
      * The requested accounts whose measurement cooldown has lapsed. An account
      * never measured is always due; the batch cap keeps a large niche from
-     * spending the whole Apify budget in one pass.
+     * consuming the whole provider budget in one pass.
      *
      * @return list<string>
      */
@@ -190,7 +190,11 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
 
             return ! $creator
                 || ($creator->safety_status !== ContentSafetyDecision::BLOCKED
-                    && ($ignoreSchedule || ! $creator->next_scrape_at || $creator->next_scrape_at->isPast()));
+                    && ($ignoreSchedule
+                        || ! $creator->next_scrape_at
+                        || $creator->next_scrape_at->isPast()
+                        || (! $creator->is_catalog_seed
+                            && $creator->niche_analysis_version < CreatorNicheService::ANALYSIS_VERSION)));
         })), 0, (int) config('services.discovery.measure_batch'));
     }
 
@@ -352,21 +356,29 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
     }
 
     /**
-     * Classify the account once, then leave it alone. The bio and hashtags an
-     * account publishes under barely move, so re-running the model on every
-     * measurement would pay for the same answer.
+     * Reuse a current classification, but refresh results produced by an older
+     * analysis contract. Curated catalog entries keep their editorial labels.
      *
-     * @return array{niche: string, niche_topics: list<string>}
+     * @return array{niche: string, niche_topics: list<string>, niche_analysis_version: int}
      */
     private function niche(DiscoveredProfile $profile, CreatorNicheService $niches, ?Creator $existing): array
     {
-        if ($existing && is_array($existing->niche_topics) && $existing->niche_topics !== []) {
-            return ['niche' => $existing->niche, 'niche_topics' => $existing->niche_topics];
+        if ($existing && is_array($existing->niche_topics) && $existing->niche_topics !== []
+            && ($existing->is_catalog_seed || $existing->niche_analysis_version >= CreatorNicheService::ANALYSIS_VERSION)) {
+            return [
+                'niche' => $existing->niche,
+                'niche_topics' => $existing->niche_topics,
+                'niche_analysis_version' => CreatorNicheService::ANALYSIS_VERSION,
+            ];
         }
 
         $detected = $niches->detect($profile);
 
-        return ['niche' => $detected['niche'], 'niche_topics' => $detected['topics']];
+        return [
+            'niche' => $detected['niche'],
+            'niche_topics' => $detected['topics'],
+            'niche_analysis_version' => CreatorNicheService::ANALYSIS_VERSION,
+        ];
     }
 
     private function storePost(
@@ -390,6 +402,7 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
             'hook' => $this->hook($post, $creator->niche),
             'caption' => $post->caption,
             'thumbnail_url' => $post->thumbnailUrl,
+            'video_url' => $post->videoUrl ?: $existing?->video_url,
             'media_urls' => $post->mediaUrls,
             'views' => $post->views,
             'likes' => $post->likes,

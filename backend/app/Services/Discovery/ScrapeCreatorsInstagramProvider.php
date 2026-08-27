@@ -275,6 +275,7 @@ class ScrapeCreatorsInstagramProvider implements InstagramDataProvider
                 ],
             ], fn (mixed $value): bool => $value !== null),
             mediaUrls: $format === 'carousel' ? InstagramCarouselMedia::urls($row, $thumbnailUrl) : [],
+            videoUrl: $format === 'reel' ? $this->video($row) : null,
         );
     }
 
@@ -288,6 +289,16 @@ class ScrapeCreatorsInstagramProvider implements InstagramDataProvider
                 ?? $row['display_url']
                 ?? data_get($row, 'image_versions2.candidates.0.url')
                 ?? data_get($row, 'image_versions.0.url'),
+        );
+    }
+
+    /** @param array<string, mixed> $row */
+    private function video(array $row): ?string
+    {
+        return $this->nullableString(
+            $row['video_url']
+                ?? data_get($row, 'video_versions.0.url')
+                ?? data_get($row, 'video_versions2.0.url'),
         );
     }
 

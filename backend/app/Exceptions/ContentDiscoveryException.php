@@ -6,7 +6,7 @@ use RuntimeException;
 use Throwable;
 
 /**
- * Niche discovery could not run — a missing Apify token or a scraper failure. It
+ * Niche discovery could not run because credentials are missing or the provider failed. It
  * is caught by the ingestion job and logged; the feed keeps its existing posts.
  */
 class ContentDiscoveryException extends RuntimeException

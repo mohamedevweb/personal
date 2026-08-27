@@ -15,6 +15,7 @@ use App\Services\Discovery\MockInstagramDataProvider;
 use App\Services\Instagram\NicheDetectionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
+use Mockery;
 use Tests\TestCase;
 
 class AnalyzeCreatorHandleTest extends TestCase
@@ -51,6 +52,32 @@ class AnalyzeCreatorHandleTest extends TestCase
         $this->actingAs($user)->putJson('/api/integrations/instagram/handle', ['username' => 'founder.creator'])->assertOk();
 
         Queue::assertPushed(AnalyzeCreatorHandle::class, 1);
+    }
+
+    public function test_opening_memory_reanalyzes_an_outdated_public_creator_dna(): void
+    {
+        Queue::fake();
+        $user = User::factory()->create();
+        CreatorProfile::query()->create([
+            'user_id' => $user->id,
+            'instagram_username' => 'founder.creator',
+            'analysis_status' => 'completed',
+            'creator_dna' => [
+                'analysis_method' => 'llm',
+                'analysis_version' => NicheDetectionService::ANALYSIS_VERSION - 1,
+            ],
+        ]);
+
+        $this->actingAs($user)
+            ->getJson('/api/me/profile')
+            ->assertOk()
+            ->assertJsonPath('profile.analysis_status', 'queued');
+
+        Queue::assertPushed(
+            AnalyzeCreatorHandle::class,
+            fn (AnalyzeCreatorHandle $job): bool => $job->userId === $user->id
+                && $job->username === 'founder.creator',
+        );
     }
 
     public function test_onboarding_is_told_the_reading_has_started(): void
@@ -243,6 +270,53 @@ class AnalyzeCreatorHandleTest extends TestCase
         $this->assertSame('Sample bio for founder.creator', $profile->bio);
         $this->assertNotNull($profile->creator_dna);
         $this->assertNotNull($profile->dna_analyzed_at);
+    }
+
+    public function test_the_public_analysis_fills_every_supported_memory_field(): void
+    {
+        Queue::fake();
+        $user = User::factory()->create();
+        CreatorProfile::query()->create([
+            'user_id' => $user->id,
+            'instagram_username' => 'founder.creator',
+        ]);
+        $niche = Mockery::mock(NicheDetectionService::class);
+        $niche->shouldReceive('detect')->once()->andReturn([
+            'primary_niche' => 'Entrepreneurship',
+            'sub_niches' => ['Business education'],
+            'topics' => ['Starting a business', 'Funding'],
+            'audience' => ['Aspiring founders'],
+            'positioning' => 'Helps aspiring founders turn an idea into a sustainable business.',
+            'language' => 'en',
+            'content_pillars' => ['Business lessons'],
+            'tone' => ['Motivational', 'Direct'],
+            'current_projects' => ['Free founder course'],
+            'goals' => ['Help one million people start a business'],
+            'content_strengths' => ['Clear calls to action', 'Practical storytelling'],
+            'voice_profile' => 'Uses direct hooks, short sentences and action-led conclusions.',
+            'analysis_status' => 'complete',
+            'analysis_method' => 'llm',
+            'confidence' => 0.95,
+            'evidence' => [
+                'caption_count' => 30,
+                'bio_available' => true,
+                'link_preview_available' => false,
+            ],
+        ]);
+        $this->app->instance(NicheDetectionService::class, $niche);
+
+        $this->runJob($user);
+
+        $profile = $user->creatorProfile()->firstOrFail();
+        $this->assertSame('Entrepreneurship', $profile->niche);
+        $this->assertSame('Helps aspiring founders turn an idea into a sustainable business.', $profile->positioning);
+        $this->assertSame('Aspiring founders', $profile->audience_description);
+        $this->assertSame(['Starting a business', 'Funding'], $profile->topics);
+        $this->assertSame(['Motivational', 'Direct'], $profile->tone);
+        $this->assertSame(['Free founder course'], $profile->current_projects);
+        $this->assertSame(['Help one million people start a business'], $profile->goals);
+        $this->assertSame(['Clear calls to action', 'Practical storytelling'], $profile->content_strengths);
+        $this->assertSame('personal-branding', $profile->primary_vertical);
     }
 
     public function test_a_completed_handle_analysis_starts_the_personalized_feed_discovery(): void

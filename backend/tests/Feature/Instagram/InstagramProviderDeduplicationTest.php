@@ -21,14 +21,14 @@ class InstagramProviderDeduplicationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_the_same_instagram_ids_from_two_providers_update_existing_rows(): void
+    public function test_repeated_measurement_of_the_same_instagram_ids_updates_existing_rows(): void
     {
         config([
             'services.discovery.measure_cooldown_days' => 0,
             'services.discovery.min_followers' => 1_000_000,
         ]);
 
-        $this->measure($this->provider('hiker', 100, 1000));
+        $this->measure($this->provider('scrapecreators', 100, 1000));
         $this->measure($this->provider('scrapecreators', 120, 1500));
 
         $this->assertSame(1, Creator::query()->count());
@@ -36,11 +36,11 @@ class InstagramProviderDeduplicationTest extends TestCase
         $this->assertSame(120, Creator::query()->firstOrFail()->followers);
         $this->assertSame(1500, ContentPost::query()->firstOrFail()->views);
         $this->assertSame(
-            ['hiker', 'scrapecreators'],
+            ['scrapecreators'],
             array_keys(Creator::query()->firstOrFail()->metadata['providers']),
         );
         $this->assertSame(
-            ['hiker', 'scrapecreators'],
+            ['scrapecreators'],
             array_keys(ContentPost::query()->firstOrFail()->metadata['providers']),
         );
     }

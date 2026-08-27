@@ -53,6 +53,8 @@ Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 've
 Route::middleware(['signed:relative', 'throttle:media'])->group(function (): void {
     Route::get('/media/content/{content}', [MediaController::class, 'content'])
         ->name('media.content');
+    Route::get('/media/content/{content}/video', [MediaController::class, 'contentVideo'])
+        ->name('media.content.video');
     Route::get('/media/content/{content}/{position}', [MediaController::class, 'contentItem'])
         ->whereNumber('position')
         ->name('media.content.item');

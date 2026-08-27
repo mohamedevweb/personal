@@ -110,7 +110,8 @@ class RegisteredCreatorService
                 'hook' => Str::limit(str($caption)->before("\n")->trim()->toString() ?: 'Instagram post', 250, ''),
                 'caption' => $caption,
                 'thumbnail_url' => $post->thumbnail_url ?: $post->media_url,
-                'media_urls' => array_values(array_filter([$post->media_url ?: $post->thumbnail_url])),
+                'video_url' => $signal->videoUrl,
+                'media_urls' => $signal->mediaUrls,
                 'views' => $signal->views,
                 'likes' => $signal->likes,
                 'comments' => $signal->comments,
@@ -152,7 +153,10 @@ class RegisteredCreatorService
             hashtags: [],
             externalId: $post->instagram_media_id,
             shares: max(0, (int) data_get($post->metrics, 'shares', 0)),
-            mediaUrls: array_values(array_filter([$post->media_url ?: $post->thumbnail_url])),
+            mediaUrls: $this->format($post) === 'reel'
+                ? []
+                : array_values(array_filter([$post->media_url ?: $post->thumbnail_url])),
+            videoUrl: $this->format($post) === 'reel' ? $post->media_url : null,
         );
     }
 

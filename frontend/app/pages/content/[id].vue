@@ -17,6 +17,7 @@ const selectedMoment = ref<number | null>(null)
 const composerOpen = ref(false)
 const generating = ref(false)
 const loading = ref(true)
+const isReel = computed(() => (post.value?.format || '').toLowerCase().includes('reel'))
 let analysisTimer: ReturnType<typeof setTimeout> | undefined
 let analysisAttempts = 0
 
@@ -93,7 +94,26 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
     <NuxtLink to="/feed" class="text-sm text-[var(--muted)]">{{ $t('content.backToFeed') }}</NuxtLink>
     <div class="mt-6 grid gap-10 lg:grid-cols-[.88fr_1.12fr]">
       <section class="min-w-0 lg:sticky lg:top-8 lg:self-start">
-        <div class="relative aspect-[4/5] overflow-hidden rounded-[18px] bg-[var(--sand)]"><img :src="post.thumbnail_url || ''" :alt="post.hook" class="h-full w-full object-cover"><div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/5 to-transparent"/><div class="absolute inset-x-6 bottom-6"><span class="rounded-full bg-white/15 px-3 py-1.5 text-[11px] text-white backdrop-blur">{{ post.format }}</span><h1 class="mt-4 text-[28px] font-medium leading-[1.12] tracking-[-.03em] text-white">{{ post.hook }}</h1></div></div>
+        <div class="relative aspect-[4/5] overflow-hidden rounded-[18px] bg-[var(--sand)]">
+          <video
+            v-if="isReel && post.video_url"
+            :src="post.video_url"
+            :poster="post.thumbnail_url || undefined"
+            controls
+            playsinline
+            preload="metadata"
+            class="h-full w-full bg-black object-contain"
+            :aria-label="$t('content.playReel', { username: post.creator.username })"
+          />
+          <template v-else>
+            <img :src="post.thumbnail_url || ''" :alt="post.hook" class="h-full w-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/5 to-transparent" />
+            <div class="absolute inset-x-6 bottom-6">
+              <span class="rounded-full bg-white/15 px-3 py-1.5 text-[11px] text-white backdrop-blur">{{ post.format }}</span>
+              <h1 class="mt-4 text-[28px] font-medium leading-[1.12] tracking-[-.03em] text-white">{{ post.hook }}</h1>
+            </div>
+          </template>
+        </div>
         <div class="mt-4 flex items-center gap-3"><a :href="creatorProfileUrl(post.creator.username)" target="_blank" rel="noopener noreferrer" class="flex flex-1 items-center gap-3"><img :src="post.creator.avatar_url || ''" alt="" class="h-9 w-9 rounded-full"><div class="flex-1"><p class="text-sm font-medium hover:underline">@{{ post.creator.username }}</p><p class="text-xs text-[var(--faint)]">{{ $t('content.followers', { count: compactNumber(post.creator.followers) }) }} · {{ relativeDate(post.published_at, locale) }}</p></div></a><a v-if="post.source_url" :href="post.source_url" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs text-[var(--muted)] transition hover:text-[var(--ink)]">{{ $t('content.openSource') }}<AppIcon name="arrow" :size="13" class="-rotate-45" /></a><p v-if="post.views > 0" class="text-xs text-[var(--muted)]">{{ $t('content.views', { count: compactNumber(post.views) }) }}</p></div>
       </section>
 
@@ -113,10 +133,10 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
           <PerformanceNote :post="post" />
         </div>
         <div class="mt-8 divide-y divide-[var(--line-soft)] border-y border-[var(--line)]">
-          <div class="py-6"><p class="text-xs font-semibold uppercase tracking-widest text-[var(--faint)]">{{ $t('content.hook') }}</p><p class="mt-2 text-[17px] leading-7">{{ post.hook_analysis }}</p></div>
-          <div class="py-6"><p class="text-xs font-semibold uppercase tracking-widest text-[var(--faint)]">{{ $t('content.structure') }}</p><p class="mt-2 text-[17px] leading-7">{{ post.structure_analysis }}</p></div>
-          <div class="py-6"><p class="text-xs font-semibold uppercase tracking-widest text-[var(--faint)]">{{ $t('content.whyOutperforming') }}</p><p class="mt-2 text-[17px] leading-7">{{ post.why_it_works }}<template v-if="post.views > 0 && post.creator.average_views > 0"> {{ $t('content.whyOutperformingSuffix', { average: compactNumber(post.creator.average_views), views: compactNumber(post.views) }) }}</template></p></div>
-          <div class="py-6"><p class="text-xs font-semibold uppercase tracking-widest text-[var(--faint)]">{{ $t('content.whyFitsYou') }}</p><p class="mt-2 text-[17px] leading-7">{{ voiceSummary }}</p></div>
+          <div class="py-6"><p class="text-[11px] font-semibold uppercase tracking-widest text-[var(--faint)]">{{ $t('content.hook') }}</p><p class="mt-2 text-[15px] leading-[1.6]">{{ post.hook_analysis }}</p></div>
+          <div class="py-6"><p class="text-[11px] font-semibold uppercase tracking-widest text-[var(--faint)]">{{ $t('content.structure') }}</p><p class="mt-2 text-[15px] leading-[1.6]">{{ post.structure_analysis }}</p></div>
+          <div class="py-6"><p class="text-[11px] font-semibold uppercase tracking-widest text-[var(--faint)]">{{ $t('content.whyOutperforming') }}</p><p class="mt-2 text-[15px] leading-[1.6]">{{ post.why_it_works }}<template v-if="post.views > 0 && post.creator.average_views > 0"> {{ $t('content.whyOutperformingSuffix', { average: compactNumber(post.creator.average_views), views: compactNumber(post.views) }) }}</template></p></div>
+          <div class="py-6"><p class="text-[11px] font-semibold uppercase tracking-widest text-[var(--faint)]">{{ $t('content.whyFitsYou') }}</p><p class="mt-2 text-[15px] leading-[1.6]">{{ voiceSummary }}</p></div>
         </div>
 
         <div class="mt-8 overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">

@@ -22,6 +22,7 @@ class CreatorAvatarTest extends TestCase
 
     public function test_the_memory_page_serves_the_public_profile_picture_through_the_proxy(): void
     {
+        Queue::fake();
         config(['app.url' => 'https://api.personal.test']);
         Storage::fake('local');
         Http::preventStrayRequests();

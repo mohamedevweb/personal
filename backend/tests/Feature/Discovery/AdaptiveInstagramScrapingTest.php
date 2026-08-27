@@ -9,6 +9,7 @@ use App\Models\ContentPostMetricSnapshot;
 use App\Models\Creator;
 use App\Models\CreatorProfile;
 use App\Models\User;
+use App\Services\Discovery\CreatorNicheService;
 use App\Services\Discovery\CreatorScrapeSchedule;
 use App\Services\Discovery\DiscoveredPost;
 use App\Services\Discovery\InstagramDataProvider;
@@ -85,6 +86,29 @@ class AdaptiveInstagramScrapingTest extends TestCase
         Queue::assertPushed(
             RefreshCreatorPostMetrics::class,
             fn (RefreshCreatorPostMetrics $job): bool => $job->creatorId === $metrics->id,
+        );
+    }
+
+    public function test_dispatcher_queues_obsolete_analysis_without_waiting_for_the_regular_schedule(): void
+    {
+        Queue::fake();
+
+        $obsolete = $this->creator('creator-obsolete', [
+            'next_scrape_at' => now()->addWeek(),
+            'niche_analysis_version' => 0,
+        ]);
+        $this->creator('catalog-editorial', [
+            'next_scrape_at' => now()->addWeek(),
+            'niche_analysis_version' => 0,
+            'is_catalog_seed' => true,
+        ]);
+
+        $this->artisan('personal:dispatch-instagram-scrapes')->assertSuccessful();
+
+        Queue::assertPushed(MeasureAccountEngagement::class, 1);
+        Queue::assertPushed(
+            MeasureAccountEngagement::class,
+            fn (MeasureAccountEngagement $job): bool => $job->usernames === [$obsolete->username],
         );
     }
 
@@ -189,6 +213,7 @@ class AdaptiveInstagramScrapingTest extends TestCase
             'average_views' => 10_000,
             'average_likes' => 1_000,
             'safety_status' => 'allowed',
+            'niche_analysis_version' => CreatorNicheService::ANALYSIS_VERSION,
         ], $overrides));
     }
 

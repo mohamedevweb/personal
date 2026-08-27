@@ -14,20 +14,10 @@ class InstagramDataProviderManager
         $driver ??= (string) config('services.discovery.driver');
 
         return match ($driver) {
-            'hiker' => $this->configured(
-                'services.discovery.hiker.api_key',
-                HikerInstagramProvider::class,
-                'HikerAPI is not configured. Set HIKER_API_KEY.',
-            ),
             'scrapecreators' => $this->configured(
                 'services.discovery.scrapecreators.api_key',
                 ScrapeCreatorsInstagramProvider::class,
                 'ScrapeCreators is not configured. Set SCRAPECREATORS_API_KEY.',
-            ),
-            'apify' => $this->configured(
-                'services.discovery.apify.token',
-                ApifyInstagramDataProvider::class,
-                'Apify is not configured. Set APIFY_TOKEN.',
             ),
             'mock' => $this->mock(),
             default => throw new ContentDiscoveryException("Unknown Instagram discovery provider [{$driver}]."),

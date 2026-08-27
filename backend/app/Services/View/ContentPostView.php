@@ -35,6 +35,7 @@ class ContentPostView
             'caption' => $post->caption,
             'source_url' => $post->source_url,
             'thumbnail_url' => $this->mediaUrl('media.content', 'content', $post->id, $post->thumbnail_url),
+            'video_url' => $this->mediaUrl('media.content.video', 'content', $post->id, $post->video_url),
             'media_urls' => $this->contentMediaUrls($post),
             'views' => $post->views,
             'likes' => $post->likes,

@@ -8,6 +8,7 @@ use App\Jobs\Instagram\SyncInstagramAccount;
 use App\Models\CreatorProfile;
 use App\Services\Creator\CreatorInspirationService;
 use App\Services\Instagram\InstagramAuthService;
+use App\Services\Instagram\NicheDetectionService;
 use App\Services\View\UserView;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -82,7 +83,15 @@ class InstagramConnectionController extends Controller
         $changed = $profile?->instagram_username !== $username;
         // A handle that has already been read is left alone; one whose reading
         // never got anywhere is retried, which is what the loader's retry does.
-        $analyze = $changed || in_array($profile?->analysis_status, [null, 'failed'], true);
+        $analysisRunning = in_array($profile?->analysis_status, [
+            'queued',
+            ...AnalyzeCreatorHandle::STAGES,
+        ], true);
+        $outdated = data_get($profile?->creator_dna, 'analysis_method') !== 'manual'
+            && (int) data_get($profile?->creator_dna, 'analysis_version', 0) < NicheDetectionService::ANALYSIS_VERSION;
+        $analyze = $changed
+            || in_array($profile?->analysis_status, [null, 'failed'], true)
+            || ($outdated && ! $analysisRunning);
 
         $analysis = $analyze ? ['analysis_status' => 'queued', 'analysis_error' => null] : [];
 
@@ -108,6 +117,9 @@ class InstagramConnectionController extends Controller
                     'positioning' => null,
                     'topics' => null,
                     'tone' => null,
+                    'current_projects' => null,
+                    'goals' => null,
+                    'content_strengths' => null,
                     'voice_profile' => null,
                     'creator_dna' => null,
                     'primary_vertical' => null,

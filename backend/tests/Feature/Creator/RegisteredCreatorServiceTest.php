@@ -33,6 +33,7 @@ class RegisteredCreatorServiceTest extends TestCase
             'creator_id' => $creator->id,
             'instagram_media_id' => 'member-media',
             'format' => 'reel',
+            'video_url' => 'https://scontent.cdninstagram.com/member-reel.mp4',
             'views' => 1900,
         ]);
         $this->actingAs($user)
@@ -103,6 +104,7 @@ class RegisteredCreatorServiceTest extends TestCase
         $account->media()->create([
             'instagram_media_id' => 'member-media',
             'media_type' => 'VIDEO',
+            'media_url' => 'https://scontent.cdninstagram.com/member-reel.mp4',
             'like_count' => 84,
             'comments_count' => 12,
             'metrics' => ['views' => 1900],

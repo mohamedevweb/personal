@@ -668,6 +668,8 @@ class PersonalMvpTest extends TestCase
 
         $profile = $this->user->creatorProfile()->firstOrFail();
         $this->assertSame(['Creator tools', 'Founder stories'], $profile->creator_dna['topics']);
+        $this->assertSame('I build calm tools for independent creators.', $profile->creator_dna['positioning']);
+        $this->assertSame("# Creator Voice\n\nDirect, reflective, and specific.", $profile->creator_dna['voice_profile']);
         $this->assertSame('manual', $profile->creator_dna['analysis_method']);
         $this->assertEquals(1.0, $profile->creator_dna['confidence']);
         $this->assertSame('personal-branding', $profile->primary_vertical);

@@ -116,6 +116,31 @@ class InstagramMediaProxyTest extends TestCase
         $this->get($path)->assertOk()->assertContent('second-slide');
     }
 
+    public function test_signed_reel_route_proxies_partial_video_content(): void
+    {
+        config(['services.instagram_media_proxy.max_video_bytes' => 1024]);
+        Http::preventStrayRequests();
+        $source = 'https://scontent-sea5-1.cdninstagram.com/reel.mp4';
+        Http::fake([$source => Http::response('mp4-', 206, [
+            'Accept-Ranges' => 'bytes',
+            'Content-Length' => '4',
+            'Content-Range' => 'bytes 0-3/12',
+            'Content-Type' => 'video/mp4',
+        ])]);
+        $post = $this->createPost('https://scontent-sea5-1.cdninstagram.com/reel.jpg');
+        $post->update(['video_url' => $source]);
+        $path = URL::temporarySignedRoute('media.content.video', now()->addHour(), ['content' => $post], absolute: false);
+
+        $this->get($path, ['Range' => 'bytes=0-3'])
+            ->assertStatus(206)
+            ->assertHeader('Content-Type', 'video/mp4')
+            ->assertHeader('Content-Range', 'bytes 0-3/12')
+            ->assertHeader('Cross-Origin-Resource-Policy', 'cross-origin')
+            ->assertStreamedContent('mp4-');
+
+        Http::assertSent(fn ($request): bool => $request->header('Range')[0] === 'bytes=0-3');
+    }
+
     public function test_media_proxy_rejects_non_instagram_hosts_without_making_a_request(): void
     {
         Storage::fake('local');
@@ -136,12 +161,14 @@ class InstagramMediaProxyTest extends TestCase
         $post->update(['media_urls' => [
             'https://instagram.ftce2-1.fna.fbcdn.net/thumb.jpg',
             'https://scontent-sea5-1.cdninstagram.com/second.jpg',
-        ]]);
+        ], 'video_url' => 'https://scontent-sea5-1.cdninstagram.com/reel.mp4']);
 
         $payload = app(ContentPostView::class)->make($post->fresh(), $user);
 
         $this->assertStringStartsWith('https://api.personal.test/api/media/content/', $payload['thumbnail_url']);
         $this->assertStringContainsString('signature=', $payload['thumbnail_url']);
+        $this->assertStringStartsWith('https://api.personal.test/api/media/content/', $payload['video_url']);
+        $this->assertStringContainsString('/video?', $payload['video_url']);
         $this->assertCount(2, $payload['media_urls']);
         $this->assertSame($payload['thumbnail_url'], $payload['media_urls'][0]);
         $this->assertStringStartsWith('https://api.personal.test/api/media/content/', $payload['media_urls'][1]);

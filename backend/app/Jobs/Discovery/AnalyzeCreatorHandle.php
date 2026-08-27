@@ -4,6 +4,7 @@ namespace App\Jobs\Discovery;
 
 use App\Models\CreatorProfile;
 use App\Models\InstagramAccount;
+use App\Services\Creator\CreatorProfileDnaWriter;
 use App\Services\Discovery\CanonicalCreatorVerticals;
 use App\Services\Discovery\CreatorMarketDetector;
 use App\Services\Discovery\DiscoveredPost;
@@ -57,7 +58,9 @@ class AnalyzeCreatorHandle implements ShouldQueue
         NicheDetectionService $niche,
         CreatorMarketDetector $markets,
         CanonicalCreatorVerticals $verticals,
+        ?CreatorProfileDnaWriter $dnaWriter = null,
     ): void {
+        $dnaWriter ??= app(CreatorProfileDnaWriter::class);
         $profile = CreatorProfile::query()->where('user_id', $this->userId)->first();
         $username = $this->username ?? $profile?->instagram_username;
 
@@ -119,6 +122,11 @@ class AnalyzeCreatorHandle implements ShouldQueue
             'username' => $scraped->username,
             'display_name' => $scraped->displayName,
             'bio' => $scraped->bio,
+            'website' => data_get($scraped->metadata, 'external_url')
+                ?? data_get($scraped->metadata, 'website'),
+            'category' => data_get($scraped->metadata, 'category')
+                ?? data_get($scraped->metadata, 'business_category'),
+            'account_type' => data_get($scraped->metadata, 'account_type'),
         ]);
         $media = $posts
             ->map(fn (DiscoveredPost $post): array => ['caption' => $post->caption])
@@ -147,28 +155,11 @@ class AnalyzeCreatorHandle implements ShouldQueue
             'market_confidence' => $market['confidence'],
         ]);
 
-        // A memory the creator wrote themselves outranks anything read off their
-        // profile, so an edited one is only ever added to, never replaced.
-        if (data_get($profile->creator_dna, 'analysis_method') !== 'manual') {
-            $profile->fill([
-                'niche' => $signals['primary_niche'],
-                'positioning' => $signals['primary_niche'] ? $scraped->bio : null,
-                'topics' => $signals['topics'],
-                'tone' => $signals['tone'],
-                'voice_profile' => $signals['voice_profile'],
-                'audience_description' => $signals['audience'] === [] ? null : implode(', ', $signals['audience']),
-                'creator_dna' => $signals,
-                'primary_vertical' => $verticals->fromSignals([
-                    $signals['primary_niche'],
-                    ...$signals['sub_niches'],
-                    ...$signals['topics'],
-                ]),
-                'dna_analyzed_at' => now(),
-                'discovery_queries' => null,
-                'discovery_hashtags' => null,
-                'discovery_refreshed_at' => null,
-            ]);
-        }
+        $dnaWriter->apply($profile, $signals, $verticals->fromSignals([
+            $signals['primary_niche'],
+            ...$signals['sub_niches'],
+            ...$signals['topics'],
+        ]));
 
         $profile->fill(['analysis_status' => 'completed', 'analysis_error' => null])->save();
 

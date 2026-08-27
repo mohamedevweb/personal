@@ -715,6 +715,7 @@
     "remixForMe": "Remix for me",
     "followers": "{count} followers",
     "views": "{count} views",
+    "playReel": "Play {'@'}{username}'s Reel",
     "openSource": "View original post",
     "formatBlurb": {
       "reel": "A hook, a spoken script and the shot to film.",
@@ -849,6 +850,7 @@
     "viewComments": "View all {count} comments",
     "openProfile": "View {'@'}{username} on Instagram",
     "openSource": "View original post on Instagram",
+    "playReel": "Play {'@'}{username}'s Reel",
     "previousSlide": "Previous slide",
     "nextSlide": "Next slide",
     "goToSlide": "Go to slide {slide}",
@@ -1039,7 +1041,7 @@
         "discovery": {
           "title": "Other creators' posts",
           "p": {
-            "what": "The For You feed is built from public posts by other Instagram accounts in your niche. We collect them through our provider Apify, from hashtag pages and public profiles.",
+            "what": "The For You feed is built from public posts by other Instagram accounts in your niche. We collect them through Scrape Creators from public Instagram profiles and search results.",
             "fields": "We keep what makes a post comparable: public username, display name, profile picture, biography, follower count and the account's average engagement, and for each post its hook, post text, thumbnail, date and public counters.",
             "basis": "The legal basis is our legitimate interest in producing trend analysis from information their authors have made public. We access no private account, no message and no data that is not already visible to everyone. This information serves performance analysis only: it is never used to contact those creators, nor to republish their content.",
             "rights": "If you are a creator and do not want your posts analysed by Personal, write to privacy{'@'}usepersonal.app: we remove your account and your posts from our database and prevent them from reappearing."
@@ -1063,9 +1065,9 @@
               "term": "Anthropic",
               "detail": "Content generation when that engine is selected. United States."
             },
-            "apify": {
-              "term": "Apify",
-              "detail": "Collection of the public posts used for trend analysis. Czech Republic, European Union."
+            "scrapecreators": {
+              "term": "Scrape Creators (Web Scraping Guy LLC)",
+              "detail": "Collection of the public posts used for trend analysis. United States."
             },
             "resend": {
               "term": "Resend",
@@ -1543,7 +1545,7 @@
         "thirdParty": {
           "title": "Third-party services",
           "p": {
-            "list": "Personal relies on Meta for the Instagram connection, on OpenAI and Anthropic for generation, on Apify for collecting public posts, and on Resend for service email. Using Personal means those services are involved, each under its own terms.",
+            "list": "Personal relies on Meta for the Instagram connection, on OpenAI and Anthropic for generation, on Scrape Creators for collecting public posts, and on Resend for service email. Using Personal means those services are involved, each under its own terms.",
             "links": "The service may point to sites we do not operate. We are not responsible for what is on them."
           }
         },

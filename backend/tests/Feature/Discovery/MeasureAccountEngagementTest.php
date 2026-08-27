@@ -11,6 +11,7 @@ use App\Services\Discovery\CreatorNicheService;
 use App\Services\Discovery\InstagramDataProvider;
 use App\Services\Discovery\OutlierScore;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Mockery;
 use Tests\TestCase;
 
 class MeasureAccountEngagementTest extends TestCase
@@ -145,6 +146,33 @@ class MeasureAccountEngagementTest extends TestCase
 
         $this->assertNotSame(123, $fresh->followers);
         $this->assertGreaterThan(0, $fresh->posts()->count());
+    }
+
+    public function test_it_reclassifies_a_creator_from_an_obsolete_analysis_version(): void
+    {
+        Creator::query()->create([
+            'username' => 'pasta.daily',
+            'display_name' => 'Pasta Daily',
+            'niche' => 'entrepreneurship giveaways',
+            'niche_topics' => ['food', 'pasta'],
+            'niche_analysis_version' => 0,
+            'followers' => 100_000,
+            'average_views' => 0,
+            'average_likes' => 0,
+        ]);
+        $niches = Mockery::mock(CreatorNicheService::class);
+        $niches->shouldReceive('detect')->once()->andReturn([
+            'niche' => 'entrepreneurship',
+            'topics' => ['starting a business', 'business education'],
+        ]);
+        $this->app->instance(CreatorNicheService::class, $niches);
+
+        $this->measure('pasta.daily');
+
+        $creator = Creator::query()->where('username', 'pasta.daily')->firstOrFail();
+        $this->assertSame('entrepreneurship', $creator->niche);
+        $this->assertSame(['starting a business', 'business education'], $creator->niche_topics);
+        $this->assertSame(CreatorNicheService::ANALYSIS_VERSION, $creator->niche_analysis_version);
     }
 
     public function test_top_accounts_rank_by_engagement_rate(): void
