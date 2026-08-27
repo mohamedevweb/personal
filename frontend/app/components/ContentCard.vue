@@ -91,24 +91,20 @@ watch(() => props.post.id, () => {
     </header>
 
     <div
-      class="relative aspect-[4/3] overflow-hidden bg-[var(--sand)]"
+      class="relative aspect-[4/5] overflow-hidden bg-[var(--sand)]"
       @touchstart.passive="rememberTouch"
       @touchend.passive="navigateFromSwipe"
     >
-      <video
+      <ReelPlayer
         v-if="mediaKind === 'reel' && post.video_url"
         :src="post.video_url"
-        :poster="post.thumbnail_url || undefined"
-        controls
-        playsinline
-        preload="none"
-        class="h-full w-full bg-black object-contain"
-        :aria-label="$t('contentCard.playReel', { username: post.creator.username })"
+        :poster="post.thumbnail_url"
+        :label="$t('contentCard.playReel', { username: post.creator.username })"
       />
       <NuxtLink v-else :to="`/content/${post.id}`" class="block h-full w-full">
         <img v-if="activeMediaUrl" :src="activeMediaUrl" :alt="post.hook" class="h-full w-full object-cover">
       </NuxtLink>
-      <AppIcon v-if="mediaKind !== 'image'" :name="mediaKind" :size="22" :stroke-width="1.9" class="pointer-events-none absolute right-3 top-3 text-white drop-shadow-[0_1px_3px_rgba(0,0,0,.55)]" />
+      <AppIcon v-if="mediaKind === 'carousel'" :name="mediaKind" :size="22" :stroke-width="1.9" class="pointer-events-none absolute right-3 top-3 text-white drop-shadow-[0_1px_3px_rgba(0,0,0,.55)]" />
 
       <button
         v-if="hasPreviousMedia"

@@ -148,6 +148,20 @@ return [
         ],
     ],
 
+    // Reading the spoken script of a reel. Off by default in cost terms: nothing
+    // is transcribed at discovery, only the creator's own reels and the posts a
+    // member actually opens.
+    'transcription' => [
+        'enabled' => (bool) env('REEL_TRANSCRIPTION_ENABLED', true),
+        // Whisper refuses anything above 25 MB, and a reel longer than three
+        // minutes costs more than the extra signal it carries.
+        'max_bytes' => (int) env('REEL_TRANSCRIPTION_MAX_BYTES', 26_214_400),
+        'max_duration_seconds' => (int) env('REEL_TRANSCRIPTION_MAX_DURATION', 180),
+        'download_timeout' => (int) env('REEL_TRANSCRIPTION_DOWNLOAD_TIMEOUT', 60),
+        // How many of a creator's own reels are transcribed to build their DNA.
+        'creator_dna_reels' => (int) env('CREATOR_DNA_TRANSCRIBED_REELS', 10),
+    ],
+
     'instagram_media_proxy' => [
         'disk' => env('INSTAGRAM_MEDIA_CACHE_DISK', 'local'),
         'cache_days' => (int) env('INSTAGRAM_MEDIA_CACHE_DAYS', 7),
@@ -167,6 +181,7 @@ return [
         'remix_reasoning_effort' => env('OPENAI_REMIX_REASONING_EFFORT', 'none'),
         'remix_max_output_tokens' => (int) env('OPENAI_REMIX_MAX_OUTPUT_TOKENS', 2500),
         'request_timeout' => (int) env('OPENAI_TIMEOUT', 120),
+        'transcription_model' => env('OPENAI_TRANSCRIPTION_MODEL', 'whisper-1'),
     ],
 
     'anthropic' => [

@@ -9,8 +9,10 @@ use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
 use App\Services\Discovery\ContentSafetyDecision;
 use App\Services\Discovery\DiscoveredPost;
+use App\Services\Discovery\DiscoveredProfile;
 use App\Services\Discovery\OutlierScore;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 class RegisteredCreatorService
@@ -79,53 +81,139 @@ class RegisteredCreatorService
         return $creator;
     }
 
+    /**
+     * The same contract from the public-handle path, where there is no connected
+     * account and everything comes from a scrape. The creator row is what lets a
+     * member's own posts be stored, analysed and transcribed like any other.
+     *
+     * @param  Collection<int, DiscoveredPost>  $posts
+     */
+    public function syncScraped(DiscoveredProfile $scraped, CreatorProfile $profile, Collection $posts): Creator
+    {
+        $creator = Creator::query()->where('user_id', $profile->user_id)->first()
+            ?? Creator::query()->whereRaw('LOWER(username) = ?', [Str::lower($scraped->username)])->first()
+            ?? new Creator;
+
+        $isNew = ! $creator->exists;
+
+        // A handle another member already claimed stays theirs. Two accounts
+        // cannot own the same creator row, and silently stealing it would move
+        // their own posts out of their feed exclusion.
+        if (! $isNew && $creator->user_id !== null && $creator->user_id !== $profile->user_id) {
+            return $creator;
+        }
+
+        $attributes = [
+            'user_id' => $profile->user_id,
+            'instagram_user_id' => $scraped->externalId ?: $creator->instagram_user_id,
+            'username' => $scraped->username,
+            'display_name' => $scraped->displayName ?: $scraped->username,
+            'avatar_url' => $scraped->avatarUrl,
+            'bio' => $scraped->bio,
+            'followers' => max(0, $scraped->followers),
+            // The scraped profile metadata is kept because the DNA rebuild reads
+            // the bio link and the account category back out of it.
+            'metadata' => array_replace_recursive($creator->metadata ?? [], $scraped->metadata, [
+                'personal_member' => [
+                    'joined_at' => data_get($creator->metadata, 'personal_member.joined_at') ?? now()->toIso8601String(),
+                    'last_synced_at' => now()->toIso8601String(),
+                ],
+            ]),
+            'last_fetched_at' => now(),
+            'metrics_updated_at' => now(),
+            'discovered_at' => $creator->discovered_at ?: now(),
+        ];
+
+        if ($isNew) {
+            $language = data_get($profile->creator_dna, 'language');
+            $attributes += [
+                'niche' => $profile->primary_vertical ?: 'unclassified',
+                'niche_topics' => $profile->topics ?? [],
+                'market' => $profile->market,
+                'primary_language' => in_array($language, ['fr', 'en', 'mixed'], true) ? $language : 'unknown',
+                'curation_status' => 'discovered',
+                'is_catalog_seed' => false,
+                // Real values land in storePosts once the posts are scored.
+                'average_views' => 0,
+                'average_likes' => 0,
+                'baseline_engagement' => 0,
+                'safety_status' => ContentSafetyDecision::PENDING,
+                'safety_reasons' => [],
+            ];
+        }
+
+        $creator->fill($attributes)->save();
+
+        $this->storePosts($creator, $posts);
+
+        return $creator;
+    }
+
     public function syncPosts(InstagramAccount $account, Creator $creator): void
     {
-        $media = $account->media()->get();
+        $this->storePosts($creator, $account->media()->get()->map(
+            fn (InstagramMedia $post): DiscoveredPost => $this->signal($post, $creator),
+        ));
+    }
+
+    /**
+     * Writes a member's own posts as ordinary content posts. They are excluded
+     * from their own feed by RecommendationService, and holding them here means
+     * the analysis, transcription and remix pipelines need no second code path.
+     *
+     * @param  Collection<int, DiscoveredPost>  $signals
+     */
+    public function storePosts(Creator $creator, Collection $signals): void
+    {
+        $signals = $signals->values();
         $followers = max(0, (int) $creator->followers);
-        $signals = $media->map(fn (InstagramMedia $post): DiscoveredPost => $this->signal($post, $creator));
         $baselines = $this->performance->baselines($signals);
 
         $creator->update([
             'average_views' => (int) round((float) ($baselines['views'] ?? 0)),
-            'average_likes' => (int) round((float) $media->avg(fn (InstagramMedia $post): int => (int) $post->like_count)),
+            'average_likes' => (int) round((float) $signals->avg(fn (DiscoveredPost $post): int => $post->likes)),
             'baseline_engagement' => max(0, (int) round((float) ($baselines['engagement'] ?? 0))),
             'performance_baselines' => $baselines,
         ]);
 
-        foreach ($media as $post) {
-            $signal = $signals->firstWhere('externalId', $post->instagram_media_id);
+        foreach ($signals as $signal) {
             $score = $this->performance->score($signal, $baselines);
-            $caption = trim((string) $post->caption);
+            $caption = trim($signal->caption);
             $contentPost = ContentPost::query()
-                ->where('instagram_media_id', $post->instagram_media_id)
-                ->when($post->permalink, fn ($query) => $query->orWhere('source_url', $post->permalink))
+                ->when($signal->externalId, fn ($query) => $query->where('instagram_media_id', $signal->externalId))
+                ->when($signal->sourceUrl, fn ($query) => $query->orWhere('source_url', $signal->sourceUrl))
                 ->first() ?? new ContentPost;
             $contentPost->fill([
                 'creator_id' => $creator->id,
-                'instagram_media_id' => $post->instagram_media_id,
+                'instagram_media_id' => $signal->externalId ?: $contentPost->instagram_media_id,
                 'platform' => 'instagram',
-                'source_url' => $post->permalink,
+                'source_url' => $signal->sourceUrl,
                 'format' => $signal->format,
                 'hook' => Str::limit(str($caption)->before("\n")->trim()->toString() ?: 'Instagram post', 250, ''),
                 'caption' => $caption,
-                'thumbnail_url' => $post->thumbnail_url ?: $post->media_url,
-                'video_url' => $signal->videoUrl,
+                'thumbnail_url' => $signal->thumbnailUrl,
+                // A signed CDN link that expires; the last one we saw is kept when
+                // this refresh did not return a new one.
+                'video_url' => $signal->videoUrl ?: $contentPost->video_url,
                 'media_urls' => $signal->mediaUrls,
                 'views' => $signal->views,
                 'likes' => $signal->likes,
                 'comments' => $signal->comments,
                 'shares' => $signal->shares,
-                'published_at' => $post->published_at ?: now(),
+                'published_at' => $signal->publishedAt,
                 'performance_ratio' => $score,
                 'outlier_score' => $score,
                 'engagement_rate' => $this->performance->engagementRate($signal->engagement(), $followers),
-                'tags' => [],
+                'tags' => $signal->hashtags,
                 'why_it_works' => '',
                 'hook_analysis' => '',
                 'structure_analysis' => '',
                 'measured_at' => now(),
-                'metadata' => ['personal_account_media' => true],
+                'metadata' => array_replace_recursive(
+                    $contentPost->metadata ?? [],
+                    $signal->metadata,
+                    ['personal_account_media' => true],
+                ),
                 'last_fetched_at' => now(),
                 'metrics_updated_at' => now(),
                 'safety_status' => ContentSafetyDecision::PENDING,

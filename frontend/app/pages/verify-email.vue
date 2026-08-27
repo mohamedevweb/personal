@@ -44,10 +44,7 @@ async function resend() {
 
     <section class="mx-auto flex min-h-[calc(100vh-5rem)] max-w-md flex-col justify-center px-6 py-14">
       <template v-if="verified">
-        <div class="grid h-14 w-14 place-items-center rounded-[14px] bg-[var(--ink)] text-[var(--paper)]">
-          <AppIcon name="sparkles" :size="24" />
-        </div>
-        <h1 class="mt-7 font-serif text-[44px] leading-[1.04] tracking-[-0.035em]">{{ $t('verifyEmail.verifiedTitle') }}</h1>
+        <h1 class="font-serif text-[44px] leading-[1.04] tracking-[-0.035em]">{{ $t('verifyEmail.verifiedTitle') }}</h1>
         <p class="mt-5 text-[16px] leading-7 text-[var(--muted)]">{{ $t('verifyEmail.verifiedCopy') }}</p>
         <NuxtLink to="/feed" class="mt-9 inline-flex h-[52px] items-center justify-center rounded-full b-btn-red px-7 text-[15px] font-medium transition">
           {{ $t('verifyEmail.continue') }}

@@ -691,7 +691,6 @@
   },
   "content": {
     "backToFeed": "← Back to your feed",
-    "analysis": "Personal analysis",
     "analysisImproving": "Deep analysis in progress",
     "loadError": "Personal could not open this pattern.",
     "usualPerformance": "this creator's usual performance",
@@ -767,7 +766,7 @@
     "retrying": "Trying again…",
     "redraft": "Rewrite",
     "redraftConfirm": "Replace draft?",
-    "delete": "Delete",
+    "delete": "Delete slide",
     "deleteConfirm": "Delete draft?",
     "deleted": "Draft deleted.",
     "deleteError": "Personal could not delete this draft. Try again.",
@@ -831,7 +830,6 @@
     "regenerate": "Rewrite this slide",
     "rewriteBlock": "Rewrite",
     "rewriteError": "Personal could not rewrite this block. Try again.",
-    "delete": "Delete slide",
     "regenerateAppend": ". That was the moment the direction became obvious.",
     "loadErrorCopy": "It may have been deleted, or it belongs to another account.",
     "startAnother": "Start a new draft"
@@ -1583,5 +1581,11 @@
         }
       }
     }
+  },
+  "reel": {
+    "play": "Play the reel",
+    "pause": "Pause the reel",
+    "unmute": "Turn the sound on",
+    "mute": "Turn the sound off"
   }
 }

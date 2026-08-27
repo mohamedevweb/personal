@@ -39,6 +39,19 @@ class InstagramMediaProxy
         return $image ? $this->imageResponse($image['body'], $image['content_type']) : null;
     }
 
+    /**
+     * Downloads a picture into the cache before anyone asks for it.
+     *
+     * Instagram signs its CDN links with an expiry a few days out. A carousel
+     * frame is only requested when a reader clicks onto it, which is often
+     * after that expiry, and the download then fails for good. Fetching every
+     * frame while the link still works is what keeps the frame viewable later.
+     */
+    public function warm(string $sourceUrl, string $cacheKey): bool
+    {
+        return $this->image($sourceUrl, $cacheKey) !== null;
+    }
+
     public function videoResponse(string $sourceUrl, ?string $range = null): ?StreamedResponse
     {
         if (! $this->supports($sourceUrl)) {

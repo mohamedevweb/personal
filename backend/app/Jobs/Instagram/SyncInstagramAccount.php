@@ -5,6 +5,7 @@ namespace App\Jobs\Instagram;
 use App\Jobs\Discovery\DiscoverNicheContent;
 use App\Models\CreatorProfile;
 use App\Models\InstagramAccount;
+use App\Services\Creator\CreatorDnaEnrichment;
 use App\Services\Creator\CreatorProfileDnaWriter;
 use App\Services\Creator\RegisteredCreatorService;
 use App\Services\Discovery\CanonicalCreatorVerticals;
@@ -43,11 +44,13 @@ class SyncInstagramAccount implements ShouldQueue
         ?CanonicalCreatorVerticals $verticals = null,
         ?RegisteredCreatorService $registeredCreators = null,
         ?CreatorProfileDnaWriter $dnaWriter = null,
+        ?CreatorDnaEnrichment $enrichment = null,
     ): void {
         $markets ??= app(CreatorMarketDetector::class);
         $verticals ??= app(CanonicalCreatorVerticals::class);
         $registeredCreators ??= app(RegisteredCreatorService::class);
         $dnaWriter ??= app(CreatorProfileDnaWriter::class);
+        $enrichment ??= app(CreatorDnaEnrichment::class);
         $account = InstagramAccount::query()->findOrFail($this->instagramAccountId);
 
         try {
@@ -102,6 +105,10 @@ class SyncInstagramAccount implements ShouldQueue
 
             $creatorProfile->save();
             $registeredCreators->sync($account->fresh('media'), $creatorProfile);
+
+            // The DNA above reads captions. The enrichment chain transcribes the
+            // member's own reels behind them and rewrites it from their voice.
+            $enrichment->queue($creatorProfile);
 
             $account->update(['sync_status' => 'finding_patterns']);
 

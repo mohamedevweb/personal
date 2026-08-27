@@ -5,6 +5,7 @@ namespace App\Services\View;
 use App\Models\ContentPost;
 use App\Models\User;
 use App\Services\Discovery\OutlierScore;
+use App\Services\Instagram\ContentMedia;
 use App\Services\Instagram\InstagramMediaProxy;
 use Illuminate\Support\Facades\URL;
 
@@ -97,16 +98,7 @@ class ContentPostView
     /** @return list<string> */
     private function contentMediaUrls(ContentPost $post): array
     {
-        $sourceUrls = collect($post->media_urls ?? [])
-            ->filter(fn (mixed $url): bool => is_string($url) && $url !== '')
-            ->unique()
-            ->values();
-
-        if ($sourceUrls->isEmpty() && $post->thumbnail_url) {
-            $sourceUrls->push($post->thumbnail_url);
-        }
-
-        return $sourceUrls
+        return collect(ContentMedia::frames($post))
             ->map(function (string $sourceUrl, int $position) use ($post): string {
                 if (! $this->media->supports($sourceUrl)) {
                     return $sourceUrl;

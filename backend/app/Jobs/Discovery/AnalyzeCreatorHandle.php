@@ -4,7 +4,9 @@ namespace App\Jobs\Discovery;
 
 use App\Models\CreatorProfile;
 use App\Models\InstagramAccount;
+use App\Services\Creator\CreatorDnaEnrichment;
 use App\Services\Creator\CreatorProfileDnaWriter;
+use App\Services\Creator\RegisteredCreatorService;
 use App\Services\Discovery\CanonicalCreatorVerticals;
 use App\Services\Discovery\CreatorMarketDetector;
 use App\Services\Discovery\DiscoveredPost;
@@ -13,6 +15,7 @@ use App\Services\Instagram\NicheDetectionService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 /**
@@ -59,8 +62,12 @@ class AnalyzeCreatorHandle implements ShouldQueue
         CreatorMarketDetector $markets,
         CanonicalCreatorVerticals $verticals,
         ?CreatorProfileDnaWriter $dnaWriter = null,
+        ?RegisteredCreatorService $registeredCreators = null,
+        ?CreatorDnaEnrichment $enrichment = null,
     ): void {
         $dnaWriter ??= app(CreatorProfileDnaWriter::class);
+        $registeredCreators ??= app(RegisteredCreatorService::class);
+        $enrichment ??= app(CreatorDnaEnrichment::class);
         $profile = CreatorProfile::query()->where('user_id', $this->userId)->first();
         $username = $this->username ?? $profile?->instagram_username;
 
@@ -162,6 +169,18 @@ class AnalyzeCreatorHandle implements ShouldQueue
         ]));
 
         $profile->fill(['analysis_status' => 'completed', 'analysis_error' => null])->save();
+
+        // Onboarding ends here. What follows only deepens the DNA, so a failure in
+        // it must never turn a finished analysis into a failed one.
+        try {
+            $registeredCreators->syncScraped($scraped, $profile, $posts);
+            $enrichment->queue($profile);
+        } catch (Throwable $exception) {
+            Log::warning('Creator DNA enrichment could not be queued.', [
+                'user_id' => $this->userId,
+                'exception' => $exception,
+            ]);
+        }
 
         // The niche is what the feed is built from, so fill it as soon as there
         // is one. Its own job, so a scraper hiccup never fails this one.

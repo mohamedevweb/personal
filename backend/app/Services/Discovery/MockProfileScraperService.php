@@ -69,9 +69,13 @@ class MockProfileScraperService implements ProfileDiscoveryService
             format: $format,
             hashtags: [],
             externalId: "mock-{$username}-{$index}",
+            metadata: $format === 'reel' ? ['video_duration' => 30 + ($postSeed % 60)] : [],
             mediaUrls: $format === 'carousel'
                 ? collect(range(0, 4))->map(fn (int $slide): string => "https://picsum.photos/seed/{$postSeed}-{$slide}/640/800")->all()
                 : [],
+            // A host on the real allowlist, so the local pipeline behaves like
+            // production: the download is attempted and fails, never skipped.
+            videoUrl: $format === 'reel' ? "https://mock.cdninstagram.com/{$postSeed}.mp4" : null,
         );
     }
 }

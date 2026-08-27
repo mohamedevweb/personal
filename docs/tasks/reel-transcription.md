@@ -1,5 +1,22 @@
 # Task — Transcrire les reels et nourrir le remix avec le script réel
 
+## État au 27/08/2026
+
+**Livré** — l'URL vidéo (section 1), le schéma `transcript` / `transcript_status` / `transcribed_at`
+(section 2), `ReelVideoFetcher` (section 3), `AudioTranscriptionService` et la config (section 4),
+`TranscribeContentPost` (section 5, sans le point d'entrée `ContentController::analyze()`).
+
+**Livré en plus, hors doc initiale** — la branche Creator DNA : les posts du créateur sont persistés
+depuis le chemin handle public (`RegisteredCreatorService::syncScraped()`), une sélection représentative
+de ses reels est transcrite en asynchrone après l'onboarding (`CreatorDnaEnrichment`, `CreatorReelSelection`),
+et le DNA est réécrit à partir des scripts parlés (`RebuildCreatorDna`), avec deux nouveaux champs
+`reasoning_patterns` et `hook_patterns` dans `NicheDetectionService`.
+
+**Reste à faire** — l'injection du transcript côté remix : la chaîne dans `ContentController::analyze()`,
+`PostInsightService::analyze()` et `ContentDraftBlueprint::brief()` (section 6), et l'exposition API
+(section 7). Le reste de ce document décrit ces parties.
+
+
 ## Problème
 
 Le pipeline de remix ne lit jamais la vidéo d'un reel. Il ne voit que des métadonnées texte :

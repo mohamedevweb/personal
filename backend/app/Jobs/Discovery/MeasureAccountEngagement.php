@@ -3,6 +3,7 @@
 namespace App\Jobs\Discovery;
 
 use App\Exceptions\ContentDiscoveryException;
+use App\Jobs\Content\CacheContentMedia;
 use App\Models\ContentPost;
 use App\Models\Creator;
 use App\Services\Discovery\ContentSafetyDecision;
@@ -308,7 +309,12 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
             ->whereIn('id', $refreshedPostIds)
             ->with('creator')
             ->get()
-            ->each(fn (ContentPost $post) => $lifecycle->reschedule($post, $capturedAt));
+            ->each(function (ContentPost $post) use ($capturedAt, $lifecycle): void {
+                $lifecycle->reschedule($post, $capturedAt);
+                // The links we just stored expire in a few days. Copy what they
+                // point at now, or the frames nobody has opened yet are lost.
+                CacheContentMedia::dispatch($post->id);
+            });
 
         return $creator;
     }

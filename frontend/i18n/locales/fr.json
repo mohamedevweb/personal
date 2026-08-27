@@ -691,7 +691,6 @@
   },
   "content": {
     "backToFeed": "← Retour à ton feed",
-    "analysis": "Analyse Personal",
     "analysisImproving": "Analyse approfondie en cours",
     "loadError": "Personal n’a pas pu ouvrir ce format.",
     "usualPerformance": "la performance habituelle de ce créateur",
@@ -767,7 +766,7 @@
     "retrying": "Relance en cours…",
     "redraft": "Régénérer",
     "redraftConfirm": "Écraser le brouillon ?",
-    "delete": "Supprimer",
+    "delete": "Supprimer la slide",
     "deleteConfirm": "Supprimer le brouillon ?",
     "deleted": "Brouillon supprimé.",
     "deleteError": "Personal n’a pas pu supprimer ce brouillon. Réessaie.",
@@ -831,7 +830,6 @@
     "regenerate": "Réécrire cette slide",
     "rewriteBlock": "Réécrire",
     "rewriteError": "Personal n’a pas pu réécrire ce bloc. Réessaie.",
-    "delete": "Supprimer la slide",
     "regenerateAppend": ". C’est là que la direction est devenue évidente.",
     "loadErrorCopy": "Il a peut-être été supprimé, ou il appartient à un autre compte.",
     "startAnother": "Commencer un brouillon"
@@ -1583,5 +1581,11 @@
         }
       }
     }
+  },
+  "reel": {
+    "play": "Lire le reel",
+    "pause": "Mettre le reel en pause",
+    "unmute": "Activer le son",
+    "mute": "Couper le son"
   }
 }

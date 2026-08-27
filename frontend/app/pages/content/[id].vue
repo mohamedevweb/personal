@@ -95,15 +95,12 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
     <div class="mt-6 grid gap-10 lg:grid-cols-[.88fr_1.12fr]">
       <section class="min-w-0 lg:sticky lg:top-8 lg:self-start">
         <div class="relative aspect-[4/5] overflow-hidden rounded-[18px] bg-[var(--sand)]">
-          <video
+          <ReelPlayer
             v-if="isReel && post.video_url"
             :src="post.video_url"
-            :poster="post.thumbnail_url || undefined"
-            controls
-            playsinline
-            preload="metadata"
-            class="h-full w-full bg-black object-contain"
-            :aria-label="$t('content.playReel', { username: post.creator.username })"
+            :poster="post.thumbnail_url"
+            fit="contain"
+            :label="$t('content.playReel', { username: post.creator.username })"
           />
           <template v-else>
             <img :src="post.thumbnail_url || ''" :alt="post.hook" class="h-full w-full object-cover">
@@ -118,14 +115,11 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
       </section>
 
       <section class="min-w-0">
-        <div class="flex items-center justify-between gap-4">
-          <p class="text-[11px] font-semibold uppercase tracking-[.16em] text-[var(--faint)]">{{ $t('content.analysis') }}</p>
-          <p v-if="post.analysis_status === 'pending'" class="inline-flex items-center gap-2 text-[11px] text-[var(--muted)]">
-            <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--ai)]" />
-            {{ $t('content.analysisImproving') }}
-          </p>
-        </div>
-        <div class="mt-5 inline-flex items-baseline gap-2 rounded-2xl bg-[var(--accent-soft)] px-5 py-4 text-[var(--accent-ink)]"><span class="font-serif text-4xl">{{ post.performance_ratio.toFixed(1) }}×</span><span class="text-xs">{{ $t('content.usualPerformance') }}</span></div>
+        <p v-if="post.analysis_status === 'pending'" class="inline-flex items-center gap-2 text-[11px] text-[var(--muted)]">
+          <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--ai)]" />
+          {{ $t('content.analysisImproving') }}
+        </p>
+        <div class="inline-flex items-baseline gap-2 rounded-2xl bg-[var(--accent-soft)] px-5 py-4 text-[var(--accent-ink)]" :class="post.analysis_status === 'pending' ? 'mt-4' : ''"><span class="font-serif text-4xl">{{ post.performance_ratio.toFixed(1) }}×</span><span class="text-xs">{{ $t('content.usualPerformance') }}</span></div>
         <!-- The number is only worth what its denominator is, so the denominator
              is stated here rather than left to be trusted. -->
         <div class="mt-3 rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-4">

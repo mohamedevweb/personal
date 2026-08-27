@@ -8,6 +8,7 @@ use App\Models\Creator;
 use App\Models\CreatorProfile;
 use App\Models\InstagramAccount;
 use App\Services\Creator\CreatorInspirationService;
+use App\Services\Instagram\ContentMedia;
 use App\Services\Instagram\InstagramMediaProxy;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -25,10 +26,10 @@ class MediaController extends Controller
 
     public function contentItem(ContentPost $content, int $position, InstagramMediaProxy $media): Response
     {
-        $sourceUrl = $content->media_urls[$position] ?? null;
+        $sourceUrl = ContentMedia::frame($content, $position);
         abort_unless(is_string($sourceUrl), 404);
 
-        $response = $media->response($sourceUrl, "content:{$content->id}:{$position}");
+        $response = $media->response($sourceUrl, ContentMedia::cacheKey($content, $position, $sourceUrl));
         abort_if($response === null, 404);
 
         return $response;
