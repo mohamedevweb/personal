@@ -51,11 +51,11 @@ class LlmJsonService
     private function viaOpenAi(string $instructions, string $input, array $schema): ?array
     {
         try {
-            $response = $this->openai->responses()->create([
+            $parameters = [
                 'model' => (string) config('services.openai.model'),
                 'instructions' => $instructions,
                 'input' => $input,
-                'max_output_tokens' => 2000,
+                'max_output_tokens' => (int) config('services.openai.analysis_max_output_tokens'),
                 'text' => [
                     'format' => [
                         'type' => 'json_schema',
@@ -64,7 +64,13 @@ class LlmJsonService
                         'schema' => $schema,
                     ],
                 ],
-            ]);
+            ];
+
+            if ($effort = config('services.openai.analysis_reasoning_effort')) {
+                $parameters['reasoning'] = ['effort' => $effort];
+            }
+
+            $response = $this->openai->responses()->create($parameters);
 
             return $this->decode($response->outputText);
         } catch (Throwable $exception) {

@@ -175,6 +175,10 @@ return [
     'openai' => [
         'api_key' => env('OPENAI_API_KEY'),
         'model' => env('OPENAI_MODEL', 'gpt-5'),
+        // Creator DNA and other structured analyses need room for the JSON after
+        // reasoning. They remain separate from the low-latency remix budget.
+        'analysis_reasoning_effort' => env('OPENAI_ANALYSIS_REASONING_EFFORT', 'low'),
+        'analysis_max_output_tokens' => (int) env('OPENAI_ANALYSIS_MAX_OUTPUT_TOKENS', 5000),
         // Remix drafting is a bounded creative task, so it uses a faster model
         // and avoids spending tokens on reasoning needed by harder workflows.
         'remix_model' => env('OPENAI_REMIX_MODEL', 'gpt-5.6-luna'),
