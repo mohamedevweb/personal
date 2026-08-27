@@ -20,6 +20,11 @@ const mediaUrls = computed(() => {
   return urls.length > 0 ? urls : props.post.thumbnail_url ? [props.post.thumbnail_url] : []
 })
 const activeMediaUrl = computed(() => mediaUrls.value[activeMediaIndex.value] || null)
+// Instagram signs its image links with an expiry, so a frame can go missing long
+// after the post was found. Remembering which ones the browser could not load
+// keeps a card showing its own frame instead of a broken picture.
+const failedMediaUrls = ref<string[]>([])
+const isMediaUnavailable = computed(() => !!activeMediaUrl.value && failedMediaUrls.value.includes(activeMediaUrl.value))
 const hasPreviousMedia = computed(() => activeMediaIndex.value > 0)
 const hasNextMedia = computed(() => activeMediaIndex.value < mediaUrls.value.length - 1)
 // Instagram cuts the caption after a couple of lines and reveals the rest behind
@@ -28,7 +33,6 @@ const hasNextMedia = computed(() => activeMediaIndex.value < mediaUrls.value.len
 const caption = computed(() => [props.post.hook, props.post.caption].filter(Boolean).join(' '))
 const isLongCaption = computed(() => caption.value.length > 80)
 const visibleCaption = computed(() => (isLongCaption.value ? `${caption.value.slice(0, 80).trimEnd()}… ` : caption.value))
-const engagement = computed(() => (props.post.likes || 0) + (props.post.comments || 0) + (props.post.shares || 0))
 
 let touchStart: { x: number, y: number } | null = null
 
@@ -38,6 +42,10 @@ function showPreviousMedia() {
 
 function showNextMedia() {
   if (hasNextMedia.value) activeMediaIndex.value++
+}
+
+function rememberFailedMedia(url: string | null) {
+  if (url && !failedMediaUrls.value.includes(url)) failedMediaUrls.value.push(url)
 }
 
 function rememberTouch(event: TouchEvent) {
@@ -60,6 +68,7 @@ function navigateFromSwipe(event: TouchEvent) {
 
 watch(() => props.post.id, () => {
   activeMediaIndex.value = 0
+  failedMediaUrls.value = []
 })
 </script>
 
@@ -102,7 +111,16 @@ watch(() => props.post.id, () => {
         :label="$t('contentCard.playReel', { username: post.creator.username })"
       />
       <NuxtLink v-else :to="`/content/${post.id}`" class="block h-full w-full">
-        <img v-if="activeMediaUrl" :src="activeMediaUrl" :alt="post.hook" class="h-full w-full object-cover">
+        <img
+          v-if="activeMediaUrl && !isMediaUnavailable"
+          :src="activeMediaUrl"
+          :alt="post.hook"
+          class="h-full w-full object-cover"
+          @error="rememberFailedMedia(activeMediaUrl)"
+        >
+        <span v-else-if="isMediaUnavailable" class="flex h-full w-full items-center justify-center px-6 text-center text-[12px] text-[var(--faint)]">
+          {{ $t('contentCard.mediaUnavailable') }}
+        </span>
       </NuxtLink>
       <AppIcon v-if="mediaKind === 'carousel'" :name="mediaKind" :size="22" :stroke-width="1.9" class="pointer-events-none absolute right-3 top-3 text-white drop-shadow-[0_1px_3px_rgba(0,0,0,.55)]" />
 
@@ -174,19 +192,10 @@ watch(() => props.post.id, () => {
 
     <!-- Everything Personal adds on top of the post lives below the fold line. -->
     <div class="flex flex-1 flex-col border-t border-[var(--line)] bg-[var(--paper)] px-2.5 py-3.5">
-      <!-- The badge sits outside the scrolling row: its explanation popover would
-           be clipped by the horizontal overflow otherwise. -->
-      <div class="flex flex-nowrap items-center gap-1">
+      <!-- Only the outlier ratio: the raw counts were already in the post above,
+           and crowding them next to the badge pushed it into a clipped scroller. -->
+      <div class="flex">
         <PerformanceBadge :post="post" />
-        <div class="flex flex-nowrap items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <span v-if="(post.creator_fit_score ?? 0) >= 55" class="shrink-0 whitespace-nowrap rounded-full border border-[var(--accent-line)] bg-[var(--accent-soft)] px-2.5 py-1.5 text-[12px] text-[var(--accent-ink)]">
-            {{ $t('contentCard.creatorFit') }}
-          </span>
-          <span class="shrink-0 whitespace-nowrap rounded-full border border-[var(--line)] px-2.5 py-1.5 text-[12px] text-[var(--muted)]">
-            {{ mediaKind === 'reel' && post.views > 0 ? $t('contentCard.views', { count: compactNumber(post.views) }) : $t('contentCard.engagements', { count: compactNumber(engagement) }) }}
-          </span>
-          <span v-for="signal in post.signals?.slice(-1)" :key="signal" class="hidden shrink-0 whitespace-nowrap rounded-full border border-[var(--line)] px-2.5 py-1.5 text-[12px] text-[var(--muted)] min-[360px]:inline">{{ signal }}</span>
-        </div>
       </div>
 
       <div class="mt-auto grid gap-2 pt-3">

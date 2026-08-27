@@ -438,7 +438,6 @@
       "following": "following",
       "grid": "Grid · last 6 posts"
     },
-    "skip": "Continue without connecting",
     "inspirations": {
       "title": "Who inspires you on Instagram?",
       "copy": "Choose 3 to 6 creators you genuinely watch when you create. Personal will prioritize their best content and complete the feed with your world.",
@@ -461,8 +460,7 @@
       "suggestionsLabel": "Suggested for you",
       "resultsLabel": "Search results",
       "noResults": "No creator to add here. Search a handle to find one.",
-      "handleError": "Enter a valid Instagram handle or profile link.",
-      "skip": "Skip for now"
+      "handleError": "Enter a valid Instagram handle or profile link."
     }
   },
   "feed": {
@@ -478,7 +476,9 @@
     "emptyTitle": "No content yet.",
     "emptyBody": "We’re finding standout content from creators across the platform. This can take a moment right after connecting Instagram.",
     "refresh": "Refresh my feed",
-    "refreshing": "Loading more content…"
+    "refreshing": "Refreshing…",
+    "loadingMore": "Loading more…",
+    "loadMore": "Load more"
   },
   "create": {
     "eyebrow": "Studio",
@@ -837,9 +837,6 @@
   "contentCard": {
     "average": "{ratio}× normal for their {format}",
     "followers": "{count} followers",
-    "views": "{count} views",
-    "engagements": "{count} interactions",
-    "creatorFit": "Matches your world",
     "likes": "{count} likes",
     "saved": "Saved ✓",
     "save": "Save",
@@ -852,6 +849,7 @@
     "previousSlide": "Previous slide",
     "nextSlide": "Next slide",
     "goToSlide": "Go to slide {slide}",
+    "mediaUnavailable": "This slide is no longer available on Instagram",
     "averageAccount": "{ratio}× normal for this account"
   },
   "performance": {
@@ -861,9 +859,11 @@
     "comparedFormat": "Measured against the median of {'@'}{username}'s last {count} {format}.",
     "comparedAccount": "Measured against the median of {'@'}{username}'s last {count} posts, every format together — too few of this one to have a normal of its own.",
     "comparedUnknown": "Measured against {'@'}{username}'s own recent posts, not against other creators.",
-    "normal": "Their normal: {parts}",
-    "normalViews": "{count} views",
-    "normalEngagement": "{count} interactions",
+    "normalLabel": "Their normal",
+    "metrics": {
+      "views": "Views",
+      "engagement": "Interactions"
+    },
     "formulaBoth": "Views count for 60% of the ratio, likes + comments + shares for the other 40%.",
     "formulaEngagement": "This format reports no views, so the ratio is likes, comments and shares only.",
     "median": "A median, not an average — one viral post does not move it.",
@@ -1233,10 +1233,6 @@
             "lang": {
               "term": "personal_lang",
               "detail": "Remembers the display language you chose."
-            },
-            "onboarding": {
-              "term": "personal-onboarding-skipped",
-              "detail": "Remembers that you chose to skip the Instagram connection step. Lifetime: one year."
             }
           }
         },

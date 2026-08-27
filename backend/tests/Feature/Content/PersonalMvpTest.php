@@ -69,6 +69,19 @@ class PersonalMvpTest extends TestCase
         $this->assertSame($firstIds->all(), $restartedIds->all());
     }
 
+    public function test_the_feed_accepts_a_full_scroll_worth_of_exclusions(): void
+    {
+        // Infinite scroll replays every id already on screen, so the cap is part
+        // of the contract the client truncates against.
+        $this->actingAs($this->user)->getJson('/api/feed?'.http_build_query([
+            'exclude' => range(1_000, 1_499),
+        ]))->assertOk();
+
+        $this->actingAs($this->user)->getJson('/api/feed?'.http_build_query([
+            'exclude' => range(1_000, 1_500),
+        ]))->assertStatus(422)->assertJsonValidationErrors('exclude');
+    }
+
     public function test_the_feed_query_count_does_not_grow_with_the_catalog(): void
     {
         $queries = 0;

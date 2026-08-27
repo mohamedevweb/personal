@@ -438,7 +438,6 @@
       "following": "abonnements",
       "grid": "Grille · 6 derniers posts"
     },
-    "skip": "Continuer sans connecter Instagram",
     "inspirations": {
       "title": "Qui t’inspire sur Instagram ?",
       "copy": "Choisis 3 à 6 créateurs que tu regardes vraiment pour créer. Personal donnera la priorité à leurs meilleurs contenus et complétera avec ton univers.",
@@ -461,8 +460,7 @@
       "suggestionsLabel": "Suggérés pour toi",
       "resultsLabel": "Résultats de recherche",
       "noResults": "Aucun créateur à ajouter ici. Recherche un handle pour en trouver.",
-      "handleError": "Saisis un handle Instagram ou un lien de profil valide.",
-      "skip": "Passer pour l’instant"
+      "handleError": "Saisis un handle Instagram ou un lien de profil valide."
     }
   },
   "feed": {
@@ -478,7 +476,9 @@
     "emptyTitle": "Rien pour l’instant.",
     "emptyBody": "On cherche les contenus qui se démarquent parmi tous les créateurs. Ça peut prendre un moment juste après la connexion Instagram.",
     "refresh": "Rafraîchir mon feed",
-    "refreshing": "Chargement d’autres contenus…"
+    "refreshing": "Actualisation…",
+    "loadingMore": "Chargement…",
+    "loadMore": "Charger plus"
   },
   "create": {
     "eyebrow": "Studio",
@@ -837,9 +837,6 @@
   "contentCard": {
     "average": "{ratio}× sa normale en {format}",
     "followers": "{count} abonnés",
-    "views": "{count} vues",
-    "engagements": "{count} interactions",
-    "creatorFit": "Dans ton univers",
     "likes": "{count} j’aime",
     "saved": "Enregistré ✓",
     "save": "Enregistrer",
@@ -852,6 +849,7 @@
     "previousSlide": "Diapositive précédente",
     "nextSlide": "Diapositive suivante",
     "goToSlide": "Aller à la diapositive {slide}",
+    "mediaUnavailable": "Cette image n’est plus disponible sur Instagram",
     "averageAccount": "{ratio}× sa normale"
   },
   "performance": {
@@ -861,9 +859,11 @@
     "comparedFormat": "Mesuré contre la médiane des {count} derniers {format} de {'@'}{username}.",
     "comparedAccount": "Mesuré contre la médiane des {count} derniers posts de {'@'}{username}, tous formats confondus — trop peu de ce format-là pour qu’il ait sa propre normale.",
     "comparedUnknown": "Mesuré contre les posts récents de {'@'}{username}, pas contre les autres créateurs.",
-    "normal": "Sa normale : {parts}",
-    "normalViews": "{count} vues",
-    "normalEngagement": "{count} interactions",
+    "normalLabel": "Sa normale",
+    "metrics": {
+      "views": "Vues",
+      "engagement": "Interactions"
+    },
     "formulaBoth": "Les vues comptent pour 60 % du ratio, les j’aime + commentaires + partages pour les 40 % restants.",
     "formulaEngagement": "Ce format ne remonte pas de vues : le ratio ne tient compte que des j’aime, commentaires et partages.",
     "median": "Une médiane, pas une moyenne — un post viral ne la déplace pas.",
@@ -1233,10 +1233,6 @@
             "lang": {
               "term": "personal_lang",
               "detail": "Mémorise la langue d’affichage que vous avez choisie."
-            },
-            "onboarding": {
-              "term": "personal-onboarding-skipped",
-              "detail": "Retient que vous avez choisi de passer l’étape de connexion Instagram. Durée : un an."
             }
           }
         },

@@ -20,9 +20,6 @@ const inspirationsLoaded = ref(false)
 const handleInput = ref('')
 const accountHandleInput = ref('')
 const handleSaving = ref(false)
-// Choosing inspirations does not need Instagram: a creator who skips the
-// connection still gets this step, so the first feed has something to build on.
-const connectionSkipped = ref(false)
 // A profile that could not be read (a private account, a provider outage) must
 // not lock a creator out of their own onboarding, so the failure screen offers
 // a way through. Nothing else lets the flow past an unfinished analysis.
@@ -185,10 +182,10 @@ watch(connectionError, (message) => {
 const onboarded = useState('personal-onboarded', () => false)
 
 // The favorites step opens once the import is done, or right away when a
-// creator provided their handle or chose not to connect Instagram.
+// creator provided their handle. Instagram is required either way: there is no
+// route into the app that leaves it behind.
 const showInspirations = computed(() => (status.value.connected && status.value.account?.sync_status === 'completed')
-  || (!status.value.connected && Boolean(status.value.instagram_username) && !showAnalysis.value)
-  || (!status.value.connected && connectionSkipped.value))
+  || (!status.value.connected && Boolean(status.value.instagram_username) && !showAnalysis.value))
 
 const onboardingSteps = computed(() => [
   {
@@ -473,24 +470,9 @@ watch(() => analysis.value?.status, (analysisStatus) => {
   if (analysisStatus === 'completed' && !status.value.connected) void loadInspirations()
 })
 
-// Let the user into the app without connecting Instagram. The cookie makes the
-// choice survive reloads so the auth gate stops sending them back here, and is
-// only written once they leave onboarding for the feed.
-const skipped = useCookie<boolean>('personal-onboarding-skipped', { maxAge: 60 * 60 * 24 * 365 })
-
-function skipConnection() {
-  connectionSkipped.value = true
-  void loadInspirations()
-}
-
 function enterApp() {
-  if (connectionSkipped.value) skipped.value = true
   onboarded.value = true
   return navigateTo('/feed')
-}
-
-function skipInspirations() {
-  void enterApp()
 }
 
 onMounted(async () => {
@@ -530,7 +512,7 @@ onMounted(async () => {
           </li>
         </ol>
 
-        <template v-if="!status.connected && !status.instagram_username && !connectionSkipped">
+        <template v-if="!status.connected && !status.instagram_username">
           <h1 class="font-serif text-5xl leading-[1.02] tracking-[-0.045em] md:text-7xl" v-html="$t('onboarding.connectTitle')" />
           <p class="mt-7 max-w-lg text-[17px] leading-7 text-[var(--muted)]">
             {{ $t('onboarding.connectCopy') }}
@@ -589,14 +571,6 @@ onMounted(async () => {
               </button>
             </div>
           </form>
-
-          <button
-            type="button"
-            class="mt-8 text-sm text-[var(--faint)] underline decoration-[var(--line)] underline-offset-4 transition hover:text-[var(--ink)]"
-            @click="skipConnection"
-          >
-            {{ $t('onboarding.skip') }} →
-          </button>
         </template>
 
         <template v-else>
@@ -809,15 +783,6 @@ onMounted(async () => {
               @click="saveInspirations"
             >
               {{ saving ? $t('onboarding.inspirations.saving') : $t('onboarding.inspirations.continue') }}&nbsp; →
-            </button>
-
-            <button
-              v-if="connectionSkipped"
-              type="button"
-              class="mt-6 block text-sm text-[var(--faint)] underline decoration-[var(--line)] underline-offset-4 transition hover:text-[var(--ink)]"
-              @click="skipInspirations"
-            >
-              {{ $t('onboarding.inspirations.skip') }} →
             </button>
           </template>
 

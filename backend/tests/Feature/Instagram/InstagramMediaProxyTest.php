@@ -2,11 +2,13 @@
 
 namespace Tests\Feature\Instagram;
 
+use App\Jobs\Content\CacheContentMedia;
 use App\Models\ContentPost;
 use App\Models\Creator;
 use App\Models\InstagramAccount;
 use App\Models\Remix;
 use App\Models\User;
+use App\Services\Instagram\InstagramMediaProxy;
 use App\Services\View\ContentPostView;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -244,6 +246,58 @@ class InstagramMediaProxyTest extends TestCase
 
         $this->assertSame([$payload['thumbnail_url']], $payload['media_urls']);
         $this->assertStringNotContainsString("/{$post->id}/0?", $payload['media_urls'][0]);
+    }
+
+    public function test_cached_carousel_frames_outlive_the_instagram_link_they_came_from(): void
+    {
+        Storage::fake('local');
+        Http::preventStrayRequests();
+        $thumbnail = 'https://instagram.ftce2-1.fna.fbcdn.net/frame-1.jpg';
+        $frame = 'https://instagram.ftce2-1.fna.fbcdn.net/frame-2.jpg';
+        Http::fake([
+            $thumbnail => Http::response('first-frame', 200, ['Content-Type' => 'image/jpeg']),
+            $frame => Http::response('second-frame', 200, ['Content-Type' => 'image/jpeg']),
+        ]);
+        $post = $this->createPost($thumbnail);
+        $post->update(['media_urls' => [$thumbnail, $frame]]);
+
+        // Discovery copies every frame while the links still resolve.
+        (new CacheContentMedia($post->id))->handle(app(InstagramMediaProxy::class));
+
+        // Days later Instagram stops serving them, which is what used to leave
+        // a broken picture on every frame nobody had opened yet.
+        Http::fake([
+            $thumbnail => Http::response('', 403),
+            $frame => Http::response('', 403),
+        ]);
+        $path = URL::temporarySignedRoute(
+            'media.content.item',
+            now()->addHour(),
+            ['content' => $post, 'position' => 1],
+            absolute: false,
+        );
+
+        $this->get($path)->assertOk()->assertContent('second-frame');
+    }
+
+    public function test_carousel_frame_positions_skip_blank_and_repeated_urls(): void
+    {
+        config(['app.url' => 'https://api.personal.test']);
+        Storage::fake('local');
+        Http::preventStrayRequests();
+        $thumbnail = 'https://instagram.ftce2-1.fna.fbcdn.net/frame-1.jpg';
+        $second = 'https://instagram.ftce2-1.fna.fbcdn.net/frame-2.jpg';
+        Http::fake([$second => Http::response('second-frame', 200, ['Content-Type' => 'image/jpeg'])]);
+        $user = User::factory()->create();
+        $post = $this->createPost($thumbnail);
+        $post->update(['media_urls' => [$thumbnail, '', $thumbnail, $second]]);
+
+        $payload = app(ContentPostView::class)->make($post->fresh(), $user);
+        $this->assertCount(2, $payload['media_urls']);
+
+        $frame = parse_url($payload['media_urls'][1], PHP_URL_PATH).'?'.parse_url($payload['media_urls'][1], PHP_URL_QUERY);
+
+        $this->get($frame)->assertOk()->assertContent('second-frame');
     }
 
     private function createPost(string $thumbnailUrl): ContentPost

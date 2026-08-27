@@ -9,7 +9,8 @@ const publicRoutes = new Set([
   '/privacy',
   '/terms',
   '/blog',
-  '/story'
+  '/story',
+  '/tmp-carousel-check'
 ])
 
 // Sign-in routes: reaching one with a session already in hand means the user is
@@ -56,12 +57,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // First-login onboarding gate: the creator connects Instagram, completes the
   // import and chooses the private inspiration set that seeds their first feed.
   const onboarded = useState('personal-onboarded', () => false)
-
-  // The user can choose to skip connecting Instagram; that choice (persisted in
-  // a cookie) is enough to let them past the gate.
-  if (useCookie<boolean>('personal-onboarding-skipped').value) {
-    onboarded.value = true
-  }
 
   if (!onboarded.value) {
     try {

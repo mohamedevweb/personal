@@ -115,16 +115,23 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
       </section>
 
       <section class="min-w-0">
-        <p v-if="post.analysis_status === 'pending'" class="inline-flex items-center gap-2 text-[11px] text-[var(--muted)]">
-          <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--ai)]" />
-          {{ $t('content.analysisImproving') }}
-        </p>
-        <div class="inline-flex items-baseline gap-2 rounded-2xl bg-[var(--accent-soft)] px-5 py-4 text-[var(--accent-ink)]" :class="post.analysis_status === 'pending' ? 'mt-4' : ''"><span class="font-serif text-4xl">{{ post.performance_ratio.toFixed(1) }}×</span><span class="text-xs">{{ $t('content.usualPerformance') }}</span></div>
-        <!-- The number is only worth what its denominator is, so the denominator
-             is stated here rather than left to be trusted. -->
-        <div class="mt-3 rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-4">
-          <p class="mb-2 text-[11px] font-semibold uppercase tracking-[.16em] text-[var(--faint)]">{{ $t('performance.title') }}</p>
-          <PerformanceNote :post="post" />
+        <!-- The number is only worth what its denominator is, so the ratio and
+             the method it came from are one panel rather than two stray blocks. -->
+        <div class="overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">
+          <div class="border-b border-[var(--accent-line)] bg-[var(--accent-soft)] px-5 py-4">
+            <span v-if="post.analysis_status === 'pending'" class="mb-3 inline-flex items-center gap-2 rounded-full border border-[var(--accent-line)] bg-[var(--surface)] px-2.5 py-1 text-[11px] text-[var(--muted)]">
+              <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--ai)]" />
+              {{ $t('content.analysisImproving') }}
+            </span>
+            <p class="flex items-baseline gap-3 text-[var(--accent-ink)]">
+              <span class="font-serif text-[44px] leading-none tracking-[-.02em]">{{ post.performance_ratio.toFixed(1) }}×</span>
+              <span class="max-w-[16rem] text-[13px] leading-[1.35]">{{ $t('content.usualPerformance') }}</span>
+            </p>
+          </div>
+          <div class="px-5 py-4">
+            <p class="mb-2.5 text-[10px] font-semibold uppercase tracking-[.16em] text-[var(--faint)]">{{ $t('performance.title') }}</p>
+            <PerformanceNote :post="post" />
+          </div>
         </div>
         <div class="mt-8 divide-y divide-[var(--line-soft)] border-y border-[var(--line)]">
           <div class="py-6"><p class="text-[11px] font-semibold uppercase tracking-widest text-[var(--faint)]">{{ $t('content.hook') }}</p><p class="mt-2 text-[15px] leading-[1.6]">{{ post.hook_analysis }}</p></div>
@@ -185,7 +192,18 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
                 <span class="flex-1 truncate text-[13.5px]">{{ moment.content }}</span>
               </button>
             </div>
-            <button v-else-if="!composerOpen" type="button" class="mt-3 flex w-full items-center gap-3 rounded-[12px] border border-dashed border-[var(--line)] bg-[var(--paper)] p-3 text-left transition hover:border-[var(--muted)]" @click="composerOpen = true">
+            <!-- Material keeps arriving, so the composer stays reachable once
+                 the list is no longer empty. -->
+            <button
+              v-if="moments.length && !composerOpen"
+              type="button"
+              class="mt-2 flex w-full items-center gap-3 rounded-[12px] border border-dashed border-[var(--line)] px-3 py-2 text-left text-[13.5px] text-[var(--muted)] transition hover:border-[var(--muted)] hover:text-[var(--ink)]"
+              @click="composerOpen = true"
+            >
+              <span class="grid h-5 w-5 shrink-0 place-items-center rounded-full border border-[var(--line)]"><AppIcon name="plus" :size="12" :stroke-width="2.2" /></span>
+              {{ $t('content.addMoment') }}
+            </button>
+            <button v-if="!moments.length && !composerOpen" type="button" class="mt-3 flex w-full items-center gap-3 rounded-[12px] border border-dashed border-[var(--line)] bg-[var(--paper)] p-3 text-left transition hover:border-[var(--muted)]" @click="composerOpen = true">
               <span class="grid h-8 w-8 shrink-0 place-items-center rounded-[9px] bg-[var(--accent-soft)] text-[var(--accent-ink)]"><AppIcon name="plus" :size="14" /></span>
               <span><span class="block text-[13px] font-medium">{{ $t('content.firstMomentTitle') }}</span><span class="mt-0.5 block text-[11.5px] text-[var(--muted)]">{{ $t('content.firstMomentCopy') }}</span></span>
             </button>

@@ -12,8 +12,11 @@ class FeedController extends Controller
 {
     public function index(Request $request, RecommendationService $recommendations): JsonResponse
     {
+        // The feed scrolls by exclusion rather than by offset, so the client sends
+        // back everything already on screen. The cap bounds the bind parameters on
+        // the pool query; past it the client drops its oldest ids.
         $data = $request->validate([
-            'exclude' => ['sometimes', 'array', 'max:240'],
+            'exclude' => ['sometimes', 'array', 'max:500'],
             'exclude.*' => ['integer', 'distinct'],
         ]);
         $items = $recommendations->forUser($request->user(), excludeIds: $data['exclude'] ?? []);
