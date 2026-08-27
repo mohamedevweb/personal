@@ -8,7 +8,6 @@ const props = withDefaults(defineProps<{ post: ContentPost, remixing?: boolean }
 defineEmits<{ save: [post: ContentPost], remix: [post: ContentPost] }>()
 const { locale } = useI18n()
 
-const activeMediaIndex = ref(0)
 const mediaKind = computed(() => {
   const format = (props.post.format || '').toLowerCase()
   if (format.includes('reel') || format.includes('video')) return 'reel'
@@ -19,14 +18,6 @@ const mediaUrls = computed(() => {
   const urls = props.post.media_urls?.filter(Boolean) || []
   return urls.length > 0 ? urls : props.post.thumbnail_url ? [props.post.thumbnail_url] : []
 })
-const activeMediaUrl = computed(() => mediaUrls.value[activeMediaIndex.value] || null)
-// Instagram signs its image links with an expiry, so a frame can go missing long
-// after the post was found. Remembering which ones the browser could not load
-// keeps a card showing its own frame instead of a broken picture.
-const failedMediaUrls = ref<string[]>([])
-const isMediaUnavailable = computed(() => !!activeMediaUrl.value && failedMediaUrls.value.includes(activeMediaUrl.value))
-const hasPreviousMedia = computed(() => activeMediaIndex.value > 0)
-const hasNextMedia = computed(() => activeMediaIndex.value < mediaUrls.value.length - 1)
 // Instagram cuts the caption after a couple of lines and reveals the rest behind
 // an inline "more", so we truncate on length to keep that link on the line. Here
 // the link opens the post's analysis rather than unfolding the caption in place.
@@ -34,42 +25,6 @@ const caption = computed(() => [props.post.hook, props.post.caption].filter(Bool
 const isLongCaption = computed(() => caption.value.length > 80)
 const visibleCaption = computed(() => (isLongCaption.value ? `${caption.value.slice(0, 80).trimEnd()}… ` : caption.value))
 
-let touchStart: { x: number, y: number } | null = null
-
-function showPreviousMedia() {
-  if (hasPreviousMedia.value) activeMediaIndex.value--
-}
-
-function showNextMedia() {
-  if (hasNextMedia.value) activeMediaIndex.value++
-}
-
-function rememberFailedMedia(url: string | null) {
-  if (url && !failedMediaUrls.value.includes(url)) failedMediaUrls.value.push(url)
-}
-
-function rememberTouch(event: TouchEvent) {
-  const touch = event.touches[0]
-  if (touch) touchStart = { x: touch.clientX, y: touch.clientY }
-}
-
-function navigateFromSwipe(event: TouchEvent) {
-  const touch = event.changedTouches[0]
-  if (!touch || !touchStart) return
-
-  const horizontalDistance = touch.clientX - touchStart.x
-  const verticalDistance = touch.clientY - touchStart.y
-  touchStart = null
-
-  if (Math.abs(horizontalDistance) < 40 || Math.abs(horizontalDistance) <= Math.abs(verticalDistance)) return
-  if (horizontalDistance > 0) showPreviousMedia()
-  else showNextMedia()
-}
-
-watch(() => props.post.id, () => {
-  activeMediaIndex.value = 0
-  failedMediaUrls.value = []
-})
 </script>
 
 <template>
@@ -99,63 +54,16 @@ watch(() => props.post.id, () => {
       <AppIcon name="dots" :size="16" class="shrink-0 text-[var(--muted)]" />
     </header>
 
-    <div
-      class="relative aspect-square overflow-hidden bg-[var(--sand)]"
-      @touchstart.passive="rememberTouch"
-      @touchend.passive="navigateFromSwipe"
-    >
+    <div class="relative aspect-square overflow-hidden bg-[var(--sand)]">
       <ReelPlayer
         v-if="mediaKind === 'reel' && post.video_url"
         :src="post.video_url"
         :poster="post.thumbnail_url"
         :label="$t('contentCard.playReel', { username: post.creator.username })"
       />
-      <NuxtLink v-else :to="`/content/${post.id}`" class="block h-full w-full">
-        <img
-          v-if="activeMediaUrl && !isMediaUnavailable"
-          :src="activeMediaUrl"
-          :alt="post.hook"
-          class="h-full w-full object-cover"
-          @error="rememberFailedMedia(activeMediaUrl)"
-        >
-        <span v-else-if="isMediaUnavailable" class="flex h-full w-full items-center justify-center px-6 text-center text-[12px] text-[var(--faint)]">
-          {{ $t('contentCard.mediaUnavailable') }}
-        </span>
-      </NuxtLink>
-      <AppIcon v-if="mediaKind === 'carousel'" :name="mediaKind" :size="22" :stroke-width="1.9" class="pointer-events-none absolute right-3 top-3 text-white drop-shadow-[0_1px_3px_rgba(0,0,0,.55)]" />
-
-      <button
-        v-if="hasPreviousMedia"
-        type="button"
-        class="absolute left-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition hover:bg-black/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-        :aria-label="$t('contentCard.previousSlide')"
-        @click="showPreviousMedia"
-      >
-        <AppIcon name="chevron" :size="18" class="rotate-180" />
-      </button>
-      <button
-        v-if="hasNextMedia"
-        type="button"
-        class="absolute right-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition hover:bg-black/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-        :aria-label="$t('contentCard.nextSlide')"
-        @click="showNextMedia"
-      >
-        <AppIcon name="chevron" :size="18" />
-      </button>
-
-      <span v-if="mediaUrls.length > 1" class="absolute bottom-2 left-1/2 flex -translate-x-1/2">
-        <button
-          v-for="(_, index) in mediaUrls"
-          :key="index"
-          type="button"
-          class="inline-flex h-4 w-4 items-center justify-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
-          :aria-label="$t('contentCard.goToSlide', { slide: index + 1 })"
-          :aria-current="index === activeMediaIndex ? 'true' : undefined"
-          @click="activeMediaIndex = index"
-        >
-          <i class="h-[5px] w-[5px] rounded-full shadow-[0_1px_2px_rgba(0,0,0,.25)]" :class="index === activeMediaIndex ? 'bg-white' : 'bg-white/45'" />
-        </button>
-      </span>
+      <CarouselMedia v-else :urls="mediaUrls" :alt="post.hook" :to="`/content/${post.id}`">
+        <AppIcon v-if="mediaKind === 'carousel'" :name="mediaKind" :size="22" :stroke-width="1.9" class="pointer-events-none absolute right-3 top-3 text-white drop-shadow-[0_1px_3px_rgba(0,0,0,.55)]" />
+      </CarouselMedia>
     </div>
 
     <div class="flex items-center gap-3.5 px-3 pb-0.5 pt-2 text-[var(--ink)]">
@@ -181,13 +89,17 @@ watch(() => props.post.id, () => {
       </button>
     </div>
 
-    <div class="px-3 pb-2 text-[12px] leading-[16px]">
-      <p class="font-semibold">{{ $t('contentCard.likes', { count: compactNumber(post.likes) }) }}</p>
-      <p class="mt-1">
+    <!-- Captions are the only part of a post whose length we do not control, so
+         this block is held at the height of its fullest form — likes, two lines
+         of caption, the comment count. Every card is then exactly as tall as
+         every other, in its row and across rows. -->
+    <div class="h-[80px] overflow-hidden px-3 pb-2 text-[12px] leading-[16px]">
+      <p class="truncate font-semibold">{{ $t('contentCard.likes', { count: compactNumber(post.likes) }) }}</p>
+      <p class="mt-1 line-clamp-2">
         <span class="font-semibold">{{ post.creator.username }}</span>
         {{ ' ' }}{{ visibleCaption }}<NuxtLink v-if="isLongCaption" :to="`/content/${post.id}`" class="text-[var(--faint)] transition hover:text-[var(--ink)]">{{ $t('contentCard.more') }}</NuxtLink>
       </p>
-      <p v-if="post.comments" class="mt-1 text-[var(--faint)]">{{ $t('contentCard.viewComments', { count: compactNumber(post.comments) }) }}</p>
+      <p v-if="post.comments" class="mt-1 truncate text-[var(--faint)]">{{ $t('contentCard.viewComments', { count: compactNumber(post.comments) }) }}</p>
     </div>
 
     <!-- Everything Personal adds on top of the post lives below the fold line. -->

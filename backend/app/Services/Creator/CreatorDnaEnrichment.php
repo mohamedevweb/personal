@@ -21,18 +21,18 @@ class CreatorDnaEnrichment
         private readonly CreatorReelSelection $selection,
     ) {}
 
-    public function queue(CreatorProfile $profile): void
+    public function queue(CreatorProfile $profile): bool
     {
         // A DNA the creator wrote themselves is never overwritten, so there is
         // nothing to spend a transcription on either.
         if (data_get($profile->creator_dna, 'analysis_method') === 'manual') {
-            return;
+            return false;
         }
 
         $creator = Creator::query()->where('user_id', $profile->user_id)->first();
 
         if (! $creator) {
-            return;
+            return false;
         }
 
         $transcriptions = config('services.transcription.enabled')
@@ -42,8 +42,18 @@ class CreatorDnaEnrichment
                 ->all()
             : [];
 
+        // Keep the public status running until the transcript-backed DNA lands.
+        // Otherwise the UI can render a failed caption-only pass while this
+        // successful second pass is still working behind it.
+        $profile->forceFill([
+            'analysis_status' => 'transcribing_reels',
+            'analysis_error' => null,
+        ])->save();
+
         // A chain, not a batch: the rebuild must read every script that made it,
         // and each transcription is harmless on its own if it does not.
         Bus::chain([...$transcriptions, new RebuildCreatorDna($profile->user_id)])->dispatch();
+
+        return true;
     }
 }

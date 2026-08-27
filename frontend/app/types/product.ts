@@ -105,7 +105,7 @@ export interface PersonalProfile {
   goals: string[] | null
   content_strengths: string[] | null
   voice_profile: string | null
-  analysis_status?: 'idle' | 'queued' | 'reading_profile' | 'importing_posts' | 'reading_voice' | 'mapping_audience' | 'completed' | 'failed'
+  analysis_status?: 'idle' | 'queued' | 'reading_profile' | 'importing_posts' | 'reading_voice' | 'mapping_audience' | 'transcribing_reels' | 'completed' | 'failed'
   creator_dna?: {
     primary_niche: string | null
     sub_niches: string[]

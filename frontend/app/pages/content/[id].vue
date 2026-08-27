@@ -19,6 +19,11 @@ const generating = ref(false)
 const loading = ref(true)
 const isReel = computed(() => (post.value?.format || '').toLowerCase().includes('reel'))
 const isCarousel = computed(() => (post.value?.format || '').toLowerCase().includes('carousel'))
+// A carousel arrives as its frames; anything else has only the one to show.
+const mediaUrls = computed(() => {
+  const urls = post.value?.media_urls?.filter(Boolean) || []
+  return urls.length > 0 ? urls : post.value?.thumbnail_url ? [post.value.thumbnail_url] : []
+})
 let analysisTimer: ReturnType<typeof setTimeout> | undefined
 let analysisAttempts = 0
 
@@ -103,9 +108,11 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
             fit="contain"
             :label="$t('content.playReel', { username: post.creator.username })"
           />
-          <template v-else>
-            <img :src="post.thumbnail_url || ''" :alt="post.hook" class="h-full w-full object-cover">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/5 to-transparent" />
+          <!-- A carousel is read slide by slide, so the analysis shows the whole
+               post rather than its first frame: same arrows, dots and swipe as
+               the feed card, on the same slides. -->
+          <CarouselMedia v-else :urls="mediaUrls" :alt="post.hook">
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/5 to-transparent" />
             <!-- The format reads as the same corner glyph Instagram uses, and the
                  feed card already uses: a word for it only spent the headline's room. -->
             <AppIcon
@@ -115,41 +122,19 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
               :stroke-width="1.9"
               class="pointer-events-none absolute right-5 top-5 text-white drop-shadow-[0_1px_3px_rgba(0,0,0,.55)]"
             />
-            <div class="absolute inset-x-6 bottom-6">
+            <div class="pointer-events-none absolute inset-x-6 bottom-7">
               <h1 class="text-[28px] font-medium leading-[1.12] tracking-[-.03em] text-white">{{ post.hook }}</h1>
             </div>
-          </template>
+          </CarouselMedia>
         </div>
         <div class="mt-4 flex items-center gap-3"><a :href="creatorProfileUrl(post.creator.username)" target="_blank" rel="noopener noreferrer" class="flex flex-1 items-center gap-3"><img :src="post.creator.avatar_url || ''" alt="" class="h-9 w-9 rounded-full"><div class="flex-1"><p class="text-sm font-medium hover:underline">@{{ post.creator.username }}</p><p class="text-xs text-[var(--faint)]">{{ $t('content.followers', { count: compactNumber(post.creator.followers) }) }} · {{ relativeDate(post.published_at, locale) }}</p></div></a><a v-if="post.source_url" :href="post.source_url" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs text-[var(--muted)] transition hover:text-[var(--ink)]">{{ $t('content.openSource') }}<AppIcon name="arrow" :size="13" class="-rotate-45" /></a><p v-if="post.views > 0" class="text-xs text-[var(--muted)]">{{ $t('content.views', { count: compactNumber(post.views) }) }}</p></div>
       </section>
 
       <section class="min-w-0">
-        <!-- The number is only worth what its denominator is, so the ratio and
-             the method it came from are one panel rather than two stray blocks. -->
+        <!-- Making your own version is what the page is for, so the card that
+             does it opens the column; the measurement and the reading of the
+             post sit underneath it as the reasons to bother. -->
         <div class="overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">
-          <div class="border-b border-[var(--accent-line)] bg-[var(--accent-soft)] px-5 py-4">
-            <span v-if="post.analysis_status === 'pending'" class="mb-3 inline-flex items-center gap-2 rounded-full border border-[var(--accent-line)] bg-[var(--surface)] px-2.5 py-1 text-[11px] text-[var(--muted)]">
-              <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--ai)]" />
-              {{ $t('content.analysisImproving') }}
-            </span>
-            <p class="flex items-baseline gap-3 text-[var(--accent-ink)]">
-              <span class="font-serif text-[44px] leading-none tracking-[-.02em]">{{ post.performance_ratio.toFixed(1) }}×</span>
-              <span class="max-w-[16rem] text-[13px] leading-[1.35]">{{ $t('content.usualPerformance') }}</span>
-            </p>
-          </div>
-          <div class="px-5 py-4">
-            <p class="mb-2.5 text-[10px] font-semibold uppercase tracking-[.16em] text-[var(--faint)]">{{ $t('performance.title') }}</p>
-            <PerformanceNote :post="post" />
-          </div>
-        </div>
-        <div class="mt-8 divide-y divide-[var(--line-soft)] border-y border-[var(--line)]">
-          <div class="py-6"><p class="text-[11px] font-semibold uppercase tracking-widest text-[var(--faint)]">{{ $t('content.hook') }}</p><p class="mt-2 text-[15px] leading-[1.6]">{{ post.hook_analysis }}</p></div>
-          <div class="py-6"><p class="text-[11px] font-semibold uppercase tracking-widest text-[var(--faint)]">{{ $t('content.structure') }}</p><p class="mt-2 text-[15px] leading-[1.6]">{{ post.structure_analysis }}</p></div>
-          <div class="py-6"><p class="text-[11px] font-semibold uppercase tracking-widest text-[var(--faint)]">{{ $t('content.whyOutperforming') }}</p><p class="mt-2 text-[15px] leading-[1.6]">{{ post.why_it_works }}<template v-if="post.views > 0 && post.creator.average_views > 0"> {{ $t('content.whyOutperformingSuffix', { average: compactNumber(post.creator.average_views), views: compactNumber(post.views) }) }}</template></p></div>
-          <div class="py-6"><p class="text-[11px] font-semibold uppercase tracking-widest text-[var(--faint)]">{{ $t('content.whyFitsYou') }}</p><p class="mt-2 text-[15px] leading-[1.6]">{{ voiceSummary }}</p></div>
-        </div>
-
-        <div class="mt-8 overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">
           <div class="border-b border-[var(--line-soft)] px-6 py-5">
             <h2 class="font-serif text-[26px] tracking-[-.02em]">{{ $t('content.makeItYours') }}</h2>
             <p class="mt-1.5 text-[13.5px] leading-6 text-[var(--muted)]">{{ $t('content.makeItYoursCopy') }}</p>
@@ -228,6 +213,31 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
             <p class="mt-3 text-center text-[12px] text-[var(--faint)]">{{ $t('content.remixFooter') }}</p>
           </div>
         </div>
+
+        <!-- The number is only worth what its denominator is, so the ratio and
+             the method it came from are one panel rather than two stray blocks. -->
+        <div class="mt-8 overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">
+          <div class="border-b border-[var(--accent-line)] bg-[var(--accent-soft)] px-5 py-4">
+            <span v-if="post.analysis_status === 'pending'" class="mb-3 inline-flex items-center gap-2 rounded-full border border-[var(--accent-line)] bg-[var(--surface)] px-2.5 py-1 text-[11px] text-[var(--muted)]">
+              <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--ai)]" />
+              {{ $t('content.analysisImproving') }}
+            </span>
+            <p class="flex items-baseline gap-3 text-[var(--accent-ink)]">
+              <span class="font-serif text-[44px] leading-none tracking-[-.02em]">{{ post.performance_ratio.toFixed(1) }}×</span>
+              <span class="max-w-[16rem] text-[13px] leading-[1.35]">{{ $t('content.usualPerformance') }}</span>
+            </p>
+          </div>
+          <div class="px-5 py-4">
+            <p class="mb-2.5 text-[10px] font-semibold uppercase tracking-[.16em] text-[var(--faint)]">{{ $t('performance.title') }}</p>
+            <PerformanceNote :post="post" />
+          </div>
+        </div>
+        <div class="mt-8 divide-y divide-[var(--line-soft)] border-y border-[var(--line)]">
+          <div class="py-6"><p class="text-[11px] font-semibold uppercase tracking-widest text-[var(--faint)]">{{ $t('content.hook') }}</p><p class="mt-2 text-[15px] leading-[1.6]">{{ post.hook_analysis }}</p></div>
+          <div class="py-6"><p class="text-[11px] font-semibold uppercase tracking-widest text-[var(--faint)]">{{ $t('content.structure') }}</p><p class="mt-2 text-[15px] leading-[1.6]">{{ post.structure_analysis }}</p></div>
+          <div class="py-6"><p class="text-[11px] font-semibold uppercase tracking-widest text-[var(--faint)]">{{ $t('content.whyOutperforming') }}</p><p class="mt-2 text-[15px] leading-[1.6]">{{ post.why_it_works }}<template v-if="post.views > 0 && post.creator.average_views > 0"> {{ $t('content.whyOutperformingSuffix', { average: compactNumber(post.creator.average_views), views: compactNumber(post.views) }) }}</template></p></div>
+          <div class="py-6"><p class="text-[11px] font-semibold uppercase tracking-widest text-[var(--faint)]">{{ $t('content.whyFitsYou') }}</p><p class="mt-2 text-[15px] leading-[1.6]">{{ voiceSummary }}</p></div>
+        </div>
       </section>
     </div>
   </main>
@@ -237,8 +247,8 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
     <div class="mt-6 grid gap-10 lg:grid-cols-[.88fr_1.12fr]">
       <div class="aspect-[4/5] animate-pulse rounded-[18px] bg-[var(--sand-soft)]" />
       <div class="space-y-5">
-        <div class="h-20 animate-pulse rounded-[18px] bg-[var(--sand-soft)]" />
         <div class="h-64 animate-pulse rounded-[18px] bg-[var(--sand-soft)]" />
+        <div class="h-20 animate-pulse rounded-[18px] bg-[var(--sand-soft)]" />
       </div>
     </div>
   </main>

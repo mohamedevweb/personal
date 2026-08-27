@@ -64,7 +64,16 @@ function toList(value: string): string[] {
 }
 
 const analysisStatus = computed(() => profile.value?.creator_dna?.analysis_status)
+const profileAnalysisRunning = computed(() => [
+  'queued',
+  'reading_profile',
+  'importing_posts',
+  'reading_voice',
+  'mapping_audience',
+  'transcribing_reels'
+].includes(profile.value?.analysis_status || ''))
 const analysisMessage = computed(() => {
+  if (profileAnalysisRunning.value) return t('personal.analysis.inProgress')
   if (analysisStatus.value === 'analysis_unavailable') return t('personal.analysis.unavailable')
   if (analysisStatus.value === 'insufficient_evidence') return t('personal.analysis.insufficient')
   if (analysisStatus.value === 'partial') return t('personal.analysis.partial')

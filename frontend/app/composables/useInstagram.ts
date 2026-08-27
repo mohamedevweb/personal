@@ -6,7 +6,8 @@ const RUNNING_ANALYSIS: HandleAnalysisStatus[] = [
   'reading_profile',
   'importing_posts',
   'reading_voice',
-  'mapping_audience'
+  'mapping_audience',
+  'transcribing_reels'
 ]
 
 export function useInstagram() {

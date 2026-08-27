@@ -41,7 +41,7 @@ class AnalyzeCreatorHandle implements ShouldQueue
      *
      * @var list<string>
      */
-    public const STAGES = ['reading_profile', 'importing_posts', 'reading_voice', 'mapping_audience'];
+    public const STAGES = ['reading_profile', 'importing_posts', 'reading_voice', 'mapping_audience', 'transcribing_reels'];
 
     public int $tries = 2;
 
@@ -168,18 +168,23 @@ class AnalyzeCreatorHandle implements ShouldQueue
             ...$signals['topics'],
         ]));
 
-        $profile->fill(['analysis_status' => 'completed', 'analysis_error' => null])->save();
+        $profile->save();
 
-        // Onboarding ends here. What follows only deepens the DNA, so a failure in
-        // it must never turn a finished analysis into a failed one.
+        // The transcript-backed pass is part of understanding the creator. Keep
+        // onboarding and the memory page waiting for it when it can be queued.
+        $enrichmentQueued = false;
         try {
             $registeredCreators->syncScraped($scraped, $profile, $posts);
-            $enrichment->queue($profile);
+            $enrichmentQueued = $enrichment->queue($profile);
         } catch (Throwable $exception) {
             Log::warning('Creator DNA enrichment could not be queued.', [
                 'user_id' => $this->userId,
                 'exception' => $exception,
             ]);
+        }
+
+        if (! $enrichmentQueued) {
+            $profile->forceFill(['analysis_status' => 'completed', 'analysis_error' => null])->save();
         }
 
         // The niche is what the feed is built from, so fill it as soon as there

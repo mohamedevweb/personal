@@ -388,8 +388,9 @@
       "steps": {
         "reading_profile": "Fetching your profile, bio and followers",
         "importing_posts": "Reading your last 30 posts",
-        "reading_voice": "Analysing your tone and how you write",
-        "mapping_audience": "Identifying your audience and your niche"
+        "reading_voice": "Analysing your captions and tone",
+        "mapping_audience": "Identifying your audience and your niche",
+        "transcribing_reels": "Transcribing your Reels and analysing your voice"
       },
       "details": {
         "profile": "{'@'}{handle} · {followers} followers",
@@ -398,7 +399,6 @@
       "postsRead": "posts read",
       "previewVoice": "Your voice",
       "previewNote": "Nothing is published, nothing is changed. Personal reads what anyone can already see.",
-      "lockNote": "Personal opens automatically once everything has been retrieved.",
       "locked": "Retrieving…",
       "failedTitle": "Personal could not read this account.",
       "retry": "Try again",
@@ -435,7 +435,19 @@
       "posts": "posts",
       "followers": "followers",
       "following": "following",
-      "grid": "Grid · last 6 posts"
+      "category": "Content creator",
+      "editProfile": "Edit profile",
+      "shareProfile": "Share profile",
+      "highlights": {
+        "bestOf": "Best of",
+        "behind": "Behind",
+        "formats": "Formats"
+      },
+      "tabs": {
+        "posts": "Posts",
+        "reels": "Reels",
+        "tagged": "Tagged"
+      }
     },
     "inspirations": {
       "title": "Who inspires you on Instagram?",
@@ -582,6 +594,7 @@
     },
     "nicheInsufficient": "Not enough content yet to determine your niche",
     "analysis": {
+      "inProgress": "Personal is transcribing your Reels and finalising your profile.",
       "unavailable": "Personal could not analyze this profile right now. Please try again.",
       "insufficient": "Instagram does not provide enough signals yet. You can complete these details manually.",
       "partial": "This is an initial estimate to confirm. You can correct it at any time."

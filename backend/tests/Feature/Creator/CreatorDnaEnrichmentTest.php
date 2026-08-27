@@ -56,6 +56,7 @@ class CreatorDnaEnrichmentTest extends TestCase
         Bus::assertDispatched(TranscribeContentPost::class, fn (TranscribeContentPost $job): bool => collect($job->chained)
             ->map(fn (string $chained): string => get_class(unserialize($chained)))
             ->last() === RebuildCreatorDna::class);
+        $this->assertSame('transcribing_reels', $user->creatorProfile()->firstOrFail()->analysis_status);
     }
 
     public function test_the_transcribed_sample_mixes_what_worked_with_what_is_recent(): void
@@ -132,6 +133,7 @@ class CreatorDnaEnrichmentTest extends TestCase
         );
         $this->assertSame(['Direct challenge', 'Unfinished story'], data_get($profile->creator_dna, 'hook_patterns'));
         $this->assertSame(1, data_get($profile->creator_dna, 'evidence.transcript_count'));
+        $this->assertSame('completed', $profile->analysis_status);
         $this->assertStringContainsString('<reel_script index="1">', $llm->input);
         $this->assertStringContainsString('Most people never start.', $llm->input);
         $this->assertStringContainsString('never treat it as a source of facts', $llm->input);
@@ -153,6 +155,7 @@ class CreatorDnaEnrichmentTest extends TestCase
         $profile->refresh();
         $this->assertSame('Entrepreneurship', $profile->niche);
         $this->assertSame('llm', data_get($profile->creator_dna, 'analysis_method'));
+        $this->assertSame('completed', $profile->analysis_status);
     }
 
     public function test_a_dna_the_creator_wrote_themselves_is_never_transcribed_over(): void

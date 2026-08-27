@@ -13,6 +13,7 @@ use App\Services\Instagram\NicheDetectionService;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Throwable;
 
 /**
  * Rewrites a member's Creator DNA from everything Personal now holds on them:
@@ -52,7 +53,13 @@ class RebuildCreatorDna implements ShouldBeUnique, ShouldQueue
         $profile = CreatorProfile::query()->where('user_id', $this->userId)->first();
         $creator = Creator::query()->where('user_id', $this->userId)->first();
 
-        if (! $profile || ! $creator) {
+        if (! $profile) {
+            return;
+        }
+
+        if (! $creator) {
+            $this->complete($profile);
+
             return;
         }
 
@@ -68,6 +75,8 @@ class RebuildCreatorDna implements ShouldBeUnique, ShouldQueue
             ->all();
 
         if ($media === []) {
+            $this->complete($profile);
+
             return;
         }
 
@@ -78,6 +87,8 @@ class RebuildCreatorDna implements ShouldBeUnique, ShouldQueue
         // of running this pass at all.
         if ($signals['analysis_method'] !== 'llm'
             && data_get($profile->creator_dna, 'analysis_method') === 'llm') {
+            $this->complete($profile);
+
             return;
         }
 
@@ -88,6 +99,7 @@ class RebuildCreatorDna implements ShouldBeUnique, ShouldQueue
             ...$signals['sub_niches'],
             ...$signals['topics'],
         ]));
+        $profile->forceFill(['analysis_status' => 'completed', 'analysis_error' => null]);
         $profile->save();
 
         // Hearing the creator can move the niche. The feed is built from it, so it
@@ -95,6 +107,18 @@ class RebuildCreatorDna implements ShouldBeUnique, ShouldQueue
         if ($profile->niche && $profile->niche !== $before) {
             DiscoverNicheContent::dispatch($this->userId);
         }
+    }
+
+    public function failed(?Throwable $exception): void
+    {
+        CreatorProfile::query()
+            ->where('user_id', $this->userId)
+            ->update(['analysis_status' => 'completed', 'analysis_error' => null]);
+    }
+
+    private function complete(CreatorProfile $profile): void
+    {
+        $profile->forceFill(['analysis_status' => 'completed', 'analysis_error' => null])->save();
     }
 
     /**

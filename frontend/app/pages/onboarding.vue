@@ -25,25 +25,39 @@ interface PreviewTile {
   kind: 'carousel' | 'reel' | null
   angle: number
   light: number
+  tint: string
+  spot: [number, number]
+  views?: number
   outlier?: boolean
 }
 
 const PREVIEW_TILES: readonly PreviewTile[] = [
-  { id: 1, kind: 'carousel', angle: 148, light: .085 },
-  { id: 2, kind: null, angle: 32, light: .05 },
-  { id: 3, kind: 'reel', outlier: true, angle: 200, light: .07 },
-  { id: 4, kind: null, angle: 210, light: .065 },
-  { id: 5, kind: 'reel', angle: 118, light: .045 },
-  { id: 6, kind: 'carousel', angle: 60, light: .075 }
+  { id: 1, kind: 'carousel', angle: 148, light: .1, tint: '224, 128, 96', spot: [28, 22] },
+  { id: 2, kind: null, angle: 32, light: .055, tint: '150, 165, 190', spot: [74, 32] },
+  { id: 3, kind: 'reel', outlier: true, angle: 200, light: .08, tint: '255, 106, 77', spot: [50, 34] },
+  { id: 4, kind: null, angle: 210, light: .07, tint: '190, 170, 140', spot: [36, 70] },
+  { id: 5, kind: 'reel', angle: 118, light: .05, tint: '130, 150, 175', spot: [66, 60], views: 21400 },
+  { id: 6, kind: 'carousel', angle: 60, light: .085, tint: '210, 150, 120', spot: [22, 58] }
 ]
 
 // Each tile gets its own wash so the grid reads as six thumbnails rather than
-// six empty boxes. The angle and the amount of light are all that separate
-// them: enough at this size, and abstract enough that the card never pretends
-// to be showing anyone's actual photos.
+// six empty boxes: a lit corner, a coloured spot where a subject would sit.
+// Abstract on purpose — the card never pretends to show anyone's actual photos.
 function tileWash(tile: PreviewTile) {
-  return `linear-gradient(${tile.angle}deg, rgba(255, 255, 255, ${tile.light}) 0%, rgba(255, 255, 255, .012) 70%)`
+  return [
+    `radial-gradient(78% 62% at ${tile.spot[0]}% ${tile.spot[1]}%, rgba(${tile.tint}, ${(tile.light * 1.5).toFixed(3)}) 0%, rgba(${tile.tint}, 0) 72%)`,
+    `linear-gradient(${tile.angle}deg, rgba(255, 255, 255, ${tile.light}) 0%, rgba(255, 255, 255, .012) 70%)`
+  ].join(', ')
 }
+
+// Story highlights and the tab bar are the two things that make a profile read
+// as the app rather than as a stat card, so the aperçu carries both.
+const PREVIEW_HIGHLIGHTS = ['bestOf', 'behind', 'formats'] as const
+const PREVIEW_TABS = [
+  { key: 'posts', icon: 'grid' },
+  { key: 'reels', icon: 'reel' },
+  { key: 'tagged', icon: 'tagged' }
+] as const
 
 const PREVIEW_RATIO = 6.2
 
@@ -60,6 +74,11 @@ const previewRatio = computed(() => new Intl.NumberFormat(locale.value, {
   minimumFractionDigits: 1,
   maximumFractionDigits: 1
 }).format(PREVIEW_RATIO))
+
+// The handle drives the rest of the profile the way it does on Instagram: it
+// names the account, and its first letter stands in for the avatar.
+const previewHandle = computed(() => status.value.instagram_username || t('onboarding.preview.handle').replace('@', ''))
+const previewInitial = computed(() => previewHandle.value.charAt(0).toUpperCase())
 
 const stages = computed<{ key: InstagramSyncStatus; label: string }[]>(() => [
   { key: 'connecting', label: t('onboarding.stages.connecting') },
@@ -81,7 +100,7 @@ const analysis = computed(() => status.value.analysis ?? null)
 
 const analysisStages = computed<HandleAnalysisStage[]>(() => analysis.value?.stages?.length
   ? analysis.value.stages
-  : ['reading_profile', 'importing_posts', 'reading_voice', 'mapping_audience'])
+  : ['reading_profile', 'importing_posts', 'reading_voice', 'mapping_audience', 'transcribing_reels'])
 
 // 'idle' is a profile that predates the analysis: nothing is running, so nothing
 // is worth waiting for either.
@@ -99,6 +118,12 @@ const postsTarget = computed(() => analysis.value?.posts_target ?? 30)
 
 function formatCount(value: number) {
   return new Intl.NumberFormat(locale.value).format(value)
+}
+
+// Instagram shortens the play count under a reel thumbnail; the aperçu does too,
+// so the tile reads as a thumbnail rather than as a figure in a table.
+function formatViews(value: number) {
+  return new Intl.NumberFormat(locale.value, { notation: 'compact', maximumFractionDigits: 1 }).format(value)
 }
 
 // What each step found, written the moment it lands so the wait shows real
@@ -452,10 +477,6 @@ onMounted(async () => {
                   {{ $t('onboarding.analysis.continueAnyway') }}
                 </button>
               </div>
-              <p v-else class="mt-4 flex items-start gap-2 text-[12px] leading-5 text-[var(--faint)]">
-                <AppIcon name="shield" :size="14" class="mt-0.5 shrink-0 text-[var(--accent)]" />
-                {{ $t('onboarding.analysis.lockNote') }}
-              </p>
             </section>
 
             <button
@@ -494,7 +515,7 @@ onMounted(async () => {
           <span v-for="i in 3" :key="i" class="h-1.5 w-1.5 rounded-full bg-white/25" />
         </div>
 
-        <p class="text-[10px] font-semibold uppercase tracking-[.22em] text-[var(--b-red-lit)]">
+        <p class="pr-14 text-[10px] font-semibold uppercase tracking-[.22em] text-[var(--b-red-lit)]">
           {{ showAnalysis ? (analysisFailed ? $t('onboarding.analysis.previewFailedLabel') : $t('onboarding.analysis.previewLabel')) : status.connected ? $t('onboarding.profileLive') : status.instagram_username ? $t('onboarding.profileProvided') : $t('onboarding.preview.label') }}
         </p>
 
@@ -550,46 +571,90 @@ onMounted(async () => {
           </div>
         </div>
 
-        <!-- The profile, without the face: a handle, the three counters every
-             Instagram profile carries, and the grid underneath them. One tile
-             is the reason the grid is drawn at all — the post that beat the
-             account's own average, which is the first thing Personal looks
-             for once the connection is made. -->
-        <div v-else class="mt-10">
-          <p class="font-display text-[26px] leading-none tracking-[-.02em]">
-            {{ status.instagram_username ? `@${status.instagram_username}` : $t('onboarding.preview.handle') }}
-          </p>
-          <p class="mt-3 max-w-[19rem] text-[12.5px] leading-[1.6] text-white/45">{{ $t('onboarding.preview.bio') }}</p>
+        <!-- The profile, without the face: the aperçu is laid out the way the
+             Instagram app lays a profile out — handle bar, avatar beside the
+             three counters, name and bio, the two profile buttons, highlights,
+             the tab bar, then the grid edge to edge. One tile is the reason the
+             grid is drawn at all: the post that beat the account's own average,
+             which is the first thing Personal looks for once connected. -->
+        <div v-else class="mt-9">
+          <div class="flex items-center gap-2">
+            <p class="min-w-0 truncate font-display text-[22px] leading-none tracking-[-.02em]">
+              {{ `@${previewHandle}` }}
+            </p>
+            <AppIcon name="chevron" :size="14" class="shrink-0 rotate-90 text-white/40" />
+            <AppIcon name="plus" :size="17" class="ml-auto shrink-0 text-white/40" />
+            <AppIcon name="text" :size="17" class="shrink-0 text-white/40" />
+          </div>
 
-          <dl class="mt-7 flex gap-8 border-y border-white/10 py-4">
-            <div v-for="stat in previewStats" :key="stat.key">
-              <dd class="font-display text-[21px] leading-none tabular-nums">{{ stat.value }}</dd>
-              <dt class="b-mono mt-2 text-white/35">{{ $t(`onboarding.preview.${stat.key}`) }}</dt>
-            </div>
-          </dl>
+          <div class="mt-6 flex items-center gap-5">
+            <span class="shrink-0 rounded-full bg-gradient-to-tr from-[#f9ce34] via-[var(--b-red-500)] to-[#6228d7] p-[2.5px]">
+              <span class="grid h-[68px] w-[68px] place-items-center rounded-full border-[3px] border-[#0d0c0b] bg-white/[.07] font-display text-[26px] leading-none text-white/70">
+                {{ previewInitial }}
+              </span>
+            </span>
+            <dl class="flex flex-1 justify-around text-center">
+              <div v-for="stat in previewStats" :key="stat.key">
+                <dd class="font-display text-[19px] leading-none tabular-nums">{{ stat.value }}</dd>
+                <dt class="mt-1.5 text-[11px] text-white/40">{{ $t(`onboarding.preview.${stat.key}`) }}</dt>
+              </div>
+            </dl>
+          </div>
 
-          <p class="b-mono mt-6 text-white/35">{{ $t('onboarding.preview.grid') }}</p>
+          <p class="mt-5 text-[13px] font-semibold leading-none">{{ previewHandle }}</p>
+          <p class="mt-1.5 text-[12px] leading-none text-white/35">{{ $t('onboarding.preview.category') }}</p>
+          <p class="mt-2 max-w-[21rem] text-[12.5px] leading-[1.55] text-white/50">{{ $t('onboarding.preview.bio') }}</p>
 
-          <div class="mt-3 grid grid-cols-3 gap-2">
+          <div class="mt-4 flex gap-1.5">
+            <span class="grid h-8 flex-1 place-items-center rounded-lg bg-white/[.09] text-[12px] font-semibold text-white/80">{{ $t('onboarding.preview.editProfile') }}</span>
+            <span class="grid h-8 flex-1 place-items-center rounded-lg bg-white/[.09] text-[12px] font-semibold text-white/80">{{ $t('onboarding.preview.shareProfile') }}</span>
+            <span class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white/[.09] text-white/70"><AppIcon name="user" :size="14" /></span>
+          </div>
+
+          <div class="mt-5 flex gap-5">
+            <span v-for="(highlight, index) in PREVIEW_HIGHLIGHTS" :key="highlight" class="flex w-[52px] shrink-0 flex-col items-center gap-1.5">
+              <span class="h-[52px] w-[52px] rounded-full border border-white/15 bg-white/[.045]" :style="{ backgroundImage: tileWash(PREVIEW_TILES[index]!) }" />
+              <span class="w-full truncate text-center text-[10.5px] text-white/40">{{ $t(`onboarding.preview.highlights.${highlight}`) }}</span>
+            </span>
+          </div>
+
+          <!-- Tab bar and grid run to the panel's edges, the way they run to the
+               screen's edges in the app. -->
+          <div class="-mx-7 mt-6 grid grid-cols-3 border-t border-white/10 md:-mx-10">
+            <span
+              v-for="(tab, index) in PREVIEW_TABS"
+              :key="tab.key"
+              class="grid h-11 place-items-center border-b"
+              :class="index === 0 ? 'border-white/80 text-white' : 'border-transparent text-white/25'"
+              :title="$t(`onboarding.preview.tabs.${tab.key}`)"
+            >
+              <AppIcon :name="tab.icon" :size="17" />
+            </span>
+          </div>
+
+          <div class="-mx-7 grid grid-cols-3 gap-[2px] md:-mx-10">
             <div
               v-for="tile in PREVIEW_TILES"
               :key="tile.id"
-              class="relative aspect-square overflow-hidden rounded-[10px] border"
-              :class="tile.outlier ? 'border-[rgba(255,106,77,.45)] bg-[rgba(224,79,54,.13)]' : 'border-white/[.08] bg-white/[.045]'"
+              class="relative aspect-square overflow-hidden"
+              :class="tile.outlier ? 'bg-[rgba(224,79,54,.16)] ring-1 ring-inset ring-[rgba(255,106,77,.4)]' : 'bg-white/[.045]'"
               :style="{ backgroundImage: tileWash(tile) }"
             >
               <AppIcon
                 v-if="tile.kind"
                 :name="tile.kind"
-                :size="13"
-                class="absolute right-2 top-2"
-                :class="tile.outlier ? 'text-[var(--b-red-lit)]' : 'text-white/25'"
+                :size="14"
+                class="absolute right-2 top-2 drop-shadow-[0_1px_2px_rgba(0,0,0,.5)]"
+                :class="tile.outlier ? 'text-[var(--b-red-lit)]' : 'text-white/55'"
               />
+              <span v-if="tile.views" class="absolute bottom-1.5 left-2 flex items-center gap-1 text-[10.5px] font-medium tabular-nums text-white/70 drop-shadow-[0_1px_2px_rgba(0,0,0,.5)]">
+                <AppIcon name="play" :size="11" filled />{{ formatViews(tile.views) }}
+              </span>
               <span
                 v-if="tile.outlier"
-                class="absolute inset-x-1.5 bottom-1.5 rounded-[6px] bg-[rgba(11,10,9,.55)] px-1.5 py-1 text-center text-[9.5px] font-semibold tabular-nums text-[var(--b-red-lit)]"
+                class="absolute inset-x-1.5 bottom-1.5 flex items-center justify-center gap-1 rounded-[6px] bg-[rgba(11,10,9,.62)] px-1.5 py-1 text-[9.5px] font-semibold tabular-nums text-[var(--b-red-lit)]"
               >
-                {{ $t('contentCard.averageAccount', { ratio: previewRatio }) }}
+                <AppIcon name="trend" :size="11" class="shrink-0" />{{ $t('contentCard.averageAccount', { ratio: previewRatio }) }}
               </span>
             </div>
           </div>

@@ -33,6 +33,7 @@ export type HandleAnalysisStage =
   | 'importing_posts'
   | 'reading_voice'
   | 'mapping_audience'
+  | 'transcribing_reels'
 
 export type HandleAnalysisStatus =
   | 'idle'
