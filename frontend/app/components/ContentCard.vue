@@ -76,7 +76,7 @@ watch(() => props.post.id, () => {
   <article class="group flex h-full flex-col overflow-hidden rounded-[20px] border border-[var(--line)] bg-[var(--surface)] shadow-[0_1px_2px_rgba(23,23,26,.04)] transition duration-300 hover:shadow-[0_12px_34px_rgba(23,23,26,.08)]">
     <!-- The post is shown the way it looks on Instagram: same header, square
          media, action bar, like count and caption ordering. -->
-    <header class="flex items-center gap-2.5 px-3 py-2.5">
+    <header class="flex items-center gap-2.5 px-3 py-2">
       <!-- Avatar and handle both open the creator's account, the way they do on
            Instagram itself. -->
       <a
@@ -100,7 +100,7 @@ watch(() => props.post.id, () => {
     </header>
 
     <div
-      class="relative aspect-[4/5] overflow-hidden bg-[var(--sand)]"
+      class="relative aspect-square overflow-hidden bg-[var(--sand)]"
       @touchstart.passive="rememberTouch"
       @touchend.passive="navigateFromSwipe"
     >
@@ -158,10 +158,10 @@ watch(() => props.post.id, () => {
       </span>
     </div>
 
-    <div class="flex items-center gap-3.5 px-3 pb-1 pt-2.5 text-[var(--ink)]">
-      <AppIcon name="heart" :size="21" :stroke-width="1.6" />
-      <AppIcon name="chat" :size="21" :stroke-width="1.6" class="-scale-x-100" />
-      <AppIcon name="paper-plane" :size="21" :stroke-width="1.6" />
+    <div class="flex items-center gap-3.5 px-3 pb-0.5 pt-2 text-[var(--ink)]">
+      <AppIcon name="heart" :size="20" :stroke-width="1.6" />
+      <AppIcon name="chat" :size="20" :stroke-width="1.6" class="-scale-x-100" />
+      <AppIcon name="paper-plane" :size="20" :stroke-width="1.6" />
       <a
         v-if="post.source_url"
         :href="post.source_url"
@@ -177,11 +177,11 @@ watch(() => props.post.id, () => {
         :aria-label="post.is_saved ? $t('contentCard.saved') : $t('contentCard.save')"
         @click="$emit('save', post)"
       >
-        <AppIcon name="bookmark" :size="21" :stroke-width="1.6" :filled="post.is_saved" />
+        <AppIcon name="bookmark" :size="20" :stroke-width="1.6" :filled="post.is_saved" />
       </button>
     </div>
 
-    <div class="min-h-[82px] px-3 pb-2.5 text-[12px] leading-[17px]">
+    <div class="px-3 pb-2 text-[12px] leading-[16px]">
       <p class="font-semibold">{{ $t('contentCard.likes', { count: compactNumber(post.likes) }) }}</p>
       <p class="mt-1">
         <span class="font-semibold">{{ post.creator.username }}</span>
@@ -191,27 +191,19 @@ watch(() => props.post.id, () => {
     </div>
 
     <!-- Everything Personal adds on top of the post lives below the fold line. -->
-    <div class="flex flex-1 flex-col border-t border-[var(--line)] bg-[var(--paper)] px-2.5 py-3">
+    <div class="flex flex-1 flex-col justify-end border-t border-[var(--line)] bg-[var(--paper)] px-2.5 py-2.5">
       <!-- Only the outlier ratio: the raw counts were already in the post above,
            and crowding them next to the badge pushed it into a clipped scroller.
-           Saving rides on the same line and wraps to its own only when the chip
-           leaves it no room. -->
-      <div class="flex flex-wrap items-center gap-2">
+           Saving is not repeated here either — the post's own bookmark in the
+           action bar above already does it, the way it does on Instagram. -->
+      <div class="flex items-center">
         <PerformanceBadge :post="post" />
-        <button
-          type="button"
-          class="inline-flex h-9 min-w-[7.5rem] flex-1 items-center justify-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3 text-[12px] transition hover:bg-[var(--line-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
-          @click="$emit('save', post)"
-        >
-          <AppIcon name="bookmark" :size="14" :filled="post.is_saved" />
-          <span class="truncate">{{ post.is_saved ? $t('contentCard.saved') : $t('contentCard.save') }}</span>
-        </button>
       </div>
 
-      <div class="grid gap-2 pt-2.5">
+      <div class="grid gap-2 pt-2">
         <button
           type="button"
-          class="inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-4 text-[12.5px] font-medium text-[var(--paper)] transition hover:bg-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+          class="inline-flex h-9 min-w-0 items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-4 text-[12.5px] font-medium text-[var(--paper)] transition hover:bg-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
           :disabled="remixing"
           :aria-busy="remixing"
           @click="$emit('remix', post)"

@@ -41,7 +41,7 @@ use Throwable;
  */
 class NicheDetectionService
 {
-    public const ANALYSIS_VERSION = 3;
+    public const ANALYSIS_VERSION = 4;
 
     private const CAPTION_CHARACTERS = 500;
 
@@ -106,7 +106,7 @@ class NicheDetectionService
             ];
         }
 
-        return $this->heuristic($account, $bio, $captions, $media, $evidence);
+        return $this->heuristic($account, $bio, $captionList, $linkPreview, $media, $evidence);
     }
 
     /**
@@ -276,31 +276,45 @@ class NicheDetectionService
     }
 
     /**
-     * The original word-frequency fallback: rank the meaningful words in the bio and
-     * captions. Deterministic and free — used whenever the model is unavailable.
+     * A conservative fallback for when the model is unavailable. A profile-level
+     * signal must support the vertical, and a topic must recur across distinct posts
+     * or appear both in the bio and a post. Returning no claim is safer than turning
+     * campaign copy or common words into a creator identity.
      *
+     * @param  Collection<int, string>  $captionList
      * @param  list<array<string, mixed>>  $media
      * @return Signals
      */
     private function heuristic(
         InstagramAccount $account,
         string $bio,
-        string $captions,
+        Collection $captionList,
+        ?string $linkPreview,
         array $media,
         array $evidence,
     ): array {
-        $source = Str::lower(trim($bio.' '.$captions));
-        $vertical = $this->verticals->fromSignals([$source]);
+        $captions = $captionList->implode("\n");
+        $vertical = $this->verticals->fromSignals([
+            $bio,
+            (string) $account->category,
+            (string) $linkPreview,
+        ]);
 
         if ($vertical === null) {
-            return $this->emptySignals('insufficient_evidence', 'heuristic', $evidence);
+            $status = $this->modelIsConfigured() ? 'analysis_unavailable' : 'insufficient_evidence';
+
+            return $this->emptySignals($status, 'heuristic', $evidence);
         }
 
-        $bioWords = $this->meaningfulWords($bio, $account);
-        $topics = collect([...$bioWords, ...$this->meaningfulWords($captions, $account)])
-            ->countBy()
+        $bioWords = array_values(array_unique($this->meaningfulWords($bio, $account)));
+        $captionOccurrences = $captionList
+            ->map(fn (string $caption): array => array_values(array_unique($this->meaningfulWords($caption, $account))))
+            ->flatten()
+            ->countBy();
+        $topics = $captionOccurrences
             ->sortDesc()
-            ->filter(fn (int $count, string $word): bool => $count >= 2 || in_array($word, $bioWords, true))
+            ->filter(fn (int $count, string $word): bool => $count >= 2
+                || ($count >= 1 && in_array($word, $bioWords, true)))
             ->keys()
             ->take(8)
             ->map(fn (string $word) => Str::headline($word))
@@ -358,11 +372,14 @@ class NicheDetectionService
         preg_match_all('/[\pL\pN]{3,}/u', Str::lower($this->cleanText($text)), $matches);
 
         $blocked = [
-            'about', 'after', 'again', 'also', 'and', 'avec', 'been', 'before', 'cette', 'dans', 'day', 'depuis',
-            'elle', 'elles', 'for', 'from', 'have', 'here', 'http', 'https', 'into', 'just', 'leurs', 'mais',
-            'mes', 'more', 'notre', 'nous', 'our', 'pour', 'sans', 'site', 'sont', 'sur', 'that', 'the', 'their',
-            'there', 'these', 'they', 'this', 'une', 'very', 'vous', 'was', 'were', 'what', 'when', 'where',
-            'which', 'who', 'with', 'www', 'your', 'youre', 'instagram',
+            'about', 'after', 'again', 'also', 'and', 'avec', 'avoir', 'been', 'before', 'car', 'cela', 'ces',
+            'cet', 'cette', 'chez', 'comme', 'comment', 'dans', 'day', 'depuis', 'des', 'donc', 'elle', 'elles',
+            'encore', 'entre', 'est', 'for', 'from', 'have', 'here', 'http', 'https', 'ils', 'into', 'just',
+            'leur', 'leurs', 'lui', 'mais', 'mes', 'mon', 'more', 'notre', 'nous', 'ont', 'our', 'par', 'pas',
+            'plus', 'pour', 'quand', 'que', 'qui', 'sans', 'ses', 'site', 'son', 'sont', 'sous', 'sur', 'that',
+            'the', 'their', 'there', 'these', 'they', 'this', 'tous', 'tout', 'une', 'very', 'vos', 'votre',
+            'vous', 'was', 'were', 'what', 'when', 'where', 'which', 'who', 'with', 'www', 'your', 'youre',
+            'instagram',
             'reel', 'reels', 'post', 'posts', 'video', 'videos', 'follow', 'link', 'bio',
         ];
         $usernameParts = preg_split('/[^\pL\pN]+/u', Str::lower((string) $account?->username)) ?: [];
@@ -397,6 +414,11 @@ class NicheDetectionService
         $normalizedUsername = Str::lower(preg_replace('/[^\pL\pN]/u', '', (string) $account->username) ?? '');
 
         return $normalizedNiche === '' || ($normalizedUsername !== '' && $normalizedNiche === $normalizedUsername);
+    }
+
+    private function modelIsConfigured(): bool
+    {
+        return (bool) config('services.openai.api_key') || (bool) config('services.anthropic.api_key');
     }
 
     /** @return Signals */

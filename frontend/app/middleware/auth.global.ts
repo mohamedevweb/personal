@@ -54,8 +54,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return navigateTo('/verify-email')
   }
 
-  // First-login onboarding gate: the creator connects Instagram, completes the
-  // import and chooses the private inspiration set that seeds their first feed.
+  // First-login onboarding gate: the creator connects Instagram and completes
+  // the import, or lets Personal read the public profile behind their handle.
   const onboarded = useState('personal-onboarded', () => false)
 
   if (!onboarded.value) {

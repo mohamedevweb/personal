@@ -368,8 +368,7 @@
     "tokenNote": "Ton jeton d’accès reste chiffré sur le serveur de Personal.",
     "flow": {
       "label": "Progression de la personnalisation",
-      "understand": "Comprendre",
-      "discover": "Découvrir"
+      "understand": "Comprendre"
     },
     "or": "ou",
     "handleTitle": "Renseigne simplement ton handle",
@@ -399,7 +398,7 @@
       "postsRead": "posts lus",
       "previewVoice": "Ta voix",
       "previewNote": "Rien n’est publié, rien n’est modifié. Personal lit ce que tout le monde peut déjà voir.",
-      "lockNote": "L’étape suivante s’ouvre automatiquement une fois la récupération terminée.",
+      "lockNote": "Personal s’ouvre automatiquement une fois la récupération terminée.",
       "locked": "Récupération en cours…",
       "failedTitle": "Personal n’a pas pu lire ce compte.",
       "retry": "Réessayer",
@@ -583,6 +582,7 @@
     },
     "nicheInsufficient": "Pas encore assez de contenu pour déterminer ta niche",
     "analysis": {
+      "unavailable": "Personal n’a pas pu analyser ce profil pour le moment. Réessaie.",
       "insufficient": "Instagram ne fournit pas encore assez de signaux. Tu peux compléter ces informations manuellement.",
       "partial": "Première estimation à confirmer. Tu peux la corriger à tout moment."
     },

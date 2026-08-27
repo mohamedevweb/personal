@@ -65,6 +65,7 @@ function toList(value: string): string[] {
 
 const analysisStatus = computed(() => profile.value?.creator_dna?.analysis_status)
 const analysisMessage = computed(() => {
+  if (analysisStatus.value === 'analysis_unavailable') return t('personal.analysis.unavailable')
   if (analysisStatus.value === 'insufficient_evidence') return t('personal.analysis.insufficient')
   if (analysisStatus.value === 'partial') return t('personal.analysis.partial')
   return null
@@ -221,6 +222,7 @@ onMounted(loadProfile)
             <button type="button" class="mt-0.5 text-xs text-[var(--muted)] underline underline-offset-4 transition hover:text-[var(--ink)]" @click="beginHandleEdit">
               {{ $t(handle ? 'personal.handle.edit' : 'personal.handle.add') }}
             </button>
+            <p v-if="analysisMessage" class="mt-1 text-xs text-[var(--accent-ink)]">{{ analysisMessage }}</p>
           </div>
         </template>
 

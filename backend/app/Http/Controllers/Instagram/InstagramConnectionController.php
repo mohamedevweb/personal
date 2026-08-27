@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Jobs\Discovery\AnalyzeCreatorHandle;
 use App\Jobs\Instagram\SyncInstagramAccount;
 use App\Models\CreatorProfile;
-use App\Services\Creator\CreatorInspirationService;
 use App\Services\Instagram\InstagramAuthService;
 use App\Services\Instagram\NicheDetectionService;
 use App\Services\View\UserView;
@@ -30,15 +29,16 @@ class InstagramConnectionController extends Controller
             ->first();
 
         if (! $account) {
+            $analysisRunning = in_array($profile?->analysis_status, [
+                'queued',
+                ...AnalyzeCreatorHandle::STAGES,
+            ], true);
+
             return response()->json([
                 'connected' => false,
                 'instagram_username' => $profile?->instagram_username,
                 'inspiration_count' => $inspirationCount,
-                // Onboarding itself holds the creator on the loader until the
-                // reading is done; the gate stays on what they chose, so a
-                // profile that could not be read never locks them out.
-                'onboarding_complete' => filled($profile?->instagram_username)
-                    && $inspirationCount >= CreatorInspirationService::MINIMUM_SELECTION,
+                'onboarding_complete' => filled($profile?->instagram_username) && ! $analysisRunning,
                 'analysis' => $this->analysis($profile),
             ]);
         }
@@ -47,7 +47,7 @@ class InstagramConnectionController extends Controller
             'connected' => true,
             'instagram_username' => $account->username,
             'inspiration_count' => $inspirationCount,
-            'onboarding_complete' => $account->sync_status === 'completed' && $inspirationCount >= CreatorInspirationService::MINIMUM_SELECTION,
+            'onboarding_complete' => $account->sync_status === 'completed',
             'analysis' => $this->analysis($profile),
             'account' => [
                 'username' => $account->username,
@@ -89,9 +89,10 @@ class InstagramConnectionController extends Controller
         ], true);
         $outdated = data_get($profile?->creator_dna, 'analysis_method') !== 'manual'
             && (int) data_get($profile?->creator_dna, 'analysis_version', 0) < NicheDetectionService::ANALYSIS_VERSION;
+        $analysisUnavailable = data_get($profile?->creator_dna, 'analysis_status') === 'analysis_unavailable';
         $analyze = $changed
             || in_array($profile?->analysis_status, [null, 'failed'], true)
-            || ($outdated && ! $analysisRunning);
+            || (($outdated || $analysisUnavailable) && ! $analysisRunning);
 
         $analysis = $analyze ? ['analysis_status' => 'queued', 'analysis_error' => null] : [];
 

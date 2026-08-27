@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import type { CreatorInspiration, CreatorInspirationResponse, HandleAnalysis, HandleAnalysisStage, InstagramSyncStatus } from '~/types/instagram'
-import { groupCreatorOptions } from '~/utils/creatorInspirationOptions'
+import type { HandleAnalysis, HandleAnalysisStage, InstagramSyncStatus } from '~/types/instagram'
 
 definePageMeta({ layout: false })
 
@@ -9,15 +8,6 @@ const { t, te, locale } = useI18n()
 const { status, loading, error, connect, loadStatus, startPolling, stopPolling } = useInstagram()
 const { apiFetch } = usePersonalApi()
 const toast = useToast()
-const inspirationData = ref<CreatorInspirationResponse | null>(null)
-const inspirationLoading = ref(false)
-const searchResults = ref<CreatorInspiration[]>([])
-const hasSearched = ref(false)
-const searching = ref(false)
-const saving = ref(false)
-const selected = ref<CreatorInspiration[]>([])
-const inspirationsLoaded = ref(false)
-const handleInput = ref('')
 const accountHandleInput = ref('')
 const handleSaving = ref(false)
 // A profile that could not be read (a private account, a provider outage) must
@@ -181,87 +171,17 @@ watch(connectionError, (message) => {
 
 const onboarded = useState('personal-onboarded', () => false)
 
-// The favorites step opens once the import is done, or right away when a
-// creator provided their handle. Instagram is required either way: there is no
-// route into the app that leaves it behind.
-const showInspirations = computed(() => (status.value.connected && status.value.account?.sync_status === 'completed')
-  || (!status.value.connected && Boolean(status.value.instagram_username) && !showAnalysis.value))
-
 const onboardingSteps = computed(() => [
   {
     key: 'understand',
     label: t('onboarding.flow.understand'),
-    complete: showInspirations.value,
-    active: !showInspirations.value
-  },
-  {
-    key: 'discover',
-    label: t('onboarding.flow.discover'),
     complete: false,
-    active: showInspirations.value
+    active: true
   }
 ])
-
-const minimum = computed(() => inspirationData.value?.minimum ?? 3)
-const maximum = computed(() => inspirationData.value?.maximum ?? 6)
-const suggestionLimit = computed(() => inspirationData.value?.suggestion_limit ?? 6)
-
-// Search results supplement the curated suggestions instead of replacing them.
-// The reserve returned by the API keeps six suggestions visible even when a
-// searched account was already present in that list.
-const creatorOptions = computed(() => groupCreatorOptions(
-  searchResults.value,
-  inspirationData.value?.suggestions || [],
-  selected.value.map(creator => creator.username),
-  suggestionLimit.value
-))
-
-interface CreatorOptionGroup {
-  key: 'results' | 'suggestions'
-  label: string
-  creators: CreatorInspiration[]
-  loading: boolean
-  empty: string | null
-}
-
-const creatorOptionGroups = computed<CreatorOptionGroup[]>(() => {
-  const groups: CreatorOptionGroup[] = []
-
-  if (hasSearched.value && (searching.value || searchResults.value.length === 0 || creatorOptions.value.results.length > 0)) {
-    groups.push({
-      key: 'results',
-      label: t('onboarding.inspirations.resultsLabel'),
-      creators: creatorOptions.value.results,
-      loading: searching.value,
-      empty: !searching.value && searchResults.value.length === 0
-        ? t('onboarding.inspirations.noResults')
-        : null
-    })
-  }
-
-  groups.push({
-    key: 'suggestions',
-    label: t('onboarding.inspirations.suggestionsLabel'),
-    creators: creatorOptions.value.suggestions,
-    loading: inspirationLoading.value,
-    empty: !inspirationLoading.value && creatorOptions.value.suggestions.length === 0
-      ? t('onboarding.inspirations.noResults')
-      : null
-  })
-
-  return groups
-})
-
-const canContinue = computed(() => selected.value.length >= minimum.value && selected.value.length <= maximum.value)
-const parsedHandle = computed(() => parseHandle(handleInput.value))
 const parsedAccountHandle = computed(() => parseHandle(accountHandleInput.value))
 
-function isSelected(username: string) {
-  return selected.value.some(creator => creator.username.toLowerCase() === username.toLowerCase())
-}
-
-// Accepts a bare handle, an @handle, or an instagram.com profile link, mirroring
-// what the API resolves when the selection is saved.
+// Accepts a bare handle, an @handle, or an instagram.com profile link.
 function parseHandle(input: string): string | null {
   let candidate = input.trim()
 
@@ -277,131 +197,6 @@ function parseHandle(input: string): string | null {
 
   candidate = candidate.replace(/^@/, '')
   return /^[A-Za-z0-9._]{1,30}$/.test(candidate) ? candidate : null
-}
-
-function addCreator(creator: CreatorInspiration) {
-  if (isSelected(creator.username)) return
-
-  if (selected.value.length >= maximum.value) {
-    toast.error(t('onboarding.inspirations.maximumError', { count: maximum.value }))
-    return
-  }
-
-  selected.value = [...selected.value, { ...creator, is_selected: true }]
-}
-
-function removeCreator(username: string) {
-  selected.value = selected.value.filter(item => item.username.toLowerCase() !== username.toLowerCase())
-}
-
-function toggleCreator(creator: CreatorInspiration) {
-  if (isSelected(creator.username)) {
-    removeCreator(creator.username)
-    return
-  }
-
-  addCreator(creator)
-}
-
-async function addHandle() {
-  const handle = parsedHandle.value
-  if (!handle || searching.value) {
-    if (handleInput.value.trim()) toast.error(t('onboarding.inspirations.handleError'))
-    return
-  }
-
-  if (isSelected(handle)) {
-    handleInput.value = ''
-    return
-  }
-
-  const known = [...searchResults.value, ...(inspirationData.value?.suggestions || [])]
-    .find(creator => creator.username.toLowerCase() === handle.toLowerCase())
-
-  if (known?.avatar_url) {
-    addCreator(known)
-    handleInput.value = ''
-    return
-  }
-
-  searching.value = true
-  hasSearched.value = true
-  searchResults.value = []
-
-  try {
-    const response = await apiFetch<{ items: CreatorInspiration[] }>(`/api/creator-inspirations/search?q=${encodeURIComponent(handle)}`)
-    searchResults.value = response.items
-    const creator = response.items.find(item => item.username.toLowerCase() === handle.toLowerCase())
-
-    if (!creator) {
-      toast.error(t('onboarding.inspirations.noResults'))
-      return
-    }
-
-    addCreator(creator)
-    handleInput.value = ''
-  } catch (exception: unknown) {
-    toast.error(apiErrorMessage(exception, t('onboarding.inspirations.searchError')))
-  } finally {
-    searching.value = false
-  }
-}
-
-function initials(creator: CreatorInspiration) {
-  return (creator.display_name || creator.username).slice(0, 2).toUpperCase()
-}
-
-async function loadInspirations() {
-  if (inspirationsLoaded.value || inspirationLoading.value) return
-  inspirationLoading.value = true
-
-  try {
-    inspirationData.value = await apiFetch<CreatorInspirationResponse>('/api/creator-inspirations')
-    selected.value = inspirationData.value.selected
-    inspirationsLoaded.value = true
-  } catch (exception: unknown) {
-    toast.error(apiErrorMessage(exception, t('onboarding.inspirations.loadError')))
-  } finally {
-    inspirationLoading.value = false
-  }
-}
-
-async function searchCreators() {
-  const query = parsedHandle.value
-  if (!query || searching.value) {
-    if (handleInput.value.trim()) toast.error(t('onboarding.inspirations.handleError'))
-    return
-  }
-
-  searching.value = true
-  hasSearched.value = true
-  searchResults.value = []
-
-  try {
-    const response = await apiFetch<{ items: CreatorInspiration[] }>(`/api/creator-inspirations/search?q=${encodeURIComponent(query)}`)
-    searchResults.value = response.items
-  } catch (exception: unknown) {
-    toast.error(apiErrorMessage(exception, t('onboarding.inspirations.searchError')))
-  } finally {
-    searching.value = false
-  }
-}
-
-async function saveInspirations() {
-  if (!canContinue.value || saving.value) return
-  saving.value = true
-
-  try {
-    await apiFetch('/api/creator-inspirations', {
-      method: 'PUT',
-      body: { handles: selected.value.map(creator => creator.username) }
-    })
-    await enterApp()
-  } catch (exception: unknown) {
-    toast.error(apiErrorMessage(exception, t('onboarding.inspirations.saveError')))
-  } finally {
-    saving.value = false
-  }
 }
 
 async function saveAccountHandle() {
@@ -457,17 +252,17 @@ async function retryAnalysis() {
 function continueWithoutAnalysis() {
   stopPolling()
   analysisDismissed.value = true
-  void loadInspirations()
+  void enterApp()
 }
 
 watch(() => status.value.account?.sync_status, (syncStatus) => {
-  if (status.value.connected && syncStatus === 'completed') void loadInspirations()
+  if (status.value.connected && syncStatus === 'completed') void enterApp()
 })
 
 // The analysis is the whole context Personal needs, so the moment it lands the
-// creator moves on to their favourites rather than being asked to type it out.
+// creator can enter the app without another setup step.
 watch(() => analysis.value?.status, (analysisStatus) => {
-  if (analysisStatus === 'completed' && !status.value.connected) void loadInspirations()
+  if (analysisStatus === 'completed' && !status.value.connected) void enterApp()
 })
 
 function enterApp() {
@@ -477,9 +272,8 @@ function enterApp() {
 
 onMounted(async () => {
   await loadStatus()
-  if (showInspirations.value) {
-    await loadInspirations()
-  }
+  if (status.value.onboarding_complete) return enterApp()
+
   if (route.query.instagram === 'connected'
     || (status.value.connected && status.value.account?.sync_status !== 'completed')
     // A reload during the reading picks it back up where it was.
@@ -503,7 +297,7 @@ onMounted(async () => {
 
     <section class="mx-auto grid min-h-[calc(100vh-5rem)] max-w-6xl items-center gap-14 px-6 py-14 md:grid-cols-[1fr_0.88fr] md:px-10 md:py-20">
       <div class="max-w-xl animate-rise">
-        <ol class="mb-9 grid grid-cols-2 gap-2" :aria-label="$t('onboarding.flow.label')">
+        <ol class="mb-9 grid grid-cols-1 gap-2" :aria-label="$t('onboarding.flow.label')">
           <li v-for="(step, index) in onboardingSteps" :key="step.key" class="min-w-0">
             <div class="mb-2 h-1 rounded-full transition" :class="step.complete || step.active ? 'bg-[var(--accent)]' : 'bg-[var(--line)]'" />
             <p class="truncate text-[10px] font-semibold uppercase tracking-[.12em]" :class="step.active ? 'text-[var(--ink)]' : 'text-[var(--faint)]'">
@@ -671,118 +465,6 @@ onMounted(async () => {
               disabled
             >
               {{ $t('onboarding.analysis.locked') }}
-            </button>
-          </template>
-
-          <template v-else-if="showInspirations">
-            <h1 class="font-serif text-4xl leading-[1.02] tracking-[-0.045em] md:text-6xl">
-              {{ $t('onboarding.inspirations.title') }}
-            </h1>
-            <p class="mt-5 max-w-lg text-[16px] leading-7 text-[var(--muted)]">
-              {{ $t('onboarding.inspirations.copy') }}
-            </p>
-
-            <section class="mt-7 rounded-[24px] border border-[var(--line)] bg-[var(--surface)] p-5 md:p-6">
-              <div class="flex flex-wrap items-center justify-between gap-2">
-                <h2 class="text-sm font-semibold">{{ $t('onboarding.inspirations.cardTitle') }}</h2>
-                <span class="text-xs text-[var(--faint)]">
-                  {{ $t('onboarding.inspirations.counter', { count: selected.length, max: maximum }) }}
-                </span>
-              </div>
-              <p class="mt-1.5 text-[13px] leading-5 text-[var(--muted)]">
-                {{ $t('onboarding.inspirations.cardCopy', { min: minimum, max: maximum }) }}
-              </p>
-
-              <form class="mt-4 flex flex-wrap gap-2" @submit.prevent="addHandle">
-                <label for="creator-search" class="sr-only">{{ $t('onboarding.inspirations.searchLabel') }}</label>
-                <input
-                  id="creator-search"
-                  v-model="handleInput"
-                  type="text"
-                  autocomplete="off"
-                  spellcheck="false"
-                  class="min-w-0 flex-1 rounded-full border border-[var(--line)] bg-[var(--paper)] px-5 py-3 text-sm outline-none transition focus:border-[var(--ink)]"
-                  :placeholder="$t('onboarding.inspirations.searchPlaceholder')"
-                >
-                <button
-                  type="button"
-                  class="rounded-full border border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-sm font-medium transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
-                  :disabled="searching || !parsedHandle"
-                  @click="searchCreators"
-                >
-                  {{ searching ? $t('onboarding.inspirations.searching') : $t('onboarding.inspirations.search') }}
-                </button>
-                <button
-                  type="submit"
-                  class="rounded-full border border-[var(--ink)] bg-[var(--ink)] px-4 py-3 text-sm font-medium text-[var(--paper)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40"
-                  :disabled="searching || !parsedHandle || selected.length >= maximum"
-                >
-                  {{ $t('onboarding.inspirations.add') }}
-                </button>
-              </form>
-
-              <ul v-if="selected.length" class="mt-4 flex flex-wrap gap-2">
-                <li
-                  v-for="creator in selected"
-                  :key="creator.username"
-                  class="flex max-w-full items-center gap-2 rounded-full border border-[var(--accent)] bg-[var(--paper)] py-1 pl-1 pr-2 text-sm"
-                >
-                  <img v-if="creator.avatar_url" :src="creator.avatar_url" :alt="creator.display_name" class="h-7 w-7 shrink-0 rounded-full object-cover">
-                  <span v-else class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[var(--surface)] text-[10px] font-semibold">{{ initials(creator) }}</span>
-                  <span class="truncate">@{{ creator.username }}</span>
-                  <button
-                    type="button"
-                    class="grid h-5 w-5 shrink-0 place-items-center rounded-full text-[var(--faint)] transition hover:bg-[var(--surface)] hover:text-[var(--ink)]"
-                    :aria-label="$t('onboarding.inspirations.remove', { handle: creator.username })"
-                    @click="removeCreator(creator.username)"
-                  >
-                    ×
-                  </button>
-                </li>
-              </ul>
-              <p v-else class="mt-4 text-[13px] text-[var(--faint)]">
-                {{ $t('onboarding.inspirations.empty') }}
-              </p>
-
-              <section v-for="group in creatorOptionGroups" :key="group.key" class="mt-5">
-                <h3 class="text-xs font-medium uppercase tracking-[0.14em] text-[var(--faint)]">
-                  {{ group.label }}
-                </h3>
-
-                <div v-if="group.loading" class="mt-3 grid grid-cols-2 gap-2">
-                  <div v-for="i in 4" :key="i" class="h-16 animate-pulse rounded-[16px] bg-[var(--line-soft)]" />
-                </div>
-                <div v-else-if="group.creators.length" class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  <button
-                    v-for="creator in group.creators"
-                    :key="creator.username"
-                    type="button"
-                    class="flex min-w-0 items-center gap-3 rounded-[16px] border border-[var(--line)] bg-[var(--paper)] p-3 text-left transition hover:border-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"
-                    :disabled="selected.length >= maximum"
-                    @click="toggleCreator(creator)"
-                  >
-                    <img v-if="creator.avatar_url" :src="creator.avatar_url" :alt="creator.display_name" class="h-10 w-10 shrink-0 rounded-full object-cover">
-                    <span v-else class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[var(--surface)] text-xs font-semibold">{{ initials(creator) }}</span>
-                    <span class="min-w-0 flex-1">
-                      <span class="block truncate text-sm font-medium">{{ creator.display_name }}</span>
-                      <span class="block truncate text-xs text-[var(--faint)]">@{{ creator.username }}</span>
-                    </span>
-                    <span class="grid h-6 w-6 shrink-0 place-items-center rounded-full border border-[var(--line)] text-xs text-[var(--faint)]">+</span>
-                  </button>
-                </div>
-                <p v-else-if="group.empty" class="mt-3 text-[13px] text-[var(--faint)]">
-                  {{ group.empty }}
-                </p>
-              </section>
-            </section>
-
-            <button
-              type="button"
-              class="mt-7 inline-flex h-[52px] items-center rounded-full b-btn-red px-7 text-[15px] font-medium transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40"
-              :disabled="!canContinue || saving"
-              @click="saveInspirations"
-            >
-              {{ saving ? $t('onboarding.inspirations.saving') : $t('onboarding.inspirations.continue') }}&nbsp; →
             </button>
           </template>
 

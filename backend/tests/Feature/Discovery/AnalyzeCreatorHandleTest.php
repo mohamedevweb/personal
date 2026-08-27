@@ -54,6 +54,29 @@ class AnalyzeCreatorHandleTest extends TestCase
         Queue::assertPushed(AnalyzeCreatorHandle::class, 1);
     }
 
+    public function test_saving_the_same_handle_retries_an_unavailable_analysis(): void
+    {
+        Queue::fake();
+        $user = User::factory()->create();
+        CreatorProfile::query()->create([
+            'user_id' => $user->id,
+            'instagram_username' => 'founder.creator',
+            'analysis_status' => 'completed',
+            'creator_dna' => [
+                'analysis_method' => 'heuristic',
+                'analysis_status' => 'analysis_unavailable',
+                'analysis_version' => NicheDetectionService::ANALYSIS_VERSION,
+            ],
+        ]);
+
+        $this->actingAs($user)
+            ->putJson('/api/integrations/instagram/handle', ['username' => 'founder.creator'])
+            ->assertOk()
+            ->assertJsonPath('analysis.status', 'queued');
+
+        Queue::assertPushed(AnalyzeCreatorHandle::class, 1);
+    }
+
     public function test_opening_memory_reanalyzes_an_outdated_public_creator_dna(): void
     {
         Queue::fake();

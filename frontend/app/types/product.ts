@@ -120,7 +120,7 @@ export interface PersonalProfile {
     content_strengths?: string[]
     voice_profile?: string | null
     analysis_version?: number
-    analysis_status?: 'complete' | 'partial' | 'insufficient_evidence'
+    analysis_status?: 'complete' | 'partial' | 'insufficient_evidence' | 'analysis_unavailable'
     analysis_method?: 'llm' | 'heuristic' | 'manual' | 'none'
     confidence?: number
     evidence?: {

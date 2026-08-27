@@ -87,6 +87,52 @@ class NicheDetectionServiceTest extends TestCase
         $this->assertNotContains('Day', $signals['topics']);
     }
 
+    public function test_offline_fallback_does_not_turn_campaign_copy_into_creator_dna(): void
+    {
+        $account = new InstagramAccount([
+            'username' => 'pierre_chartier_x2007',
+            'display_name' => 'Pierre Chartier',
+            'bio' => "💼 @derivatives_finance\n✉️ Mail Pro : zarch@nuggets-influence.com\nPnL Maker👇🏼",
+        ]);
+        $media = [
+            ['caption' => 'Pierre Chartier rejoint son broker au beach club.'],
+            ['caption' => 'Pierre Chartier est sollicité pour avoir son avis.'],
+            ['caption' => 'Avec Emergent, pas besoin de savoir coder votre idée.'],
+            ['caption' => 'Votre pronostic est attendu par toute l équipe.'],
+        ];
+
+        $signals = app(NicheDetectionService::class)->detect($account, $media);
+
+        $this->assertNull($signals['primary_niche']);
+        $this->assertNull($signals['positioning']);
+        $this->assertSame([], $signals['topics']);
+        $this->assertSame([], $signals['content_pillars']);
+        $this->assertSame('insufficient_evidence', $signals['analysis_status']);
+        $this->assertSame('heuristic', $signals['analysis_method']);
+    }
+
+    public function test_a_failed_configured_model_is_reported_as_unavailable_without_false_claims(): void
+    {
+        config()->set('services.openai.api_key', 'configured-key');
+        $llm = Mockery::mock(LlmJsonService::class);
+        $llm->shouldReceive('object')->once()->andReturnNull();
+        $account = new InstagramAccount([
+            'username' => 'pierre_chartier_x2007',
+            'display_name' => 'Pierre Chartier',
+            'bio' => "💼 @derivatives_finance\n✉️ Mail Pro : zarch@nuggets-influence.com\nPnL Maker👇🏼",
+        ]);
+        $media = collect(range(1, 4))->map(fn (int $index): array => [
+            'caption' => "Pierre Chartier est sollicité pour avoir son avis {$index}.",
+        ])->all();
+
+        $signals = (new NicheDetectionService($llm, app(CanonicalCreatorVerticals::class)))
+            ->detect($account, $media);
+
+        $this->assertNull($signals['primary_niche']);
+        $this->assertSame([], $signals['topics']);
+        $this->assertSame('analysis_unavailable', $signals['analysis_status']);
+    }
+
     public function test_llm_analysis_receives_each_recent_caption_instead_of_one_truncated_block(): void
     {
         $account = new InstagramAccount([

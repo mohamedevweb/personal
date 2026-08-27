@@ -368,8 +368,7 @@
     "tokenNote": "Your access token stays encrypted on Personal’s server.",
     "flow": {
       "label": "Personalization progress",
-      "understand": "Understand",
-      "discover": "Discover"
+      "understand": "Understand"
     },
     "or": "or",
     "handleTitle": "Enter your handle instead",
@@ -399,7 +398,7 @@
       "postsRead": "posts read",
       "previewVoice": "Your voice",
       "previewNote": "Nothing is published, nothing is changed. Personal reads what anyone can already see.",
-      "lockNote": "The next step opens on its own once everything has been retrieved.",
+      "lockNote": "Personal opens automatically once everything has been retrieved.",
       "locked": "Retrieving…",
       "failedTitle": "Personal could not read this account.",
       "retry": "Try again",
@@ -583,6 +582,7 @@
     },
     "nicheInsufficient": "Not enough content yet to determine your niche",
     "analysis": {
+      "unavailable": "Personal could not analyze this profile right now. Please try again.",
       "insufficient": "Instagram does not provide enough signals yet. You can complete these details manually.",
       "partial": "This is an initial estimate to confirm. You can correct it at any time."
     },

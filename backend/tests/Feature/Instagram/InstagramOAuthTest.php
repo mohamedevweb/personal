@@ -131,12 +131,16 @@ class InstagramOAuthTest extends TestCase
 
         $response = $this->actingAs($user)->getJson('/api/integrations/instagram/status');
 
-        $response->assertOk()->assertJsonMissing(['access_token' => 'must-never-leak']);
+        $response->assertOk()
+            ->assertJsonPath('inspiration_count', 0)
+            ->assertJsonPath('onboarding_complete', true)
+            ->assertJsonMissing(['access_token' => 'must-never-leak']);
         $this->assertStringNotContainsString('must-never-leak', $response->getContent());
     }
 
     public function test_user_can_provide_a_handle_without_connecting_oauth(): void
     {
+        Queue::fake();
         $user = User::factory()->create();
 
         $this->actingAs($user)->putJson('/api/integrations/instagram/handle', [
@@ -154,6 +158,13 @@ class InstagramOAuthTest extends TestCase
             ->assertJsonPath('connected', false)
             ->assertJsonPath('instagram_username', 'manual.creator')
             ->assertJsonPath('onboarding_complete', false);
+
+        $user->creatorProfile()->update(['analysis_status' => 'completed']);
+
+        $this->actingAs($user)->getJson('/api/integrations/instagram/status')
+            ->assertOk()
+            ->assertJsonPath('inspiration_count', 0)
+            ->assertJsonPath('onboarding_complete', true);
     }
 
     public function test_manual_handle_must_be_a_valid_instagram_username(): void
