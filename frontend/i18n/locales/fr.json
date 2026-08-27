@@ -716,11 +716,6 @@
     "views": "{count} vues",
     "playReel": "Lire le Reel de {'@'}{username}",
     "openSource": "Voir le post original",
-    "formatBlurb": {
-      "reel": "Une accroche, un script parlé et le plan à filmer.",
-      "carousel": "Une couverture qui arrête le scroll, puis les slides.",
-      "caption": "Un post écrit, dans ta voix."
-    },
     "creatingCopy": "Personal lit le schéma et ton moment.",
     "remixFooter": "Tu pourras changer de format et modifier chaque mot ensuite."
   },

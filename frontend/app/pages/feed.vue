@@ -171,8 +171,10 @@ onMounted(loadFeed)
         <div v-for="i in 3" :key="i" class="h-[380px] animate-pulse rounded-[20px] bg-[var(--sand-soft)]" />
       </div>
 
-      <p class="mt-6 text-center text-[13px] text-[var(--muted)]" role="status" aria-live="polite">
-        <span v-if="loadingMore">{{ $t('feed.loadingMore') }}</span>
+      <!-- The skeletons above already say "loading" to anyone who can see them,
+           so that half of the status is left to screen readers only. -->
+      <p class="text-center text-[13px] text-[var(--muted)]" :class="{ 'mt-6': exhausted }" role="status" aria-live="polite">
+        <span v-if="loadingMore" class="sr-only">{{ $t('feed.loadingMore') }}</span>
         <span v-else-if="exhausted">{{ $t('feed.rotationComplete') }}</span>
       </p>
 

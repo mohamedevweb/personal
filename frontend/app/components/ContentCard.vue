@@ -193,20 +193,22 @@ watch(() => props.post.id, () => {
     <!-- Everything Personal adds on top of the post lives below the fold line. -->
     <div class="flex flex-1 flex-col border-t border-[var(--line)] bg-[var(--paper)] px-2.5 py-3.5">
       <!-- Only the outlier ratio: the raw counts were already in the post above,
-           and crowding them next to the badge pushed it into a clipped scroller. -->
-      <div class="flex">
+           and crowding them next to the badge pushed it into a clipped scroller.
+           Saving rides on the same line and wraps to its own only when the chip
+           leaves it no room. -->
+      <div class="flex flex-wrap items-center gap-2">
         <PerformanceBadge :post="post" />
-      </div>
-
-      <div class="mt-auto grid gap-2 pt-3">
         <button
           type="button"
-          class="inline-flex h-9 min-w-0 items-center justify-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3 text-[12px] transition hover:bg-[var(--line-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+          class="inline-flex h-9 min-w-[7.5rem] flex-1 items-center justify-center gap-1.5 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3 text-[12px] transition hover:bg-[var(--line-soft)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
           @click="$emit('save', post)"
         >
           <AppIcon name="bookmark" :size="14" :filled="post.is_saved" />
           <span class="truncate">{{ post.is_saved ? $t('contentCard.saved') : $t('contentCard.save') }}</span>
         </button>
+      </div>
+
+      <div class="mt-auto grid gap-2 pt-3">
         <button
           type="button"
           class="inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-full bg-[var(--ink)] px-4 text-[12.5px] font-medium text-[var(--paper)] transition hover:bg-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"

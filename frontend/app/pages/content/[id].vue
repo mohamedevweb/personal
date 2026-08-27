@@ -18,6 +18,7 @@ const composerOpen = ref(false)
 const generating = ref(false)
 const loading = ref(true)
 const isReel = computed(() => (post.value?.format || '').toLowerCase().includes('reel'))
+const isCarousel = computed(() => (post.value?.format || '').toLowerCase().includes('carousel'))
 let analysisTimer: ReturnType<typeof setTimeout> | undefined
 let analysisAttempts = 0
 
@@ -105,9 +106,17 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
           <template v-else>
             <img :src="post.thumbnail_url || ''" :alt="post.hook" class="h-full w-full object-cover">
             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/5 to-transparent" />
+            <!-- The format reads as the same corner glyph Instagram uses, and the
+                 feed card already uses: a word for it only spent the headline's room. -->
+            <AppIcon
+              v-if="isCarousel"
+              name="carousel"
+              :size="26"
+              :stroke-width="1.9"
+              class="pointer-events-none absolute right-5 top-5 text-white drop-shadow-[0_1px_3px_rgba(0,0,0,.55)]"
+            />
             <div class="absolute inset-x-6 bottom-6">
-              <span class="rounded-full bg-white/15 px-3 py-1.5 text-[11px] text-white backdrop-blur">{{ post.format }}</span>
-              <h1 class="mt-4 text-[28px] font-medium leading-[1.12] tracking-[-.03em] text-white">{{ post.hook }}</h1>
+              <h1 class="text-[28px] font-medium leading-[1.12] tracking-[-.03em] text-white">{{ post.hook }}</h1>
             </div>
           </template>
         </div>
@@ -146,8 +155,8 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
             <p class="mt-1.5 text-[13.5px] leading-6 text-[var(--muted)]">{{ $t('content.makeItYoursCopy') }}</p>
           </div>
 
-          <!-- The three shapes, each saying what you actually get, so the choice
-               is made on the outcome rather than on a word. -->
+          <!-- The three shapes, named and no more: the icon and the word carry
+               the choice. -->
           <div class="grid gap-px bg-[var(--line-soft)] sm:grid-cols-3">
             <button
               v-for="item in (['reel', 'carousel', 'caption'] as const)"
@@ -163,10 +172,7 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
               >
                 <AppIcon :name="item === 'caption' ? 'text' : item" :size="17" />
               </span>
-              <span class="block sm:mt-3">
-                <span class="block text-[13.5px] font-medium">{{ $t(`remix.formats.${item}`) }}</span>
-                <span class="mt-1 block text-[12.5px] leading-5 text-[var(--muted)]">{{ $t(`content.formatBlurb.${item}`) }}</span>
-              </span>
+              <span class="block text-[13.5px] font-medium sm:mt-3">{{ $t(`remix.formats.${item}`) }}</span>
             </button>
           </div>
 
