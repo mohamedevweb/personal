@@ -63,9 +63,6 @@
             {{ $t('landing.hero.getAccess') }}
             <AppIcon name="arrow" :size="17" class="transition-transform duration-300 group-hover:translate-x-1" />
           </LandingButtonLink>
-          <LandingButtonLink to="#how" variant="dark" size="lg" class="w-full sm:w-auto">
-            {{ $t('landing.hero.seeHow') }}
-          </LandingButtonLink>
         </div>
 
         <p

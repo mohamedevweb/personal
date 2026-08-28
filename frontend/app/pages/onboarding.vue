@@ -34,14 +34,11 @@ interface PreviewTile {
 const PREVIEW_TILES: readonly PreviewTile[] = [
   { id: 1, kind: 'carousel', angle: 148, light: .1, tint: '224, 128, 96', spot: [28, 22] },
   { id: 2, kind: null, angle: 32, light: .055, tint: '150, 165, 190', spot: [74, 32] },
-  { id: 3, kind: 'reel', outlier: true, angle: 200, light: .08, tint: '255, 106, 77', spot: [50, 34] },
-  { id: 4, kind: null, angle: 210, light: .07, tint: '190, 170, 140', spot: [36, 70] },
-  { id: 5, kind: 'reel', angle: 118, light: .05, tint: '130, 150, 175', spot: [66, 60], views: 21400 },
-  { id: 6, kind: 'carousel', angle: 60, light: .085, tint: '210, 150, 120', spot: [22, 58] }
+  { id: 3, kind: 'reel', outlier: true, angle: 200, light: .08, tint: '255, 106, 77', spot: [50, 34] }
 ]
 
-// Each tile gets its own wash so the grid reads as six thumbnails rather than
-// six empty boxes: a lit corner, a coloured spot where a subject would sit.
+// Each tile gets its own wash so the grid reads as three thumbnails rather than
+// three empty boxes: a lit corner, a coloured spot where a subject would sit.
 // Abstract on purpose — the card never pretends to show anyone's actual photos.
 function tileWash(tile: PreviewTile) {
   return [
@@ -321,7 +318,7 @@ onMounted(async () => {
       </div>
     </header>
 
-    <section class="mx-auto grid min-h-[calc(100vh-5rem)] max-w-6xl items-start gap-14 px-6 py-14 md:grid-cols-[1fr_0.88fr] md:px-10 md:py-20">
+    <section class="mx-auto grid min-h-[calc(100vh-5rem)] max-w-6xl items-start gap-14 px-6 py-14 md:grid-cols-[1fr_0.74fr] md:px-10 md:py-20">
       <div class="max-w-xl animate-rise">
         <template v-if="!status.connected && !status.instagram_username">
           <h1 class="font-serif text-5xl leading-[1.02] tracking-[-0.045em] md:text-7xl" v-html="$t('onboarding.connectTitle')" />
@@ -491,7 +488,7 @@ onMounted(async () => {
 
       </div>
 
-      <aside class="b-night relative min-h-[430px] overflow-hidden rounded-[24px] p-7 text-white md:p-10">
+      <aside class="b-night relative min-h-[360px] overflow-hidden rounded-[24px] p-7 text-white md:p-10">
         <!-- The same reading as the list on the left, seen from the profile's
              side: the profile is laid out the way Instagram lays it out, and
              each part fills in as it is found — nothing is drawn until it is
