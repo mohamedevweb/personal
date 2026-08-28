@@ -38,8 +38,10 @@ class CreatorCatalogTest extends TestCase
             $this->assertTrue($group->every(fn (array $entry): bool => $entry['market'] === 'FR'));
         }
 
-        $this->assertCount(30, $entries->where('status', 'approved'));
+        $this->assertCount(29, $entries->where('status', 'approved'));
         $this->assertCount(0, $entries->where('status', 'pending'));
+        $this->assertSame('inactive', $entries->firstWhere('handle', 'noholita')['status']);
+        $this->assertNotContains('noholita', collect(app(CreatorCatalog::class)->approved())->pluck('handle'));
         $this->assertEqualsCanonicalizing(
             ['jujufitcats', 'majormouvement', 'caroline.mignaux', 'leotechmaker', 'mrjojol67', 'paulinelaigneau', 'bprkt', 'jbaptisten'],
             $entries->pluck('handle')->intersect(['jujufitcats', 'majormouvement', 'caroline.mignaux', 'leotechmaker', 'mrjojol67', 'paulinelaigneau', 'bprkt', 'jbaptisten'])->all(),

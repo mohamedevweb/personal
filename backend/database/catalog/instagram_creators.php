@@ -50,7 +50,7 @@ $catalog = [
         ['lenamahfouf', ['mode', 'lifestyle', 'luxe'], 'Créatrice française reconnue dans la mode et le lifestyle.', $sources['beauty']],
         ['sananas2106', ['maquillage', 'skincare', 'beauté'], 'Créatrice beauté française spécialisée dans le maquillage.', $sources['beauty']],
         ['romy', ['beauté', 'mode', 'lifestyle'], 'Créatrice française avec une ligne éditoriale beauté et mode.', $sources['beauty']],
-        ['noholita', ['mode', 'style', 'lifestyle'], 'Créatrice mode française connue pour son contenu de style personnel.', $sources['beauty']],
+        ['noholita', ['mode', 'style', 'lifestyle'], 'Créatrice mode française connue pour son contenu de style personnel.', $sources['beauty'], 'inactive'],
         ['paolalct', ['mode', 'beauté', 'lifestyle'], 'Créatrice française active sur les formats mode et beauté.', $sources['beauty']],
     ],
     'wellness' => [
@@ -64,7 +64,9 @@ $catalog = [
 
 $entries = [];
 foreach ($catalog as $vertical => $creators) {
-    foreach ($creators as [$handle, $topics, $rationale, $editorialSource]) {
+    foreach ($creators as $creator) {
+        [$handle, $topics, $rationale, $editorialSource] = $creator;
+        $status = $creator[4] ?? 'approved';
         $entries[] = [
             'handle' => $handle,
             'instagram_url' => "https://www.instagram.com/{$handle}/",
@@ -74,7 +76,7 @@ foreach ($catalog as $vertical => $creators) {
             'rationale' => $rationale,
             'source_urls' => ["https://www.instagram.com/{$handle}/", $editorialSource],
             'editorially_verified_at' => '2026-08-21',
-            'status' => 'approved',
+            'status' => $status,
         ];
     }
 }

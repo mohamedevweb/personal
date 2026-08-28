@@ -4,7 +4,7 @@ return [
     'manifest' => database_path('catalog/instagram_creators.php'),
     'markets' => ['FR', 'GB', 'US'],
     'languages' => ['fr', 'en', 'mixed', 'unknown'],
-    'statuses' => ['pending', 'approved'],
+    'statuses' => ['pending', 'approved', 'inactive'],
     'curation_statuses' => ['discovered', 'approved', 'inactive'],
     'recognition_tiers' => ['expert', 'established', 'leader'],
     'manifest_version' => 'golden-fr-v1',

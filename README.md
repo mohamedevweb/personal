@@ -128,7 +128,7 @@ php artisan personal:prune-unsupported-markets --dry-run
 
 ## Curated creator catalog
 
-The first production dataset is a versioned Golden Catalog in `backend/database/catalog/instagram_creators.php`. It contains 30 human-curated French creators, five in each of the six canonical verticals. Each entry records the exact Instagram URL, editorial sources, topics and rationale. Followers and recognition tiers are intentionally absent because they are measured rather than guessed. Entries start as `pending` during review and are changed to `approved` only after the human editorial decision. Golden Catalog FR v1 is now fully approved for import.
+The first production dataset is a versioned Golden Catalog in `backend/database/catalog/instagram_creators.php`. It contains 30 human-curated French creators, five in each of the six canonical verticals. Each entry records the exact Instagram URL, editorial sources, topics and rationale. Followers and recognition tiers are intentionally absent because they are measured rather than guessed. Entries start as `pending` during review and are changed to `approved` only after the human editorial decision. Entries removed from production stay `inactive`, so a later import cannot recreate them.
 
 Run the read-only audit first. It makes one profile request per creator. A separate posts request is made only when the profile response contains fewer than six publications. It then writes JSON and CSV reports under `backend/storage/app/private/catalog-reports` on the host and `/var/www/html/storage/app/private/catalog-reports` inside Docker:
 
@@ -157,7 +157,7 @@ docker compose exec app php artisan personal:audit-creator-catalog \
 docker compose exec app php artisan personal:import-creator-catalog
 ```
 
-After the queue has measured the 30 approved seeds and the feed is useful, set `DISCOVERY_CURATED_CATALOG_ONLY=true` and restart the app, queue and scheduler containers. The feed then excludes every non-approved creator and stops automatic search-based insertion. Market quotas fall back to the best remaining approved French content while this first catalog is FR-only.
+After the queue has measured the approved seeds and the feed is useful, set `DISCOVERY_CURATED_CATALOG_ONLY=true` and restart the app, queue and scheduler containers. The feed then excludes every non-approved creator and stops automatic search-based insertion. Market quotas fall back to the best remaining approved French content while this first catalog is FR-only.
 
 Related-account expansion is review-only and never writes creators or posts. Candidates are ranked by recent activity, metric coverage and median engagement, with niche proximity inherited from the approved seed that surfaced them:
 
