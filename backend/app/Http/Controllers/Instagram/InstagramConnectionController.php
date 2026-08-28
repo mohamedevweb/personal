@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Jobs\Discovery\AnalyzeCreatorHandle;
 use App\Jobs\Instagram\SyncInstagramAccount;
 use App\Models\CreatorProfile;
+use App\Services\Creator\OnboardingCompletionService;
 use App\Services\Instagram\InstagramAuthService;
 use App\Services\Instagram\NicheDetectionService;
 use App\Services\View\UserView;
@@ -20,25 +21,24 @@ class InstagramConnectionController extends Controller
         return response()->json(['authorization_url' => $auth->authorizationUrl($request->user())]);
     }
 
-    public function status(Request $request, UserView $view): JsonResponse
-    {
+    public function status(
+        Request $request,
+        UserView $view,
+        OnboardingCompletionService $onboarding,
+    ): JsonResponse {
         $inspirationCount = $request->user()->inspirationCreators()->count();
         $profile = $request->user()->creatorProfile()->first();
         $account = $request->user()->instagramAccount()
             ->withCount(['media as imported_media_count'])
             ->first();
+        $onboardingComplete = $onboarding->completeFor($request->user(), $account, $profile);
 
         if (! $account) {
-            $analysisRunning = in_array($profile?->analysis_status, [
-                'queued',
-                ...AnalyzeCreatorHandle::STAGES,
-            ], true);
-
             return response()->json([
                 'connected' => false,
                 'instagram_username' => $profile?->instagram_username,
                 'inspiration_count' => $inspirationCount,
-                'onboarding_complete' => filled($profile?->instagram_username) && ! $analysisRunning,
+                'onboarding_complete' => $onboardingComplete,
                 'analysis' => $this->analysis($profile),
             ]);
         }
@@ -47,7 +47,7 @@ class InstagramConnectionController extends Controller
             'connected' => true,
             'instagram_username' => $account->username,
             'inspiration_count' => $inspirationCount,
-            'onboarding_complete' => $account->sync_status === 'completed',
+            'onboarding_complete' => $onboardingComplete,
             'analysis' => $this->analysis($profile),
             'account' => [
                 'username' => $account->username,

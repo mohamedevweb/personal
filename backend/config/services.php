@@ -167,8 +167,8 @@ return [
     'carousel_analysis' => [
         'enabled' => (bool) env('CAROUSEL_ANALYSIS_ENABLED', true),
         'model' => env('OPENAI_VISION_MODEL', env('OPENAI_MODEL', 'gpt-5')),
-        'creator_dna_carousels' => (int) env('CREATOR_DNA_ANALYZED_CAROUSELS', 6),
-        'max_slides' => (int) env('CAROUSEL_ANALYSIS_MAX_SLIDES', 20),
+        'creator_dna_carousels' => (int) env('CREATOR_DNA_ANALYZED_CAROUSELS', 4),
+        'max_slides' => (int) env('CAROUSEL_ANALYSIS_MAX_SLIDES', 10),
         'image_detail' => env('CAROUSEL_ANALYSIS_IMAGE_DETAIL', 'high'),
         'max_output_tokens' => (int) env('CAROUSEL_ANALYSIS_MAX_OUTPUT_TOKENS', 4000),
     ],

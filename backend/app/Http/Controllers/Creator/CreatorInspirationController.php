@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Creator;
 
 use App\Http\Controllers\Controller;
-use App\Jobs\Discovery\AnalyzeCreatorHandle;
 use App\Services\Creator\CreatorInspirationService;
+use App\Services\Creator\OnboardingCompletionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -24,8 +24,11 @@ class CreatorInspirationController extends Controller
         return response()->json(['items' => $inspirations->search($request->user(), $data['q'])]);
     }
 
-    public function update(Request $request, CreatorInspirationService $inspirations): JsonResponse
-    {
+    public function update(
+        Request $request,
+        CreatorInspirationService $inspirations,
+        OnboardingCompletionService $onboarding,
+    ): JsonResponse {
         $data = $request->validate([
             'handles' => [
                 'required',
@@ -39,15 +42,10 @@ class CreatorInspirationController extends Controller
         $selected = $inspirations->select($request->user(), $data['handles']);
         $account = $request->user()->instagramAccount()->first();
         $profile = $request->user()->creatorProfile()->first();
-        $analysisRunning = in_array($profile?->analysis_status, [
-            'queued',
-            ...AnalyzeCreatorHandle::STAGES,
-        ], true);
 
         return response()->json([
             'selected' => $selected,
-            'onboarding_complete' => $account?->sync_status === 'completed'
-                || (filled($profile?->instagram_username) && ! $analysisRunning),
+            'onboarding_complete' => $onboarding->completeFor($request->user(), $account, $profile),
         ]);
     }
 }

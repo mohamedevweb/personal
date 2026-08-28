@@ -381,8 +381,6 @@
     "handleSaveError": "Personal n’a pas pu enregistrer ton handle Instagram. Réessaie.",
     "handleSuffix": "renseigné",
     "analysis": {
-      "previewLabel": "Lecture en cours · profil public",
-      "previewFailedLabel": "Profil non lu",
       "progress": "{done} sur {total}",
       "working": "En cours…",
       "steps": {
@@ -410,7 +408,6 @@
         "analysis_unavailable": "La lecture de ton profil n’a pas abouti. Réessaie dans un instant."
       }
     },
-    "profileProvided": "Profil Instagram renseigné",
     "connectedSuffix": "connecté",
     "readyTitle": "Vous êtes prêt.",
     "understandingTitle": "Compréhension de votre marque…",
@@ -419,7 +416,6 @@
     "startPersonal": "Démarrer Personal",
     "reconnect": "Reconnecter Instagram",
     "cancelledError": "L’autorisation Instagram a été annulée.",
-    "profileLive": "Profil Personal · en direct",
     "stages": {
       "connecting": "Connexion d’Instagram",
       "importing_content": "Import de votre contenu",
@@ -429,7 +425,6 @@
     },
     "placeholderQuote": "Votre contenu devient du contexte, pas un tableau de bord.",
     "preview": {
-      "label": "Aperçu · votre profil après connexion",
       "handle": "{'@'}votrecompte",
       "bio": "Vos quarante derniers posts, vos formats, vos chiffres. Rien d’autre à remplir.",
       "posts": "publications",

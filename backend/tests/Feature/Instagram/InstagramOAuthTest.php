@@ -136,6 +136,7 @@ class InstagramOAuthTest extends TestCase
             ->assertJsonPath('onboarding_complete', true)
             ->assertJsonMissing(['access_token' => 'must-never-leak']);
         $this->assertStringNotContainsString('must-never-leak', $response->getContent());
+        $this->assertNotNull($user->fresh()->onboarding_completed_at);
     }
 
     public function test_user_can_provide_a_handle_without_connecting_oauth(): void
@@ -164,6 +165,39 @@ class InstagramOAuthTest extends TestCase
         $this->actingAs($user)->getJson('/api/integrations/instagram/status')
             ->assertOk()
             ->assertJsonPath('inspiration_count', 0)
+            ->assertJsonPath('onboarding_complete', true);
+        $this->assertNotNull($user->fresh()->onboarding_completed_at);
+    }
+
+    public function test_background_dna_refresh_does_not_reopen_completed_handle_onboarding(): void
+    {
+        $user = User::factory()->create();
+        $user->creatorProfile()->create([
+            'instagram_username' => 'manual.creator',
+            'analysis_status' => 'queued',
+            'dna_analyzed_at' => now()->subDay(),
+            'creator_dna' => [
+                'analysis_method' => 'llm',
+                'analysis_version' => 4,
+            ],
+        ]);
+
+        $this->actingAs($user)->getJson('/api/integrations/instagram/status')
+            ->assertOk()
+            ->assertJsonPath('connected', false)
+            ->assertJsonPath('analysis.status', 'queued')
+            ->assertJsonPath('onboarding_complete', true);
+
+        $this->assertNotNull($user->fresh()->onboarding_completed_at);
+
+        $user->creatorProfile()->update([
+            'analysis_status' => 'transcribing_reels',
+            'dna_analyzed_at' => null,
+        ]);
+
+        $this->actingAs($user)->getJson('/api/integrations/instagram/status')
+            ->assertOk()
+            ->assertJsonPath('analysis.status', 'transcribing_reels')
             ->assertJsonPath('onboarding_complete', true);
     }
 

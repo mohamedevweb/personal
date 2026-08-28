@@ -116,6 +116,15 @@ const analysisIndex = computed(() => {
 
 const postsTarget = computed(() => analysis.value?.posts_target ?? 30)
 
+// The grid under the tab bar is the reading made visible: a tile is drawn once
+// the share of posts behind it has been read, so the profile fills in at the
+// pace of the analysis instead of appearing whole at the end.
+const analysisTilesRead = computed(() => {
+  const read = analysis.value?.analyzed_posts_count
+  if (!read) return 0
+  return Math.min(PREVIEW_TILES.length, Math.floor(read / postsTarget.value * PREVIEW_TILES.length))
+})
+
 function formatCount(value: number) {
   return new Intl.NumberFormat(locale.value).format(value)
 }
@@ -196,14 +205,6 @@ watch(connectionError, (message) => {
 
 const onboarded = useState('personal-onboarded', () => false)
 
-const onboardingSteps = computed(() => [
-  {
-    key: 'understand',
-    label: t('onboarding.flow.understand'),
-    complete: false,
-    active: true
-  }
-])
 const parsedAccountHandle = computed(() => parseHandle(accountHandleInput.value))
 
 // Accepts a bare handle, an @handle, or an instagram.com profile link.
@@ -322,15 +323,6 @@ onMounted(async () => {
 
     <section class="mx-auto grid min-h-[calc(100vh-5rem)] max-w-6xl items-center gap-14 px-6 py-14 md:grid-cols-[1fr_0.88fr] md:px-10 md:py-20">
       <div class="max-w-xl animate-rise">
-        <ol class="mb-9 grid grid-cols-1 gap-2" :aria-label="$t('onboarding.flow.label')">
-          <li v-for="(step, index) in onboardingSteps" :key="step.key" class="min-w-0">
-            <div class="mb-2 h-1 rounded-full transition" :class="step.complete || step.active ? 'bg-[var(--accent)]' : 'bg-[var(--line)]'" />
-            <p class="truncate text-[10px] font-semibold uppercase tracking-[.12em]" :class="step.active ? 'text-[var(--ink)]' : 'text-[var(--faint)]'">
-              {{ index + 1 }}. {{ step.label }}
-            </p>
-          </li>
-        </ol>
-
         <template v-if="!status.connected && !status.instagram_username">
           <h1 class="font-serif text-5xl leading-[1.02] tracking-[-0.045em] md:text-7xl" v-html="$t('onboarding.connectTitle')" />
           <p class="mt-7 max-w-lg text-[17px] leading-7 text-[var(--muted)]">
@@ -511,39 +503,79 @@ onMounted(async () => {
       </div>
 
       <aside class="b-night relative min-h-[430px] overflow-hidden rounded-[24px] p-7 text-white md:p-10">
-        <div class="absolute right-8 top-8 flex gap-1.5">
-          <span v-for="i in 3" :key="i" class="h-1.5 w-1.5 rounded-full bg-white/25" />
-        </div>
-
-        <p class="pr-14 text-[10px] font-semibold uppercase tracking-[.22em] text-[var(--b-red-lit)]">
-          {{ showAnalysis ? (analysisFailed ? $t('onboarding.analysis.previewFailedLabel') : $t('onboarding.analysis.previewLabel')) : status.connected ? $t('onboarding.profileLive') : status.instagram_username ? $t('onboarding.profileProvided') : $t('onboarding.preview.label') }}
-        </p>
-
         <!-- The same reading as the list on the left, seen from the profile's
-             side: the counters and the bio fill in as they are found, and
-             nothing is drawn until it is real. -->
-        <div v-if="showAnalysis" class="mt-10">
-          <p class="font-display text-[26px] leading-none tracking-[-.02em]">{{ '@' + status.instagram_username }}</p>
+             side: the profile is laid out the way Instagram lays it out, and
+             each part fills in as it is found — nothing is drawn until it is
+             real. -->
+        <div v-if="showAnalysis">
+          <div class="flex items-center gap-2">
+            <p class="min-w-0 truncate font-display text-[22px] leading-none tracking-[-.02em]">
+              {{ `@${previewHandle}` }}
+            </p>
+            <AppIcon name="chevron" :size="14" class="shrink-0 rotate-90 text-white/40" />
+            <AppIcon name="plus" :size="17" class="ml-auto shrink-0 text-white/40" />
+            <AppIcon name="text" :size="17" class="shrink-0 text-white/40" />
+          </div>
 
-          <p v-if="analysis?.bio" class="mt-4 max-w-[19rem] whitespace-pre-line text-[12.5px] leading-[1.6] text-white/60">{{ analysis.bio }}</p>
-          <div v-else class="mt-5 space-y-2.5">
+          <div class="mt-6 flex items-center gap-5">
+            <span class="shrink-0 rounded-full bg-gradient-to-tr from-[#f9ce34] via-[var(--b-red-500)] to-[#6228d7] p-[2.5px]">
+              <span class="grid h-[68px] w-[68px] place-items-center rounded-full border-[3px] border-[#0d0c0b] bg-white/[.07] font-display text-[26px] leading-none text-white/70">
+                {{ previewInitial }}
+              </span>
+            </span>
+            <dl class="flex flex-1 justify-around text-center">
+              <div>
+                <dd class="font-display text-[19px] leading-none tabular-nums">
+                  {{ analysis?.followers_count == null ? '—' : formatCount(analysis.followers_count) }}
+                </dd>
+                <dt class="mt-1.5 text-[11px] text-white/40">{{ $t('onboarding.preview.followers') }}</dt>
+              </div>
+              <div>
+                <dd class="font-display text-[19px] leading-none tabular-nums">
+                  {{ analysis?.analyzed_posts_count == null ? '—' : `${analysis.analyzed_posts_count}/${postsTarget}` }}
+                </dd>
+                <dt class="mt-1.5 text-[11px] text-white/40">{{ $t('onboarding.analysis.postsRead') }}</dt>
+              </div>
+            </dl>
+          </div>
+
+          <p class="mt-5 text-[13px] font-semibold leading-none">{{ previewHandle }}</p>
+          <p v-if="analysis?.niche" class="mt-1.5 text-[12px] leading-none text-white/35">{{ analysis.niche }}</p>
+
+          <p v-if="analysis?.bio" class="mt-2 max-w-[21rem] whitespace-pre-line text-[12.5px] leading-[1.55] text-white/50">{{ analysis.bio }}</p>
+          <div v-else class="mt-3 space-y-2">
             <div v-for="width in ['w-56', 'w-40']" :key="width" class="h-2.5 max-w-full rounded-full bg-white/10" :class="[width, analysisFailed ? '' : 'animate-pulse']" />
           </div>
 
-          <dl class="mt-7 flex gap-8 border-y border-white/10 py-4">
-            <div>
-              <dd class="font-display text-[21px] leading-none tabular-nums">
-                {{ analysis?.followers_count == null ? '—' : formatCount(analysis.followers_count) }}
-              </dd>
-              <dt class="b-mono mt-2 text-white/35">{{ $t('onboarding.preview.followers') }}</dt>
-            </div>
-            <div>
-              <dd class="font-display text-[21px] leading-none tabular-nums">
-                {{ analysis?.analyzed_posts_count == null ? '—' : `${analysis.analyzed_posts_count}/${postsTarget}` }}
-              </dd>
-              <dt class="b-mono mt-2 text-white/35">{{ $t('onboarding.analysis.postsRead') }}</dt>
-            </div>
-          </dl>
+          <div class="mt-4 flex gap-1.5">
+            <span class="grid h-8 flex-1 place-items-center rounded-lg bg-white/[.09] text-[12px] font-semibold text-white/80">{{ $t('onboarding.preview.editProfile') }}</span>
+            <span class="grid h-8 flex-1 place-items-center rounded-lg bg-white/[.09] text-[12px] font-semibold text-white/80">{{ $t('onboarding.preview.shareProfile') }}</span>
+            <span class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white/[.09] text-white/70"><AppIcon name="user" :size="14" /></span>
+          </div>
+
+          <div class="-mx-7 mt-6 grid grid-cols-3 border-t border-white/10 md:-mx-10">
+            <span
+              v-for="(tab, index) in PREVIEW_TABS"
+              :key="tab.key"
+              class="grid h-11 place-items-center border-b"
+              :class="index === 0 ? 'border-white/80 text-white' : 'border-transparent text-white/25'"
+              :title="$t(`onboarding.preview.tabs.${tab.key}`)"
+            >
+              <AppIcon :name="tab.icon" :size="17" />
+            </span>
+          </div>
+
+          <!-- The grid is the reading itself: a tile lights up as the posts
+               behind it are read, and the rest stay empty until they are. -->
+          <div class="-mx-7 grid grid-cols-3 gap-[2px] md:-mx-10">
+            <div
+              v-for="(tile, index) in PREVIEW_TILES"
+              :key="tile.id"
+              class="aspect-square"
+              :class="index < analysisTilesRead ? '' : ['bg-white/[.03]', analysisFailed ? '' : 'animate-pulse']"
+              :style="index < analysisTilesRead ? { backgroundImage: tileWash(tile) } : undefined"
+            />
+          </div>
 
           <p class="b-mono mt-6 text-white/35">{{ $t('onboarding.analysis.previewVoice') }}</p>
           <div v-if="analysis?.tone?.length" class="mt-3 flex flex-wrap gap-2">
@@ -556,7 +588,7 @@ onMounted(async () => {
           <p class="mt-7 font-serif text-xl leading-7 text-white/45">{{ $t('onboarding.analysis.previewNote') }}</p>
         </div>
 
-        <div v-else-if="status.connected" class="mt-12 space-y-1">
+        <div v-else-if="status.connected" class="mt-2 space-y-1">
           <div
             v-for="(stage, index) in stages"
             :key="stage.key"
@@ -577,7 +609,7 @@ onMounted(async () => {
              the tab bar, then the grid edge to edge. One tile is the reason the
              grid is drawn at all: the post that beat the account's own average,
              which is the first thing Personal looks for once connected. -->
-        <div v-else class="mt-9">
+        <div v-else>
           <div class="flex items-center gap-2">
             <p class="min-w-0 truncate font-display text-[22px] leading-none tracking-[-.02em]">
               {{ `@${previewHandle}` }}

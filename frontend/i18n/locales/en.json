@@ -381,8 +381,6 @@
     "handleSaveError": "Personal could not save your Instagram handle. Please try again.",
     "handleSuffix": "provided",
     "analysis": {
-      "previewLabel": "Reading · public profile",
-      "previewFailedLabel": "Profile not read",
       "progress": "{done} of {total}",
       "working": "Working…",
       "steps": {
@@ -410,7 +408,6 @@
         "analysis_unavailable": "Reading your profile did not go through. Please try again in a moment."
       }
     },
-    "profileProvided": "Instagram profile provided",
     "connectedSuffix": "connected",
     "readyTitle": "You’re ready.",
     "understandingTitle": "Understanding your brand…",
@@ -419,7 +416,6 @@
     "startPersonal": "Start Personal",
     "reconnect": "Reconnect Instagram",
     "cancelledError": "Instagram authorization was cancelled.",
-    "profileLive": "Personal profile · live",
     "stages": {
       "connecting": "Connecting Instagram",
       "importing_content": "Importing your content",
@@ -429,7 +425,6 @@
     },
     "placeholderQuote": "Your content becomes context, not a dashboard.",
     "preview": {
-      "label": "Preview · your profile once connected",
       "handle": "{'@'}yourhandle",
       "bio": "Your last forty posts, your formats, your numbers. Nothing else to fill in.",
       "posts": "posts",
