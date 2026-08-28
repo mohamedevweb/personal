@@ -8,6 +8,7 @@ use App\Models\ContentPost;
 use App\Models\Creator;
 use App\Services\Discovery\ContentSafetyDecision;
 use App\Services\Discovery\ContentSafetyPolicy;
+use App\Services\Discovery\CreatorMarketDetector;
 use App\Services\Discovery\CreatorNicheCatalog;
 use App\Services\Discovery\CreatorNicheService;
 use App\Services\Discovery\CreatorScrapeSchedule;
@@ -65,9 +66,11 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
         ContentSafetyPolicy $safety,
         ?CreatorScrapeSchedule $schedule = null,
         ?PostMetricsLifecycle $lifecycle = null,
+        ?CreatorMarketDetector $markets = null,
     ): void {
         $schedule ??= app(CreatorScrapeSchedule::class);
         $lifecycle ??= app(PostMetricsLifecycle::class);
+        $markets ??= app(CreatorMarketDetector::class);
         $due = $this->dueUsernames();
 
         if ($due === []) {
@@ -91,6 +94,7 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
                     $safety,
                     $schedule,
                     $lifecycle,
+                    $markets,
                 );
             } finally {
                 $lock->release();
@@ -107,6 +111,7 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
         ContentSafetyPolicy $safety,
         CreatorScrapeSchedule $schedule,
         PostMetricsLifecycle $lifecycle,
+        CreatorMarketDetector $markets,
     ): void {
         try {
             $profile = $provider->getProfile($username, fresh: true);
@@ -156,7 +161,7 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
             externalId: $profile->externalId,
             isPrivate: $profile->isPrivate,
             metadata: $profile->metadata,
-        ), $niches, $catalog, $performance, $safety, $lifecycle);
+        ), $niches, $catalog, $performance, $safety, $lifecycle, $markets);
 
         if ($creator) {
             if ($creator->safety_status === ContentSafetyDecision::PENDING || ! $creator->last_measured_at) {
@@ -190,7 +195,8 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
             $creator = $known->get($username);
 
             return ! $creator
-                || ($creator->safety_status !== ContentSafetyDecision::BLOCKED
+                || ($creator->curation_status !== 'inactive'
+                    && $creator->safety_status !== ContentSafetyDecision::BLOCKED
                     && ($ignoreSchedule
                         || ! $creator->next_scrape_at
                         || $creator->next_scrape_at->isPast()
@@ -206,6 +212,7 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
         OutlierScore $performance,
         ContentSafetyPolicy $safety,
         PostMetricsLifecycle $lifecycle,
+        CreatorMarketDetector $markets,
     ): ?Creator {
         if ($profile->posts->isEmpty()) {
             return null;
@@ -215,6 +222,23 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
             ->when($profile->externalId, fn ($query) => $query->where('instagram_user_id', $profile->externalId))
             ->orWhere('username', $profile->username)
             ->first();
+        $market = $existing?->is_catalog_seed
+            ? ['market' => $existing->market, 'language' => $existing->primary_language]
+            : $markets->detect(implode("\n", array_filter([
+                $profile->displayName,
+                $profile->bio,
+                json_encode($profile->metadata, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                $profile->posts->pluck('caption')->filter()->take(20)->implode("\n"),
+            ])));
+
+        if ($market['market'] === null && in_array($existing?->market, config('creator_catalog.markets'), true)) {
+            $market = ['market' => $existing->market, 'language' => $existing->primary_language];
+        }
+
+        if ($market['market'] !== null && ! in_array($market['market'], config('creator_catalog.markets'), true)) {
+            return $this->excludeUnsupportedMarket($profile, $existing, $market);
+        }
+
         $creatorSafety = $safety->creator($profile);
 
         if (! $creatorSafety->isAllowed()) {
@@ -267,6 +291,8 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
             'safety_status' => ContentSafetyDecision::ALLOWED,
             'safety_reasons' => [],
             'safety_checked_at' => now(),
+            'market' => $market['market'],
+            'primary_language' => $market['language'],
         ];
 
         if ($qualified) {
@@ -315,6 +341,34 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
                 // point at now, or the frames nobody has opened yet are lost.
                 CacheContentMedia::dispatch($post->id);
             });
+
+        return $creator;
+    }
+
+    /** @param array{market: ?string, language: string} $market */
+    private function excludeUnsupportedMarket(DiscoveredProfile $profile, ?Creator $existing, array $market): Creator
+    {
+        $creator = $existing ?: new Creator;
+        $creator->fill([
+            'instagram_user_id' => $profile->externalId ?: $existing?->instagram_user_id,
+            'username' => $profile->username,
+            'display_name' => $profile->displayName ?: $profile->username,
+            'avatar_url' => $profile->avatarUrl,
+            'bio' => $profile->bio,
+            'metadata' => array_replace_recursive($existing?->metadata ?? [], $profile->metadata),
+            'followers' => $profile->followers,
+            'niche' => $existing?->niche ?: $profile->username,
+            'average_views' => $existing?->average_views ?: 0,
+            'average_likes' => $existing?->average_likes ?: 0,
+            'market' => $market['market'],
+            'primary_language' => $market['language'],
+            'curation_status' => $existing?->user_id ? $existing->curation_status : 'inactive',
+            'last_fetched_at' => now(),
+            'last_measured_at' => now(),
+            'discovered_at' => $existing?->discovered_at ?: now(),
+        ])->save();
+
+        $this->disqualify($creator);
 
         return $creator;
     }

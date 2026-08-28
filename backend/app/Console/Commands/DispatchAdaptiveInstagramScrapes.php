@@ -7,7 +7,9 @@ use App\Jobs\Discovery\RefreshCreatorPostMetrics;
 use App\Models\Creator;
 use App\Services\Discovery\ContentSafetyDecision;
 use App\Services\Discovery\CreatorNicheService;
+use Carbon\CarbonInterface;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Builder;
 
 class DispatchAdaptiveInstagramScrapes extends Command
 {
@@ -19,8 +21,10 @@ class DispatchAdaptiveInstagramScrapes extends Command
     {
         $now = now();
         $dueCreators = Creator::query()
+            ->whereIn('market', config('creator_catalog.markets'))
             ->when(config('creator_catalog.curated_only'), fn ($query) => $query->where('curation_status', 'approved'))
             ->where('safety_status', '!=', ContentSafetyDecision::BLOCKED)
+            ->where(fn (Builder $query): Builder => $this->performing($query, $now))
             ->where(function ($query) use ($now): void {
                 $query->where('next_scrape_at', '<=', $now)
                     ->orWhere(function ($query): void {
@@ -38,8 +42,10 @@ class DispatchAdaptiveInstagramScrapes extends Command
         }
 
         $metricCreators = Creator::query()
+            ->whereIn('market', config('creator_catalog.markets'))
             ->whereNotIn('id', $dueCreators->pluck('id'))
             ->where('safety_status', ContentSafetyDecision::ALLOWED)
+            ->where(fn (Builder $query): Builder => $this->performing($query, $now))
             ->where('next_scrape_at', '>', $now)
             ->whereHas('posts', function ($query) use ($now): void {
                 $query->where('tracking_status', '!=', 'stopped')
@@ -57,5 +63,18 @@ class DispatchAdaptiveInstagramScrapes extends Command
         $this->info("Queued {$dueCreators->count()} creator refreshes and {$metricCreators->count()} grouped metric refreshes.");
 
         return self::SUCCESS;
+    }
+
+    private function performing(Builder $query, CarbonInterface $now): Builder
+    {
+        return $query->where(function (Builder $performance) use ($now): void {
+            $performance->where('curation_status', 'approved')
+                ->orWhereHas('posts', function (Builder $posts) use ($now): void {
+                    $posts->whereNotNull('measured_at')
+                        ->where('published_at', '>=', $now->copy()->subDays((int) config('services.discovery.feed_window_days')))
+                        ->where('outlier_score', '>=', (float) config('services.discovery.min_outlier_score'))
+                        ->whereRaw('likes + comments >= ?', [(int) config('services.discovery.min_post_engagement')]);
+                });
+        });
     }
 }

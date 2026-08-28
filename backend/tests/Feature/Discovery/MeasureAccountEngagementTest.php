@@ -8,8 +8,11 @@ use App\Models\Creator;
 use App\Services\Discovery\ContentSafetyPolicy;
 use App\Services\Discovery\CreatorNicheCatalog;
 use App\Services\Discovery\CreatorNicheService;
+use App\Services\Discovery\DiscoveredPost;
+use App\Services\Discovery\DiscoveredProfile;
 use App\Services\Discovery\InstagramDataProvider;
 use App\Services\Discovery\OutlierScore;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
 use Tests\TestCase;
@@ -225,5 +228,51 @@ class MeasureAccountEngagementTest extends TestCase
         // Its old scores are stripped rather than left to linger in a feed.
         $this->assertSame(0, $creator->posts()->whereNotNull('measured_at')->count());
         $this->assertSame(0.0, (float) $creator->posts()->max('outlier_score'));
+    }
+
+    public function test_an_unsupported_market_is_classified_without_storing_its_posts(): void
+    {
+        $profile = new DiscoveredProfile(
+            username: 'creator.br',
+            displayName: 'Creator Brasil',
+            avatarUrl: null,
+            followers: 50_000,
+            posts: collect([
+                new DiscoveredPost(
+                    sourceUrl: 'https://www.instagram.com/reel/brasil/',
+                    username: 'creator.br',
+                    displayName: 'Creator Brasil',
+                    avatarUrl: null,
+                    followers: 50_000,
+                    caption: 'Hoje eu compartilho conselhos para voce e seus seguidores no Brasil',
+                    thumbnailUrl: null,
+                    likes: 1000,
+                    comments: 100,
+                    views: 10_000,
+                    publishedAt: CarbonImmutable::now()->subDay(),
+                    format: 'reel',
+                    hashtags: [],
+                    externalId: 'br-post-1',
+                ),
+            ]),
+            bio: 'Conteudo para voce com dicas do Brasil',
+            externalId: 'br-creator-1',
+        );
+        $provider = Mockery::mock(InstagramDataProvider::class);
+        $provider->shouldReceive('getProfile')->once()->with('creator.br', true)->andReturn($profile);
+
+        (new MeasureAccountEngagement(['creator.br']))->handle(
+            $provider,
+            app(CreatorNicheService::class),
+            app(CreatorNicheCatalog::class),
+            app(OutlierScore::class),
+            app(ContentSafetyPolicy::class),
+        );
+
+        $creator = Creator::query()->where('username', 'creator.br')->firstOrFail();
+        $this->assertSame('BR', $creator->market);
+        $this->assertSame('pt', $creator->primary_language);
+        $this->assertSame('inactive', $creator->curation_status);
+        $this->assertSame(0, $creator->posts()->count());
     }
 }

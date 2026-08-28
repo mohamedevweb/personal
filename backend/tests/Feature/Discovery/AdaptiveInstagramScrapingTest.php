@@ -66,9 +66,15 @@ class AdaptiveInstagramScrapingTest extends TestCase
     {
         Queue::fake();
 
-        $due = $this->creator('creator-due', ['next_scrape_at' => now()->subMinute()]);
+        $due = $this->creator('creator-due', [
+            'market' => 'US',
+            'curation_status' => 'approved',
+            'next_scrape_at' => now()->subMinute(),
+        ]);
         $this->creator('creator-future', ['next_scrape_at' => now()->addDay()]);
         $metrics = $this->creator('creator-metrics', [
+            'market' => 'GB',
+            'curation_status' => 'approved',
             'next_scrape_at' => now()->addDay(),
             'last_measured_at' => now(),
         ]);
@@ -94,6 +100,8 @@ class AdaptiveInstagramScrapingTest extends TestCase
         Queue::fake();
 
         $obsolete = $this->creator('creator-obsolete', [
+            'market' => 'FR',
+            'curation_status' => 'approved',
             'next_scrape_at' => now()->addWeek(),
             'niche_analysis_version' => 0,
         ]);
@@ -109,6 +117,43 @@ class AdaptiveInstagramScrapingTest extends TestCase
         Queue::assertPushed(
             MeasureAccountEngagement::class,
             fn (MeasureAccountEngagement $job): bool => $job->usernames === [$obsolete->username],
+        );
+    }
+
+    public function test_dispatcher_skips_unsupported_and_non_performing_creators(): void
+    {
+        Queue::fake();
+
+        $this->creator('brazil-performing', [
+            'market' => 'BR',
+            'next_scrape_at' => now()->subMinute(),
+            'curation_status' => 'approved',
+        ]);
+        $quiet = $this->creator('us-quiet', [
+            'market' => 'US',
+            'next_scrape_at' => now()->subMinute(),
+        ]);
+        $performing = $this->creator('us-performing', [
+            'market' => 'US',
+            'next_scrape_at' => now()->subMinute(),
+        ]);
+        $this->contentPost($performing, 'qualified', [
+            'likes' => 600,
+            'comments' => 50,
+            'outlier_score' => 2,
+            'measured_at' => now(),
+        ]);
+
+        $this->artisan('personal:dispatch-instagram-scrapes')->assertSuccessful();
+
+        Queue::assertPushed(MeasureAccountEngagement::class, 1);
+        Queue::assertPushed(
+            MeasureAccountEngagement::class,
+            fn (MeasureAccountEngagement $job): bool => $job->usernames === [$performing->username],
+        );
+        Queue::assertNotPushed(
+            MeasureAccountEngagement::class,
+            fn (MeasureAccountEngagement $job): bool => in_array($quiet->username, $job->usernames, true),
         );
     }
 

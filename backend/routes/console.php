@@ -24,7 +24,7 @@ Schedule::call(function (): void {
 })->daily()->name('sync-instagram-accounts')->withoutOverlapping();
 
 Schedule::command('personal:dispatch-instagram-scrapes')
-    ->hourly()
+    ->dailyAt('02:30')
     ->name('dispatch-adaptive-instagram-scrapes')
     ->withoutOverlapping();
 
@@ -36,4 +36,9 @@ Schedule::command('personal:prune-post-metric-snapshots')
 Schedule::command('personal:prune-discovery-content')
     ->daily()
     ->name('prune-discovery-content')
+    ->withoutOverlapping();
+
+Schedule::command('personal:prune-unsupported-markets')
+    ->dailyAt('04:00')
+    ->name('prune-unsupported-markets')
     ->withoutOverlapping();

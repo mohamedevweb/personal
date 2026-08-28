@@ -39,6 +39,35 @@ class DiscoveryContentRetentionTest extends TestCase
         $this->assertModelExists($recent);
     }
 
+    public function test_market_cleanup_deletes_only_unprotected_unsupported_discovery_content(): void
+    {
+        $user = User::factory()->create();
+        $unsupported = Creator::query()->create([
+            'username' => 'outside-markets', 'display_name' => 'Outside Markets', 'niche' => 'wellness',
+            'market' => 'BR', 'followers' => 50000, 'average_views' => 10000, 'average_likes' => 1000,
+        ]);
+        $allowed = Creator::query()->create([
+            'username' => 'inside-markets', 'display_name' => 'Inside Markets', 'niche' => 'wellness',
+            'market' => 'FR', 'followers' => 50000, 'average_views' => 10000, 'average_likes' => 1000,
+        ]);
+        $deleted = $this->storePost($unsupported, 'unsupported', 1);
+        $saved = $this->storePost($unsupported, 'unsupported-saved', 1);
+        $kept = $this->storePost($allowed, 'allowed', 1);
+        SavedContent::query()->create(['user_id' => $user->id, 'content_post_id' => $saved->id]);
+
+        $this->artisan('personal:prune-unsupported-markets --dry-run')->assertSuccessful();
+        $this->assertModelExists($deleted);
+
+        $this->artisan('personal:prune-unsupported-markets')->assertSuccessful();
+
+        $this->assertModelMissing($deleted);
+        $this->assertModelExists($saved);
+        $this->assertModelExists($kept);
+        $this->assertSame('inactive', $unsupported->fresh()->curation_status);
+        $this->assertSame('stopped', $saved->fresh()->tracking_status);
+        $this->assertNull($saved->measured_at);
+    }
+
     private function storePost(Creator $creator, string $hook, int $days): ContentPost
     {
         return ContentPost::query()->create([

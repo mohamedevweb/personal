@@ -201,6 +201,7 @@ class RecommendationService
             ->whereRaw('likes + comments >= ?', [(int) config('services.discovery.min_post_engagement')])
             ->whereHas('creator', function (Builder $creator) use ($inspirationIds, $user): void {
                 $creator->where('followers', '>=', (int) config('services.discovery.min_followers'))
+                    ->whereIn('market', config('creator_catalog.markets'))
                     ->where('safety_status', 'allowed')
                     ->where(function (Builder $owner) use ($user): void {
                         $owner->whereNull('user_id')->orWhere('user_id', '!=', $user->id);

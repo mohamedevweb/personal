@@ -10,16 +10,33 @@ class CreatorMarketDetector
     public function detect(string $text): array
     {
         $text = preg_replace('/[^a-z0-9]+/', ' ', Str::lower(Str::ascii($text))) ?: '';
-        $french = $this->matches($text, [' le ', ' la ', ' les ', ' une ', ' des ', ' avec ', ' pour ', ' dans ', ' conseils ', ' france ', ' paris ', ' lyon ', ' marseille ']);
+        $french = $this->matches($text, [' le ', ' la ', ' les ', ' une ', ' des ', ' avec ', ' pour ', ' dans ', ' conseils ', ' france ', ' paris ', ' lyon ', ' marseille ', ' country code fr ']);
         $english = $this->matches($text, [' the ', ' and ', ' with ', ' your ', ' how ', ' why ', ' coach ', ' creator ', ' founder ']);
-        $gb = $this->matches($text, [' uk ', ' united kingdom ', ' london ', ' manchester ', ' birmingham ', ' glasgow ', ' britain ', ' british ', ' england ', ' scotland ', ' wales ']);
-        $us = $this->matches($text, [' usa ', ' united states ', ' new york ', ' nyc ', ' los angeles ', ' california ', ' miami ', ' austin ', ' texas ', ' american ']);
+        $portuguese = $this->matches($text, [' que ', ' para ', ' com ', ' uma ', ' nao ', ' hoje ', ' voce ', ' seguidores ', ' brasil ', ' brasileiro ', ' brasileira ', ' sao paulo ', ' rio de janeiro ', ' country code br ']);
+        $gb = $this->matches($text, [' uk ', ' united kingdom ', ' london ', ' manchester ', ' birmingham ', ' glasgow ', ' britain ', ' british ', ' england ', ' scotland ', ' wales ', ' country code gb ', ' country code uk ']);
+        $us = $this->matches($text, [' usa ', ' united states ', ' new york ', ' nyc ', ' los angeles ', ' california ', ' miami ', ' austin ', ' texas ', ' american ', ' country code us ']);
         $language = match (true) {
             $french > 0 && $english > 0 && abs($french - $english) <= 1 => 'mixed',
+            $portuguese > $french && $portuguese > $english => 'pt',
             $french > $english => 'fr',
             $english > 0 => 'en',
             default => 'unknown',
         };
+
+        foreach (['fr' => 'FR', 'gb' => 'GB', 'uk' => 'GB', 'us' => 'US', 'br' => 'BR'] as $code => $market) {
+            if (str_contains(" {$text} ", " country code {$code} ")) {
+                return [
+                    'market' => $market,
+                    'confidence' => 0.98,
+                    'language' => $market === 'FR' ? 'fr' : ($market === 'BR' ? 'pt' : 'en'),
+                    'evidence' => ['provider_country_code'],
+                ];
+            }
+        }
+
+        if ($portuguese >= 2 && $portuguese > max($french, $english)) {
+            return ['market' => 'BR', 'confidence' => min(0.98, 0.70 + ($portuguese * 0.04)), 'language' => 'pt', 'evidence' => ['portuguese_language']];
+        }
 
         if ($french >= 2 && $french > $english) {
             return ['market' => 'FR', 'confidence' => min(0.98, 0.70 + ($french * 0.04)), 'language' => $language, 'evidence' => ['french_language']];

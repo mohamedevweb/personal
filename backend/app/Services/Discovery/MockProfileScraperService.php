@@ -41,6 +41,7 @@ class MockProfileScraperService implements ProfileDiscoveryService
             posts: $posts,
             bio: 'Sample bio for '.$username,
             externalId: $username,
+            metadata: ['country_code' => 'US'],
         );
     }
 

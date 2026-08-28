@@ -84,6 +84,8 @@ class DatabaseSeeder extends Seeder
                 // The benchmark layer stands in for measured accounts, so it carries
                 // the same signals a profile scrape would have written.
                 'niche_topics' => array_map('strtolower', explode(' ', $item[2])),
+                'market' => 'US',
+                'primary_language' => 'en',
                 'followers' => $item[3],
                 'average_views' => $item[4],
                 'average_likes' => $item[5],

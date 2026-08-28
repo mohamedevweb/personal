@@ -55,13 +55,15 @@ class CreatorCatalogTest extends TestCase
         }));
     }
 
-    public function test_market_detection_distinguishes_fr_gb_us_and_unknown(): void
+    public function test_market_detection_distinguishes_fr_gb_us_br_and_unknown(): void
     {
         $detector = app(CreatorMarketDetector::class);
 
         $this->assertSame('FR', $detector->detect('Je partage des conseils pour les créateurs en France à Paris')['market']);
         $this->assertSame('GB', $detector->detect('The creator coach with your weekly strategy from London UK')['market']);
         $this->assertSame('US', $detector->detect('The creator coach with your weekly strategy from New York USA')['market']);
+        $this->assertSame('BR', $detector->detect('Hoje eu compartilho conselhos para voce com seguidores no Brasil')['market']);
+        $this->assertSame('pt', $detector->detect('Hoje eu compartilho conselhos para voce com seguidores no Brasil')['language']);
         $this->assertNull($detector->detect('The creator sharing weekly productivity tips')['market']);
         $this->assertLessThan(0.70, $detector->detect('The creator sharing weekly productivity tips')['confidence']);
     }

@@ -41,6 +41,7 @@ class FeedRankingTest extends TestCase
             'display_name' => $username,
             'niche' => 'food-cooking',
             'niche_topics' => ['vegan', 'recipes'],
+            'market' => 'US',
             'followers' => $followers,
             'average_views' => 0,
             'average_likes' => 0,

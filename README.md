@@ -109,7 +109,7 @@ Discovery search cost is capped on every axis: search queries have a cooldown (`
 
 ### Adaptive Instagram scraping
 
-Tracked creators now carry `last_scraped_at`, `next_scrape_at`, `last_post_at`, `scrape_priority` and `scrape_status`. The hourly scheduler queries only creators whose `next_scrape_at` is due, then recalculates their priority from inspiration selections, matching For You verticals, catalogue importance, posting frequency, recent activity and recent outliers. Configured HOT, ACTIVE, WARM and COLD windows range from 6 hours to 7 days. Provider failures use exponential backoff instead of retrying every scheduler pass.
+Tracked creators now carry `last_scraped_at`, `next_scrape_at`, `last_post_at`, `scrape_priority` and `scrape_status`. The daily scheduler queries only due creators in France, the United Kingdom and the United States that are approved or have a recent qualifying outlier. It then recalculates their priority from inspiration selections, matching For You verticals, catalogue importance, posting frequency, recent activity and recent outliers. Configured HOT, ACTIVE, WARM and COLD windows decide which accounts remain due for a given daily pass. Provider failures use exponential backoff instead of retrying every scheduler pass. A second daily command removes unprotected discovery content outside those three markets while preserving saved posts, remixes and member identities.
 
 The same creator and Instagram media IDs remain global, so one provider refresh serves every user who selected that account. Feed requests never call a discovery provider. A full creator refresh upserts only unseen publications and updates metrics already present in the provider response. ScrapeCreators' cache remains enabled for interactive search, while scheduled refreshes bypass it because `next_scrape_at` is the application cache boundary.
 
@@ -123,6 +123,7 @@ The scheduler invokes these commands automatically; they are also safe to run ma
 cd backend
 php artisan personal:dispatch-instagram-scrapes
 php artisan personal:prune-post-metric-snapshots
+php artisan personal:prune-unsupported-markets --dry-run
 ```
 
 ## Curated creator catalog
