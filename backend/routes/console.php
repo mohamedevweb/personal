@@ -38,11 +38,6 @@ Schedule::command('personal:prune-discovery-content')
     ->name('prune-discovery-content')
     ->withoutOverlapping();
 
-Schedule::command('personal:enforce-content-safety-policy --limit=10')
-    ->everyTenMinutes()
-    ->name('enforce-content-safety-policy')
-    ->withoutOverlapping();
-
 Schedule::command('personal:prune-unsupported-markets')
     ->dailyAt('04:00')
     ->name('prune-unsupported-markets')
