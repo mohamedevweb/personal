@@ -82,7 +82,10 @@ class InstagramProviderDeduplicationTest extends TestCase
             followers: $followers,
             posts: collect([$post]),
             externalId: 'instagram-user-1',
-            metadata: ['providers' => [$name => ['raw_data' => ['id' => 'instagram-user-1']]]],
+            metadata: [
+                'country_code' => 'US',
+                'providers' => [$name => ['raw_data' => ['id' => 'instagram-user-1']]],
+            ],
         );
         $provider = Mockery::mock(InstagramDataProvider::class);
         $provider->shouldReceive('getProfile')->once()->with('same.creator', true)->andReturn($profile);

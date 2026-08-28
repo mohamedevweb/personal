@@ -21,8 +21,15 @@ class PruneUnsupportedMarketContent extends Command
         $markets = array_values((array) config('creator_catalog.markets'));
         $unsupportedCreators = Creator::query()
             ->whereNull('user_id')
-            ->whereNotNull('market')
-            ->whereNotIn('market', $markets);
+            ->where(function (Builder $query) use ($markets): void {
+                $query->whereNotNull('market')->whereNotIn('market', $markets)
+                    ->orWhere(function (Builder $unclassified): void {
+                        $unclassified->whereNull('market')
+                            ->where('curation_status', 'inactive')
+                            ->whereDoesntHave('posts')
+                            ->whereDoesntHave('inspiredByUsers');
+                    });
+            });
         $unsupportedPosts = ContentPost::query()
             ->whereIn('creator_id', (clone $unsupportedCreators)->select('id'));
         $includingProtected = (bool) $this->option('including-protected');

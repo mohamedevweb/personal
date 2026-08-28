@@ -235,16 +235,16 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
             $market = ['market' => $existing->market, 'language' => $existing->primary_language];
         }
 
-        if ($market['market'] !== null && ! in_array($market['market'], config('creator_catalog.markets'), true)) {
-            return $this->excludeUnsupportedMarket($profile, $existing, $market);
-        }
-
         $creatorSafety = $safety->creator($profile);
 
         if (! $creatorSafety->isAllowed()) {
             $this->blockCreator($profile, $existing, $creatorSafety);
 
             return Creator::query()->where('username', $profile->username)->first();
+        }
+
+        if (! in_array($market['market'], config('creator_catalog.markets'), true)) {
+            return $this->excludeUnsupportedMarket($profile, $existing, $market);
         }
 
         $decisions = $profile->posts->mapWithKeys(
