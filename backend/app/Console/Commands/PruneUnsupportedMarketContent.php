@@ -10,7 +10,9 @@ use Illuminate\Support\Facades\DB;
 
 class PruneUnsupportedMarketContent extends Command
 {
-    protected $signature = 'personal:prune-unsupported-markets {--dry-run : Count without changing data}';
+    protected $signature = 'personal:prune-unsupported-markets
+        {--dry-run : Count without changing data}
+        {--including-protected : Also remove saved, remixed and inspired discovery content}';
 
     protected $description = 'Remove unprotected discovery content outside the configured creator markets';
 
@@ -19,14 +21,15 @@ class PruneUnsupportedMarketContent extends Command
         $markets = array_values((array) config('creator_catalog.markets'));
         $unsupportedCreators = Creator::query()
             ->whereNull('user_id')
-            ->where(function (Builder $query) use ($markets): void {
-                $query->whereNull('market')->orWhereNotIn('market', $markets);
-            });
+            ->whereNotNull('market')
+            ->whereNotIn('market', $markets);
         $unsupportedPosts = ContentPost::query()
             ->whereIn('creator_id', (clone $unsupportedCreators)->select('id'));
+        $includingProtected = (bool) $this->option('including-protected');
         $deletablePosts = (clone $unsupportedPosts)
-            ->whereDoesntHave('savedContent')
-            ->whereDoesntHave('remixes');
+            ->when(! $includingProtected, function (Builder $query): void {
+                $query->whereDoesntHave('savedContent')->whereDoesntHave('remixes');
+            });
         $protectedPosts = (clone $unsupportedPosts)
             ->where(function (Builder $query): void {
                 $query->whereHas('savedContent')->orWhereHas('remixes');
@@ -34,15 +37,30 @@ class PruneUnsupportedMarketContent extends Command
         $creators = (clone $unsupportedCreators)->count();
         $posts = (clone $deletablePosts)->count();
         $protected = (clone $protectedPosts)->count();
+        $inspirations = DB::table('user_creator_inspirations')
+            ->whereIn('creator_id', (clone $unsupportedCreators)->select('id'))
+            ->count();
 
         if ($this->option('dry-run')) {
-            $this->info("{$creators} unsupported discovery creators found. {$posts} unprotected posts would be deleted and {$protected} protected posts would be retained.");
+            $protectedAction = $includingProtected ? 'deleted' : 'retained';
+            $this->info("{$creators} unsupported discovery creators found. {$posts} posts would be deleted, {$protected} protected posts would be {$protectedAction}, and {$inspirations} inspiration selections would be affected.");
 
             return self::SUCCESS;
         }
 
-        $deletedCreators = DB::transaction(function () use ($deletablePosts, $unsupportedCreators): int {
+        $deletedCreators = DB::transaction(function () use ($deletablePosts, $includingProtected, $unsupportedCreators): int {
             $deletablePosts->eachById(fn (ContentPost $post) => $post->delete());
+
+            if ($includingProtected) {
+                DB::table('user_creator_inspirations')
+                    ->whereIn('creator_id', (clone $unsupportedCreators)->select('id'))
+                    ->delete();
+
+                $count = (clone $unsupportedCreators)->count();
+                $unsupportedCreators->eachById(fn (Creator $creator) => $creator->delete());
+
+                return $count;
+            }
 
             (clone $unsupportedCreators)->update([
                 'curation_status' => 'inactive',
@@ -71,7 +89,10 @@ class PruneUnsupportedMarketContent extends Command
             return $count;
         });
 
-        $this->info("{$posts} unsupported unprotected posts and {$deletedCreators} empty creators deleted. {$protected} saved or remixed posts were retained and disabled from feeds.");
+        $protectedResult = $includingProtected
+            ? "{$protected} protected posts and {$inspirations} inspiration selections were also removed"
+            : "{$protected} saved or remixed posts were retained and disabled from feeds";
+        $this->info("{$posts} unsupported posts and {$deletedCreators} creators deleted. {$protectedResult}.");
 
         return self::SUCCESS;
     }

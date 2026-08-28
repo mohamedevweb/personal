@@ -68,6 +68,44 @@ class DiscoveryContentRetentionTest extends TestCase
         $this->assertNull($saved->measured_at);
     }
 
+    public function test_strict_market_cleanup_removes_protected_content_and_inspirations(): void
+    {
+        $user = User::factory()->create();
+        $unsupported = Creator::query()->create([
+            'username' => 'strict-outside-markets', 'display_name' => 'Strict Outside Markets', 'niche' => 'wellness',
+            'market' => 'AU', 'followers' => 50000, 'average_views' => 10000, 'average_likes' => 1000,
+        ]);
+        $post = $this->storePost($unsupported, 'strict-unsupported', 1);
+        SavedContent::query()->create(['user_id' => $user->id, 'content_post_id' => $post->id]);
+        Remix::query()->create([
+            'user_id' => $user->id, 'source_content_id' => $post->id,
+            'format' => 'reel', 'generated_content' => [], 'status' => 'draft',
+        ]);
+        $user->inspirationCreators()->attach($unsupported->id);
+
+        $this->artisan('personal:prune-unsupported-markets --including-protected')->assertSuccessful();
+
+        $this->assertModelMissing($post);
+        $this->assertModelMissing($unsupported);
+        $this->assertSame(0, SavedContent::query()->count());
+        $this->assertSame(0, Remix::query()->count());
+        $this->assertSame(0, $user->inspirationCreators()->count());
+    }
+
+    public function test_market_cleanup_quarantines_unclassified_creators_without_deleting_them(): void
+    {
+        $creator = Creator::query()->create([
+            'username' => 'unclassified-market', 'display_name' => 'Unclassified Market', 'niche' => 'wellness',
+            'market' => null, 'followers' => 50000, 'average_views' => 10000, 'average_likes' => 1000,
+        ]);
+        $post = $this->storePost($creator, 'unclassified', 1);
+
+        $this->artisan('personal:prune-unsupported-markets --including-protected')->assertSuccessful();
+
+        $this->assertModelExists($creator);
+        $this->assertModelExists($post);
+    }
+
     private function storePost(Creator $creator, string $hook, int $days): ContentPost
     {
         return ContentPost::query()->create([
