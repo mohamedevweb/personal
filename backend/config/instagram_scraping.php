@@ -3,6 +3,7 @@
 return [
     // Scheduler passes are cheap database scans. Provider calls only happen in
     // the queued jobs selected by next_scrape_at and next_metrics_scrape_at.
+    'scheduled' => (bool) env('INSTAGRAM_SCRAPING_SCHEDULED', false),
     'creator_batch' => (int) env('INSTAGRAM_SCRAPE_CREATOR_BATCH', 30),
     'metrics_creator_batch' => (int) env('INSTAGRAM_SCRAPE_METRICS_CREATOR_BATCH', 30),
     'metrics_posts_per_creator' => (int) env('INSTAGRAM_SCRAPE_METRICS_POSTS_PER_CREATOR', 24),

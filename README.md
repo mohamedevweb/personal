@@ -109,7 +109,7 @@ Discovery search cost is capped on every axis: search queries have a cooldown (`
 
 ### Adaptive Instagram scraping
 
-Tracked creators now carry `last_scraped_at`, `next_scrape_at`, `last_post_at`, `scrape_priority` and `scrape_status`. The daily scheduler queries only due creators in France, the United Kingdom and the United States that are approved or have a recent qualifying outlier. It then recalculates their priority from inspiration selections, matching For You verticals, catalogue importance, posting frequency, recent activity and recent outliers. Configured HOT, ACTIVE, WARM and COLD windows decide which accounts remain due for a given daily pass. Provider failures use exponential backoff instead of retrying every scheduler pass. A second daily command removes unprotected discovery content outside those three markets while preserving saved posts, remixes and member identities.
+Tracked creators now carry `last_scraped_at`, `next_scrape_at`, `last_post_at`, `scrape_priority` and `scrape_status`. The adaptive public-account scheduler is paused by default. Set `INSTAGRAM_SCRAPING_SCHEDULED=true` to resume its daily scan of due creators in France, the United Kingdom and the United States. It then recalculates their priority from inspiration selections, matching For You verticals, catalogue importance, posting frequency, recent activity and recent outliers. Configured HOT, ACTIVE, WARM and COLD windows decide which accounts remain due for a given daily pass. Provider failures use exponential backoff instead of retrying every scheduler pass. A second daily command removes unprotected discovery content outside those three markets while preserving saved posts, remixes and member identities.
 
 The same creator and Instagram media IDs remain global, so one provider refresh serves every user who selected that account. Feed requests never call a discovery provider. A full creator refresh upserts only unseen publications and updates metrics already present in the provider response. ScrapeCreators' cache remains enabled for interactive search, while scheduled refreshes bypass it because `next_scrape_at` is the application cache boundary.
 
@@ -117,7 +117,7 @@ Recent post metrics have their own lifecycle. Due posts are grouped by creator, 
 
 Every real metric refresh writes one `content_post_metric_snapshots` row with views, likes, comments, shares, elapsed time, view delta, velocity and acceleration. The daily retention command keeps raw points for 30 days, downsamples older history to one point per UTC day and expires it after 365 days. All cadence, thresholds, batch sizes and retention windows live in `config/instagram_scraping.php` and can be overridden through the documented environment values.
 
-The scheduler invokes these commands automatically; they are also safe to run manually:
+The maintenance commands remain scheduled automatically. The adaptive scrape command runs automatically only when `INSTAGRAM_SCRAPING_SCHEDULED=true`; all three are safe to run manually:
 
 ```bash
 cd backend

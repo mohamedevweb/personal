@@ -76,6 +76,9 @@ class CreatorCatalogTest extends TestCase
         $this->assertSame('US', $detector->detect('The creator coach with your weekly strategy from New York USA')['market']);
         $this->assertSame('BR', $detector->detect('Hoje eu compartilho conselhos para voce com seguidores no Brasil')['market']);
         $this->assertSame('pt', $detector->detect('Hoje eu compartilho conselhos para voce com seguidores no Brasil')['language']);
+        $spanish = $detector->detect('Country code US. Lucy miro al mundo y noto que esta girando. Mi segundo disco disponible este lunes.');
+        $this->assertSame('ES', $spanish['market']);
+        $this->assertSame('es', $spanish['language']);
         $this->assertNull($detector->detect('The creator sharing weekly productivity tips')['market']);
         $this->assertLessThan(0.70, $detector->detect('The creator sharing weekly productivity tips')['confidence']);
     }

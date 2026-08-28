@@ -106,6 +106,44 @@ class DiscoveryContentRetentionTest extends TestCase
         $this->assertModelExists($post);
     }
 
+    public function test_strict_market_cleanup_removes_unclassified_discovery_creators(): void
+    {
+        $creator = Creator::query()->create([
+            'username' => 'strict-unclassified-market', 'display_name' => 'Strict Unclassified Market', 'niche' => 'wellness',
+            'market' => null, 'followers' => 50000, 'average_views' => 10000, 'average_likes' => 1000,
+        ]);
+        $post = $this->storePost($creator, 'strict-unclassified', 1);
+
+        $this->artisan('personal:prune-unsupported-markets --including-protected --including-unclassified')->assertSuccessful();
+
+        $this->assertModelMissing($creator);
+        $this->assertModelMissing($post);
+    }
+
+    public function test_market_cleanup_redetects_spanish_content_before_strict_removal(): void
+    {
+        $creator = Creator::query()->create([
+            'username' => 'spanish-us-account', 'display_name' => 'Spanish US Account', 'niche' => 'music',
+            'market' => 'US', 'primary_language' => 'en',
+            'followers' => 50000, 'average_views' => 10000, 'average_likes' => 1000,
+            'metadata' => ['country_code' => 'US'],
+        ]);
+        $post = $this->storePost($creator, 'spanish-post', 1);
+        $post->update([
+            'caption' => 'Lucy miro al mundo y noto que esta girando. Mi segundo disco disponible este lunes.',
+        ]);
+
+        $this->artisan('personal:prune-unsupported-markets --dry-run --redetect --including-protected --including-unclassified')->assertSuccessful();
+
+        $this->assertSame('US', $creator->fresh()->market);
+        $this->assertModelExists($post);
+
+        $this->artisan('personal:prune-unsupported-markets --redetect --including-protected --including-unclassified')->assertSuccessful();
+
+        $this->assertModelMissing($creator);
+        $this->assertModelMissing($post);
+    }
+
     private function storePost(Creator $creator, string $hook, int $days): ContentPost
     {
         return ContentPost::query()->create([

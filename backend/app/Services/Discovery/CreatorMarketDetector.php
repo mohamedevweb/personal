@@ -12,16 +12,28 @@ class CreatorMarketDetector
         $text = preg_replace('/[^a-z0-9]+/', ' ', Str::lower(Str::ascii($text))) ?: '';
         $french = $this->matches($text, [' le ', ' la ', ' les ', ' une ', ' des ', ' avec ', ' pour ', ' dans ', ' conseils ', ' france ', ' paris ', ' lyon ', ' marseille ', ' country code fr ']);
         $english = $this->matches($text, [' the ', ' and ', ' with ', ' your ', ' how ', ' why ', ' coach ', ' creator ', ' founder ']);
+        $spanish = $this->matches($text, [' el ', ' los ', ' las ', ' del ', ' al ', ' por ', ' con ', ' una ', ' para ', ' esta ', ' este ', ' mundo ', ' feliz ', ' lunes ', ' gracias ', ' nuevo ', ' segundo ', ' disco ', ' disponible ', ' espana ', ' madrid ', ' barcelona ']);
         $portuguese = $this->matches($text, [' que ', ' para ', ' com ', ' uma ', ' nao ', ' hoje ', ' voce ', ' seguidores ', ' brasil ', ' brasileiro ', ' brasileira ', ' sao paulo ', ' rio de janeiro ', ' country code br ']);
         $gb = $this->matches($text, [' uk ', ' united kingdom ', ' london ', ' manchester ', ' birmingham ', ' glasgow ', ' britain ', ' british ', ' england ', ' scotland ', ' wales ', ' country code gb ', ' country code uk ']);
         $us = $this->matches($text, [' usa ', ' united states ', ' new york ', ' nyc ', ' los angeles ', ' california ', ' miami ', ' austin ', ' texas ', ' american ', ' country code us ']);
         $language = match (true) {
             $french > 0 && $english > 0 && abs($french - $english) <= 1 => 'mixed',
-            $portuguese > $french && $portuguese > $english => 'pt',
+            $spanish > max($french, $english, $portuguese) => 'es',
+            $portuguese > max($french, $english, $spanish) => 'pt',
             $french > $english => 'fr',
             $english > 0 => 'en',
             default => 'unknown',
         };
+
+        // Strong content-language evidence takes precedence over a provider
+        // country code, which can describe the account location, not its audience.
+        if ($spanish >= 2 && $spanish > max($french, $english, $portuguese)) {
+            return ['market' => 'ES', 'confidence' => min(0.98, 0.70 + ($spanish * 0.04)), 'language' => 'es', 'evidence' => ['spanish_language']];
+        }
+
+        if ($portuguese >= 2 && $portuguese > max($french, $english, $spanish)) {
+            return ['market' => 'BR', 'confidence' => min(0.98, 0.70 + ($portuguese * 0.04)), 'language' => 'pt', 'evidence' => ['portuguese_language']];
+        }
 
         foreach (['fr' => 'FR', 'gb' => 'GB', 'uk' => 'GB', 'us' => 'US', 'br' => 'BR'] as $code => $market) {
             if (str_contains(" {$text} ", " country code {$code} ")) {
@@ -32,10 +44,6 @@ class CreatorMarketDetector
                     'evidence' => ['provider_country_code'],
                 ];
             }
-        }
-
-        if ($portuguese >= 2 && $portuguese > max($french, $english)) {
-            return ['market' => 'BR', 'confidence' => min(0.98, 0.70 + ($portuguese * 0.04)), 'language' => 'pt', 'evidence' => ['portuguese_language']];
         }
 
         if ($french >= 2 && $french > $english) {

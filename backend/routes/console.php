@@ -23,10 +23,12 @@ Schedule::call(function (): void {
         ->delete();
 })->daily()->name('sync-instagram-accounts')->withoutOverlapping();
 
-Schedule::command('personal:dispatch-instagram-scrapes')
-    ->dailyAt('02:30')
-    ->name('dispatch-adaptive-instagram-scrapes')
-    ->withoutOverlapping();
+if (config('instagram_scraping.scheduled')) {
+    Schedule::command('personal:dispatch-instagram-scrapes')
+        ->dailyAt('02:30')
+        ->name('dispatch-adaptive-instagram-scrapes')
+        ->withoutOverlapping();
+}
 
 Schedule::command('personal:prune-post-metric-snapshots')
     ->daily()
