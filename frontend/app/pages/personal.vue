@@ -76,7 +76,6 @@ const analysisMessage = computed(() => {
   if (profileAnalysisRunning.value) return t('personal.analysis.inProgress')
   if (analysisStatus.value === 'analysis_unavailable') return t('personal.analysis.unavailable')
   if (analysisStatus.value === 'insufficient_evidence') return t('personal.analysis.insufficient')
-  if (analysisStatus.value === 'partial') return t('personal.analysis.partial')
   return null
 })
 

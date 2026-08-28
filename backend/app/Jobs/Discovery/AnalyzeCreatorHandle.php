@@ -2,9 +2,9 @@
 
 namespace App\Jobs\Discovery;
 
+use App\Jobs\Creator\CompleteCreatorDnaMediaImport;
 use App\Models\CreatorProfile;
 use App\Models\InstagramAccount;
-use App\Jobs\Creator\CompleteCreatorDnaMediaImport;
 use App\Services\Creator\CreatorProfileDnaWriter;
 use App\Services\Creator\RegisteredCreatorService;
 use App\Services\Discovery\CanonicalCreatorVerticals;

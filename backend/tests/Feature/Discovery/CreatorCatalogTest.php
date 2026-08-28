@@ -29,8 +29,8 @@ class CreatorCatalogTest extends TestCase
     {
         $entries = collect(app(CreatorCatalog::class)->entries());
 
-        $this->assertCount(30, $entries);
-        $this->assertCount(30, $entries->pluck('handle')->map(fn (string $handle): string => strtolower($handle))->unique());
+        $this->assertCount(25, $entries);
+        $this->assertCount(25, $entries->pluck('handle')->map(fn (string $handle): string => strtolower($handle))->unique());
 
         foreach (array_keys(config('creator_catalog.verticals')) as $vertical) {
             $group = $entries->where('vertical', $vertical);
@@ -38,10 +38,20 @@ class CreatorCatalogTest extends TestCase
             $this->assertTrue($group->every(fn (array $entry): bool => $entry['market'] === 'FR'));
         }
 
-        $this->assertCount(29, $entries->where('status', 'approved'));
+        $this->assertCount(22, $entries->where('status', 'approved'));
         $this->assertCount(0, $entries->where('status', 'pending'));
-        $this->assertSame('inactive', $entries->firstWhere('handle', 'noholita')['status']);
-        $this->assertNotContains('noholita', collect(app(CreatorCatalog::class)->approved())->pluck('handle'));
+
+        // Beauty & Fashion was retired as a vertical, so its creators leave the
+        // manifest with it. The three retired sport creators stay behind as
+        // inactive entries, which is what keeps a later import from recreating them.
+        $this->assertArrayNotHasKey('beauty-fashion', (array) config('creator_catalog.verticals'));
+        $this->assertEmpty($entries->pluck('handle')->intersect(['lenamahfouf', 'sananas2106', 'romy', 'noholita', 'paolalct']));
+
+        $approved = collect(app(CreatorCatalog::class)->approved())->pluck('handle');
+        foreach (['jujufitcats', 'sissymua', 'justinegallice'] as $retiredHandle) {
+            $this->assertSame('inactive', $entries->firstWhere('handle', $retiredHandle)['status']);
+            $this->assertNotContains($retiredHandle, $approved);
+        }
         $this->assertEqualsCanonicalizing(
             ['jujufitcats', 'majormouvement', 'caroline.mignaux', 'leotechmaker', 'mrjojol67', 'paulinelaigneau', 'bprkt', 'jbaptisten'],
             $entries->pluck('handle')->intersect(['jujufitcats', 'majormouvement', 'caroline.mignaux', 'leotechmaker', 'mrjojol67', 'paulinelaigneau', 'bprkt', 'jbaptisten'])->all(),
@@ -146,7 +156,7 @@ class CreatorCatalogTest extends TestCase
     {
         Storage::fake('local');
         $provider = \Mockery::mock(InstagramDataProvider::class);
-        $provider->shouldReceive('getProfile')->times(30)->andReturn($this->profile());
+        $provider->shouldReceive('getProfile')->times((int) config('creator_catalog.target_total'))->andReturn($this->profile());
         $provider->shouldNotReceive('getPosts');
         $manager = \Mockery::mock(InstagramDataProviderManager::class);
         $manager->shouldReceive('provider')->once()->with('mock')->andReturn($provider);

@@ -589,8 +589,7 @@
     "analysis": {
       "inProgress": "Personal is transcribing your Reels and finalising your profile.",
       "unavailable": "Personal could not analyze this profile right now. Please try again.",
-      "insufficient": "Instagram does not provide enough signals yet. You can complete these details manually.",
-      "partial": "This is an initial estimate to confirm. You can correct it at any time."
+      "insufficient": "Instagram does not provide enough signals yet. You can complete these details manually."
     },
     "cancel": "Cancel",
     "saving": "Saving…",

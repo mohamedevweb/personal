@@ -13,16 +13,15 @@ $sources = [
     'food' => 'https://www.demotivateur.fr/influence-food/top-influenceurs-food-france',
     'branding' => 'https://www.favikon.com/blog/top-business-influencers-france',
     'tech' => 'https://www.blog.agencewaldo.com/classement-des-meilleurs-comptes-instagram-francais-specialises-dans-la-tech/',
-    'beauty' => 'https://www.kolsquare.com/fr/top-influencers/top-10-influenceuses-beaute-francaises',
     'wellness' => 'https://www.favikon.com/blog/top-wellness-influencers-france',
 ];
 
 $catalog = [
     'sport-fitness' => [
         ['tiboinshape', ['musculation', 'fitness', 'motivation'], 'Créateur fitness français grand public.', $sources['sport']],
-        ['jujufitcats', ['fitness', 'musculation', 'lifestyle'], 'Créatrice fitness française avec une ligne éditoriale personnelle.', $sources['sport']],
-        ['sissymua', ['fitness', 'coaching', 'bien-être'], 'Créatrice et coach fitness française reconnue.', $sources['sport']],
-        ['justinegallice', ['fitness', 'coaching', 'nutrition sportive'], 'Coach fitness française publiant des entraînements et conseils.', $sources['sport']],
+        ['jujufitcats', ['fitness', 'musculation', 'lifestyle'], 'Créatrice fitness française avec une ligne éditoriale personnelle.', $sources['sport'], 'inactive'],
+        ['sissymua', ['fitness', 'coaching', 'bien-être'], 'Créatrice et coach fitness française reconnue.', $sources['sport'], 'inactive'],
+        ['justinegallice', ['fitness', 'coaching', 'nutrition sportive'], 'Coach fitness française publiant des entraînements et conseils.', $sources['sport'], 'inactive'],
         ['majormouvement', ['mobilité', 'santé', 'coaching sportif'], 'Kinésithérapeute créateur français centré sur le mouvement.', $sources['sport']],
     ],
     'food-cooking' => [
@@ -45,13 +44,6 @@ $catalog = [
         ['mrjojol67', ['smartphones', 'produits tech', 'tests'], 'Créateur tech français publiant des tests et de la vulgarisation.', $sources['tech']],
         ['jbaptisten', ['produits tech', 'tests', 'actualité tech'], 'Créateur français historique de contenus high-tech.', $sources['tech']],
         ['pulseeon_', ['produits tech', 'astuces', 'tests'], 'Créateur tech français publiant des tests produits et des astuces courtes.', 'https://www.heepsy.com/es/top-instagram/tech/france'],
-    ],
-    'beauty-fashion' => [
-        ['lenamahfouf', ['mode', 'lifestyle', 'luxe'], 'Créatrice française reconnue dans la mode et le lifestyle.', $sources['beauty']],
-        ['sananas2106', ['maquillage', 'skincare', 'beauté'], 'Créatrice beauté française spécialisée dans le maquillage.', $sources['beauty']],
-        ['romy', ['beauté', 'mode', 'lifestyle'], 'Créatrice française avec une ligne éditoriale beauté et mode.', $sources['beauty']],
-        ['noholita', ['mode', 'style', 'lifestyle'], 'Créatrice mode française connue pour son contenu de style personnel.', $sources['beauty'], 'inactive'],
-        ['paolalct', ['mode', 'beauté', 'lifestyle'], 'Créatrice française active sur les formats mode et beauté.', $sources['beauty']],
     ],
     'wellness' => [
         ['chloe___bloom', ['méditation', 'développement personnel', 'bien-être'], 'Créatrice française centrée sur le bien-être et la méditation.', $sources['wellness']],

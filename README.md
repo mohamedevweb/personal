@@ -128,7 +128,7 @@ php artisan personal:prune-unsupported-markets --dry-run
 
 ## Curated creator catalog
 
-The first production dataset is a versioned Golden Catalog in `backend/database/catalog/instagram_creators.php`. It contains 30 human-curated French creators, five in each of the six canonical verticals. Each entry records the exact Instagram URL, editorial sources, topics and rationale. Followers and recognition tiers are intentionally absent because they are measured rather than guessed. Entries start as `pending` during review and are changed to `approved` only after the human editorial decision. Entries removed from production stay `inactive`, so a later import cannot recreate them.
+The first production dataset is a versioned Golden Catalog in `backend/database/catalog/instagram_creators.php`. It contains 25 human-curated French creators, five in each of the five canonical verticals. Each entry records the exact Instagram URL, editorial sources, topics and rationale. Followers and recognition tiers are intentionally absent because they are measured rather than guessed. Entries start as `pending` during review and are changed to `approved` only after the human editorial decision. Entries removed from production stay `inactive`, so a later import cannot recreate them.
 
 Run the read-only audit first. It makes one profile request per creator. A separate posts request is made only when the profile response contains fewer than six publications. It then writes JSON and CSV reports under `backend/storage/app/private/catalog-reports` on the host and `/var/www/html/storage/app/private/catalog-reports` inside Docker:
 
@@ -157,6 +157,14 @@ docker compose exec app php artisan personal:audit-creator-catalog \
 docker compose exec app php artisan personal:import-creator-catalog
 ```
 
+Removing an entry from the manifest, or switching it to `inactive`, only stops the next import. The rows already in the database keep their `approved` curation status until the reconciliation command retires them, so an editorial retirement always takes two steps. Preview it first:
+
+```bash
+docker compose exec app php artisan personal:retire-catalog-creators --dry-run
+```
+
+It deactivates every catalog seed the manifest no longer approves and deletes their posts, then removes the creator once nothing is left attached. Posts a member saved or remixed are kept and stopped instead, unless `--including-protected` is passed. Deleting the posts rather than only deactivating the creator is deliberate: `curation_status` filters the personalised feed only while `DISCOVERY_CURATED_CATALOG_ONLY` is on, so a retirement that relied on it alone would silently depend on that flag.
+
 After the queue has measured the approved seeds and the feed is useful, set `DISCOVERY_CURATED_CATALOG_ONLY=true` and restart the app, queue and scheduler containers. The feed then excludes every non-approved creator and stops automatic search-based insertion. Market quotas fall back to the best remaining approved French content while this first catalog is FR-only.
 
 Related-account expansion is review-only and never writes creators or posts. Candidates are ranked by recent activity, metric coverage and median engagement, with niche proximity inherited from the approved seed that surfaced them:
@@ -165,7 +173,7 @@ Related-account expansion is review-only and never writes creators or posts. Can
 docker compose exec app php artisan personal:discover-creator-candidates
 ```
 
-Use that report to expand deliberately from 30 to 60 and then 120 creators. Add selected candidates to the manifest as `pending`, audit them, approve them and import again. Discovery never promotes candidates automatically.
+Use that report to expand deliberately from 25 to 60 and then 120 creators. Add selected candidates to the manifest as `pending`, audit them, approve them and import again. Discovery never promotes candidates automatically.
 
 Measured content is retained for 90 days. The scheduler runs the purge daily and always protects posts saved by a user or used in a remix. Preview it manually with:
 

@@ -8,7 +8,7 @@ return [
     'curation_statuses' => ['discovered', 'approved', 'inactive'],
     'recognition_tiers' => ['expert', 'established', 'leader'],
     'manifest_version' => 'golden-fr-v1',
-    'target_total' => 30,
+    'target_total' => 25,
     'target_per_vertical' => 5,
 
     'verticals' => [
@@ -16,7 +16,6 @@ return [
         'food-cooking' => ['name' => 'Food & Cooking', 'aliases' => ['food', 'cuisine', 'recettes', 'alimentation saine', 'patisserie', 'pâtisserie', 'healthy food', 'cooking', 'baking']],
         'personal-branding' => ['name' => 'Personal Branding', 'aliases' => ['marque personnelle', 'création de contenu', 'creation de contenu', 'marketing', 'creator economy', 'entrepreneuriat', 'entrepreneurship', 'content creation']],
         'tech-ai' => ['name' => 'Tech & AI', 'aliases' => ['tech', 'technologie', 'ia', 'ai', 'intelligence artificielle', 'développement', 'developpement', 'development', 'saas', 'productivité', 'productivity']],
-        'beauty-fashion' => ['name' => 'Beauty & Fashion', 'aliases' => ['beauté', 'beaute', 'beauty', 'skincare', 'maquillage', 'makeup', 'mode', 'fashion', 'style', 'luxe', 'luxury']],
         'wellness' => ['name' => 'Wellness', 'aliases' => ['bien-être', 'bien etre', 'wellbeing', 'santé mentale', 'sante mentale', 'mental health', 'mindfulness', 'méditation', 'meditation', 'sommeil', 'sleep', 'récupération', 'recovery', 'santé globale']],
     ],
 

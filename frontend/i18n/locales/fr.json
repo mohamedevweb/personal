@@ -589,8 +589,7 @@
     "analysis": {
       "inProgress": "Personal transcrit tes Reels et finalise ton profil.",
       "unavailable": "Personal n’a pas pu analyser ce profil pour le moment. Réessaie.",
-      "insufficient": "Instagram ne fournit pas encore assez de signaux. Tu peux compléter ces informations manuellement.",
-      "partial": "Première estimation à confirmer. Tu peux la corriger à tout moment."
+      "insufficient": "Instagram ne fournit pas encore assez de signaux. Tu peux compléter ces informations manuellement."
     },
     "cancel": "Annuler",
     "saving": "Enregistrement…",
