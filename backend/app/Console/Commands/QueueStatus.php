@@ -60,7 +60,8 @@ class QueueStatus extends Command
         $oldestPending = $connection->table($jobsTable)
             ->whereNull('reserved_at')
             ->groupBy('queue')
-            ->pluck(DB::raw('MIN(created_at)'), 'queue');
+            ->selectRaw('queue, MIN(created_at) AS oldest_created_at')
+            ->pluck('oldest_created_at', 'queue');
         $failed = $this->failedCountsByQueue();
 
         $queues = $ready->keys()
