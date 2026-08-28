@@ -118,6 +118,9 @@ export interface PersonalProfile {
     current_projects?: string[]
     goals?: string[]
     content_strengths?: string[]
+    reasoning_patterns?: string[]
+    hook_patterns?: string[]
+    visual_patterns?: string[]
     voice_profile?: string | null
     analysis_version?: number
     analysis_status?: 'complete' | 'partial' | 'insufficient_evidence' | 'analysis_unavailable'
@@ -125,6 +128,9 @@ export interface PersonalProfile {
     confidence?: number
     evidence?: {
       caption_count: number
+      transcript_count?: number
+      carousel_count?: number
+      carousel_slide_count?: number
       bio_available: boolean
       link_preview_available: boolean
     }

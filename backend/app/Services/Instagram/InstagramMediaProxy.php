@@ -107,13 +107,18 @@ class InstagramMediaProxy
         );
     }
 
-    public function moderationDataUrl(string $sourceUrl): ?string
+    public function imageDataUrl(string $sourceUrl, string $cacheKey): ?string
     {
-        $image = $this->image($sourceUrl, 'moderation:'.hash('sha256', $sourceUrl));
+        $image = $this->image($sourceUrl, $cacheKey);
 
         return $image
             ? 'data:'.$image['content_type'].';base64,'.base64_encode($image['body'])
             : null;
+    }
+
+    public function moderationDataUrl(string $sourceUrl): ?string
+    {
+        return $this->imageDataUrl($sourceUrl, 'moderation:'.hash('sha256', $sourceUrl));
     }
 
     /** @return array{body: string, content_type: string}|null */

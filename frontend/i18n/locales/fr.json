@@ -390,7 +390,7 @@
         "importing_posts": "Lecture de tes 30 derniers posts",
         "reading_voice": "Analyse de tes légendes et de ton ton",
         "mapping_audience": "Identification de ton audience et de ta niche",
-        "transcribing_reels": "Transcription de tes Reels et analyse de ta voix"
+        "transcribing_reels": "Analyse de tes Reels et de tes carrousels"
       },
       "details": {
         "profile": "{'@'}{handle} · {followers} abonnés",
@@ -718,7 +718,6 @@
     "voiceFallbackTone": "naturelle",
     "makeItYours": "Crée ta version",
     "makeItYoursCopy": "Choisis la forme. Personal adaptera le schéma à ton contexte, sans le copier.",
-    "groundInMoment": "Choisis un moment réel",
     "addMoment": "Ajouter un moment",
     "firstMomentTitle": "Donne une matière réelle à Personal",
     "firstMomentCopy": "Une décision, une leçon ou une opinion suffit.",

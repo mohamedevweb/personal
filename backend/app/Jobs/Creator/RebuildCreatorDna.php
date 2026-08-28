@@ -17,9 +17,9 @@ use Throwable;
 
 /**
  * Rewrites a member's Creator DNA from everything Personal now holds on them:
- * their bio, their link, their captions and the spoken scripts of their reels.
- * Runs at the end of the enrichment chain, so it reads whichever transcriptions
- * made it through and never waits on the ones that did not.
+ * their bio, their link, their captions, their spoken Reel scripts and the
+ * ordered text and visual structure of their carousels. It reads whichever
+ * best-effort analyses made it through without waiting on those that did not.
  */
 class RebuildCreatorDna implements ShouldBeUnique, ShouldQueue
 {
@@ -67,10 +67,11 @@ class RebuildCreatorDna implements ShouldBeUnique, ShouldQueue
             ->where('creator_id', $creator->id)
             ->orderByDesc('published_at')
             ->limit(self::POSTS_READ)
-            ->get(['caption', 'transcript'])
+            ->get(['caption', 'transcript', 'carousel_analysis'])
             ->map(fn (ContentPost $post): array => [
                 'caption' => $post->caption,
                 'transcript' => $post->transcript,
+                'carousel_analysis' => $post->carousel_analysis,
             ])
             ->all();
 

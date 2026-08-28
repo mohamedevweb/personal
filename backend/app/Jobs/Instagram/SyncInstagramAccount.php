@@ -106,8 +106,8 @@ class SyncInstagramAccount implements ShouldQueue
             $creatorProfile->save();
             $registeredCreators->sync($account->fresh('media'), $creatorProfile);
 
-            // The DNA above reads captions. The enrichment chain transcribes the
-            // member's own reels behind them and rewrites it from their voice.
+            // The DNA above reads captions. The enrichment chain reads the
+            // member's own Reels and carousels, then rebuilds the deeper DNA.
             $enrichment->queue($creatorProfile);
 
             $account->update(['sync_status' => 'finding_patterns']);

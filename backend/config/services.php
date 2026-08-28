@@ -162,6 +162,17 @@ return [
         'creator_dna_reels' => (int) env('CREATOR_DNA_TRANSCRIBED_REELS', 10),
     ],
 
+    // OCR plus visual structure for a representative sample of the member's
+    // carousels. Results are stored, so a DNA rebuild does not pay twice.
+    'carousel_analysis' => [
+        'enabled' => (bool) env('CAROUSEL_ANALYSIS_ENABLED', true),
+        'model' => env('OPENAI_VISION_MODEL', env('OPENAI_MODEL', 'gpt-5')),
+        'creator_dna_carousels' => (int) env('CREATOR_DNA_ANALYZED_CAROUSELS', 6),
+        'max_slides' => (int) env('CAROUSEL_ANALYSIS_MAX_SLIDES', 20),
+        'image_detail' => env('CAROUSEL_ANALYSIS_IMAGE_DETAIL', 'high'),
+        'max_output_tokens' => (int) env('CAROUSEL_ANALYSIS_MAX_OUTPUT_TOKENS', 4000),
+    ],
+
     'instagram_media_proxy' => [
         'disk' => env('INSTAGRAM_MEDIA_CACHE_DISK', 'local'),
         'cache_days' => (int) env('INSTAGRAM_MEDIA_CACHE_DAYS', 7),
