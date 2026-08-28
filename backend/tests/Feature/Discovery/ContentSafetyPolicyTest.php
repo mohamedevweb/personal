@@ -20,8 +20,11 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Mockery;
 use OpenAI\Resources\Moderations;
+use OpenAI\Resources\Responses;
 use OpenAI\Responses\Moderations\CreateResponse;
+use OpenAI\Responses\Responses\CreateResponse as ResponsesCreateResponse;
 use OpenAI\Testing\ClientFake;
+use OpenAI\Testing\Enums\OverrideStrategy;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -36,6 +39,7 @@ class ContentSafetyPolicyTest extends TestCase
         config([
             'services.discovery.safety.enabled' => true,
             'services.discovery.safety.use_openai' => false,
+            'services.discovery.safety.enforce_policy' => false,
             'services.discovery.min_followers' => 5000,
         ]);
     }
@@ -131,6 +135,79 @@ class ContentSafetyPolicyTest extends TestCase
         Http::assertSentCount(1);
         $client->assertSent(Moderations::class, fn (string $method, array $parameters): bool => $method === 'create'
             && $parameters['input'][1]['image_url']['url'] === 'data:image/jpeg;base64,'.base64_encode('jpeg-body'));
+    }
+
+    public function test_it_blocks_the_fixed_product_policy_across_every_carousel_frame(): void
+    {
+        config([
+            'services.discovery.safety.use_openai' => true,
+            'services.discovery.safety.enforce_policy' => true,
+            'services.discovery.safety.policy_model' => 'gpt-5',
+            'services.discovery.safety.policy_reasoning_effort' => 'low',
+            'services.discovery.safety.policy_max_output_tokens' => 2500,
+            'services.discovery.safety.policy_max_frames' => 10,
+            'services.discovery.safety.policy_image_detail' => 'low',
+            'services.openai.api_key' => 'test-key',
+        ]);
+        $client = new ClientFake([
+            CreateResponse::fake(['results' => [[
+                'categories' => $this->moderationCategories(),
+                'category_scores' => $this->moderationScores(),
+                'flagged' => false,
+            ]]]),
+            ResponsesCreateResponse::fake(['output' => [[
+                'type' => 'message',
+                'id' => 'msg_policy',
+                'status' => 'completed',
+                'role' => 'assistant',
+                'content' => [[
+                    'type' => 'output_text',
+                    'text' => json_encode([
+                        'sexual_suggestive' => false,
+                        'nudity' => false,
+                        'lingerie_bikini' => true,
+                        'sexual_adult_topics' => false,
+                        'graphic_violence' => false,
+                    ], JSON_THROW_ON_ERROR),
+                    'annotations' => [],
+                ]],
+            ]]], strategy: OverrideStrategy::Replace),
+        ]);
+        $post = $this->discoveredPost('Summer campaign');
+        $post = new DiscoveredPost(
+            sourceUrl: $post->sourceUrl,
+            username: $post->username,
+            displayName: $post->displayName,
+            avatarUrl: $post->avatarUrl,
+            followers: $post->followers,
+            caption: $post->caption,
+            thumbnailUrl: $post->thumbnailUrl,
+            likes: $post->likes,
+            comments: $post->comments,
+            views: $post->views,
+            publishedAt: $post->publishedAt,
+            format: 'carousel',
+            hashtags: $post->hashtags,
+            externalId: $post->externalId,
+            mediaUrls: [
+                'https://cdn.example.test/slide-1.jpg',
+                'https://cdn.example.test/slide-2.jpg',
+            ],
+        );
+
+        $decision = $this->policy($client)->post($post);
+
+        $this->assertSame(ContentSafetyDecision::BLOCKED, $decision->status);
+        $this->assertSame(['policy:lingerie/bikini'], $decision->reasons);
+        $client->assertSent(Responses::class, function (string $method, array $parameters): bool {
+            $content = $parameters['input'][0]['content'];
+
+            return $method === 'create'
+                && $parameters['store'] === false
+                && $parameters['text']['format']['strict'] === true
+                && $content[1]['image_url'] === 'https://cdn.example.test/slide-1.jpg'
+                && $content[2]['image_url'] === 'https://cdn.example.test/slide-2.jpg';
+        });
     }
 
     public function test_it_keeps_an_instagram_post_pending_when_its_thumbnail_cannot_be_downloaded(): void
@@ -282,5 +359,31 @@ class ContentSafetyPolicyTest extends TestCase
             hashtags: [],
             externalId: $externalId,
         );
+    }
+
+    /** @return array<string, bool> */
+    private function moderationCategories(): array
+    {
+        return [
+            'hate' => false,
+            'hate/threatening' => false,
+            'harassment' => false,
+            'harassment/threatening' => false,
+            'self-harm' => false,
+            'self-harm/intent' => false,
+            'self-harm/instructions' => false,
+            'sexual' => false,
+            'sexual/minors' => false,
+            'violence' => false,
+            'violence/graphic' => false,
+        ];
+    }
+
+    /** @return array<string, float> */
+    private function moderationScores(): array
+    {
+        return collect(array_keys($this->moderationCategories()))
+            ->mapWithKeys(fn (string $category): array => [$category => 0.0])
+            ->all();
     }
 }

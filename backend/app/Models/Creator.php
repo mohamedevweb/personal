@@ -30,6 +30,7 @@ class Creator extends Model
             'metrics_updated_at' => 'datetime',
             'last_measured_at' => 'datetime',
             'safety_checked_at' => 'datetime',
+            'safety_policy_version' => 'integer',
             'last_scraped_at' => 'datetime',
             'next_scrape_at' => 'datetime',
             'last_post_at' => 'datetime',

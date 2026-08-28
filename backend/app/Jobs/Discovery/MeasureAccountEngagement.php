@@ -291,6 +291,7 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
             'safety_status' => ContentSafetyDecision::ALLOWED,
             'safety_reasons' => [],
             'safety_checked_at' => now(),
+            'safety_policy_version' => ContentSafetyPolicy::VERSION,
             'market' => $market['market'],
             'primary_language' => $market['language'],
         ];
@@ -396,6 +397,7 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
             'safety_status' => $decision->status,
             'safety_reasons' => $decision->reasons,
             'safety_checked_at' => now(),
+            'safety_policy_version' => ContentSafetyPolicy::VERSION,
         ])->save();
 
         $this->disqualify($creator);
@@ -476,6 +478,7 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
             'safety_status' => $decision->status,
             'safety_reasons' => $decision->reasons,
             'safety_checked_at' => $capturedAt,
+            'safety_policy_version' => ContentSafetyPolicy::VERSION,
             // why_it_works is written by score() once the baseline is known;
             // the hook and structure breakdown is generated lazily the first
             // time a creator opens the post.
@@ -519,6 +522,7 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
                 'safety_status' => $decision->status,
                 'safety_reasons' => $decision->reasons,
                 'safety_checked_at' => now(),
+                'safety_policy_version' => ContentSafetyPolicy::VERSION,
                 'measured_at' => null,
                 'outlier_score' => 0,
                 'performance_ratio' => 0,

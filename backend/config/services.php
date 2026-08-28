@@ -98,6 +98,12 @@ return [
             'use_openai' => (bool) env('DISCOVERY_CONTENT_SAFETY_USE_OPENAI', true),
             'fail_closed' => (bool) env('DISCOVERY_CONTENT_SAFETY_FAIL_CLOSED', true),
             'model' => env('DISCOVERY_CONTENT_SAFETY_MODEL', 'omni-moderation-latest'),
+            'enforce_policy' => (bool) env('DISCOVERY_CONTENT_POLICY_ENABLED', true),
+            'policy_model' => env('DISCOVERY_CONTENT_POLICY_MODEL', env('OPENAI_VISION_MODEL', 'gpt-5')),
+            'policy_reasoning_effort' => env('DISCOVERY_CONTENT_POLICY_REASONING_EFFORT', 'low'),
+            'policy_max_output_tokens' => (int) env('DISCOVERY_CONTENT_POLICY_MAX_OUTPUT_TOKENS', 2500),
+            'policy_max_frames' => (int) env('DISCOVERY_CONTENT_POLICY_MAX_FRAMES', 10),
+            'policy_image_detail' => env('DISCOVERY_CONTENT_POLICY_IMAGE_DETAIL', 'low'),
             'blocked_categories' => [
                 'harassment', 'harassment/threatening', 'hate', 'hate/threatening',
                 'illicit', 'illicit/violent', 'self-harm', 'self-harm/intent',

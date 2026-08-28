@@ -29,6 +29,7 @@ class ContentPost extends Model
             'last_fetched_at' => 'datetime',
             'metrics_updated_at' => 'datetime',
             'safety_checked_at' => 'datetime',
+            'safety_policy_version' => 'integer',
             'last_metrics_scraped_at' => 'datetime',
             'next_metrics_scrape_at' => 'datetime',
             'views_velocity' => 'float',
