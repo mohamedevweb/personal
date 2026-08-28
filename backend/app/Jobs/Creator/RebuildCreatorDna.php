@@ -100,7 +100,11 @@ class RebuildCreatorDna implements ShouldBeUnique, ShouldQueue
             ...$signals['sub_niches'],
             ...$signals['topics'],
         ]));
-        $profile->forceFill(['analysis_status' => 'completed', 'analysis_error' => null]);
+        $profile->forceFill([
+            'media_enrichment_status' => 'completed',
+            'media_enrichment_error' => null,
+            'media_enrichment_completed_at' => now(),
+        ]);
         $profile->save();
 
         // Hearing the creator can move the niche. The feed is built from it, so it
@@ -114,12 +118,20 @@ class RebuildCreatorDna implements ShouldBeUnique, ShouldQueue
     {
         CreatorProfile::query()
             ->where('user_id', $this->userId)
-            ->update(['analysis_status' => 'completed', 'analysis_error' => null]);
+            ->update([
+                'media_enrichment_status' => 'failed',
+                'media_enrichment_error' => 'dna_rebuild_unavailable',
+                'media_enrichment_completed_at' => now(),
+            ]);
     }
 
     private function complete(CreatorProfile $profile): void
     {
-        $profile->forceFill(['analysis_status' => 'completed', 'analysis_error' => null])->save();
+        $profile->forceFill([
+            'media_enrichment_status' => 'completed',
+            'media_enrichment_error' => null,
+            'media_enrichment_completed_at' => now(),
+        ])->save();
     }
 
     /**

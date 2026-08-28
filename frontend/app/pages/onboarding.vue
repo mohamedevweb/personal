@@ -576,16 +576,6 @@ onMounted(async () => {
               :style="index < analysisTilesRead ? { backgroundImage: tileWash(tile) } : undefined"
             />
           </div>
-
-          <p class="b-mono mt-6 text-white/35">{{ $t('onboarding.analysis.previewVoice') }}</p>
-          <div v-if="analysis?.tone?.length" class="mt-3 flex flex-wrap gap-2">
-            <span v-for="tone in analysis.tone" :key="tone" class="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/70">{{ tone }}</span>
-          </div>
-          <div v-else class="mt-3 flex gap-2">
-            <div v-for="i in 3" :key="i" class="h-7 w-20 rounded-full bg-white/[.07]" :class="analysisFailed ? '' : 'animate-pulse'" />
-          </div>
-
-          <p class="mt-7 font-serif text-xl leading-7 text-white/45">{{ $t('onboarding.analysis.previewNote') }}</p>
         </div>
 
         <div v-else-if="status.connected" class="mt-2 space-y-1">

@@ -21,6 +21,11 @@ class CreatorProfile extends Model
             'discovery_queries' => 'array',
             'dna_analyzed_at' => 'datetime',
             'analysis_started_at' => 'datetime',
+            'analysis_stage_started_at' => 'datetime',
+            'analysis_completed_at' => 'datetime',
+            'analysis_timings' => 'array',
+            'media_enrichment_started_at' => 'datetime',
+            'media_enrichment_completed_at' => 'datetime',
             'discovery_refreshed_at' => 'datetime',
             'market_confidence' => 'float',
         ];

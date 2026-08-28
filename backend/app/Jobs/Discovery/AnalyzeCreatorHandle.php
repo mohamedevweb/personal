@@ -4,7 +4,7 @@ namespace App\Jobs\Discovery;
 
 use App\Models\CreatorProfile;
 use App\Models\InstagramAccount;
-use App\Services\Creator\CreatorDnaEnrichment;
+use App\Jobs\Creator\CompleteCreatorDnaMediaImport;
 use App\Services\Creator\CreatorProfileDnaWriter;
 use App\Services\Creator\RegisteredCreatorService;
 use App\Services\Discovery\CanonicalCreatorVerticals;
@@ -33,7 +33,7 @@ class AnalyzeCreatorHandle implements ShouldQueue
     use Queueable;
 
     /** How many recent posts the analysis reads — and announces it is reading. */
-    public const POSTS_READ = 30;
+    public const POSTS_READ = 12;
 
     /**
      * The steps the loader shows, in the order they run. 'queued' precedes them,
@@ -41,7 +41,7 @@ class AnalyzeCreatorHandle implements ShouldQueue
      *
      * @var list<string>
      */
-    public const STAGES = ['reading_profile', 'importing_posts', 'reading_voice', 'mapping_audience', 'transcribing_reels'];
+    public const STAGES = ['reading_profile', 'importing_posts', 'reading_voice', 'mapping_audience'];
 
     public int $tries = 2;
 
@@ -54,7 +54,9 @@ class AnalyzeCreatorHandle implements ShouldQueue
     public function __construct(
         public readonly int $userId,
         public readonly ?string $username = null,
-    ) {}
+    ) {
+        $this->onQueue('onboarding');
+    }
 
     public function handle(
         InstagramDataProvider $instagram,
@@ -63,11 +65,9 @@ class AnalyzeCreatorHandle implements ShouldQueue
         CanonicalCreatorVerticals $verticals,
         ?CreatorProfileDnaWriter $dnaWriter = null,
         ?RegisteredCreatorService $registeredCreators = null,
-        ?CreatorDnaEnrichment $enrichment = null,
     ): void {
         $dnaWriter ??= app(CreatorProfileDnaWriter::class);
         $registeredCreators ??= app(RegisteredCreatorService::class);
-        $enrichment ??= app(CreatorDnaEnrichment::class);
         $profile = CreatorProfile::query()->where('user_id', $this->userId)->first();
         $username = $this->username ?? $profile?->instagram_username;
 
@@ -170,21 +170,22 @@ class AnalyzeCreatorHandle implements ShouldQueue
 
         $profile->save();
 
-        // The transcript-backed pass is part of understanding the creator. Keep
-        // onboarding and the memory page waiting for it when it can be queued.
-        $enrichmentQueued = false;
         try {
             $registeredCreators->syncScraped($scraped, $profile, $posts);
-            $enrichmentQueued = $enrichment->queue($profile);
+            $this->complete($profile);
+            $profile->forceFill([
+                'media_enrichment_status' => 'queued',
+                'media_enrichment_error' => null,
+                'media_enrichment_started_at' => null,
+                'media_enrichment_completed_at' => null,
+            ])->save();
+            CompleteCreatorDnaMediaImport::dispatch($this->userId, $scraped->username);
         } catch (Throwable $exception) {
             Log::warning('Creator DNA enrichment could not be queued.', [
                 'user_id' => $this->userId,
                 'exception' => $exception,
             ]);
-        }
-
-        if (! $enrichmentQueued) {
-            $profile->forceFill(['analysis_status' => 'completed', 'analysis_error' => null])->save();
+            $this->complete($profile);
         }
 
         // The niche is what the feed is built from, so fill it as soon as there
@@ -229,10 +230,31 @@ class AnalyzeCreatorHandle implements ShouldQueue
     /** Moves the loader to the next step. */
     private function stage(CreatorProfile $profile, string $status, bool $started = false): void
     {
+        $now = now();
+        $timings = $profile->analysis_timings ?? [];
+        $previous = $profile->analysis_status;
+
+        if (in_array($previous, self::STAGES, true) && $profile->analysis_stage_started_at) {
+            $timings[$previous] = [
+                'duration_ms' => $profile->analysis_stage_started_at->diffInMilliseconds($now),
+            ];
+        }
+
         $profile->forceFill([
             'analysis_status' => $status,
             'analysis_error' => null,
-            ...($started ? ['analysis_started_at' => now()] : []),
+            'analysis_stage_started_at' => $now,
+            'analysis_timings' => $timings,
+            ...($started ? ['analysis_started_at' => $now, 'analysis_completed_at' => null] : []),
+        ])->save();
+    }
+
+    private function complete(CreatorProfile $profile): void
+    {
+        $this->stage($profile, 'completed');
+        $profile->forceFill([
+            'analysis_completed_at' => now(),
+            'analysis_stage_started_at' => null,
         ])->save();
     }
 
@@ -242,10 +264,8 @@ class AnalyzeCreatorHandle implements ShouldQueue
      */
     private function stop(CreatorProfile $profile, string $reason): void
     {
-        $profile->forceFill([
-            'analysis_status' => 'failed',
-            'analysis_error' => $reason,
-        ])->save();
+        $this->stage($profile, 'failed');
+        $profile->forceFill(['analysis_error' => $reason, 'analysis_completed_at' => now()])->save();
     }
 
     public function failed(?Throwable $exception): void

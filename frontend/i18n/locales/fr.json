@@ -395,8 +395,6 @@
         "posts": "{count} posts lus sur {target}"
       },
       "postsRead": "posts lus",
-      "previewVoice": "Ta voix",
-      "previewNote": "Rien n’est publié, rien n’est modifié. Personal lit ce que tout le monde peut déjà voir.",
       "locked": "Récupération en cours…",
       "failedTitle": "Personal n’a pas pu lire ce compte.",
       "retry": "Réessayer",

@@ -395,8 +395,6 @@
         "posts": "{count} of {target} posts read"
       },
       "postsRead": "posts read",
-      "previewVoice": "Your voice",
-      "previewNote": "Nothing is published, nothing is changed. Personal reads what anyone can already see.",
       "locked": "Retrieving…",
       "failedTitle": "Personal could not read this account.",
       "retry": "Try again",

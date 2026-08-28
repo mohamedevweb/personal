@@ -165,7 +165,7 @@ return [
         'max_duration_seconds' => (int) env('REEL_TRANSCRIPTION_MAX_DURATION', 180),
         'download_timeout' => (int) env('REEL_TRANSCRIPTION_DOWNLOAD_TIMEOUT', 60),
         // How many of a creator's own reels are transcribed to build their DNA.
-        'creator_dna_reels' => (int) env('CREATOR_DNA_TRANSCRIBED_REELS', 10),
+        'creator_dna_reels' => (int) env('CREATOR_DNA_TRANSCRIBED_REELS', 4),
     ],
 
     // OCR plus visual structure for a representative sample of the member's
@@ -173,9 +173,9 @@ return [
     'carousel_analysis' => [
         'enabled' => (bool) env('CAROUSEL_ANALYSIS_ENABLED', true),
         'model' => env('OPENAI_VISION_MODEL', env('OPENAI_MODEL', 'gpt-5')),
-        'creator_dna_carousels' => (int) env('CREATOR_DNA_ANALYZED_CAROUSELS', 4),
-        'max_slides' => (int) env('CAROUSEL_ANALYSIS_MAX_SLIDES', 10),
-        'image_detail' => env('CAROUSEL_ANALYSIS_IMAGE_DETAIL', 'high'),
+        'creator_dna_carousels' => (int) env('CREATOR_DNA_ANALYZED_CAROUSELS', 2),
+        'max_slides' => (int) env('CAROUSEL_ANALYSIS_MAX_SLIDES', 6),
+        'image_detail' => env('CAROUSEL_ANALYSIS_IMAGE_DETAIL', 'low'),
         'max_output_tokens' => (int) env('CAROUSEL_ANALYSIS_MAX_OUTPUT_TOKENS', 4000),
     ],
 

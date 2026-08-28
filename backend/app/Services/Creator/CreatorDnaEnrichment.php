@@ -9,6 +9,7 @@ use App\Models\ContentPost;
 use App\Models\Creator;
 use App\Models\CreatorProfile;
 use App\Services\Llm\CarouselVisualAnalysisService;
+use Illuminate\Bus\Batch;
 use Illuminate\Support\Facades\Bus;
 
 /**
@@ -53,21 +54,30 @@ class CreatorDnaEnrichment
                 ->all()
             : [];
 
-        // Keep the public status running until the media-backed DNA lands.
-        // Otherwise the UI can render a failed caption-only pass while this
-        // successful second pass is still working behind it.
         $profile->forceFill([
-            'analysis_status' => 'transcribing_reels',
-            'analysis_error' => null,
+            'media_enrichment_status' => 'processing',
+            'media_enrichment_error' => null,
+            'media_enrichment_started_at' => $profile->media_enrichment_started_at ?? now(),
+            'media_enrichment_completed_at' => null,
         ])->save();
 
-        // A chain, not a batch: the rebuild must read every script and carousel
-        // analysis that made it. Each best-effort reader keeps the chain alive.
-        Bus::chain([
-            ...$transcriptions,
-            ...$carouselAnalyses,
-            new RebuildCreatorDna($profile->user_id),
-        ])->dispatch();
+        $jobs = [...$transcriptions, ...$carouselAnalyses];
+
+        if ($jobs === []) {
+            RebuildCreatorDna::dispatch($profile->user_id);
+
+            return true;
+        }
+
+        $userId = $profile->user_id;
+        Bus::batch($jobs)
+            ->name("creator-dna-media:{$userId}")
+            ->allowFailures()
+            ->finally(function (Batch $batch) use ($userId): void {
+                RebuildCreatorDna::dispatch($userId);
+            })
+            ->onQueue('analysis')
+            ->dispatch();
 
         return true;
     }
