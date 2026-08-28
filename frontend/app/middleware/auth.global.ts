@@ -57,10 +57,18 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // First-login onboarding gate: the creator connects Instagram and completes
   // the import, or lets Personal read the public profile behind their handle.
   const onboarded = useState('personal-onboarded', () => false)
+  const instagramStatus = useState<InstagramStatusResponse>('instagram-status', () => ({
+    connected: false,
+    inspiration_count: 0,
+    onboarding_complete: false
+  }))
+  const instagramStatusLoaded = useState('instagram-status-loaded', () => false)
 
   if (!onboarded.value) {
     try {
       const status = await apiFetch<InstagramStatusResponse>('/api/integrations/instagram/status')
+      instagramStatus.value = status
+      instagramStatusLoaded.value = true
       onboarded.value = status.onboarding_complete
     } catch {
       // If we cannot verify the connection, don't trap the user on a blank gate.

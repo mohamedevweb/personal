@@ -73,7 +73,7 @@ docker compose exec app php artisan personal:link-registered-creators
 
 Set `DISCOVERY_DRIVER=scrapecreators` and `SCRAPECREATORS_API_KEY` to run creator discovery and account measurement through ScrapeCreators. Profile responses use ScrapeCreators' provider-side cache for the same three-day window as account measurement by default. Change `SCRAPECREATORS_CACHE_MAX_AGE` when testing freshness versus cost.
 
-**Creator DNA.** A public handle is enough to start: `AnalyzeCreatorHandle` reads the public profile and up to 30 recent captions, then stores a structured `creator_dna` with positioning, primary niche, sub-niches, topics, audience, language, content pillars, tone, explicit current projects and goals, observable content strengths and voice. A background enrichment pass transcribes a representative sample of the creator's Reels and reads every slide of selected carousels with multimodal OCR. Ordered slide text, narrative structure and recurring visual patterns then contribute to the same DNA. The visual results are stored per post, so later rebuilds do not pay to analyse unchanged slides again. These signals fill the member's Personal memory automatically. `SyncInstagramAccount` enriches the same profile later when the member connects through OAuth, while a memory edited manually is never overwritten. Model-backed analysis has a deterministic fallback, so an unavailable enrichment never removes the caption-based DNA.
+**Creator DNA.** A public handle is enough to start: `AnalyzeCreatorHandle` reads the public profile and up to 12 recent captions, then stores a structured `creator_dna` with positioning, primary niche, sub-niches, topics, audience, language, content pillars, tone, explicit current projects and goals, observable content strengths and voice. That initial DNA completes onboarding. A background pass imports up to 30 posts, transcribes a representative sample of the creator's Reels and reads selected carousel slides with multimodal OCR. Reel and carousel jobs run as a parallel batch, then ordered slide text, narrative structure and recurring visual patterns refine the same DNA. The media results are stored per post, so later rebuilds do not pay to analyse unchanged content again. These signals fill the member's Personal memory automatically. `SyncInstagramAccount` enriches the same profile later when the member connects through OAuth, while a memory edited manually is never overwritten. Model-backed analysis has a deterministic fallback, so an unavailable enrichment never removes the caption-based DNA.
 
 **Stage 1, `DiscoverNicheContent`.** The Creator DNA becomes precise account-search phrases. ScrapeCreators finds seed creators, then Instagram suggested accounts expand each seed into a reusable creator graph. Creators are upserted by Instagram ID when available, relationships are refreshed rather than duplicated, and global query cooldowns avoid paying twice for a niche Personal already knows.
 
@@ -227,6 +227,22 @@ Composition:
 - `postgres` — with a health check the backend services wait on
 
 `NUXT_PUBLIC_API_BASE` is read by the browser, so it must be a URL the browser can reach. Product data is fetched client-side, so server-side rendering never needs an internal API address.
+
+### Production queue status
+
+From `/opt/personal` on the VPS, run the read-only queue status tool:
+
+```bash
+./queue-status.sh
+```
+
+It shows whether every queue worker service is running, followed by ready, delayed,
+reserved and failed job counts for each queue. To list the job classes currently
+waiting or running without printing their payloads, use:
+
+```bash
+./queue-status.sh --details --limit=50
+```
 
 ## Browsing the database locally
 

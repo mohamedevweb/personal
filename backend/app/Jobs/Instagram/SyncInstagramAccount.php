@@ -94,6 +94,11 @@ class SyncInstagramAccount implements ShouldQueue
             ]);
 
             $dnaWriter->apply($creatorProfile, $signals, $primaryVertical);
+            $creatorProfile->forceFill([
+                'analysis_status' => 'completed',
+                'analysis_error' => null,
+                'analysis_completed_at' => now(),
+            ]);
 
             if ($this->hasLegacyPlaceholderContext($creatorProfile)) {
                 $creatorProfile->fill([
@@ -106,7 +111,7 @@ class SyncInstagramAccount implements ShouldQueue
             $creatorProfile->save();
             $registeredCreators->sync($account->fresh('media'), $creatorProfile);
 
-            // The DNA above reads captions. The enrichment chain reads the
+            // The DNA above reads captions. The enrichment batch reads the
             // member's own Reels and carousels, then rebuilds the deeper DNA.
             $enrichment->queue($creatorProfile);
 

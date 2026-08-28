@@ -43,6 +43,8 @@ class AnalyzeCarouselContentPostTest extends TestCase
         $this->assertSame(AnalyzeCarouselContentPost::DONE, $post->carousel_analysis_status);
         $this->assertSame('Stop waiting', data_get($post->carousel_analysis, 'slides.0.text'));
         $this->assertNotNull($post->carousel_analyzed_at);
+        $this->assertNotNull($post->carousel_analysis_started_at);
+        $this->assertNotNull($post->carousel_analysis_duration_ms);
     }
 
     public function test_a_completed_current_analysis_is_not_paid_for_twice(): void

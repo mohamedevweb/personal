@@ -8,6 +8,7 @@ on:
     paths:
       - "backend/**"
       - "deploy.sh"
+      - "queue-status.sh"
       - "docker-compose.yml"
       - "docker-compose.prod.yml"
       - ".github/workflows/backend.yml"
@@ -15,6 +16,7 @@ on:
     paths:
       - "backend/**"
       - "deploy.sh"
+      - "queue-status.sh"
       - "docker-compose.yml"
       - "docker-compose.prod.yml"
       - ".github/workflows/backend.yml"

@@ -5,7 +5,7 @@ set -Eeuo pipefail
 cd /opt/personal
 
 compose_files=(-f docker-compose.yml -f docker-compose.prod.yml)
-backend_services=(app web queue interactive-queue scheduler)
+backend_services=(app web queue onboarding-queue analysis-queue interactive-queue scheduler)
 
 git fetch origin main --quiet
 git reset --hard origin/main

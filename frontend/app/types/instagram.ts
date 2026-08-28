@@ -61,14 +61,37 @@ export interface HandleAnalysis {
   audience_description: string | null
 }
 
+export type MediaEnrichmentStatus =
+  | 'idle'
+  | 'queued'
+  | 'importing_media'
+  | 'processing'
+  | 'completed'
+  | 'failed'
+
+export interface MediaEnrichment {
+  status: MediaEnrichmentStatus
+  error: string | null
+  started_at: string | null
+  completed_at: string | null
+}
+
 export interface InstagramStatusResponse {
   connected: boolean
   instagram_username?: string | null
   inspiration_count: number
   onboarding_complete: boolean
   analysis?: HandleAnalysis
+  media_enrichment?: MediaEnrichment
   account?: InstagramAccount
   profile?: CreatorProfile | null
+}
+
+export interface InstagramProgressResponse {
+  onboarding_complete: boolean
+  analysis: HandleAnalysis
+  media_enrichment: MediaEnrichment
+  account: Pick<InstagramAccount, 'sync_status' | 'sync_error'> | null
 }
 
 export interface CreatorInspiration {

@@ -40,6 +40,7 @@ class InstagramConnectionController extends Controller
                 'inspiration_count' => $inspirationCount,
                 'onboarding_complete' => $onboardingComplete,
                 'analysis' => $this->analysis($profile),
+                'media_enrichment' => $this->mediaEnrichment($profile),
             ]);
         }
 
@@ -49,6 +50,7 @@ class InstagramConnectionController extends Controller
             'inspiration_count' => $inspirationCount,
             'onboarding_complete' => $onboardingComplete,
             'analysis' => $this->analysis($profile),
+            'media_enrichment' => $this->mediaEnrichment($profile),
             'account' => [
                 'username' => $account->username,
                 'display_name' => $account->display_name,
@@ -68,6 +70,44 @@ class InstagramConnectionController extends Controller
                 'tone' => $profile->tone,
                 'creator_dna' => $profile->creator_dna,
                 'dna_analyzed_at' => $profile->dna_analyzed_at,
+            ] : null,
+        ]);
+    }
+
+    public function progress(Request $request, OnboardingCompletionService $onboarding): JsonResponse
+    {
+        $profile = $request->user()->creatorProfile()->first([
+            'id',
+            'user_id',
+            'instagram_username',
+            'analysis_status',
+            'analysis_error',
+            'followers_count',
+            'analyzed_posts_count',
+            'bio',
+            'niche',
+            'tone',
+            'audience_description',
+            'dna_analyzed_at',
+            'media_enrichment_status',
+            'media_enrichment_error',
+            'media_enrichment_started_at',
+            'media_enrichment_completed_at',
+        ]);
+        $account = $request->user()->instagramAccount()->first([
+            'id',
+            'user_id',
+            'sync_status',
+            'sync_error',
+        ]);
+
+        return response()->json([
+            'onboarding_complete' => $onboarding->completeFor($request->user(), $account, $profile),
+            'analysis' => $this->analysis($profile),
+            'media_enrichment' => $this->mediaEnrichment($profile),
+            'account' => $account ? [
+                'sync_status' => $account->sync_status,
+                'sync_error' => $account->sync_error,
             ] : null,
         ]);
     }
@@ -99,6 +139,9 @@ class InstagramConnectionController extends Controller
         if ($changed) {
             $analysis += [
                 'analysis_started_at' => null,
+                'analysis_stage_started_at' => null,
+                'analysis_completed_at' => null,
+                'analysis_timings' => null,
                 'followers_count' => null,
                 'analyzed_posts_count' => null,
                 'avatar_url' => null,
@@ -108,6 +151,10 @@ class InstagramConnectionController extends Controller
                 'discovery_queries' => null,
                 'discovery_hashtags' => null,
                 'discovery_refreshed_at' => null,
+                'media_enrichment_status' => 'idle',
+                'media_enrichment_error' => null,
+                'media_enrichment_started_at' => null,
+                'media_enrichment_completed_at' => null,
             ];
 
             if (data_get($profile?->creator_dna, 'analysis_method') !== 'manual') {
@@ -188,6 +235,17 @@ class InstagramConnectionController extends Controller
             'niche' => $profile?->niche,
             'tone' => $profile?->tone,
             'audience_description' => $profile?->audience_description,
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private function mediaEnrichment(?CreatorProfile $profile): array
+    {
+        return [
+            'status' => $profile?->media_enrichment_status ?? 'idle',
+            'error' => $profile?->media_enrichment_error,
+            'started_at' => $profile?->media_enrichment_started_at,
+            'completed_at' => $profile?->media_enrichment_completed_at,
         ];
     }
 }

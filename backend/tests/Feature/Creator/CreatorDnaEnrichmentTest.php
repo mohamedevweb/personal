@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Services\Creator\CreatorDnaEnrichment;
 use App\Services\Creator\CreatorProfileDnaWriter;
 use App\Services\Creator\CreatorReelSelection;
+use App\Services\Creator\RegisteredCreatorService;
 use App\Services\Discovery\CanonicalCreatorVerticals;
 use App\Services\Discovery\CreatorMarketDetector;
 use App\Services\Discovery\InstagramDataProvider;
@@ -22,11 +23,12 @@ use App\Services\Llm\LlmJsonService;
 use Illuminate\Bus\PendingBatch;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
+use Mockery;
 use Tests\TestCase;
 
 /**
  * Onboarding reads captions and stops. Everything the member says out loud is read
- * afterwards, by the chain these tests cover.
+ * afterwards, by the parallel batch these tests cover.
  */
 class CreatorDnaEnrichmentTest extends TestCase
 {
@@ -90,6 +92,26 @@ class CreatorDnaEnrichmentTest extends TestCase
         $this->assertTrue($selection->contains('id', $newest->id), 'The most recent reel is part of the sample.');
     }
 
+    public function test_the_full_media_window_is_imported_after_onboarding(): void
+    {
+        $creator = $this->creator();
+        $instagram = Mockery::mock(InstagramDataProvider::class);
+        $instagram->shouldReceive('getPosts')
+            ->once()
+            ->with('founder.creator', CompleteCreatorDnaMediaImport::POSTS_READ)
+            ->andReturn(collect());
+        $enrichment = Mockery::mock(CreatorDnaEnrichment::class);
+        $enrichment->shouldReceive('queue')->once()->andReturn(true);
+
+        $job = new CompleteCreatorDnaMediaImport($creator->user_id, 'founder.creator');
+        $job->handle($instagram, app(RegisteredCreatorService::class), $enrichment);
+
+        $profile = $creator->user->creatorProfile()->firstOrFail();
+        $this->assertSame('analysis', $job->queue);
+        $this->assertSame('importing_media', $profile->media_enrichment_status);
+        $this->assertNotNull($profile->media_enrichment_started_at);
+    }
+
     public function test_a_reel_already_read_is_not_queued_again(): void
     {
         Bus::fake();
@@ -126,6 +148,17 @@ class CreatorDnaEnrichmentTest extends TestCase
                 && $jobs->first() instanceof AnalyzeCarouselContentPost
                 && $jobs->first()->contentPostId === $carousel->id;
         });
+    }
+
+    public function test_the_media_batch_rebuilds_the_dna_after_every_job_finishes(): void
+    {
+        $creator = $this->creator();
+        $carousel = $this->carousel($creator, 'batch');
+
+        app(CreatorDnaEnrichment::class)->queue($creator->user->creatorProfile);
+
+        $this->assertSame(AnalyzeCarouselContentPost::UNAVAILABLE, $carousel->refresh()->carousel_analysis_status);
+        $this->assertSame('completed', $creator->user->creatorProfile()->firstOrFail()->media_enrichment_status);
     }
 
     public function test_the_dna_is_rebuilt_from_the_spoken_scripts(): void

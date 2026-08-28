@@ -67,11 +67,34 @@ services:
       - app
     restart: unless-stopped
 
-  # Runs analysis, imports and discovery work, and acts as a fallback for remix
-  # jobs if the dedicated worker is unavailable.
+  # Runs imports and discovery work, and acts as a fallback for remix jobs if the
+  # dedicated worker is unavailable.
   queue:
     <<: *backend
-    command: ["php", "artisan", "queue:work", "--queue=remix,analysis,interactive,default", "--tries=3", "--timeout=150", "--sleep=1", "--max-time=3600"]
+    command: ["php", "artisan", "queue:work", "--queue=remix,interactive,default", "--tries=3", "--timeout=150", "--sleep=1", "--max-time=3600"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      app:
+        condition: service_started
+
+  # The first Creator DNA never waits behind video or visual analysis.
+  onboarding-queue:
+    <<: *backend
+    command: ["php", "artisan", "queue:work", "--queue=onboarding", "--tries=3", "--timeout=180", "--sleep=1", "--max-time=3600"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      app:
+        condition: service_started
+
+  # Reels and carousels are batched, and two workers consume the batch in
+  # parallel. Scale this service further without changing application code.
+  analysis-queue:
+    <<: *backend
+    command: ["php", "artisan", "queue:work", "--queue=analysis", "--tries=3", "--timeout=180", "--sleep=1", "--max-time=3600"]
+    deploy:
+      replicas: 2
     depends_on:
       postgres:
         condition: service_healthy

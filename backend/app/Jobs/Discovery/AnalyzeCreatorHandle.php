@@ -78,7 +78,7 @@ class AnalyzeCreatorHandle implements ShouldQueue
         // A connected account gets the authenticated import instead, which sees
         // insights this scrape cannot. Nothing is left to wait for here.
         if (InstagramAccount::query()->where('user_id', $this->userId)->exists()) {
-            $this->stage($profile, 'completed');
+            $this->complete($profile);
 
             return;
         }
@@ -186,6 +186,11 @@ class AnalyzeCreatorHandle implements ShouldQueue
                 'exception' => $exception,
             ]);
             $this->complete($profile);
+            $profile->forceFill([
+                'media_enrichment_status' => 'failed',
+                'media_enrichment_error' => 'media_import_unavailable',
+                'media_enrichment_completed_at' => now(),
+            ])->save();
         }
 
         // The niche is what the feed is built from, so fill it as soon as there
@@ -265,7 +270,11 @@ class AnalyzeCreatorHandle implements ShouldQueue
     private function stop(CreatorProfile $profile, string $reason): void
     {
         $this->stage($profile, 'failed');
-        $profile->forceFill(['analysis_error' => $reason, 'analysis_completed_at' => now()])->save();
+        $profile->forceFill([
+            'analysis_error' => $reason,
+            'analysis_completed_at' => now(),
+            'analysis_stage_started_at' => null,
+        ])->save();
     }
 
     public function failed(?Throwable $exception): void
@@ -273,7 +282,11 @@ class AnalyzeCreatorHandle implements ShouldQueue
         CreatorProfile::query()
             ->where('user_id', $this->userId)
             ->when($this->username, fn ($query) => $query->where('instagram_username', $this->username))
-            ->update(['analysis_status' => 'failed', 'analysis_error' => 'analysis_unavailable']);
+            ->update([
+                'analysis_status' => 'failed',
+                'analysis_error' => 'analysis_unavailable',
+                'analysis_completed_at' => now(),
+            ]);
     }
 
     private function isCurrent(CreatorProfile $profile, string $username): bool

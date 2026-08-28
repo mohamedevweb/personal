@@ -96,7 +96,7 @@
       "reassuranceTwo": "Personal ne publie jamais à votre place"
     },
     "proof": {
-      "scanned": "Vos 25 derniers posts, lus une fois",
+      "scanned": "Vos 30 derniers posts, lus une fois",
       "outliers": "Des outliers, pas des top posts",
       "niches": "Votre niche, pas internet",
       "voice": "Votre voix, apprise de vos posts",
@@ -121,7 +121,7 @@
       "steps": {
         "understand": {
           "title": "Comprendre",
-          "body": "Connectez Instagram une fois. Personal lit vos 25 derniers posts et vous écrit noir sur blanc ce qu'il a compris.",
+          "body": "Connectez Instagram une fois. Personal lit vos 30 derniers posts et vous écrit noir sur blanc ce qu'il a compris.",
           "caption": "Lu en direct depuis votre compte"
         },
         "discover": {
@@ -370,8 +370,6 @@
       "understand": "Comprendre"
     },
     "or": "ou",
-    "handleTitle": "Renseigne simplement ton handle",
-    "handleCopy": "Personal l’utilisera pour identifier ton univers, sans accéder à ton compte Instagram.",
     "handleLabel": "Ton handle Instagram",
     "handlePlaceholder": "{'@'}tonhandle",
     "saveHandle": "Continuer",
@@ -384,7 +382,7 @@
       "working": "En cours…",
       "steps": {
         "reading_profile": "Récupération de ton profil, ta bio et tes abonnés",
-        "importing_posts": "Lecture de tes 30 derniers posts",
+        "importing_posts": "Lecture de tes 12 derniers posts",
         "reading_voice": "Analyse de tes légendes et de ton ton",
         "mapping_audience": "Identification de ton audience et de ta niche",
         "transcribing_reels": "Analyse de tes Reels et de tes carrousels"
@@ -422,7 +420,7 @@
     },
     "preview": {
       "handle": "{'@'}votrecompte",
-      "bio": "Vos vingt-cinq derniers posts, vos formats, vos chiffres. Rien d’autre à remplir.",
+      "bio": "Vos trente derniers posts, vos formats, vos chiffres. Rien d’autre à remplir.",
       "posts": "publications",
       "followers": "abonnés",
       "following": "abonnements",
@@ -585,7 +583,9 @@
     },
     "nicheInsufficient": "Pas encore assez de contenu pour déterminer ta niche",
     "analysis": {
-      "inProgress": "Personal transcrit tes Reels et finalise ton profil.",
+      "inProgress": "Personal lit ton profil.",
+      "mediaInProgress": "Ton Creator DNA est prêt. Personal l’affine avec tes Reels et tes carrousels en arrière-plan.",
+      "mediaFailed": "Ton Creator DNA est prêt. Certains contenus n’ont pas pu être lus, Personal réessaiera plus tard.",
       "unavailable": "Personal n’a pas pu analyser ce profil pour le moment. Réessaie.",
       "insufficient": "Instagram ne fournit pas encore assez de signaux. Tu peux compléter ces informations manuellement."
     },

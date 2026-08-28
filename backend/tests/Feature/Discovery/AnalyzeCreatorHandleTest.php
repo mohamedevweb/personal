@@ -41,6 +41,7 @@ class AnalyzeCreatorHandleTest extends TestCase
             ->assertJsonPath('instagram_username', 'founder.creator');
 
         Queue::assertPushed(AnalyzeCreatorHandle::class, fn (AnalyzeCreatorHandle $job): bool => $job->userId === $user->id);
+        Queue::assertPushed(AnalyzeCreatorHandle::class, fn (AnalyzeCreatorHandle $job): bool => $job->queue === 'onboarding');
     }
 
     public function test_saving_the_same_handle_again_does_not_scrape_again(): void
@@ -142,6 +143,8 @@ class AnalyzeCreatorHandleTest extends TestCase
         $profile = $user->creatorProfile()->firstOrFail();
         $this->assertNotNull($profile->followers_count);
         $this->assertNotNull($profile->analysis_started_at);
+        $this->assertNotNull($profile->analysis_completed_at);
+        $this->assertArrayHasKey('reading_profile', $profile->analysis_timings);
     }
 
     public function test_a_profile_that_cannot_be_read_stops_with_a_reason(): void

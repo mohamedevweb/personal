@@ -100,7 +100,7 @@ const analysis = computed(() => status.value.analysis ?? null)
 
 const analysisStages = computed<HandleAnalysisStage[]>(() => analysis.value?.stages?.length
   ? analysis.value.stages
-  : ['reading_profile', 'importing_posts', 'reading_voice', 'mapping_audience', 'transcribing_reels'])
+  : ['reading_profile', 'importing_posts', 'reading_voice', 'mapping_audience'])
 
 // 'idle' is a profile that predates the analysis: nothing is running, so nothing
 // is worth waiting for either.
@@ -297,7 +297,7 @@ function enterApp() {
 }
 
 onMounted(async () => {
-  await loadStatus()
+  await loadStatus(false)
   if (status.value.onboarding_complete) return enterApp()
 
   if (route.query.instagram === 'connected'
@@ -350,13 +350,7 @@ onMounted(async () => {
           </div>
 
           <form class="rounded-[20px] border border-[var(--line)] bg-[var(--surface)] p-5" @submit.prevent="saveAccountHandle">
-            <label for="instagram-account-handle" class="block text-sm font-semibold">
-              {{ $t('onboarding.handleTitle') }}
-            </label>
-            <p class="mt-1.5 text-[13px] leading-5 text-[var(--muted)]">
-              {{ $t('onboarding.handleCopy') }}
-            </p>
-            <div class="mt-4 flex flex-col gap-2 sm:flex-row">
+            <div class="flex flex-col gap-2 sm:flex-row">
               <input
                 id="instagram-account-handle"
                 v-model="accountHandleInput"

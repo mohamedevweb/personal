@@ -5,15 +5,16 @@ namespace App\Jobs\Content;
 use App\Models\ContentPost;
 use App\Services\Instagram\ContentMedia;
 use App\Services\Llm\CarouselVisualAnalysisService;
+use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Throwable;
 
-/** Reads every available slide of one carousel without holding up the chain. */
+/** Reads the selected slides of one carousel without holding up the batch. */
 class AnalyzeCarouselContentPost implements ShouldBeUnique, ShouldQueue
 {
-    use Queueable;
+    use Batchable, Queueable;
 
     public const DONE = 'done';
 
@@ -51,22 +52,30 @@ class AnalyzeCarouselContentPost implements ShouldBeUnique, ShouldQueue
         }
 
         if ($post->format !== 'carousel' || ContentMedia::frames($post) === [] || ! config('services.openai.api_key')) {
-            $this->store($post, null, self::UNAVAILABLE);
+            $this->store($post, null, self::UNAVAILABLE, 0);
 
             return;
         }
 
+        $startedAt = hrtime(true);
+        $post->forceFill(['carousel_analysis_started_at' => now()])->save();
         $result = $analysis->analyze($post);
-        $this->store($post, $result, $result === null ? self::FAILED : self::DONE);
+        $this->store(
+            $post,
+            $result,
+            $result === null ? self::FAILED : self::DONE,
+            max(0, (int) round((hrtime(true) - $startedAt) / 1_000_000)),
+        );
     }
 
     /** @param array<string, mixed>|null $analysis */
-    private function store(ContentPost $post, ?array $analysis, string $status): void
+    private function store(ContentPost $post, ?array $analysis, string $status, int $durationMs): void
     {
         $post->forceFill([
             'carousel_analysis' => $status === self::DONE ? $analysis : $post->carousel_analysis,
             'carousel_analysis_status' => $status,
             'carousel_analyzed_at' => $status === self::DONE ? now() : $post->carousel_analyzed_at,
+            'carousel_analysis_duration_ms' => $durationMs,
         ])->save();
     }
 

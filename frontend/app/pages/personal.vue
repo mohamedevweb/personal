@@ -17,6 +17,7 @@ const { apiFetch } = usePersonalApi()
 const {
   status: instagramStatus,
   analysisRunning,
+  mediaEnrichmentRunning,
   loadStatus: loadInstagramStatus,
   startPolling: startInstagramPolling
 } = useInstagram()
@@ -74,6 +75,8 @@ const profileAnalysisRunning = computed(() => [
 ].includes(profile.value?.analysis_status || ''))
 const analysisMessage = computed(() => {
   if (profileAnalysisRunning.value) return t('personal.analysis.inProgress')
+  if (mediaEnrichmentRunning.value) return t('personal.analysis.mediaInProgress')
+  if (instagramStatus.value.media_enrichment?.status === 'failed') return t('personal.analysis.mediaFailed')
   if (analysisStatus.value === 'analysis_unavailable') return t('personal.analysis.unavailable')
   if (analysisStatus.value === 'insufficient_evidence') return t('personal.analysis.insufficient')
   return null
@@ -157,7 +160,7 @@ async function loadProfile() {
     instagramAvatarFailed.value = false
     avatarFailed.value = false
     await loadInstagramStatus()
-    if (analysisRunning.value) startInstagramPolling()
+    if (analysisRunning.value || mediaEnrichmentRunning.value) startInstagramPolling()
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('personal.loadError')))
   } finally {
@@ -175,6 +178,12 @@ async function toggleSaved(post: ContentPost) {
 }
 
 watch(() => instagramStatus.value.analysis?.status, async (status, previousStatus) => {
+  if (status !== previousStatus && (status === 'completed' || status === 'failed')) {
+    await loadProfile()
+  }
+})
+
+watch(() => instagramStatus.value.media_enrichment?.status, async (status, previousStatus) => {
   if (status !== previousStatus && (status === 'completed' || status === 'failed')) {
     await loadProfile()
   }

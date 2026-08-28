@@ -134,9 +134,28 @@ class InstagramOAuthTest extends TestCase
         $response->assertOk()
             ->assertJsonPath('inspiration_count', 0)
             ->assertJsonPath('onboarding_complete', true)
+            ->assertJsonPath('media_enrichment.status', 'idle')
             ->assertJsonMissing(['access_token' => 'must-never-leak']);
         $this->assertStringNotContainsString('must-never-leak', $response->getContent());
         $this->assertNotNull($user->fresh()->onboarding_completed_at);
+    }
+
+    public function test_progress_returns_only_the_fields_needed_by_polling(): void
+    {
+        $user = User::factory()->create();
+        $user->creatorProfile()->create([
+            'instagram_username' => 'progress.creator',
+            'analysis_status' => 'reading_voice',
+            'media_enrichment_status' => 'idle',
+        ]);
+
+        $this->actingAs($user)
+            ->getJson('/api/integrations/instagram/progress')
+            ->assertOk()
+            ->assertJsonPath('analysis.status', 'reading_voice')
+            ->assertJsonPath('media_enrichment.status', 'idle')
+            ->assertJsonMissingPath('inspiration_count')
+            ->assertJsonMissingPath('profile');
     }
 
     public function test_user_can_provide_a_handle_without_connecting_oauth(): void

@@ -106,6 +106,8 @@ export interface PersonalProfile {
   content_strengths: string[] | null
   voice_profile: string | null
   analysis_status?: 'idle' | 'queued' | 'reading_profile' | 'importing_posts' | 'reading_voice' | 'mapping_audience' | 'transcribing_reels' | 'completed' | 'failed'
+  media_enrichment_status?: 'idle' | 'queued' | 'importing_media' | 'processing' | 'completed' | 'failed'
+  media_enrichment_error?: string | null
   creator_dna?: {
     primary_niche: string | null
     sub_niches: string[]

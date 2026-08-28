@@ -5,19 +5,20 @@ namespace App\Jobs\Content;
 use App\Models\ContentPost;
 use App\Services\Discovery\ReelVideoFetcher;
 use App\Services\Llm\AudioTranscriptionService;
+use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Throwable;
 
 /**
- * Reads the spoken script of one reel. Never throws: a chain that transcribes a
- * batch of reels must keep going when one video has expired, and an analysis that
+ * Reads the spoken script of one reel. Never throws: a batch that transcribes
+ * several reels must keep going when one video has expired, and an analysis that
  * follows it must still run on the caption alone.
  */
 class TranscribeContentPost implements ShouldBeUnique, ShouldQueue
 {
-    use Queueable;
+    use Batchable, Queueable;
 
     public const DONE = 'done';
 
@@ -57,11 +58,13 @@ class TranscribeContentPost implements ShouldBeUnique, ShouldQueue
         }
 
         if ($post->format !== 'reel' || ! $post->video_url) {
-            $this->store($post, null, self::UNAVAILABLE);
+            $this->store($post, null, self::UNAVAILABLE, 0);
 
             return;
         }
 
+        $startedAt = hrtime(true);
+        $post->forceFill(['transcription_started_at' => now()])->save();
         $reached = false;
         $transcript = $videos->withVideo(
             $post->video_url,
@@ -79,16 +82,22 @@ class TranscribeContentPost implements ShouldBeUnique, ShouldQueue
             // reachable at all. Neither is an error to retry.
             $transcript === '' || ! $reached => self::UNAVAILABLE,
             default => self::FAILED,
-        });
+        }, $this->elapsedMilliseconds($startedAt));
     }
 
-    private function store(ContentPost $post, ?string $transcript, string $status): void
+    private function store(ContentPost $post, ?string $transcript, string $status, int $durationMs): void
     {
         $post->forceFill([
             'transcript' => $status === self::DONE ? $transcript : $post->transcript,
             'transcript_status' => $status,
             'transcribed_at' => $status === self::DONE ? now() : $post->transcribed_at,
+            'transcription_duration_ms' => $durationMs,
         ])->save();
+    }
+
+    private function elapsedMilliseconds(int $startedAt): int
+    {
+        return max(0, (int) round((hrtime(true) - $startedAt) / 1_000_000));
     }
 
     /** Known before the download, so an over-long reel never costs bandwidth. */

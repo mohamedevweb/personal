@@ -40,6 +40,8 @@ class TranscribeContentPostTest extends TestCase
         $this->assertSame('Everyone has a dream. Most people never start.', $post->transcript);
         $this->assertSame(TranscribeContentPost::DONE, $post->transcript_status);
         $this->assertNotNull($post->transcribed_at);
+        $this->assertNotNull($post->transcription_started_at);
+        $this->assertNotNull($post->transcription_duration_ms);
     }
 
     public function test_a_post_that_is_not_a_reel_is_never_downloaded(): void
@@ -86,7 +88,7 @@ class TranscribeContentPostTest extends TestCase
         $this->assertSame(TranscribeContentPost::UNAVAILABLE, $post->refresh()->transcript_status);
     }
 
-    public function test_a_transcription_failure_is_retryable_and_keeps_the_chain_alive(): void
+    public function test_a_transcription_failure_is_retryable_and_keeps_the_batch_alive(): void
     {
         $this->fakeCdn();
         $this->bindOpenAi(new Response(500, [], '{"error":{"message":"boom"}}'));

@@ -57,6 +57,12 @@ class RebuildCreatorDna implements ShouldBeUnique, ShouldQueue
             return;
         }
 
+        if (data_get($profile->creator_dna, 'analysis_method') === 'manual') {
+            $this->complete($profile);
+
+            return;
+        }
+
         if (! $creator) {
             $this->complete($profile);
 

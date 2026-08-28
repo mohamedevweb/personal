@@ -48,7 +48,13 @@ class CompleteCreatorDnaMediaImport implements ShouldBeUnique, ShouldQueue
         $profile = CreatorProfile::query()->where('user_id', $this->userId)->first();
         $creator = Creator::query()->where('user_id', $this->userId)->first();
 
-        if (! $profile || ! $creator || ! $this->isCurrent($profile)) {
+        if (! $profile || ! $this->isCurrent($profile)) {
+            return;
+        }
+
+        if (! $creator) {
+            $this->failProfile($profile, 'creator_identity_unavailable');
+
             return;
         }
 
@@ -61,7 +67,7 @@ class CompleteCreatorDnaMediaImport implements ShouldBeUnique, ShouldQueue
         $profile->forceFill([
             'media_enrichment_status' => 'importing_media',
             'media_enrichment_error' => null,
-            'media_enrichment_started_at' => now(),
+            'media_enrichment_started_at' => $profile->media_enrichment_started_at ?? now(),
             'media_enrichment_completed_at' => null,
         ])->save();
 
@@ -80,18 +86,27 @@ class CompleteCreatorDnaMediaImport implements ShouldBeUnique, ShouldQueue
 
     public function failed(?Throwable $exception): void
     {
-        CreatorProfile::query()
+        $profile = CreatorProfile::query()
             ->where('user_id', $this->userId)
             ->where('instagram_username', $this->username)
-            ->update([
-                'media_enrichment_status' => 'failed',
-                'media_enrichment_error' => 'media_import_unavailable',
-                'media_enrichment_completed_at' => now(),
-            ]);
+            ->first();
+
+        if ($profile) {
+            $this->failProfile($profile, 'media_import_unavailable');
+        }
     }
 
     private function isCurrent(CreatorProfile $profile): bool
     {
         return strcasecmp((string) $profile->fresh()?->instagram_username, $this->username) === 0;
+    }
+
+    private function failProfile(CreatorProfile $profile, string $error): void
+    {
+        $profile->forceFill([
+            'media_enrichment_status' => 'failed',
+            'media_enrichment_error' => $error,
+            'media_enrichment_completed_at' => now(),
+        ])->save();
     }
 }
