@@ -4,6 +4,7 @@ namespace Tests\Feature\Creator;
 
 use App\Jobs\Content\AnalyzeCarouselContentPost;
 use App\Jobs\Content\TranscribeContentPost;
+use App\Jobs\Creator\CompleteCreatorDnaMediaImport;
 use App\Jobs\Creator\RebuildCreatorDna;
 use App\Jobs\Discovery\AnalyzeCreatorHandle;
 use App\Models\ContentPost;
@@ -18,6 +19,7 @@ use App\Services\Discovery\CreatorMarketDetector;
 use App\Services\Discovery\InstagramDataProvider;
 use App\Services\Instagram\NicheDetectionService;
 use App\Services\Llm\LlmJsonService;
+use Illuminate\Bus\PendingBatch;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Tests\TestCase;
@@ -55,10 +57,17 @@ class CreatorDnaEnrichmentTest extends TestCase
             ->whereNotNull('video_url')
             ->exists());
 
-        Bus::assertDispatched(TranscribeContentPost::class, fn (TranscribeContentPost $job): bool => collect($job->chained)
-            ->map(fn (string $chained): string => get_class(unserialize($chained)))
-            ->last() === RebuildCreatorDna::class);
-        $this->assertSame('transcribing_reels', $user->creatorProfile()->firstOrFail()->analysis_status);
+        // Onboarding no longer waits on the media pass: the caption-based DNA is
+        // complete on its own, and the deeper read is handed to its own job.
+        Bus::assertDispatched(
+            CompleteCreatorDnaMediaImport::class,
+            fn (CompleteCreatorDnaMediaImport $job): bool => $job->userId === $user->id
+                && $job->username === 'founder.creator',
+        );
+
+        $profile = $user->creatorProfile()->firstOrFail();
+        $this->assertSame('completed', $profile->analysis_status);
+        $this->assertSame('queued', $profile->media_enrichment_status);
     }
 
     public function test_the_transcribed_sample_mixes_what_worked_with_what_is_recent(): void
@@ -93,10 +102,13 @@ class CreatorDnaEnrichmentTest extends TestCase
 
         app(CreatorDnaEnrichment::class)->queue($creator->user->creatorProfile);
 
-        Bus::assertDispatched(TranscribeContentPost::class, fn (TranscribeContentPost $job): bool => $job->contentPostId === $pending->id
-            && collect($job->chained)
-                ->map(fn (string $chained): string => get_class(unserialize($chained)))
-                ->all() === [RebuildCreatorDna::class]);
+        Bus::assertBatched(function (PendingBatch $batch) use ($pending): bool {
+            $jobs = collect($batch->jobs)->flatten();
+
+            return $jobs->count() === 1
+                && $jobs->first() instanceof TranscribeContentPost
+                && $jobs->first()->contentPostId === $pending->id;
+        });
     }
 
     public function test_an_unread_carousel_is_queued_before_the_dna_rebuild(): void
@@ -107,10 +119,13 @@ class CreatorDnaEnrichmentTest extends TestCase
 
         app(CreatorDnaEnrichment::class)->queue($creator->user->creatorProfile);
 
-        Bus::assertDispatched(AnalyzeCarouselContentPost::class, fn (AnalyzeCarouselContentPost $job): bool => $job->contentPostId === $carousel->id
-            && collect($job->chained)
-                ->map(fn (string $chained): string => get_class(unserialize($chained)))
-                ->all() === [RebuildCreatorDna::class]);
+        Bus::assertBatched(function (PendingBatch $batch) use ($carousel): bool {
+            $jobs = collect($batch->jobs)->flatten();
+
+            return $jobs->count() === 1
+                && $jobs->first() instanceof AnalyzeCarouselContentPost
+                && $jobs->first()->contentPostId === $carousel->id;
+        });
     }
 
     public function test_the_dna_is_rebuilt_from_the_spoken_scripts(): void
@@ -149,7 +164,7 @@ class CreatorDnaEnrichmentTest extends TestCase
         );
         $this->assertSame(['Direct challenge', 'Unfinished story'], data_get($profile->creator_dna, 'hook_patterns'));
         $this->assertSame(1, data_get($profile->creator_dna, 'evidence.transcript_count'));
-        $this->assertSame('completed', $profile->analysis_status);
+        $this->assertSame('completed', $profile->media_enrichment_status);
         $this->assertStringContainsString('<reel_script index="1">', $llm->input);
         $this->assertStringContainsString('Most people never start.', $llm->input);
         $this->assertStringContainsString('never treat it as a source of facts', $llm->input);
@@ -221,7 +236,7 @@ class CreatorDnaEnrichmentTest extends TestCase
         $profile->refresh();
         $this->assertSame('Entrepreneurship', $profile->niche);
         $this->assertSame('llm', data_get($profile->creator_dna, 'analysis_method'));
-        $this->assertSame('completed', $profile->analysis_status);
+        $this->assertSame('completed', $profile->media_enrichment_status);
     }
 
     public function test_a_dna_the_creator_wrote_themselves_is_never_transcribed_over(): void
