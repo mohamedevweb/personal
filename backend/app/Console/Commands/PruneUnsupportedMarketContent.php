@@ -31,7 +31,7 @@ class PruneUnsupportedMarketContent extends Command
         }
 
         try {
-            $redetected = $this->option('redetect') ? $this->redetectMarkets($marketDetector) : 0;
+            $redetected = $this->option('redetect') ? $this->redetectMarkets($marketDetector, $markets) : 0;
             $unsupportedCreators = $this->unsupportedCreators($markets);
             $unsupportedPosts = ContentPost::query()
                 ->whereIn('creator_id', (clone $unsupportedCreators)->select('id'));
@@ -135,27 +135,36 @@ class PruneUnsupportedMarketContent extends Command
             });
     }
 
-    private function redetectMarkets(CreatorMarketDetector $marketDetector): int
+    private function redetectMarkets(CreatorMarketDetector $marketDetector, array $allowedMarkets): int
     {
         $count = 0;
 
         Creator::query()
             ->whereNull('user_id')
             ->where('is_catalog_seed', false)
-            ->eachById(function (Creator $creator) use ($marketDetector, &$count): void {
+            ->eachById(function (Creator $creator) use ($marketDetector, $allowedMarkets, &$count): void {
                 $captions = $creator->posts()
                     ->latest('published_at')
                     ->limit(20)
                     ->pluck('caption')
                     ->filter()
                     ->implode("\n");
-                $metadata = json_encode($creator->metadata, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '';
                 $detection = $marketDetector->detect(implode("\n", array_filter([
                     $creator->display_name,
                     $creator->bio,
-                    $metadata,
                     $captions,
                 ])));
+                $currentMarketIsAllowed = in_array($creator->market, $allowedMarkets, true);
+                $detectedMarketIsUnsupported = $detection['market'] !== null
+                    && ! in_array($detection['market'], $allowedMarkets, true);
+
+                if ($currentMarketIsAllowed && ! $detectedMarketIsUnsupported) {
+                    return;
+                }
+
+                if ($creator->market === $detection['market'] && $creator->primary_language === $detection['language']) {
+                    return;
+                }
 
                 $creator->update([
                     'market' => $detection['market'],

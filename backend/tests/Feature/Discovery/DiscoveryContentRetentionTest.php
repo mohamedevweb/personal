@@ -122,6 +122,15 @@ class DiscoveryContentRetentionTest extends TestCase
 
     public function test_market_cleanup_redetects_spanish_content_before_strict_removal(): void
     {
+        $ambiguousAllowedCreator = Creator::query()->create([
+            'username' => 'ambiguous-us-account', 'display_name' => 'Ambiguous US Account', 'niche' => 'business',
+            'market' => 'US', 'primary_language' => 'en',
+            'followers' => 50000, 'average_views' => 10000, 'average_likes' => 1000,
+            'metadata' => ['country_code' => 'BR'],
+        ]);
+        $ambiguousPost = $this->storePost($ambiguousAllowedCreator, 'ambiguous-post', 1);
+        $ambiguousPost->update(['caption' => 'The creator sharing weekly productivity tips']);
+
         $creator = Creator::query()->create([
             'username' => 'spanish-us-account', 'display_name' => 'Spanish US Account', 'niche' => 'music',
             'market' => 'US', 'primary_language' => 'en',
@@ -142,6 +151,9 @@ class DiscoveryContentRetentionTest extends TestCase
 
         $this->assertModelMissing($creator);
         $this->assertModelMissing($post);
+        $this->assertModelExists($ambiguousAllowedCreator);
+        $this->assertModelExists($ambiguousPost);
+        $this->assertSame('US', $ambiguousAllowedCreator->fresh()->market);
     }
 
     private function storePost(Creator $creator, string $hook, int $days): ContentPost
