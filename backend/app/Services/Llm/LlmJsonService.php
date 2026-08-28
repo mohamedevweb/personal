@@ -53,7 +53,7 @@ class LlmJsonService
         try {
             $parameters = [
                 'model' => (string) config('services.openai.model'),
-                'instructions' => $instructions,
+                'instructions' => $this->instructions($instructions),
                 'input' => $input,
                 'max_output_tokens' => (int) config('services.openai.analysis_max_output_tokens'),
                 'text' => [
@@ -91,7 +91,7 @@ class LlmJsonService
                 outputConfig: BetaOutputConfig::with(
                     format: BetaJSONOutputFormat::with(schema: $schema),
                 ),
-                system: $instructions,
+                system: $this->instructions($instructions),
             );
 
             foreach ($message->content as $block) {
@@ -115,6 +115,11 @@ class LlmJsonService
 
         $decoded = json_decode($text, true);
 
-        return is_array($decoded) ? $decoded : null;
+        return is_array($decoded) ? GeneratedText::normalizeArray($decoded) : null;
+    }
+
+    private function instructions(string $instructions): string
+    {
+        return rtrim($instructions)."\n\n".GeneratedText::STYLE_RULE;
     }
 }

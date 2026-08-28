@@ -32,7 +32,7 @@ class MockContentGenerationService implements ContentGenerationService
             ?? 'You have been building Personal after studying how creators find ideas that fit their own story.';
         $idea = $moment
             ? $this->firstSentence($moment->content)
-            : 'I spent months looking at creator tools before realizing the real problem was not publishing—it was knowing what to say.';
+            : 'I spent months looking at creator tools before realizing the real problem was not publishing. It was knowing what to say.';
 
         $base = [
             'original_pattern' => $source->hook,
@@ -58,7 +58,7 @@ class MockContentGenerationService implements ContentGenerationService
                 ['id' => 3, 'text' => 'But every conversation revealed the same hidden problem.'],
                 ['id' => 4, 'text' => 'They did not need more blank pages. They needed better starting points.'],
                 ['id' => 5, 'text' => 'The shift: connect what is working with what is actually happening in your life.'],
-                ['id' => 6, 'text' => 'That is the idea I am building now—and it changed how I think about personal branding.'],
+                ['id' => 6, 'text' => 'That is the idea I am building now, and it changed how I think about personal branding.'],
             ]],
             'reel' => $base + [
                 'hook' => $idea,
@@ -68,7 +68,7 @@ class MockContentGenerationService implements ContentGenerationService
                 'cta' => 'What is one assumption you changed after talking to customers?',
             ],
             default => $base + [
-                'caption' => $idea."\n\nI thought creators needed another way to produce content faster. What I kept hearing was different: the hardest part happens before the blank page.\n\nThe useful content was already there—in customer conversations, mistakes, pivots and small wins. The missing piece was knowing which story to tell, and why now.\n\nThat realization changed what I decided to build.",
+                'caption' => $idea."\n\nI thought creators needed another way to produce content faster. What I kept hearing was different: the hardest part happens before the blank page.\n\nThe useful content was already there, in customer conversations, mistakes, pivots and small wins. The missing piece was knowing which story to tell, and why now.\n\nThat realization changed what I decided to build.",
             ],
         };
     }
@@ -124,6 +124,6 @@ class MockContentGenerationService implements ContentGenerationService
 
     private function firstSentence(string $content): string
     {
-        return rtrim(str($content)->before('.')->toString(), '.').'—and it changed how I think about what to build next.';
+        return rtrim(str($content)->before('.')->toString(), '.').', and it changed how I think about what to build next.';
     }
 }

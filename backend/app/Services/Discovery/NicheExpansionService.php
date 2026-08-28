@@ -155,7 +155,7 @@ class NicheExpansionService
         }
 
         $limit = (int) config('services.discovery.hashtag_limit');
-        $context = trim(($profile?->niche ?? '').' — topics: '.implode(', ', $seed));
+        $context = trim(($profile?->niche ?? '').'. Topics: '.implode(', ', $seed));
 
         $result = $this->llm->object(
             "You are an Instagram growth strategist. Given a creator's niche, return the {$limit} most relevant, "

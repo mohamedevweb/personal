@@ -5,6 +5,7 @@ namespace App\Services\Chat;
 use Anthropic\Beta\Messages\BetaTextBlock;
 use Anthropic\Client as AnthropicClient;
 use App\Models\User;
+use App\Services\Llm\GeneratedText;
 use Illuminate\Support\Facades\Log;
 use OpenAI\Contracts\ClientContract as OpenAiClient;
 use Throwable;
@@ -58,7 +59,7 @@ class ChatService
 
             $text = trim((string) $response->outputText);
 
-            return $text !== '' ? $text : $this->fallback();
+            return $text !== '' ? GeneratedText::normalize($text) : $this->fallback();
         } catch (Throwable $exception) {
             Log::warning('Chat reply (OpenAI) failed; using fallback.', ['exception' => $exception]);
 
@@ -79,7 +80,7 @@ class ChatService
 
             foreach ($message->content as $block) {
                 if ($block instanceof BetaTextBlock && trim($block->text) !== '') {
-                    return trim($block->text);
+                    return GeneratedText::normalize(trim($block->text));
                 }
             }
         } catch (Throwable $exception) {
@@ -100,6 +101,8 @@ class ChatService
         brief. Offer specific hooks, angles, captions and formats rather than generic
         advice, and ask a sharpening question when the request is vague. Keep replies
         to a few short paragraphs and never invent metrics or facts about the user.
+        Never use em dashes or en dashes. Use commas, full stops, parentheses, or
+        words instead.
         Reply in {$language}.
         PROMPT;
     }

@@ -45,9 +45,9 @@
     "copy": "Something broken, confusing, or missing? Write to us and a human on the team answers.",
     "cta": "Write to the team",
     "hint": "Opens your email app with a message ready to send to {address}.",
-    "subject": "Support / Feedback — Personal",
+    "subject": "Support / Feedback | Personal",
     "noAccount": "not signed in",
-    "body": "Hi Personal team,\n\nI want to give feedback or I need help with…\n\nFor example: I don't like the fact that the remix is…\n\nWhat I expected instead:\n\n\n—\nAccount: {account}\nPage: {page}"
+    "body": "Hi Personal team,\n\nI want to give feedback or I need help with…\n\nFor example: I don't like the fact that the remix is…\n\nWhat I expected instead:\n\n\nAccount: {account}\nPage: {page}"
   },
   "chat": {
     "open": "Open assistant",
@@ -238,7 +238,7 @@
   },
   "blog": {
     "head": {
-      "title": "Blog — Personal",
+      "title": "Blog | Personal",
       "description": "Notes on making content, AI applied to a voice, and building Personal."
     },
     "hero": {
@@ -255,7 +255,7 @@
   },
   "story": {
     "head": {
-      "title": "Story — Personal",
+      "title": "Story | Personal",
       "description": "Who is building Personal, why the tool exists, and the build in public along the way."
     },
     "hero": {
@@ -865,7 +865,7 @@
     "open": "How is this calculated?",
     "close": "Close",
     "comparedFormat": "Measured against the median of {'@'}{username}'s last {count} {format}.",
-    "comparedAccount": "Measured against the median of {'@'}{username}'s last {count} posts, every format together — too few of this one to have a normal of its own.",
+    "comparedAccount": "Measured against the median of {'@'}{username}'s last {count} posts across all formats. There are too few posts in this format to calculate its own normal.",
     "comparedUnknown": "Measured against {'@'}{username}'s own recent posts, not against other creators.",
     "normalLabel": "Their normal",
     "metrics": {
@@ -874,7 +874,7 @@
     },
     "formulaBoth": "Views count for 60% of the ratio, likes + comments + shares for the other 40%.",
     "formulaEngagement": "This format reports no views, so the ratio is likes, comments and shares only.",
-    "median": "A median, not an average — one viral post does not move it.",
+    "median": "A median, not an average. One viral post does not move it.",
     "floor": "Only posts above 1.2× carrying at least 500 likes and comments reach your feed.",
     "formats": {
       "reel": "Reels",
@@ -885,7 +885,7 @@
   "legal": {
     "privacy": {
       "head": {
-        "title": "Privacy Policy — Personal",
+        "title": "Privacy Policy | Personal",
         "description": "What Personal collects, why, who it is shared with, how long it is kept, and how to erase all of it."
       },
       "hero": {
@@ -927,7 +927,7 @@
         "controller": {
           "title": "Who is the data controller",
           "p": {
-            "who": "The controller under the General Data Protection Regulation (GDPR) is the publisher of the Personal service, available at usepersonal.app: [LEGAL ENTITY — legal form, registered address, company number].",
+            "who": "The controller under the General Data Protection Regulation (GDPR) is the publisher of the Personal service, available at usepersonal.app: [LEGAL ENTITY, legal form, registered address, company number].",
             "contact": "For any question about this policy, or to exercise your rights, write to privacy{'@'}usepersonal.app. We answer within one month at the latest.",
             "dpo": "Given the size of the service and the nature of the processing, no data protection officer has been appointed: requests are handled directly by the publisher."
           }
@@ -948,7 +948,7 @@
             },
             "profile": {
               "term": "Creator profile",
-              "detail": "Your niche, your audience description, your positioning, your tone, your topics, your current projects, your goals and your strengths — whether you write them yourself or they are inferred from your posts and then submitted to you for approval."
+              "detail": "Your niche, your audience description, your positioning, your tone, your topics, your current projects, your goals and your strengths, whether you write them yourself or they are inferred from your posts and then submitted to you for approval."
             },
             "moments": {
               "term": "Life Moments",
@@ -1006,27 +1006,27 @@
           },
           "items": {
             "service": {
-              "term": "Providing the service — performance of the contract",
+              "term": "Providing the service, performance of the contract",
               "detail": "Creating and securing your account, importing your posts, building your For You feed, generating drafts, and keeping your Moments and saved content."
             },
             "personalisation": {
-              "term": "Personalising recommendations — performance of the contract",
+              "term": "Personalising recommendations, performance of the contract",
               "detail": "Matching the formats that genuinely work in your niche against your positioning and your life moments, so that only what sounds like you is suggested."
             },
             "connection": {
-              "term": "Connecting Instagram — consent",
+              "term": "Connecting Instagram, consent",
               "detail": "Access to your account rests on the permission you grant at Meta. You can withdraw it at any time, without affecting the lawfulness of processing carried out beforehand."
             },
             "emails": {
-              "term": "Sending service email — performance of the contract",
+              "term": "Sending service email, performance of the contract",
               "detail": "Address verification, password resets and messages essential to the life of your account. No marketing without your prior agreement."
             },
             "security": {
-              "term": "Securing the service — legitimate interest",
+              "term": "Securing the service, legitimate interest",
               "detail": "Rate limiting, abuse detection, technical logs and backups. Our interest is protecting accounts, and it never overrides your fundamental rights and freedoms."
             },
             "improve": {
-              "term": "Improving the product — legitimate interest",
+              "term": "Improving the product, legitimate interest",
               "detail": "Understanding errors and usage in order to fix and evolve the service. We work on aggregated or anonymised data wherever that is possible."
             },
             "analytics": {
@@ -1093,7 +1093,7 @@
         "transfers": {
           "title": "Transfers outside the European Union",
           "p": {
-            "text": "Some of our processors are established in the United States. Those transfers are governed by the European Commission's Standard Contractual Clauses and, where the provider is certified under it, by the EU–US Data Privacy Framework. You can request a copy of the applicable safeguards at privacy{'@'}usepersonal.app."
+            "text": "Some of our processors are established in the United States. Those transfers are governed by the European Commission's Standard Contractual Clauses and, where the provider is certified under it, by the EU/US Data Privacy Framework. You can request a copy of the applicable safeguards at privacy{'@'}usepersonal.app."
           }
         },
         "retention": {
@@ -1150,7 +1150,7 @@
             },
             "ratelimit": {
               "term": "Abuse limiting",
-              "detail": "Sensitive endpoints — sign-in, registration, content generation — are capped by request rate."
+              "detail": "Sensitive endpoints, including sign-in, registration and content generation, are capped by request rate."
             },
             "breach": {
               "term": "Data breach",
@@ -1198,7 +1198,7 @@
             },
             "complaint": {
               "term": "Complaint",
-              "detail": "Lodge a complaint with a supervisory authority — in France, the CNIL, 3 place de Fontenoy, TSA 80715, 75334 Paris Cedex 07, cnil.fr — if you believe your rights are not respected."
+              "detail": "Lodge a complaint with a supervisory authority, in France the CNIL at 3 place de Fontenoy, TSA 80715, 75334 Paris Cedex 07, cnil.fr, if you believe your rights are not respected."
             }
           },
           "note": "We answer within one month, extendable by two months for complex requests, in which case we tell you. We may ask you to verify your identity where there is reasonable doubt about who is making the request."
@@ -1253,7 +1253,7 @@
         "changes": {
           "title": "Changes to this policy",
           "p": {
-            "text": "This policy evolves with the product. The last updated date sits at the top of this page. Any substantial change — a new purpose, a new processor receiving your personal data, a change in retention — is notified to you by email or in the app before it takes effect."
+            "text": "This policy evolves with the product. The last updated date sits at the top of this page. Any substantial change, such as a new purpose, a new processor receiving your personal data or a change in retention, is notified to you by email or in the app before it takes effect."
           }
         },
         "contact": {
@@ -1267,7 +1267,7 @@
     },
     "terms": {
       "head": {
-        "title": "Terms of Service — Personal",
+        "title": "Terms of Service | Personal",
         "description": "The agreement between you and Personal: what the service does, what you may publish, what artificial intelligence does not guarantee, and how either side ends it."
       },
       "hero": {
@@ -1321,7 +1321,7 @@
         "publisher": {
           "title": "Who publishes Personal",
           "p": {
-            "who": "Personal is published by [LEGAL ENTITY — legal form, registered address, company number], acting as service provider under these terms.",
+            "who": "Personal is published by [LEGAL ENTITY, legal form, registered address, company number], acting as service provider under these terms.",
             "director": "Publication director: [PUBLICATION DIRECTOR]. Contact: legal{'@'}usepersonal.app.",
             "host": "The application and its PostgreSQL database are hosted with [HOSTING PROVIDER], in the European Union. The domain name and DNS zone are managed by OVH, 2 rue Kellermann, 59100 Roubaix, France."
           }
@@ -1388,7 +1388,7 @@
           "p": {
             "free": "Personal is free during early access. No payment method is requested, and no charge can be applied to you.",
             "later": "Paid plans may appear later. If that happens, we announce it by email at least 30 days beforehand, the new conditions apply only once you have accepted them, and you always keep the choice to leave rather than pay.",
-            "costs": "Your own costs — internet access, device, your Instagram account — remain yours."
+            "costs": "Your own costs, including internet access, your device and your Instagram account, remain yours."
           }
         },
         "instagram": {
@@ -1404,7 +1404,7 @@
             },
             "eligible": {
               "term": "Professional account",
-              "detail": "The connection requires an Instagram professional account — creator or business — as Meta requires for this API."
+              "detail": "The connection requires an Instagram professional account, creator or business, as Meta requires for this API."
             },
             "revoke": {
               "term": "Withdrawing access",
@@ -1437,7 +1437,7 @@
           "items": {
             "licence": {
               "term": "The permission we need",
-              "detail": "To run the service, you grant us a non-exclusive, worldwide, royalty-free licence to host, store, reproduce and process your content — solely to display it back to you, produce what you ask for, and operate the service. It lasts as long as you keep the content, and no longer."
+              "detail": "To run the service, you grant us a non-exclusive, worldwide, royalty-free licence to host, store, reproduce and process your content, solely to display it back to you, produce what you ask for, and operate the service. It lasts as long as you keep the content, and no longer."
             },
             "noTraining": {
               "term": "No model is trained on it",
@@ -1445,7 +1445,7 @@
             },
             "warrant": {
               "term": "What you promise us",
-              "detail": "That you hold the rights to whatever you put into Personal, and that it infringes nobody's rights — image, privacy, trade mark or copyright included."
+              "detail": "That you hold the rights to whatever you put into Personal, and that it infringes nobody's rights, including image, privacy, trade mark or copyright rights."
             },
             "backup": {
               "term": "Your own copies",
@@ -1497,7 +1497,7 @@
         "ourContent": {
           "title": "Our intellectual property",
           "p": {
-            "ours": "The Personal service — its code, its interface, its design, its name and its logo — belongs to the publisher and is protected. These terms grant you a personal, non-transferable right to use it, and nothing more.",
+            "ours": "The Personal service, its code, its interface, its design, its name and its logo, belongs to the publisher and is protected. These terms grant you a personal, non-transferable right to use it, and nothing more.",
             "output": "The texts generated for you are yours to use freely, including commercially. We claim no right over them. Note that a model may produce a similar text for someone else: no exclusivity can be guaranteed over a generated output.",
             "feedback": "If you send us an idea or a suggestion about the product, we may use it without owing you anything, and without that giving us any right over the rest of your content."
           }
@@ -1508,7 +1508,7 @@
             "asis": "The service is provided as it is, in early access. We put real care into it, but we do not promise that it will be available without interruption, free of error, or that it will meet a specific need of yours.",
             "maintenance": "We may interrupt the service for maintenance, security or a technical failure. Where an interruption is planned and significant, we announce it beforehand.",
             "evolve": "Features can be added, changed or withdrawn as the product develops. Where a change substantially reduces what the service does, we notify you by email or in the app before it takes effect, and you remain free to delete your account.",
-            "deps": "Part of the service depends on third parties — Meta, our AI providers, our host. Their outages become ours, and that is outside our control."
+            "deps": "Part of the service depends on third parties, including Meta, our AI providers and our host. Their outages become ours, and that is outside our control."
           }
         },
         "suspension": {
@@ -1527,7 +1527,7 @@
             },
             "effect": {
               "term": "What happens next",
-              "detail": "Closing the account ends your right to use the service and triggers the deletion of your data under the conditions set out in the Privacy Policy. Clauses meant to survive it — intellectual property, liability, governing law — do."
+              "detail": "Closing the account ends your right to use the service and triggers the deletion of your data under the conditions set out in the Privacy Policy. Clauses meant to survive it, including intellectual property, liability and governing law, do."
             },
             "shutdown": {
               "term": "If Personal stops",
@@ -1538,7 +1538,7 @@
         "liability": {
           "title": "Liability",
           "p": {
-            "ours": "We are liable for damage resulting directly from our own failure to meet these terms. That liability is neither excluded nor limited where the law forbids it — in particular for death or personal injury, gross negligence or wilful misconduct.",
+            "ours": "We are liable for damage resulting directly from our own failure to meet these terms. That liability is neither excluded nor limited where the law forbids it, in particular for death or personal injury, gross negligence or wilful misconduct.",
             "not": "We are not liable for what we do not control: the content you decide to publish, the results it does or does not produce, decisions taken by Instagram about your account, or the failure of a third-party service.",
             "cap": "Where the law allows a limit and you use Personal for professional purposes, our total liability is capped at the greater of the sums you paid us in the twelve months preceding the event and one hundred euros. Nothing in this section restricts the rights a consumer holds under mandatory law.",
             "yours": "You answer for the use you make of the service, and you hold us harmless from any third-party claim arising from content you published or from your breach of these terms."
@@ -1554,7 +1554,7 @@
         "privacy": {
           "title": "Personal data",
           "p": {
-            "policy": "How we handle your personal data — what we collect, why, who it is shared with, how long it is kept and how to erase it — is set out in full in our Privacy Policy, which forms part of this agreement.",
+            "policy": "How we handle your personal data, what we collect, why, who it is shared with, how long it is kept and how to erase it, is set out in full in our Privacy Policy, which forms part of this agreement.",
             "link": "Read it at usepersonal.app/privacy. If a point of these terms and a point of that policy disagree about personal data, the Privacy Policy prevails."
           },
           "cta": "Read the privacy policy"
@@ -1571,7 +1571,7 @@
           "p": {
             "law": "These terms are governed by French law. If you are a consumer resident in another European Union country, you keep the protection of the mandatory rules of your own country.",
             "first": "In a dispute, write to us first at legal{'@'}usepersonal.app. Most things are settled there, and faster.",
-            "mediation": "If you are a consumer and our answer does not satisfy you, you may refer the matter free of charge to a consumer mediator: [CONSUMER MEDIATOR — name, postal address and website], within one year of your written complaint.",
+            "mediation": "If you are a consumer and our answer does not satisfy you, you may refer the matter free of charge to a consumer mediator: [CONSUMER MEDIATOR, name, postal address and website], within one year of your written complaint.",
             "court": "Failing agreement, the dispute goes before the competent courts. Where you act as a professional, jurisdiction lies with the courts of [PUBLISHER'S REGISTERED OFFICE], including for urgent proceedings and where there are several defendants."
           }
         },

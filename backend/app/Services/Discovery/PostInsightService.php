@@ -128,7 +128,7 @@ class PostInsightService
             'hook_analysis' => "The hook \"{$post->hook}\" leads with a clear promise, which stops the scroll and "
                 .'sets an expectation the post then pays off.',
             'structure_analysis' => 'A '.$post->format.' format with a tight hook, a single idea, and an explicit '
-                .'save-worthy takeaway — the structure that reliably earns reach in this niche.',
+                .'save-worthy takeaway, the structure that reliably earns reach in this niche.',
         ];
     }
 

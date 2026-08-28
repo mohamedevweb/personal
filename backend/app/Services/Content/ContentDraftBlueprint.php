@@ -6,6 +6,7 @@ use App\Models\ContentPost;
 use App\Models\LifeMoment;
 use App\Models\Remix;
 use App\Models\User;
+use App\Services\Llm\GeneratedText;
 
 /**
  * Everything a model needs to draft a piece of content: the standing instructions,
@@ -25,7 +26,7 @@ class ContentDraftBlueprint
         Borrow only the structure of the source: its hook shape, the order it
         reveals information, the way it lands a takeaway. Never borrow its subject
         matter, its claims, or its phrasing. Every fact in what you write must come
-        from the creator's own material — if their material is thin, write something
+        from the creator's own material. If their material is thin, write something
         smaller and true rather than inventing detail, numbers, or anecdotes.
 
         The source is never a voice reference. Its cadence, vocabulary and persona
@@ -44,7 +45,7 @@ class ContentDraftBlueprint
     {
         $language = app()->getLocale() === 'fr' ? 'natural French' : 'English';
 
-        return self::SYSTEM."\n\nWrite every part of the draft in {$language}.";
+        return self::SYSTEM."\n\nWrite every part of the draft in {$language}.\n".GeneratedText::STYLE_RULE;
     }
 
     public function brief(ContentPost $source, User $user, string $format, ?LifeMoment $moment): string
@@ -52,7 +53,7 @@ class ContentDraftBlueprint
         $profile = $user->creatorProfile;
 
         $sections = [
-            'THE PATTERN THAT WORKED (structure only — do not reuse its subject or wording)',
+            'THE PATTERN THAT WORKED (structure only, do not reuse its subject or wording)',
             "Creator niche: {$source->creator->niche}",
             "Hook: {$source->hook}",
             "Caption: {$source->caption}",

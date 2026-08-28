@@ -17,7 +17,7 @@ class MockInstagramDiscoveryService implements ContentDiscoveryService
 
     private const HOOKS = [
         'The one %s mistake that quietly kills your reach',
-        'I studied 100 %s posts — here is the pattern',
+        'I studied 100 %s posts. Here is the pattern',
         'Why your %s content stopped growing (and the fix)',
         'The %s hook I steal for every viral post',
         '3 %s ideas you can film in under 10 minutes',

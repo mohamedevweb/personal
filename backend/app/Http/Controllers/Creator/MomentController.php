@@ -35,7 +35,7 @@ class MomentController extends Controller
             'user_id' => $request->user()->id,
             'life_moment_id' => $moment->id,
             'title' => 'Turn this moment into a story your audience can use',
-            'explanation' => 'This moment has a personal transformation and a concrete lesson—two strong signals for an authentic founder post.',
+            'explanation' => 'This moment has a personal transformation and a concrete lesson, two strong signals for an authentic founder post.',
             'relevance_score' => self::NEW_MOMENT_RELEVANCE,
             'origin' => 'life_moment',
         ]);

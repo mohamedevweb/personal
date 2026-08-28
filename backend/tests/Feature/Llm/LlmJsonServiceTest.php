@@ -45,6 +45,7 @@ class LlmJsonServiceTest extends TestCase
         $this->assertSame(['ok' => true], $result);
         $this->assertSame(5000, $sentBodies[0]['max_output_tokens']);
         $this->assertSame(['effort' => 'low'], $sentBodies[0]['reasoning']);
+        $this->assertStringContainsString('Never use em dashes or en dashes', $sentBodies[0]['instructions']);
     }
 
     /** @return array<string, mixed> */

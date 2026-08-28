@@ -6,6 +6,7 @@ use App\Exceptions\ContentGenerationException;
 use App\Models\ContentPost;
 use App\Models\LifeMoment;
 use App\Models\User;
+use App\Services\Llm\GeneratedText;
 
 /**
  * Turns a model's JSON answer into the payload the editor renders.
@@ -54,7 +55,7 @@ class ContentDraftAssembler
             throw new ContentGenerationException('Personal received an unusable rewrite. Please try again.');
         }
 
-        return $text;
+        return GeneratedText::normalize($text);
     }
 
     /**
@@ -93,6 +94,6 @@ class ContentDraftAssembler
             throw new ContentGenerationException('Personal received an unusable draft. Please try again.');
         }
 
-        return $decoded;
+        return GeneratedText::normalizeArray($decoded);
     }
 }
