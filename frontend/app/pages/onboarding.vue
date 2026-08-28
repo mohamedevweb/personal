@@ -321,7 +321,7 @@ onMounted(async () => {
       </div>
     </header>
 
-    <section class="mx-auto grid min-h-[calc(100vh-5rem)] max-w-6xl items-center gap-14 px-6 py-14 md:grid-cols-[1fr_0.88fr] md:px-10 md:py-20">
+    <section class="mx-auto grid min-h-[calc(100vh-5rem)] max-w-6xl items-start gap-14 px-6 py-14 md:grid-cols-[1fr_0.88fr] md:px-10 md:py-20">
       <div class="max-w-xl animate-rise">
         <template v-if="!status.connected && !status.instagram_username">
           <h1 class="font-serif text-5xl leading-[1.02] tracking-[-0.045em] md:text-7xl" v-html="$t('onboarding.connectTitle')" />
@@ -342,11 +342,6 @@ onMounted(async () => {
             {{ loading ? $t('onboarding.preparing') : $t('onboarding.continueWithInstagram') }}
             <span aria-hidden="true">↗</span>
           </button>
-
-          <p class="mt-5 flex items-center gap-2 text-xs text-[var(--faint)]">
-            <svg viewBox="0 0 20 20" class="h-4 w-4 fill-none stroke-current" stroke-width="1.5"><rect x="4" y="8" width="12" height="9" rx="2"/><path d="M7 8V6a3 3 0 016 0v2"/></svg>
-            {{ $t('onboarding.tokenNote') }}
-          </p>
 
           <div class="my-8 flex items-center gap-4 text-xs font-medium uppercase tracking-[.16em] text-[var(--faint)]">
             <span class="h-px flex-1 bg-[var(--line)]" />
@@ -680,8 +675,6 @@ onMounted(async () => {
               </span>
             </div>
           </div>
-
-          <p class="mt-7 font-serif text-xl leading-7 text-white/45">{{ $t('onboarding.placeholderQuote') }}</p>
         </div>
       </aside>
     </section>

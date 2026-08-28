@@ -96,7 +96,7 @@
       "reassuranceTwo": "Personal ne publie jamais à votre place"
     },
     "proof": {
-      "scanned": "Vos 40 derniers posts, lus une fois",
+      "scanned": "Vos 25 derniers posts, lus une fois",
       "outliers": "Des outliers, pas des top posts",
       "niches": "Votre niche, pas internet",
       "voice": "Votre voix, apprise de vos posts",
@@ -121,7 +121,7 @@
       "steps": {
         "understand": {
           "title": "Comprendre",
-          "body": "Connectez Instagram une fois. Personal lit vos 40 derniers posts et vous écrit noir sur blanc ce qu'il a compris.",
+          "body": "Connectez Instagram une fois. Personal lit vos 25 derniers posts et vous écrit noir sur blanc ce qu'il a compris.",
           "caption": "Lu en direct depuis votre compte"
         },
         "discover": {
@@ -365,7 +365,6 @@
     "connectCopy": "Personal utilise ton compte Instagram pour comprendre ton contenu, ta niche et ce qui marche déjà pour toi.",
     "preparing": "Préparation d’Instagram…",
     "continueWithInstagram": "Continuer avec Instagram",
-    "tokenNote": "Ton jeton d’accès reste chiffré sur le serveur de Personal.",
     "flow": {
       "label": "Progression de la personnalisation",
       "understand": "Comprendre"
@@ -421,10 +420,9 @@
       "learning_style": "Apprentissage de votre style",
       "finding_patterns": "Recherche de schémas"
     },
-    "placeholderQuote": "Votre contenu devient du contexte, pas un tableau de bord.",
     "preview": {
       "handle": "{'@'}votrecompte",
-      "bio": "Vos quarante derniers posts, vos formats, vos chiffres. Rien d’autre à remplir.",
+      "bio": "Vos vingt-cinq derniers posts, vos formats, vos chiffres. Rien d’autre à remplir.",
       "posts": "publications",
       "followers": "abonnés",
       "following": "abonnements",

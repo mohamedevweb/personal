@@ -96,7 +96,7 @@
       "reassuranceTwo": "Personal never posts for you"
     },
     "proof": {
-      "scanned": "Your last 40 posts, read once",
+      "scanned": "Your last 25 posts, read once",
       "outliers": "Outliers, not top posts",
       "niches": "Your niche, not the internet",
       "voice": "Your voice, learned from your posts",
@@ -121,7 +121,7 @@
       "steps": {
         "understand": {
           "title": "Understand",
-          "body": "Connect Instagram once. Personal reads your last 40 posts and tells you, in writing, what it understood.",
+          "body": "Connect Instagram once. Personal reads your last 25 posts and tells you, in writing, what it understood.",
           "caption": "Read live from your account"
         },
         "discover": {
@@ -365,7 +365,6 @@
     "connectCopy": "Personal uses your Instagram account to understand your content, niche and what already works for you.",
     "preparing": "Preparing Instagram…",
     "continueWithInstagram": "Continue with Instagram",
-    "tokenNote": "Your access token stays encrypted on Personal’s server.",
     "flow": {
       "label": "Personalization progress",
       "understand": "Understand"
@@ -421,10 +420,9 @@
       "learning_style": "Learning your style",
       "finding_patterns": "Finding patterns"
     },
-    "placeholderQuote": "Your content becomes context, not a dashboard.",
     "preview": {
       "handle": "{'@'}yourhandle",
-      "bio": "Your last forty posts, your formats, your numbers. Nothing else to fill in.",
+      "bio": "Your last twenty-five posts, your formats, your numbers. Nothing else to fill in.",
       "posts": "posts",
       "followers": "followers",
       "following": "following",
