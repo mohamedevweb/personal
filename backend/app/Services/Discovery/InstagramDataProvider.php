@@ -16,4 +16,11 @@ interface InstagramDataProvider
 
     /** @return Collection<int, DiscoveredProfile> */
     public function getRelatedAccounts(string $externalId, int $limit, ?string $username = null): Collection;
+
+    /**
+     * The current media of a single post. Listing endpoints omit carousel
+     * children and video files, and every Instagram url expires, so anything
+     * that has to read the media itself refetches it here first.
+     */
+    public function getPostMedia(string $sourceUrl): ?DiscoveredPostMedia;
 }

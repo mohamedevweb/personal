@@ -3,6 +3,7 @@
 namespace App\Jobs\Content;
 
 use App\Models\ContentPost;
+use App\Services\Discovery\ContentPostMediaRefresh;
 use App\Services\Instagram\ContentMedia;
 use App\Services\Llm\CarouselVisualAnalysisService;
 use Illuminate\Bus\Batchable;
@@ -38,7 +39,7 @@ class AnalyzeCarouselContentPost implements ShouldBeUnique, ShouldQueue
         return (string) $this->contentPostId;
     }
 
-    public function handle(CarouselVisualAnalysisService $analysis): void
+    public function handle(CarouselVisualAnalysisService $analysis, ContentPostMediaRefresh $media): void
     {
         if (! config('services.carousel_analysis.enabled')) {
             return;
@@ -51,7 +52,15 @@ class AnalyzeCarouselContentPost implements ShouldBeUnique, ShouldQueue
             return;
         }
 
-        if ($post->format !== 'carousel' || ContentMedia::frames($post) === [] || ! config('services.openai.api_key')) {
+        if (mb_strtolower((string) $post->format) !== 'carousel' || ! config('services.openai.api_key')) {
+            $this->store($post, null, self::UNAVAILABLE, 0);
+
+            return;
+        }
+
+        // Discovery only stores the cover of most carousels: the listing endpoint
+        // omits the children. Without the other slides there is nothing to read.
+        if (! $media->ensure($post) || count(ContentMedia::frames($post)) < 2) {
             $this->store($post, null, self::UNAVAILABLE, 0);
 
             return;

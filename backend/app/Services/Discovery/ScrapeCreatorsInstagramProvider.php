@@ -279,6 +279,46 @@ class ScrapeCreatorsInstagramProvider implements InstagramDataProvider
         );
     }
 
+    public function getPostMedia(string $sourceUrl): ?DiscoveredPostMedia
+    {
+        $payload = $this->get('/v1/instagram/post', ['url' => $sourceUrl], allowNotFound: true);
+        $media = $this->postRow($payload);
+
+        if ($media === null) {
+            return null;
+        }
+
+        $duration = $media['video_duration'] ?? null;
+
+        return new DiscoveredPostMedia(
+            mediaUrls: InstagramCarouselMedia::urls($media, $this->thumbnail($media)),
+            videoUrl: $this->video($media),
+            videoDurationSeconds: is_numeric($duration) ? (int) ceil((float) $duration) : null,
+        );
+    }
+
+    /**
+     * The single-post endpoint answers with a GraphQL envelope rather than the
+     * flat rows the listing endpoints return, and the wrapper key has changed
+     * name before. Every known shape is unwrapped here so the extractors below
+     * keep seeing one media row.
+     *
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>|null
+     */
+    private function postRow(array $payload): ?array
+    {
+        foreach (['data.xdt_shortcode_media', 'data.shortcode_media', 'data.post', 'data.items.0', 'post', 'data'] as $path) {
+            $row = data_get($payload, $path);
+
+            if (is_array($row) && (isset($row['id']) || isset($row['shortcode']) || isset($row['code']))) {
+                return $row;
+            }
+        }
+
+        return null;
+    }
+
     /** @param array<string, mixed> $row */
     private function thumbnail(array $row): ?string
     {

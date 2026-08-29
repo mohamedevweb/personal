@@ -3,6 +3,7 @@
 namespace App\Jobs\Content;
 
 use App\Models\ContentPost;
+use App\Services\Discovery\ContentPostMediaRefresh;
 use App\Services\Discovery\ReelVideoFetcher;
 use App\Services\Llm\AudioTranscriptionService;
 use Illuminate\Bus\Batchable;
@@ -45,8 +46,11 @@ class TranscribeContentPost implements ShouldBeUnique, ShouldQueue
         return (string) $this->contentPostId;
     }
 
-    public function handle(ReelVideoFetcher $videos, AudioTranscriptionService $transcription): void
-    {
+    public function handle(
+        ReelVideoFetcher $videos,
+        AudioTranscriptionService $transcription,
+        ContentPostMediaRefresh $media,
+    ): void {
         if (! config('services.transcription.enabled')) {
             return;
         }
@@ -57,7 +61,15 @@ class TranscribeContentPost implements ShouldBeUnique, ShouldQueue
             return;
         }
 
-        if ($post->format !== 'reel' || ! $post->video_url) {
+        if (mb_strtolower((string) $post->format) !== 'reel') {
+            $this->store($post, null, self::UNAVAILABLE, 0);
+
+            return;
+        }
+
+        // The url captured at discovery is signed and expires long before a
+        // member opens the post, so the playable one is fetched here.
+        if (! $media->ensure($post)) {
             $this->store($post, null, self::UNAVAILABLE, 0);
 
             return;

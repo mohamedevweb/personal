@@ -5,6 +5,7 @@ namespace Tests\Feature\Content;
 use App\Jobs\Content\TranscribeContentPost;
 use App\Models\ContentPost;
 use App\Models\Creator;
+use App\Services\Discovery\ContentPostMediaRefresh;
 use App\Services\Discovery\ReelVideoFetcher;
 use App\Services\Llm\AudioTranscriptionService;
 use GuzzleHttp\Client as GuzzleClient;
@@ -142,6 +143,7 @@ class TranscribeContentPostTest extends TestCase
         (new TranscribeContentPost($post->id))->handle(
             app(ReelVideoFetcher::class),
             app(AudioTranscriptionService::class),
+            app(ContentPostMediaRefresh::class),
         );
     }
 

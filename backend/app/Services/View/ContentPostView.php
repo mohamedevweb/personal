@@ -51,6 +51,12 @@ class ContentPostView
             'why_it_works' => $post->why_it_works,
             'hook_analysis' => $post->hook_analysis,
             'structure_analysis' => $post->structure_analysis,
+            // What was actually read off the post. The client shows the script
+            // and the slide text as the evidence behind the analysis.
+            'transcript' => $post->transcript,
+            'transcript_status' => $post->transcript_status,
+            'carousel_analysis_status' => $post->carousel_analysis_status,
+            'carousel_slides' => $this->carouselSlides($post),
             'recommendation_score' => $recommendationScore,
             'is_saved' => $isSaved ?? $user->savedContent()->where('content_post_id', $post->id)->exists(),
             'creator' => [
@@ -63,6 +69,25 @@ class ContentPostView
                 'average_views' => $post->creator->average_views,
             ],
         ];
+    }
+
+    /**
+     * The slide readings, without the visual notes the model also produces:
+     * those are working material for the brief, not something to show.
+     *
+     * @return list<array{position: int, text: string, role: string}>
+     */
+    private function carouselSlides(ContentPost $post): array
+    {
+        return collect(data_get($post->carousel_analysis, 'slides') ?? [])
+            ->filter(fn (mixed $slide): bool => is_array($slide) && filled($slide['text'] ?? null))
+            ->map(fn (array $slide, int $index): array => [
+                'position' => (int) ($slide['position'] ?? $index + 1),
+                'text' => (string) $slide['text'],
+                'role' => (string) ($slide['role'] ?? ''),
+            ])
+            ->values()
+            ->all();
     }
 
     /**

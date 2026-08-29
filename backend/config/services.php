@@ -56,6 +56,17 @@ return [
             // matches the account measurement cooldown and avoids duplicate cost.
             'cache_max_age' => env('SCRAPECREATORS_CACHE_MAX_AGE', '3d'),
         ],
+        // Refetching one post to recover its carousel slides or a playable video
+        // url. Costs a provider credit, so it is driven by what members open.
+        'media_refresh' => [
+            'enabled' => (bool) env('POST_MEDIA_REFRESH_ENABLED', true),
+            // Instagram signs its media urls; past this the stored ones 403.
+            'url_ttl_hours' => (int) env('POST_MEDIA_REFRESH_TTL_HOURS', 6),
+            // A post whose media cannot be recovered is not paid for again
+            // within this window, however often it is opened.
+            'cooldown_hours' => (int) env('POST_MEDIA_REFRESH_COOLDOWN_HOURS', 24),
+        ],
+
         // Recent posts pulled per account to average the engagement rate over.
         'profile_posts' => (int) env('DISCOVERY_PROFILE_POSTS', 12),
         'search_query_limit' => (int) env('DISCOVERY_SEARCH_QUERY_LIMIT', 6),

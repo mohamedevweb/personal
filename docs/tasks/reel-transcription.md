@@ -1,21 +1,20 @@
 # Task — Transcrire les reels et nourrir le remix avec le script réel
 
-## État au 27/08/2026
+## État au 29/08/2026
 
-**Livré** — l'URL vidéo (section 1), le schéma `transcript` / `transcript_status` / `transcribed_at`
-(section 2), `ReelVideoFetcher` (section 3), `AudioTranscriptionService` et la config (section 4),
-`TranscribeContentPost` (section 5, sans le point d'entrée `ContentController::analyze()`).
+**Terminé.** La chaîne d'ouverture (`ContentController::analyze()`), l'injection dans
+`PostInsightService::analyze()` et `ContentDraftBlueprint::brief()`, et l'exposition API
+(`ContentPostView`) sont livrées, ce qui clôt les sections 5 à 7.
 
-**Livré en plus, hors doc initiale** — la branche Creator DNA : les posts du créateur sont persistés
-depuis le chemin handle public (`RegisteredCreatorService::syncScraped()`), une sélection représentative
-de ses reels est transcrite en asynchrone après l'onboarding (`CreatorDnaEnrichment`, `CreatorReelSelection`),
-et le DNA est réécrit à partir des scripts parlés (`RebuildCreatorDna`), avec deux nouveaux champs
-`reasoning_patterns` et `hook_patterns` dans `NicheDetectionService`.
+**Livré en plus, hors doc initiale** — le média manquant. Le endpoint de listing
+(`/v2/instagram/user/posts`) ne renvoie ni les enfants d'un carrousel ni les `video_versions` :
+1 reel sur 212 avait une `video_url` et 15 carrousels sur 144 avaient leurs slides. Les urls
+Instagram étant en plus signées et expirantes, `ContentPostMediaRefresh` refetch le post
+(`/v1/instagram/post`, 1 crédit) au moment où quelque chose doit le lire, avec flag, TTL et
+cooldown. Le carrousel est traité au même titre que le reel, via `AnalyzeCarouselContentPost`.
 
-**Reste à faire** — l'injection du transcript côté remix : la chaîne dans `ContentController::analyze()`,
-`PostInsightService::analyze()` et `ContentDraftBlueprint::brief()` (section 6), et l'exposition API
-(section 7). Le reste de ce document décrit ces parties.
-
+**Reste ouvert** — l'affichage du script et des slides côté front : l'API les expose
+(`transcript`, `carousel_slides`), `frontend/app/pages/content/[id].vue` ne les montre pas encore.
 
 ## Problème
 

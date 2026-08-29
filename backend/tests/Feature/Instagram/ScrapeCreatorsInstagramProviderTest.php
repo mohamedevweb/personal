@@ -26,6 +26,60 @@ class ScrapeCreatorsInstagramProviderTest extends TestCase
         ]);
     }
 
+    public function test_it_recovers_the_slides_of_a_carousel_from_the_single_post_endpoint(): void
+    {
+        Http::fake(['*/v1/instagram/post*' => Http::response([
+            'success' => true,
+            'data' => ['xdt_shortcode_media' => [
+                'id' => '3931485019532992411',
+                'shortcode' => 'DaPcMudCJ-b',
+                'display_url' => 'https://scontent.cdninstagram.com/cover.jpg',
+                'video_url' => null,
+                'edge_sidecar_to_children' => ['edges' => [
+                    ['node' => ['display_url' => 'https://scontent.cdninstagram.com/slide-1.jpg']],
+                    ['node' => ['display_url' => 'https://scontent.cdninstagram.com/slide-2.jpg']],
+                    ['node' => ['display_url' => 'https://scontent.cdninstagram.com/slide-3.jpg']],
+                ]],
+            ]],
+        ])]);
+
+        $media = (new ScrapeCreatorsInstagramProvider)->getPostMedia('https://www.instagram.com/p/DaPcMudCJ-b/');
+
+        $this->assertSame([
+            'https://scontent.cdninstagram.com/slide-1.jpg',
+            'https://scontent.cdninstagram.com/slide-2.jpg',
+            'https://scontent.cdninstagram.com/slide-3.jpg',
+        ], $media?->mediaUrls);
+        $this->assertNull($media?->videoUrl);
+    }
+
+    public function test_it_recovers_a_playable_video_url_and_duration_for_a_reel(): void
+    {
+        Http::fake(['*/v1/instagram/post*' => Http::response([
+            'success' => true,
+            'data' => ['xdt_shortcode_media' => [
+                'id' => '3937',
+                'shortcode' => 'DaYJLnrI-ny',
+                'is_video' => true,
+                'video_url' => 'https://instagram.fcdg1-1.fna.fbcdn.net/o1/v/t2/f2/reel.mp4',
+                'video_duration' => 52.8,
+                'thumbnail_src' => 'https://scontent.cdninstagram.com/reel-cover.jpg',
+            ]],
+        ])]);
+
+        $media = (new ScrapeCreatorsInstagramProvider)->getPostMedia('https://www.instagram.com/reel/DaYJLnrI-ny/');
+
+        $this->assertSame('https://instagram.fcdg1-1.fna.fbcdn.net/o1/v/t2/f2/reel.mp4', $media?->videoUrl);
+        $this->assertSame(53, $media?->videoDurationSeconds);
+    }
+
+    public function test_a_post_the_provider_no_longer_serves_is_null_rather_than_an_error(): void
+    {
+        Http::fake(['*/v1/instagram/post*' => Http::response('', 404)]);
+
+        $this->assertNull((new ScrapeCreatorsInstagramProvider)->getPostMedia('https://www.instagram.com/p/gone/'));
+    }
+
     public function test_it_normalizes_profile_timeline_posts_search_posts_and_related_accounts(): void
     {
         Http::fake(function ($request) {

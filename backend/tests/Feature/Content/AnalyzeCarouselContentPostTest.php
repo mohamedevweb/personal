@@ -5,6 +5,7 @@ namespace Tests\Feature\Content;
 use App\Jobs\Content\AnalyzeCarouselContentPost;
 use App\Models\ContentPost;
 use App\Models\Creator;
+use App\Services\Discovery\ContentPostMediaRefresh;
 use App\Services\Llm\CarouselVisualAnalysisService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
@@ -37,7 +38,7 @@ class AnalyzeCarouselContentPostTest extends TestCase
         $service = Mockery::mock(CarouselVisualAnalysisService::class);
         $service->shouldReceive('analyze')->once()->withArgs(fn (ContentPost $value): bool => $value->is($post))->andReturn($analysis);
 
-        (new AnalyzeCarouselContentPost($post->id))->handle($service);
+        (new AnalyzeCarouselContentPost($post->id))->handle($service, app(ContentPostMediaRefresh::class));
 
         $post->refresh();
         $this->assertSame(AnalyzeCarouselContentPost::DONE, $post->carousel_analysis_status);
@@ -56,7 +57,7 @@ class AnalyzeCarouselContentPostTest extends TestCase
         $service = Mockery::mock(CarouselVisualAnalysisService::class);
         $service->shouldNotReceive('analyze');
 
-        (new AnalyzeCarouselContentPost($post->id))->handle($service);
+        (new AnalyzeCarouselContentPost($post->id))->handle($service, app(ContentPostMediaRefresh::class));
 
         $this->assertSame(AnalyzeCarouselContentPost::DONE, $post->refresh()->carousel_analysis_status);
     }
@@ -67,7 +68,7 @@ class AnalyzeCarouselContentPostTest extends TestCase
         $service = Mockery::mock(CarouselVisualAnalysisService::class);
         $service->shouldNotReceive('analyze');
 
-        (new AnalyzeCarouselContentPost($post->id))->handle($service);
+        (new AnalyzeCarouselContentPost($post->id))->handle($service, app(ContentPostMediaRefresh::class));
 
         $this->assertSame(AnalyzeCarouselContentPost::UNAVAILABLE, $post->refresh()->carousel_analysis_status);
     }

@@ -32,6 +32,9 @@
         <!-- Without this the suite calls the real OpenAI API whenever a key is
              present in .env: billable, and red the moment the network blinks. -->
         <env name="CONTENT_GENERATION_DRIVER" value="mock"/>
+        <!-- Refetching a post's media costs a provider credit. Tests that want
+             it turn it on themselves; every other fixture keeps its own urls. -->
+        <env name="POST_MEDIA_REFRESH_ENABLED" value="false"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>

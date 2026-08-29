@@ -664,6 +664,13 @@
       "saved": "Your password has been updated.",
       "error": "We could not update your password. Please try again."
     },
+    "session": {
+      "title": "Session",
+      "copy": "Sign out of Personal on this device. Your account and your imported posts stay untouched.",
+      "action": "Sign out",
+      "pending": "Signing out…",
+      "error": "Personal could not sign you out. Please try again."
+    },
     "instagram": "Instagram",
     "instagramCopy": "Your own account data is the real foundation of Personal.",
     "instagramConnected": "Instagram account connected",

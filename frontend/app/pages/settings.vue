@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const { status, loading, error, connect, loadStatus } = useInstagram()
 const { apiFetch } = usePersonalApi()
-const { user, loadUser, updateAccount, updatePassword, resendVerification } = useAuth()
+const { user, loadUser, updateAccount, updatePassword, resendVerification, logout } = useAuth()
 const { address: supportAddress, mailto: supportMailto } = useSupportEmail()
 const { t } = useI18n()
 const toast = useToast()
@@ -61,6 +61,18 @@ async function savePassword() {
     toast.error(apiErrorMessage(exception, t('settings.password.error')))
   } finally {
     passwordSaving.value = false
+  }
+}
+
+const signingOut = ref(false)
+
+async function signOut() {
+  signingOut.value = true
+  try {
+    await logout()
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('settings.session.error')))
+    signingOut.value = false
   }
 }
 
@@ -161,13 +173,8 @@ watch(error, (message) => {
 
     <!-- Instagram -->
     <section class="mt-5 rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-6 md:p-8">
-      <div class="flex items-start gap-4">
-        <div class="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-[var(--ink)] text-[13px] font-medium text-[var(--paper)]">IG</div>
-        <div class="flex-1">
-          <h2 class="font-serif text-[26px] tracking-[-.02em]">{{ $t('settings.instagram') }}</h2>
-          <p class="mt-1 text-sm leading-6 text-[var(--muted)]">{{ $t('settings.instagramCopy') }}</p>
-        </div>
-      </div>
+      <h2 class="font-serif text-[26px] tracking-[-.02em]">{{ $t('settings.instagram') }}</h2>
+      <p class="mt-1 text-sm leading-6 text-[var(--muted)]">{{ $t('settings.instagramCopy') }}</p>
       <div v-if="status.connected" class="mt-7 flex items-center gap-3 rounded-[14px] border border-[var(--line-soft)] bg-[var(--paper)] p-4">
         <img
           v-if="status.account?.profile_picture_url && !instagramAvatarFailed"
@@ -188,30 +195,35 @@ watch(error, (message) => {
 
     <!-- Support -->
     <section class="mt-5 rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-6 md:p-8">
-      <div class="flex items-start gap-4">
-        <span class="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-[var(--paper)] text-[var(--muted)]"><AppIcon name="chat" :size="19" /></span>
-        <div class="flex-1">
-          <h2 class="font-serif text-[26px] tracking-[-.02em]">{{ $t('support.title') }}</h2>
-          <p class="mt-2 text-sm leading-6 text-[var(--muted)]">{{ $t('support.copy') }}</p>
-          <a :href="supportMailto" class="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-full b-btn-red px-5 text-[14px] font-medium transition">
-            <AppIcon name="mail" :size="17" />
-            {{ $t('support.cta') }}
-          </a>
-          <p class="mt-3 text-xs text-[var(--faint)]">{{ $t('support.hint', { address: supportAddress }) }}</p>
-        </div>
-      </div>
+      <h2 class="font-serif text-[26px] tracking-[-.02em]">{{ $t('support.title') }}</h2>
+      <p class="mt-2 text-sm leading-6 text-[var(--muted)]">{{ $t('support.copy') }}</p>
+      <a :href="supportMailto" class="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-full b-btn-red px-5 text-[14px] font-medium transition">
+        <AppIcon name="mail" :size="17" />
+        {{ $t('support.cta') }}
+      </a>
+      <p class="mt-3 text-xs text-[var(--faint)]">{{ $t('support.hint', { address: supportAddress }) }}</p>
     </section>
 
     <!-- Privacy -->
     <section class="mt-5 rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-6 md:p-8">
-      <div class="flex items-start gap-4">
-        <span class="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-[var(--paper)] text-[var(--muted)]"><AppIcon name="shield" :size="19" /></span>
-        <div>
-          <h2 class="font-serif text-[26px] tracking-[-.02em]">{{ $t('settings.privacy') }}</h2>
-          <p class="mt-2 text-sm leading-6 text-[var(--muted)]">{{ $t('settings.privacyCopy') }}</p>
-          <NuxtLink to="/privacy" class="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-[var(--ink)] underline underline-offset-4 transition hover:text-[var(--accent)]">{{ $t('settings.privacyLink') }}</NuxtLink>
-        </div>
-      </div>
+      <h2 class="font-serif text-[26px] tracking-[-.02em]">{{ $t('settings.privacy') }}</h2>
+      <p class="mt-2 text-sm leading-6 text-[var(--muted)]">{{ $t('settings.privacyCopy') }}</p>
+      <NuxtLink to="/privacy" class="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-[var(--ink)] underline underline-offset-4 transition hover:text-[var(--accent)]">{{ $t('settings.privacyLink') }}</NuxtLink>
+    </section>
+
+    <!-- Session -->
+    <section class="mt-5 rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-6 md:p-8">
+      <h2 class="font-serif text-[26px] tracking-[-.02em]">{{ $t('settings.session.title') }}</h2>
+      <p class="mt-2 text-sm leading-6 text-[var(--muted)]">{{ $t('settings.session.copy') }}</p>
+      <button
+        type="button"
+        class="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[var(--paper)] px-5 text-[14px] font-medium transition hover:border-[var(--danger)] hover:text-[var(--danger)] disabled:cursor-wait disabled:opacity-60"
+        :disabled="signingOut"
+        @click="signOut"
+      >
+        <AppIcon name="logout" :size="17" />
+        {{ signingOut ? $t('settings.session.pending') : $t('settings.session.action') }}
+      </button>
     </section>
   </main>
 </template>

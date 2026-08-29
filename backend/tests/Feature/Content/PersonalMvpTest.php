@@ -3,6 +3,7 @@
 namespace Tests\Feature\Content;
 
 use App\Exceptions\ContentGenerationException;
+use App\Jobs\Content\AnalyzeCarouselContentPost;
 use App\Jobs\Content\AnalyzeContentPost;
 use App\Jobs\Content\GenerateRemix;
 use App\Models\ContentPost;
@@ -13,6 +14,7 @@ use App\Services\Content\ContentGenerationService;
 use App\Services\Discovery\PostInsightService;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
@@ -133,7 +135,7 @@ class PersonalMvpTest extends TestCase
 
     public function test_content_analysis_follows_the_requested_language(): void
     {
-        Queue::fake();
+        Bus::fake();
         config()->set('services.openai.api_key', null);
         config()->set('services.anthropic.api_key', null);
         $post = ContentPost::query()->firstOrFail();
@@ -149,9 +151,16 @@ class PersonalMvpTest extends TestCase
             ->withHeader('Accept-Language', 'fr-FR,fr;q=0.9')
             ->postJson("/api/content/{$post->id}/analysis")
             ->assertAccepted();
-        Queue::assertPushed(AnalyzeContentPost::class, fn (AnalyzeContentPost $job): bool => $job->contentPostId === $post->id
-            && $job->locale === 'fr'
-            && $job->queue === 'analysis');
+        // Reading the slides comes first: the written analysis has to see them.
+        Bus::assertChained([AnalyzeCarouselContentPost::class, AnalyzeContentPost::class]);
+        Bus::assertDispatched(AnalyzeCarouselContentPost::class, function (AnalyzeCarouselContentPost $job) use ($post): bool {
+            $analysis = unserialize($job->chained[0]);
+
+            return $job->contentPostId === $post->id
+                && $analysis->contentPostId === $post->id
+                && $analysis->locale === 'fr'
+                && $analysis->queue === 'analysis';
+        });
 
         (new AnalyzeContentPost($post->id, 'fr'))->handle(app(PostInsightService::class));
         $this->assertDatabaseHas('content_posts', ['id' => $post->id, 'analysis_locale' => 'fr']);

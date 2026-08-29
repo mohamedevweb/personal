@@ -45,6 +45,7 @@ defineProps<{ name: string, size?: number, filled?: boolean, strokeWidth?: numbe
     <template v-else-if="name === 'pause'"><rect x="7.8" y="5.4" width="3" height="13.2" rx="1.3"/><rect x="13.2" y="5.4" width="3" height="13.2" rx="1.3"/></template>
     <template v-else-if="name === 'sound-on'"><path d="M4 9.5h3.2L12 5.5v13L7.2 14.5H4v-5Z" fill="currentColor"/><path d="M15.4 9.2a4 4 0 0 1 0 5.6m2.6-8.2a7.6 7.6 0 0 1 0 10.8"/></template>
     <template v-else-if="name === 'sound-off'"><path d="M4 9.5h3.2L12 5.5v13L7.2 14.5H4v-5Z" fill="currentColor"/><path d="m16 10 4 4m0-4-4 4"/></template>
+    <template v-else-if="name === 'logout'"><path d="M15 4.5h3.5A1.5 1.5 0 0 1 20 6v12a1.5 1.5 0 0 1-1.5 1.5H15"/><path d="M11 8.5 14.5 12 11 15.5M14.5 12H4"/></template>
     <template v-else><circle cx="12" cy="12" r="9"/><path d="m9.5 12 1.7 1.7 3.8-4"/></template>
   </svg>
 </template>

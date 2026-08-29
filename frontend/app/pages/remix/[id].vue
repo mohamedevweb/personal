@@ -2,7 +2,7 @@
 import type { Remix } from '~/types/product'
 import { creatorProfileUrl } from '~/types/product'
 
-const FORMATS = ['reel', 'carousel', 'caption'] as const
+const FORMATS = ['reel', 'carousel'] as const
 type Format = typeof FORMATS[number]
 
 /* Instagram's own ceilings, so the counters on this screen mean something once
@@ -509,7 +509,7 @@ onBeforeUnmount(() => {
                   @click="switchFormat(item)"
                   @keydown="onTabKeydown($event, index)"
                 >
-                  <AppIcon :name="item === 'caption' ? 'text' : item" :size="15" />
+                  <AppIcon :name="item" :size="15" />
                   {{ $t(`remix.formats.${item}`) }}
                 </button>
               </div>

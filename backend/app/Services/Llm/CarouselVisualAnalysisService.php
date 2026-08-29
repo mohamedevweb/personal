@@ -84,7 +84,20 @@ class CarouselVisualAnalysisService
 
         $decoded = json_decode((string) $response->outputText, true);
 
-        return is_array($decoded) ? $this->normalize($decoded, $frames->count()) : null;
+        if (! is_array($decoded)) {
+            return null;
+        }
+
+        return [
+            ...$this->normalize($decoded, $frames->count()),
+            // What this reading cost, kept next to it: slides are the most
+            // expensive thing the product reads, and the bill has to be
+            // answerable from the data rather than from a dashboard.
+            'usage' => [
+                'input_tokens' => $response->usage?->inputTokens,
+                'output_tokens' => $response->usage?->outputTokens,
+            ],
+        ];
     }
 
     private function imageUrl(ContentPost $post, string $url, int $position): ?string

@@ -1,14 +1,13 @@
 <script setup lang="ts">
 /**
- * 04 — one story, three production-ready drafts.
+ * 04 — one story, two production-ready drafts.
  *
  * This mirrors the remix editor closely enough to make the format switch
- * honest: a carousel is a swipeable deck, a Reel is a timed script, and a
- * caption shows the Instagram fold and character count.
+ * honest: a carousel is a swipeable deck and a Reel is a timed script.
  */
 const live = useScreenLive()
 
-const FORMATS = ['reel', 'carousel', 'caption'] as const
+const FORMATS = ['reel', 'carousel'] as const
 type Format = typeof FORMATS[number]
 
 const format = ref<Format>('carousel')
@@ -49,7 +48,7 @@ onMounted(() => {
             : 'text-[var(--b-stone)] hover:text-[var(--b-black)]'"
           @click="selectFormat(option)"
         >
-          <AppIcon :name="option === 'caption' ? 'text' : option" :size="14" />
+          <AppIcon :name="option" :size="14" />
           {{ $t(`remix.formats.${option}`) }}
         </button>
       </div>
@@ -94,7 +93,7 @@ onMounted(() => {
 
       <!-- The real Reel draft is an editable timeline, not a decorative video
            frame. These are the same beats the product generates. -->
-      <div v-else-if="format === 'reel'" class="w-full overflow-hidden rounded-[15px] border border-[var(--b-line)] bg-[var(--b-surface)]">
+      <div v-else class="w-full overflow-hidden rounded-[15px] border border-[var(--b-line)] bg-[var(--b-surface)]">
         <div class="flex items-center justify-between border-b border-[var(--b-line-soft)] px-4 py-3">
           <span class="b-mono text-[var(--b-stone)]">{{ $t('landing.how.draft.reel.label') }}</span>
           <span class="inline-flex items-center gap-1 text-[10.5px] tabular-nums text-[var(--b-stone)]">
@@ -129,25 +128,6 @@ onMounted(() => {
             <span class="b-mono text-[var(--b-stone)]">{{ $t('remix.cta') }}</span>
             <p class="mt-1 text-[11.5px] leading-[1.4] text-[var(--copy)]">{{ $t('landing.how.draft.reel.cta') }}</p>
           </div>
-        </div>
-      </div>
-
-      <!-- The caption preview reproduces the useful publishing constraints
-           shown by the product: the fold and Instagram's character ceiling. -->
-      <div v-else class="w-full overflow-hidden rounded-[15px] border border-[var(--b-line)] bg-[var(--b-surface)]">
-        <div class="border-b border-[var(--b-line-soft)] bg-[var(--b-ivory)] px-4 py-3">
-          <span class="b-mono text-[var(--b-stone)]">{{ $t('remix.beforeMore') }}</span>
-          <p class="mt-1.5 text-[11.5px] leading-[1.45] text-[var(--copy)]">
-            {{ $t('landing.how.draft.caption.preview') }}
-            <span class="text-[var(--b-stone)]">… {{ $t('remix.more') }}</span>
-          </p>
-        </div>
-        <div class="min-h-[116px] px-4 py-3.5">
-          <p class="whitespace-pre-line text-[12px] leading-[1.55] text-[var(--copy)]">{{ $t('landing.how.draft.caption.body') }}</p>
-        </div>
-        <div class="flex items-center justify-between border-t border-[var(--b-line-soft)] px-4 py-2.5">
-          <span class="b-mono text-[var(--b-stone)]">{{ $t('remix.captionPost') }}</span>
-          <span class="text-[10.5px] tabular-nums text-[var(--b-stone)]">347 / 2 200</span>
         </div>
       </div>
     </div>

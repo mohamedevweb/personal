@@ -31,6 +31,18 @@ class ContentMedia
         return $frames;
     }
 
+    /**
+     * The text read off the slides of a carousel, in reading order. Empty until
+     * the visual analysis has run, which is the normal state of a fresh post.
+     */
+    public static function slideText(ContentPost $post): string
+    {
+        return (new Collection(data_get($post->carousel_analysis, 'slides') ?? []))
+            ->filter(fn (mixed $slide): bool => is_array($slide) && filled($slide['text'] ?? null))
+            ->map(fn (array $slide): string => 'Slide '.($slide['position'] ?? '?').': '.trim((string) $slide['text']))
+            ->implode("\n");
+    }
+
     public static function frame(ContentPost $post, int $position): ?string
     {
         return self::frames($post)[$position] ?? null;

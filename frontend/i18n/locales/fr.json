@@ -664,6 +664,13 @@
       "saved": "Votre mot de passe a été mis à jour.",
       "error": "Impossible de mettre à jour votre mot de passe. Réessayez."
     },
+    "session": {
+      "title": "Session",
+      "copy": "Déconnectez-vous de Personal sur cet appareil. Votre compte et vos posts importés restent intacts.",
+      "action": "Se déconnecter",
+      "pending": "Déconnexion…",
+      "error": "Personal n’a pas pu vous déconnecter. Réessayez."
+    },
     "instagram": "Instagram",
     "instagramCopy": "Les données de votre propre compte sont la vraie fondation de Personal.",
     "instagramConnected": "Compte Instagram connecté",
