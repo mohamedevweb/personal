@@ -18,6 +18,7 @@ defineProps<{ name: string, size?: number, filled?: boolean, strokeWidth?: numbe
     <template v-else-if="name === 'send'"><path d="M12 19V5m0 0-6 6m6-6 6 6"/></template>
     <template v-else-if="name === 'trend'"><path d="M4 16.5 10 10l3.5 3.5L20 7"/><path d="M15 7h5v5"/></template>
     <template v-else-if="name === 'shield'"><path d="M12 3 5 6v6c0 4.2 2.9 7.6 7 9 4.1-1.4 7-4.8 7-9V6l-7-3Z"/><path d="m9.2 12 1.9 1.9 3.7-4"/></template>
+    <template v-else-if="name === 'sidebar'"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M9.5 4v16"/></template>
     <template v-else-if="name === 'chevron'"><path d="m9 6 6 6-6 6"/></template>
     <template v-else-if="name === 'heart'"><path d="M20.8 5.9a4.9 4.9 0 0 0-7 0L12 7.7l-1.8-1.8a4.9 4.9 0 1 0-7 7l8.8 8.8 8.8-8.8a4.9 4.9 0 0 0 0-7Z"/></template>
     <template v-else-if="name === 'paper-plane'"><path d="M22 2 11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7Z"/></template>

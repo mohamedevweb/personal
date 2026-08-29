@@ -37,7 +37,9 @@
       "studio": "Studio"
     },
     "pattern": "Pattern",
-    "remix": "Remix"
+    "remix": "Remix",
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar"
   },
   "support": {
     "nav": "Support / Feedback",

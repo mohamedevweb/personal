@@ -2,6 +2,7 @@
 const route = useRoute()
 const { user, loadUser, logout } = useAuth()
 const { mailto: supportMailto } = useSupportEmail()
+const { collapsed, toggle: toggleSidebar } = useSidebar()
 const { t } = useI18n()
 const avatarFailed = ref(false)
 
@@ -40,6 +41,18 @@ const mobileNav = [
   { label: 'nav.settings', to: '/settings', icon: 'settings' }
 ]
 
+// Folded, a row is a centred icon with its label read out by the tooltip and
+// the aria-label instead of standing next to it.
+const rowClass = computed(() => collapsed.value
+  ? 'flex h-10 w-10 items-center justify-center rounded-[10px] transition'
+  : 'flex items-center gap-3 rounded-[10px] px-3 py-2 text-[13.5px] transition')
+
+function rowTone(active: boolean) {
+  return active
+    ? 'bg-[var(--line-soft)] font-medium text-[var(--ink)]'
+    : 'text-[var(--muted)] hover:bg-[var(--sand-soft)] hover:text-[var(--ink)]'
+}
+
 const titles: Record<string, string> = {
   '/feed': 'nav.forYou',
   '/drafts': 'nav.drafts',
@@ -57,61 +70,95 @@ const pageTitle = computed(() => {
 
 <template>
   <div class="min-h-screen bg-[var(--paper)] text-[var(--ink)]">
-    <aside class="fixed inset-y-0 left-0 z-30 hidden w-[264px] flex-col border-r border-[var(--line)] bg-[var(--rail)] py-5 pl-[max(.75rem,env(safe-area-inset-left))] pr-3 md:flex">
-      <NuxtLink to="/feed" class="b-focus block w-fit px-2 py-1">
-        <PersonalLogo :size="22" />
-      </NuxtLink>
+    <aside
+      class="fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-[var(--line)] bg-[var(--rail)] py-5 pl-[max(.75rem,env(safe-area-inset-left))] pr-3 transition-[width] duration-200 md:flex"
+      :class="collapsed ? 'w-[76px]' : 'w-[264px]'"
+    >
+      <div class="flex items-center" :class="collapsed ? 'flex-col gap-2' : 'justify-between'">
+        <NuxtLink to="/feed" class="b-focus block w-fit px-2 py-1">
+          <PersonalMark v-if="collapsed" :size="22" tone="signature" />
+          <PersonalLogo v-else :size="22" />
+        </NuxtLink>
+
+        <button
+          type="button"
+          class="b-focus grid h-9 w-9 place-items-center rounded-[10px] text-[var(--faint)] transition hover:bg-[var(--sand-soft)] hover:text-[var(--ink)]"
+          :aria-label="$t(collapsed ? 'nav.expand' : 'nav.collapse')"
+          :title="$t(collapsed ? 'nav.expand' : 'nav.collapse')"
+          :aria-expanded="!collapsed"
+          @click="toggleSidebar"
+        >
+          <AppIcon name="sidebar" :size="17" />
+        </button>
+      </div>
 
       <nav class="mt-9 space-y-7">
-        <div v-for="group in groups" :key="group.label">
-          <p class="px-3 text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--faint)]">{{ $t(group.label) }}</p>
-          <div class="mt-2 space-y-0.5">
+        <div v-for="(group, index) in groups" :key="group.label">
+          <p v-if="!collapsed" class="px-3 text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--faint)]">{{ $t(group.label) }}</p>
+          <!-- Folded, the group headings go: a short rule keeps the blocks apart. -->
+          <div v-else-if="index > 0" class="mx-auto h-px w-5 bg-[var(--line)]" />
+          <div class="mt-2 space-y-0.5" :class="collapsed ? 'flex flex-col items-center' : ''">
             <NuxtLink
               v-for="item in group.items"
               :key="item.to"
               :to="item.to"
-              class="flex items-center gap-3 rounded-[10px] px-3 py-2 text-[13.5px] transition"
-              :class="route.path === item.to ? 'bg-[var(--line-soft)] font-medium text-[var(--ink)]' : 'text-[var(--muted)] hover:bg-[var(--sand-soft)] hover:text-[var(--ink)]'"
+              :aria-label="collapsed ? $t(item.label) : undefined"
+              :title="collapsed ? $t(item.label) : undefined"
+              :class="[rowClass, rowTone(route.path === item.to)]"
             >
               <AppIcon :name="item.icon" :size="17" :class="route.path === item.to ? 'text-[var(--accent)]' : ''" />
-              {{ $t(item.label) }}
+              <span v-if="!collapsed">{{ $t(item.label) }}</span>
             </NuxtLink>
           </div>
         </div>
       </nav>
 
-      <div class="mt-auto">
+      <div class="mt-auto" :class="collapsed ? 'flex flex-col items-center gap-0.5' : ''">
         <a
           :href="supportMailto"
-          class="flex items-center gap-3 rounded-[10px] px-3 py-2 text-[13.5px] text-[var(--muted)] transition hover:bg-[var(--sand-soft)] hover:text-[var(--ink)]"
+          :aria-label="collapsed ? $t('support.nav') : undefined"
+          :title="collapsed ? $t('support.nav') : undefined"
+          :class="[rowClass, 'text-[var(--muted)] hover:bg-[var(--sand-soft)] hover:text-[var(--ink)]']"
         >
           <AppIcon name="chat" :size="17" />
-          {{ $t('support.nav') }}
+          <span v-if="!collapsed">{{ $t('support.nav') }}</span>
         </a>
 
         <NuxtLink
           to="/settings"
-          class="flex items-center gap-3 rounded-[10px] px-3 py-2 text-[13.5px] transition"
-          :class="route.path === '/settings' ? 'bg-[var(--line-soft)] font-medium text-[var(--ink)]' : 'text-[var(--muted)] hover:bg-[var(--sand-soft)] hover:text-[var(--ink)]'"
+          :aria-label="collapsed ? $t('nav.settings') : undefined"
+          :title="collapsed ? $t('nav.settings') : undefined"
+          :class="[rowClass, rowTone(route.path === '/settings')]"
         >
           <AppIcon name="settings" :size="17" :class="route.path === '/settings' ? 'text-[var(--accent)]' : ''" />
-          {{ $t('nav.settings') }}
+          <span v-if="!collapsed">{{ $t('nav.settings') }}</span>
         </NuxtLink>
 
-        <div class="mt-1 flex items-center gap-3 rounded-[14px] px-2 py-2">
-          <NuxtLink to="/personal" class="b-focus shrink-0 rounded-full" :aria-label="$t('nav.personal')">
+        <!-- Folded, the account block loses its name and the sign-out link
+             becomes an icon of its own under the avatar. -->
+        <div class="mt-1 flex items-center gap-3 rounded-[14px] px-2 py-2" :class="collapsed ? 'flex-col gap-1 px-0' : ''">
+          <NuxtLink to="/personal" class="b-focus shrink-0 rounded-full" :aria-label="$t('nav.personal')" :title="collapsed ? accountLabel : undefined">
             <img v-if="user?.avatar_url && !avatarFailed" :src="user.avatar_url" :alt="accountLabel" class="h-9 w-9 rounded-full object-cover" @error="avatarFailed = true">
             <div v-else class="grid h-9 w-9 place-items-center rounded-full bg-[var(--ink)] text-[var(--paper)]"><AppIcon name="user" :size="16" /></div>
           </NuxtLink>
-          <div class="min-w-0 flex-1">
+          <div v-if="!collapsed" class="min-w-0 flex-1">
             <p class="truncate text-[13px] font-medium">{{ accountLabel }}</p>
             <button class="text-[11px] text-[var(--faint)] transition hover:text-[var(--ink)]" @click="logout">{{ $t('common.signOut') }}</button>
           </div>
+          <button
+            v-else
+            class="b-focus grid h-9 w-9 place-items-center rounded-[10px] text-[var(--faint)] transition hover:bg-[var(--sand-soft)] hover:text-[var(--ink)]"
+            :aria-label="$t('common.signOut')"
+            :title="$t('common.signOut')"
+            @click="logout"
+          >
+            <AppIcon name="logout" :size="17" />
+          </button>
         </div>
       </div>
     </aside>
 
-    <div class="md:ml-[264px]">
+    <div class="transition-[margin] duration-200" :class="collapsed ? 'md:ml-[76px]' : 'md:ml-[264px]'">
       <!-- The bar sits under the status bar rather than beside it: its own
            background runs up into the inset, and the row keeps its height. -->
       <header class="sticky top-0 z-20 border-b border-[var(--line)] bg-[var(--paper)]/95 pt-[env(safe-area-inset-top)] backdrop-blur md:hidden">
