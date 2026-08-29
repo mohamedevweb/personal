@@ -712,7 +712,7 @@ onBeforeUnmount(() => {
               </div>
               <NuxtLink
                 v-if="remix.life_moment"
-                to="/create"
+                to="/personal"
                 class="flex items-center justify-between border-t border-[var(--line-soft)] px-5 py-3 text-[12.5px] text-[var(--muted)] transition hover:bg-[var(--paper)] hover:text-[var(--ink)]"
               >
                 {{ $t('remix.editMoments') }}<AppIcon name="arrow" :size="14" />
@@ -726,9 +726,6 @@ onBeforeUnmount(() => {
     <div v-else class="page-shell pt-16 text-center">
       <p class="font-serif text-[30px] tracking-[-.02em]">{{ $t('remix.loadError') }}</p>
       <p class="mx-auto mt-3 max-w-[38ch] text-sm leading-6 text-[var(--muted)]">{{ $t('remix.loadErrorCopy') }}</p>
-      <NuxtLink to="/create" class="mt-7 inline-flex h-11 items-center rounded-full b-btn-red px-5 text-[14px] font-medium transition">
-        {{ $t('remix.startAnother') }}
-      </NuxtLink>
     </div>
   </main>
 </template>

@@ -90,7 +90,7 @@ onBeforeUnmount(() => {
 
 <template>
   <main class="page-shell pb-16 pt-2">
-    <header class="flex flex-col gap-4 rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-6 sm:flex-row sm:items-center sm:justify-between">
+    <header class="rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-6">
       <div class="flex items-start gap-4">
         <span class="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-[var(--accent-soft)] text-[var(--accent-ink)]">
           <AppIcon name="draft" :size="19" />
@@ -100,9 +100,6 @@ onBeforeUnmount(() => {
           <p class="mt-2 max-w-xl text-[15px] leading-6 text-[var(--muted)]">{{ $t('drafts.subtitle') }}</p>
         </div>
       </div>
-      <NuxtLink to="/create" class="inline-flex h-11 w-fit shrink-0 items-center justify-center gap-2 rounded-full b-btn-red px-5 text-[14px] font-medium transition">
-        <AppIcon name="plus" :size="17" />{{ $t('drafts.newDraft') }}
-      </NuxtLink>
     </header>
 
     <div v-if="loading" class="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
@@ -172,7 +169,6 @@ onBeforeUnmount(() => {
     <div v-else class="mt-5 rounded-[18px] border border-dashed border-[var(--line)] bg-[var(--surface)] px-6 py-16 text-center">
       <p class="font-serif text-[26px] tracking-[-.02em]">{{ $t('drafts.emptyTitle') }}</p>
       <p class="mx-auto mt-3 max-w-md text-sm leading-6 text-[var(--muted)]">{{ $t('drafts.emptyCopy') }}</p>
-      <NuxtLink to="/create" class="mt-6 inline-flex h-11 items-center justify-center rounded-full b-btn-red px-5 text-[14px] font-medium transition">{{ $t('drafts.createFirst') }}</NuxtLink>
     </div>
   </main>
 </template>

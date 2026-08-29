@@ -9,6 +9,9 @@ export default defineNuxtConfig({
   srcDir: 'app/',
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
+  routeRules: {
+    '/create': { redirect: '/drafts' }
+  },
   modules: ['@nuxtjs/tailwindcss', '@nuxtjs/i18n', '@sentry/nuxt/module'],
   sentry: {
     authToken: process.env.SENTRY_AUTH_TOKEN,
