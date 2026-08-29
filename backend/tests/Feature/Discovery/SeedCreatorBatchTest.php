@@ -3,6 +3,8 @@
 namespace Tests\Feature\Discovery;
 
 use App\Models\Creator;
+use App\Services\Discovery\ContentSafetyDecision;
+use App\Services\Discovery\ContentSafetyPolicy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
@@ -66,6 +68,27 @@ class SeedCreatorBatchTest extends TestCase
 
         $this->assertDatabaseCount('creators', 1);
         $this->assertDatabaseCount('content_posts', 1);
+    }
+
+    public function test_unavailable_content_safety_stops_before_provider_or_database_writes(): void
+    {
+        Storage::fake('local');
+        $path = $this->csv([
+            ['Business', 'FR', '@first.creator', 'First Creator', '100K', 'founder/startup', 'candidate_safe'],
+        ]);
+        $safety = \Mockery::mock(ContentSafetyPolicy::class);
+        $safety->shouldReceive('creator')->once()->andReturn(new ContentSafetyDecision(
+            ContentSafetyDecision::PENDING,
+            ['moderation:unavailable'],
+        ));
+        $this->app->instance(ContentSafetyPolicy::class, $safety);
+
+        $this->artisan("personal:seed-creator-batch {$path} --provider=mock")
+            ->expectsOutput('Content safety is unavailable. No creator or post was written.')
+            ->assertFailed();
+
+        $this->assertDatabaseCount('creators', 0);
+        $this->assertDatabaseCount('content_posts', 0);
     }
 
     /** @param list<list<string>> $rows */

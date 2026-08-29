@@ -244,11 +244,6 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
         if ($market['market'] === null) {
             if (in_array($existing?->market, config('creator_catalog.markets'), true)) {
                 $market = ['market' => $existing->market, 'language' => $existing->primary_language];
-            } elseif (in_array($marketHint, config('creator_catalog.markets'), true)) {
-                $market = [
-                    'market' => $marketHint,
-                    'language' => $marketHint === 'FR' ? 'fr' : 'en',
-                ];
             }
         }
 

@@ -5,6 +5,8 @@ namespace App\Console\Commands;
 use App\Jobs\Discovery\MeasureAccountEngagement;
 use App\Models\Creator;
 use App\Services\Discovery\ContentSafetyDecision;
+use App\Services\Discovery\ContentSafetyPolicy;
+use App\Services\Discovery\DiscoveredProfile;
 use App\Services\Discovery\InstagramDataProviderManager;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
@@ -33,7 +35,7 @@ class SeedCreatorBatch extends Command
         'Safety',
     ];
 
-    public function handle(InstagramDataProviderManager $providers): int
+    public function handle(InstagramDataProviderManager $providers, ContentSafetyPolicy $safety): int
     {
         $batch = filter_var($this->option('batch'), FILTER_VALIDATE_INT);
         $size = filter_var($this->option('size'), FILTER_VALIDATE_INT);
@@ -78,6 +80,20 @@ class SeedCreatorBatch extends Command
             $provider = $providers->provider((string) $this->option('provider'));
         } catch (Throwable $exception) {
             $this->error($exception->getMessage());
+
+            return self::FAILURE;
+        }
+
+        $safetyPreflight = $safety->creator(new DiscoveredProfile(
+            username: 'personal_import_preflight',
+            displayName: 'Personal import preflight',
+            avatarUrl: null,
+            followers: 0,
+            posts: collect(),
+        ));
+
+        if (! $safetyPreflight->isAllowed()) {
+            $this->error('Content safety is unavailable. No creator or post was written.');
 
             return self::FAILURE;
         }

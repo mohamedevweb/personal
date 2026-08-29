@@ -76,7 +76,6 @@ const profileAnalysisRunning = computed(() => [
 const analysisMessage = computed(() => {
   if (profileAnalysisRunning.value) return t('personal.analysis.inProgress')
   if (mediaEnrichmentRunning.value) return t('personal.analysis.mediaInProgress')
-  if (instagramStatus.value.media_enrichment?.status === 'failed') return t('personal.analysis.mediaFailed')
   if (analysisStatus.value === 'analysis_unavailable') return t('personal.analysis.unavailable')
   if (analysisStatus.value === 'insufficient_evidence') return t('personal.analysis.insufficient')
   return null
