@@ -47,8 +47,15 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
 
     public int $uniqueFor = 3600;
 
-    /** @param list<string> $usernames Accounts to measure, bare handles. */
-    public function __construct(public readonly array $usernames) {}
+    /**
+     * @param  list<string>  $usernames  Accounts to measure, bare handles.
+     * @param  array<string, string>  $marketHints  Authoritative market hints keyed by lowercase handle.
+     */
+    public function __construct(
+        public readonly array $usernames,
+        public readonly bool $latestOnly = false,
+        public readonly array $marketHints = [],
+    ) {}
 
     public function uniqueId(): string
     {
@@ -161,7 +168,7 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
             externalId: $profile->externalId,
             isPrivate: $profile->isPrivate,
             metadata: $profile->metadata,
-        ), $niches, $catalog, $performance, $safety, $lifecycle, $markets);
+        ), $niches, $catalog, $performance, $safety, $lifecycle, $markets, $this->marketHint($username));
 
         if ($creator) {
             if ($creator->safety_status === ContentSafetyDecision::PENDING || ! $creator->last_measured_at) {
@@ -213,6 +220,7 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
         ContentSafetyPolicy $safety,
         PostMetricsLifecycle $lifecycle,
         CreatorMarketDetector $markets,
+        ?string $marketHint,
     ): ?Creator {
         if ($profile->posts->isEmpty()) {
             return null;
@@ -222,17 +230,26 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
             ->when($profile->externalId, fn ($query) => $query->where('instagram_user_id', $profile->externalId))
             ->orWhere('username', $profile->username)
             ->first();
-        $market = $existing?->is_catalog_seed
-            ? ['market' => $existing->market, 'language' => $existing->primary_language]
-            : $markets->detect(implode("\n", array_filter([
-                $profile->displayName,
-                $profile->bio,
-                json_encode($profile->metadata, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
-                $profile->posts->pluck('caption')->filter()->take(20)->implode("\n"),
-            ])));
+        $market = in_array($marketHint, config('creator_catalog.markets'), true)
+            ? ['market' => $marketHint, 'language' => $marketHint === 'FR' ? 'fr' : 'en']
+            : ($existing?->is_catalog_seed
+                ? ['market' => $existing->market, 'language' => $existing->primary_language]
+                : $markets->detect(implode("\n", array_filter([
+                    $profile->displayName,
+                    $profile->bio,
+                    json_encode($profile->metadata, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+                    $profile->posts->pluck('caption')->filter()->take(20)->implode("\n"),
+                ]))));
 
-        if ($market['market'] === null && in_array($existing?->market, config('creator_catalog.markets'), true)) {
-            $market = ['market' => $existing->market, 'language' => $existing->primary_language];
+        if ($market['market'] === null) {
+            if (in_array($existing?->market, config('creator_catalog.markets'), true)) {
+                $market = ['market' => $existing->market, 'language' => $existing->primary_language];
+            } elseif (in_array($marketHint, config('creator_catalog.markets'), true)) {
+                $market = [
+                    'market' => $marketHint,
+                    'language' => $marketHint === 'FR' ? 'fr' : 'en',
+                ];
+            }
         }
 
         $creatorSafety = $safety->creator($profile);
@@ -314,7 +331,11 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
         $refreshedPostIds = [];
         $capturedAt = now();
 
-        foreach ($profile->posts as $post) {
+        $postsToStore = $this->latestOnly
+            ? $profile->posts->sortByDesc(fn (DiscoveredPost $post): int => $post->publishedAt->getTimestamp())->take(1)
+            : $profile->posts;
+
+        foreach ($postsToStore as $post) {
             $decision = $decisions[$post->sourceUrl];
 
             if ($decision->isAllowed()) {
@@ -344,6 +365,13 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
             });
 
         return $creator;
+    }
+
+    private function marketHint(string $username): ?string
+    {
+        $hint = $this->marketHints[mb_strtolower($username)] ?? null;
+
+        return is_string($hint) ? strtoupper($hint) : null;
     }
 
     /** @param array{market: ?string, language: string} $market */

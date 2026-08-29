@@ -9,9 +9,9 @@ const { locale, t } = useI18n()
 const toast = useToast()
 const post = ref<ContentPost | null>(null)
 const moments = ref<LifeMoment[]>([])
-type RemixFormat = 'reel' | 'carousel' | 'caption'
+type RemixFormat = 'reel' | 'carousel'
 const requestedFormat = Array.isArray(route.query.format) ? route.query.format[0] : route.query.format
-const format = ref<RemixFormat>(['reel', 'carousel', 'caption'].includes(requestedFormat || '') ? requestedFormat as RemixFormat : 'carousel')
+const format = ref<RemixFormat>(['reel', 'carousel'].includes(requestedFormat || '') ? requestedFormat as RemixFormat : 'carousel')
 const selectedMoment = ref<number | null>(null)
 const composerOpen = ref(false)
 const generating = ref(false)
@@ -132,11 +132,11 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
             <p class="mt-1.5 text-[13.5px] leading-6 text-[var(--muted)]">{{ $t('content.makeItYoursCopy') }}</p>
           </div>
 
-          <!-- The three shapes, named and no more: the icon and the word carry
+          <!-- The two shapes, named and no more: the icon and the word carry
                the choice. -->
-          <div class="grid gap-px bg-[var(--line-soft)] sm:grid-cols-3">
+          <div class="grid gap-px bg-[var(--line-soft)] sm:grid-cols-2">
             <button
-              v-for="item in (['reel', 'carousel', 'caption'] as const)"
+              v-for="item in (['reel', 'carousel'] as const)"
               :key="item"
               class="group flex items-start gap-3 px-5 py-4 text-left transition sm:block"
               :class="format === item ? 'bg-[var(--accent-soft)]' : 'bg-[var(--surface)] hover:bg-[var(--paper)]'"
@@ -147,7 +147,7 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
                 class="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] transition"
                 :class="format === item ? 'bg-[var(--ink)] text-[var(--paper)]' : 'bg-[var(--sand-soft)] text-[var(--muted)]'"
               >
-                <AppIcon :name="item === 'caption' ? 'text' : item" :size="17" />
+                <AppIcon :name="item" :size="17" />
               </span>
               <span class="block text-[13.5px] font-medium sm:mt-3">{{ $t(`remix.formats.${item}`) }}</span>
             </button>

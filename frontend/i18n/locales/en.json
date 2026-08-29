@@ -583,8 +583,8 @@
     "nicheInsufficient": "Not enough content yet to determine your niche",
     "analysis": {
       "inProgress": "Personal is reading your profile.",
-      "mediaInProgress": "Your Creator DNA is ready. Personal is refining it from your Reels and carousels in the background.",
-      "mediaFailed": "Your Creator DNA is ready. Some media could not be read, and Personal will try again later.",
+      "mediaInProgress": "Personal is refining your profile from your Reels and carousels in the background.",
+      "mediaFailed": "Some media could not be read, and Personal will try again later.",
       "unavailable": "Personal could not analyze this profile right now. Please try again.",
       "insufficient": "Instagram does not provide enough signals yet. You can complete these details manually."
     },

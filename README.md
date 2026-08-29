@@ -175,6 +175,21 @@ docker compose exec app php artisan personal:discover-creator-candidates
 
 Use that report to expand deliberately from 25 to 60 and then 120 creators. Add selected candidates to the manifest as `pending`, audit them, approve them and import again. Discovery never promotes candidates automatically.
 
+An approved CSV can also be imported in explicit batches. The command reads the selected rows, measures each account from its recent publications, runs the normal content safety policy, and stores only the latest safe post. FR is an authoritative market hint. Combined UK/US rows still rely on the measured profile to choose GB or US.
+
+Preview a 20-row batch before making provider requests or database writes:
+
+```bash
+cd backend
+php artisan personal:seed-creator-batch /absolute/path/to/creators.csv --batch=1 --size=20 --dry-run
+```
+
+Then seed that exact batch. Repeating it is idempotent, and duplicate handles in later CSV batches update the existing creator instead of creating another row:
+
+```bash
+php artisan personal:seed-creator-batch /absolute/path/to/creators.csv --batch=1 --size=20
+```
+
 Measured content is retained for 90 days. The scheduler runs the purge daily and always protects posts saved by a user or used in a remix. Preview it manually with:
 
 ```bash
