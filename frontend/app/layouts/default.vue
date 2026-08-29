@@ -88,9 +88,20 @@ const pageTitle = computed(() => {
           {{ $t('support.nav') }}
         </a>
 
+        <NuxtLink
+          to="/settings"
+          class="flex items-center gap-3 rounded-[10px] px-3 py-2 text-[13.5px] transition"
+          :class="route.path === '/settings' ? 'bg-[var(--line-soft)] font-medium text-[var(--ink)]' : 'text-[var(--muted)] hover:bg-[var(--sand-soft)] hover:text-[var(--ink)]'"
+        >
+          <AppIcon name="settings" :size="17" :class="route.path === '/settings' ? 'text-[var(--accent)]' : ''" />
+          {{ $t('nav.settings') }}
+        </NuxtLink>
+
         <div class="mt-1 flex items-center gap-3 rounded-[14px] px-2 py-2">
-          <img v-if="user?.avatar_url && !avatarFailed" :src="user.avatar_url" :alt="accountLabel" class="h-9 w-9 rounded-full object-cover" @error="avatarFailed = true">
-          <div v-else class="grid h-9 w-9 place-items-center rounded-full bg-[var(--ink)] text-[var(--paper)]"><AppIcon name="user" :size="16" /></div>
+          <NuxtLink to="/personal" class="b-focus shrink-0 rounded-full" :aria-label="$t('nav.personal')">
+            <img v-if="user?.avatar_url && !avatarFailed" :src="user.avatar_url" :alt="accountLabel" class="h-9 w-9 rounded-full object-cover" @error="avatarFailed = true">
+            <div v-else class="grid h-9 w-9 place-items-center rounded-full bg-[var(--ink)] text-[var(--paper)]"><AppIcon name="user" :size="16" /></div>
+          </NuxtLink>
           <div class="min-w-0 flex-1">
             <p class="truncate text-[13px] font-medium">{{ accountLabel }}</p>
             <button class="text-[11px] text-[var(--faint)] transition hover:text-[var(--ink)]" @click="logout">{{ $t('common.signOut') }}</button>
@@ -100,24 +111,6 @@ const pageTitle = computed(() => {
     </aside>
 
     <div class="md:ml-[264px]">
-      <header class="sticky top-0 z-20 hidden h-[74px] bg-[var(--paper)] md:block">
-        <div class="page-shell flex h-full items-center justify-between">
-          <h1 class="font-serif text-[30px] leading-none tracking-[-.02em]">{{ $t(pageTitle) }}</h1>
-          <div class="flex items-center gap-2">
-            <NuxtLink to="/settings" class="grid h-10 w-10 place-items-center rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--muted)] transition hover:text-[var(--ink)]" :aria-label="$t('nav.settings')">
-              <AppIcon name="settings" :size="17" />
-            </NuxtLink>
-            <NuxtLink to="/personal" class="grid h-10 w-10 place-items-center overflow-hidden rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--muted)] transition hover:text-[var(--ink)]" :aria-label="$t('nav.personal')">
-              <img v-if="user?.avatar_url && !avatarFailed" :src="user.avatar_url" :alt="accountLabel" class="h-full w-full object-cover" @error="avatarFailed = true">
-              <AppIcon v-else name="user" :size="17" />
-            </NuxtLink>
-            <NuxtLink to="/create" class="grid h-10 w-10 place-items-center rounded-full b-btn-red transition" :aria-label="$t('nav.create')">
-              <AppIcon name="plus" :size="18" />
-            </NuxtLink>
-          </div>
-        </div>
-      </header>
-
       <header class="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-[var(--line)] bg-[var(--paper)]/95 px-5 backdrop-blur md:hidden">
         <NuxtLink to="/feed" class="b-focus flex items-center gap-2.5">
           <PersonalMark :size="19" tone="signature" />
@@ -126,7 +119,7 @@ const pageTitle = computed(() => {
         <NuxtLink to="/create" class="grid h-9 w-9 place-items-center rounded-full b-btn-red" :aria-label="$t('nav.create')"><AppIcon name="plus" /></NuxtLink>
       </header>
 
-      <div class="pb-20 md:pb-0"><slot /></div>
+      <div class="pb-20 md:pb-0 md:pt-8"><slot /></div>
     </div>
 
     <nav class="fixed inset-x-0 bottom-0 z-30 flex h-16 items-center justify-around border-t border-[var(--line)] bg-[var(--surface)]/95 px-2 backdrop-blur md:hidden">
