@@ -33,7 +33,12 @@
 
     <div class="b-floor pointer-events-none absolute inset-x-0 top-0 z-0 h-[100svh]" aria-hidden="true" />
 
-    <div class="relative z-10 mx-auto max-w-[1200px] px-5 pb-20 pt-[136px] md:px-10 md:pt-[168px]">
+    <!-- The stage is a screen tall, and on a phone the copy is a good deal
+         shorter than that. Rather than sit against the top with a third of the
+         fold left empty under it, the block centres itself in the room it has —
+         the padding still holds it clear of the bar. Wider than a phone the
+         copy already fills the stage, so it keeps the top edge it was set on. -->
+    <div class="relative z-10 mx-auto flex min-h-[100svh] max-w-[1200px] flex-col justify-center px-5 pb-20 pt-[136px] md:block md:min-h-0 md:px-10 md:pt-[168px]">
       <div class="mx-auto max-w-[54rem] text-center">
         <h1
           data-reveal
@@ -65,14 +70,16 @@
           </LandingButtonLink>
         </div>
 
+        <!-- Two facts on one line where there is room for them, two lines with
+             no orphaned separator between them where there is not. -->
         <p
           data-reveal
           data-reveal-now
-          class="mt-6 flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 text-[13px] text-white/45"
+          class="mt-6 flex flex-col items-center justify-center gap-y-1 text-[13px] text-white/45 sm:flex-row sm:gap-x-2.5"
           style="--reveal-delay:220ms"
         >
           <span>{{ $t('landing.hero.reassuranceOne') }}</span>
-          <span class="h-[3px] w-[3px] rounded-full bg-white/30" aria-hidden="true" />
+          <span class="hidden h-[3px] w-[3px] rounded-full bg-white/30 sm:block" aria-hidden="true" />
           <span>{{ $t('landing.hero.reassuranceTwo') }}</span>
         </p>
       </div>

@@ -21,7 +21,7 @@ function select(code: string) {
       v-for="option in options"
       :key="option.code"
       type="button"
-      class="rounded-full px-2.5 py-1 uppercase tracking-[.06em] transition"
+      class="inline-flex h-9 min-w-11 items-center justify-center rounded-full px-2.5 uppercase tracking-[.06em] transition sm:h-auto sm:min-w-0 sm:py-1"
       :class="locale === option.code
         ? (variant === 'dark' ? 'bg-white text-[var(--ink)]' : 'bg-[var(--ink)] text-[var(--paper)]')
         : (variant === 'dark' ? 'text-white/55 hover:text-white' : 'text-[var(--muted)] hover:text-[var(--ink)]')"

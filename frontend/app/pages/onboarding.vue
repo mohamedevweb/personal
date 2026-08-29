@@ -318,7 +318,7 @@ onMounted(async () => {
       </div>
     </header>
 
-    <section class="mx-auto grid min-h-[calc(100vh-5rem)] max-w-6xl items-start gap-14 px-6 py-14 md:grid-cols-[1fr_0.74fr] md:px-10 md:py-20">
+    <section class="mx-auto grid min-h-[calc(100dvh-5rem)] max-w-6xl items-start gap-14 px-6 py-14 md:grid-cols-[1fr_0.74fr] md:px-10 md:py-20">
       <div class="max-w-xl animate-rise">
         <template v-if="!status.connected && !status.instagram_username">
           <h1 class="font-serif text-5xl leading-[1.02] tracking-[-0.045em] md:text-7xl" v-html="$t('onboarding.connectTitle')" />
@@ -327,7 +327,7 @@ onMounted(async () => {
           </p>
 
           <button
-            class="mt-10 inline-flex h-[54px] items-center gap-3 rounded-full b-btn-red px-7 text-[15px] font-medium transition hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-60"
+            class="mt-10 inline-flex h-[54px] w-full items-center justify-center gap-3 rounded-full b-btn-red px-7 text-[15px] font-medium transition hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-60 sm:w-auto"
             :disabled="loading"
             @click="connect"
           >
@@ -355,7 +355,7 @@ onMounted(async () => {
                 autocomplete="off"
                 autocapitalize="none"
                 spellcheck="false"
-                class="min-w-0 flex-1 rounded-full border border-[var(--line)] bg-[var(--paper)] px-5 py-3 text-sm outline-none transition focus:border-[var(--ink)]"
+                class="min-w-0 flex-1 rounded-full border border-[var(--line)] bg-[var(--paper)] px-5 py-3 text-sm outline-none transition focus:border-[var(--ink)] [@media(pointer:coarse)]:text-[16px]"
                 :placeholder="$t('onboarding.handlePlaceholder')"
                 :aria-label="$t('onboarding.handleLabel')"
               >

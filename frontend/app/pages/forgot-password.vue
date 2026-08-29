@@ -25,7 +25,7 @@ async function submit() {
 
 <template>
   <main class="min-h-screen bg-[var(--b-ivory)] p-3 text-[var(--b-black)] md:p-4">
-    <div class="mx-auto grid min-h-[calc(100vh-1.5rem)] max-w-[1500px] gap-3 md:min-h-[calc(100vh-2rem)] md:gap-4 lg:grid-cols-2">
+    <div class="mx-auto grid min-h-[calc(100dvh-1.5rem)] max-w-[1500px] gap-3 md:min-h-[calc(100dvh-2rem)] md:gap-4 lg:grid-cols-2">
       <section class="b-panel relative flex flex-col justify-center rounded-[24px] px-6 py-14 md:px-10">
         <LanguageSwitcher class="absolute right-5 top-5" />
 
@@ -152,6 +152,12 @@ async function submit() {
 .auth-input {
   @apply h-[52px] w-full rounded-[14px] border border-[var(--b-line)] bg-[var(--b-surface)] px-4 text-[15px] outline-none transition-colors;
 }
+
+/* iOS zooms the page in whenever a focused field is set under 16px, and never
+   zooms back out, so on a touch pointer the field is lifted to the threshold.
+   The size the design asks for is kept everywhere a pointer is doing the
+   typing. */
+@media (pointer: coarse) { .auth-input { font-size: 16px; } }
 
 .auth-input::placeholder { color: var(--b-stone); }
 .auth-input:focus {

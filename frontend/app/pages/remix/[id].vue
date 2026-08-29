@@ -394,57 +394,71 @@ onBeforeUnmount(() => {
     <div v-else-if="remix" :inert="retrying || deleting || !!switching" :aria-busy="retrying || deleting || !!switching">
       <!-- Everything that changes the draft's state lives in one bar that stays
            in reach while the editor scrolls. -->
-      <div class="sticky top-16 z-10 border-b border-[var(--line)] bg-[var(--paper)]/92 backdrop-blur md:top-[74px]">
-        <div class="page-shell flex h-16 items-center gap-3 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <NuxtLink
-            :to="`/content/${remix.source_content?.id}`"
-            :aria-label="$t('remix.backToAnalysis')"
-            class="b-focus -ml-1 flex shrink-0 items-center gap-1.5 rounded-full px-1 py-1 text-[13px] text-[var(--muted)] transition hover:text-[var(--ink)]"
-          >
-            <AppIcon name="chevron" :size="15" class="rotate-180" />
-            <span class="hidden sm:inline">{{ $t('remix.backToAnalysis') }}</span>
-          </NuxtLink>
-
-          <span class="status-chip" :class="isReady ? 'status-ready' : 'status-draft'">
-            <span class="status-dot" />{{ isReady ? $t('remix.statusReady') : $t('remix.statusDraft') }}
-          </span>
-
-          <span class="hidden text-[12px] text-[var(--faint)] md:inline">
-            {{ saving ? $t('remix.saving') : dirty ? $t('remix.unsaved') : $t('remix.allSaved') }}
-          </span>
-
-          <div class="ml-auto flex shrink-0 items-center gap-2">
-            <button
-              class="bar-button"
-              :class="confirmingDelete ? 'text-[var(--danger)]' : 'hover:text-[var(--danger)]'"
-              :disabled="deleting || saving"
-              :aria-label="confirmingDelete ? $t('remix.deleteConfirm') : $t('remix.delete')"
-              @click="askDelete"
+      <div class="sticky top-[calc(4rem+env(safe-area-inset-top))] z-10 border-b border-[var(--line)] bg-[var(--paper)]/92 backdrop-blur md:top-[74px]">
+        <!-- Saving is manual, so the two buttons that write the draft are pinned
+             outside the scroller: on a phone the rest of the bar slides under
+             them rather than pushing them off the screen. -->
+        <div class="page-shell flex h-16 items-center gap-3">
+          <!-- A phone has no room for the state, the three tools and the two
+               buttons that write, so the fade says the row carries on rather
+               than leaving a chip looking accidentally cut. -->
+          <div class="flex min-w-0 flex-1 items-center gap-3 overflow-x-auto pr-2 [mask-image:linear-gradient(to_right,#000_calc(100%-1.75rem),transparent)] [scrollbar-width:none] md:[mask-image:none] [&::-webkit-scrollbar]:hidden">
+            <NuxtLink
+              :to="`/content/${remix.source_content?.id}`"
+              :aria-label="$t('remix.backToAnalysis')"
+              class="b-focus -ml-1 flex shrink-0 items-center gap-1.5 rounded-full px-1 py-1 text-[13px] text-[var(--muted)] transition hover:text-[var(--ink)]"
             >
-              <AppIcon name="trash" :size="15" />
-              <!-- Armed, the question has to be readable on a phone too. -->
-              <span :class="confirmingDelete ? '' : 'hidden sm:inline'">
-                {{ confirmingDelete ? $t('remix.deleteConfirm') : $t('remix.delete') }}
-              </span>
-            </button>
-            <button class="bar-button" :aria-label="$t('remix.copy')" @click="copyDraft">
-              <AppIcon :name="copied ? 'check' : 'copy'" :size="15" />
-              <span class="hidden sm:inline">{{ copied ? $t('remix.copied') : $t('remix.copy') }}</span>
-            </button>
-            <button
-              class="bar-button"
-              :class="confirmingRedraft ? 'text-[var(--accent-ink)]' : ''"
-              :disabled="retrying || saving"
-              :aria-label="$t('remix.redraft')"
-              @click="askRedraft"
-            >
-              <AppIcon name="sparkles" :size="15" />
-              <!-- Armed, the question has to be readable on a phone too, where the
-                   other labels stay hidden. -->
-              <span :class="confirmingRedraft ? '' : 'hidden sm:inline'">
-                {{ retrying ? $t('remix.retrying') : confirmingRedraft ? $t('remix.redraftConfirm') : $t('remix.redraft') }}
-              </span>
-            </button>
+              <AppIcon name="chevron" :size="15" class="rotate-180" />
+              <span class="hidden sm:inline">{{ $t('remix.backToAnalysis') }}</span>
+            </NuxtLink>
+
+            <span class="status-chip" :class="isReady ? 'status-ready' : 'status-draft'">
+              <span class="status-dot" />{{ isReady ? $t('remix.statusReady') : $t('remix.statusDraft') }}
+            </span>
+
+            <span class="hidden text-[12px] text-[var(--faint)] md:inline">
+              {{ saving ? $t('remix.saving') : dirty ? $t('remix.unsaved') : $t('remix.allSaved') }}
+            </span>
+
+            <!-- Wide enough and the row has slack, so the tools sit against the
+                 write buttons; on a phone the auto margin is nothing and they
+                 simply follow the state chip into the scroll. -->
+            <div class="ml-auto flex shrink-0 items-center gap-2 pl-3">
+              <button
+                class="bar-button"
+                :class="confirmingDelete ? 'text-[var(--danger)]' : 'hover:text-[var(--danger)]'"
+                :disabled="deleting || saving"
+                :aria-label="confirmingDelete ? $t('remix.deleteConfirm') : $t('remix.delete')"
+                @click="askDelete"
+              >
+                <AppIcon name="trash" :size="15" />
+                <!-- Armed, the question has to be readable on a phone too. -->
+                <span :class="confirmingDelete ? '' : 'hidden sm:inline'">
+                  {{ confirmingDelete ? $t('remix.deleteConfirm') : $t('remix.delete') }}
+                </span>
+              </button>
+              <button class="bar-button" :aria-label="$t('remix.copy')" @click="copyDraft">
+                <AppIcon :name="copied ? 'check' : 'copy'" :size="15" />
+                <span class="hidden sm:inline">{{ copied ? $t('remix.copied') : $t('remix.copy') }}</span>
+              </button>
+              <button
+                class="bar-button"
+                :class="confirmingRedraft ? 'text-[var(--accent-ink)]' : ''"
+                :disabled="retrying || saving"
+                :aria-label="$t('remix.redraft')"
+                @click="askRedraft"
+              >
+                <AppIcon name="sparkles" :size="15" />
+                <!-- Armed, the question has to be readable on a phone too, where the
+                     other labels stay hidden. -->
+                <span :class="confirmingRedraft ? '' : 'hidden sm:inline'">
+                  {{ retrying ? $t('remix.retrying') : confirmingRedraft ? $t('remix.redraftConfirm') : $t('remix.redraft') }}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex shrink-0 items-center gap-2">
             <button class="bar-button" :disabled="saving || !dirty" @click="save(remix.status === 'ready' ? 'ready' : 'draft')">
               {{ $t('remix.saveDraft') }}
             </button>
@@ -741,7 +755,12 @@ onBeforeUnmount(() => {
 .status-ready { @apply border-[var(--positive-line)] bg-[var(--positive-soft)] text-[var(--positive)]; }
 .status-dot { @apply h-1.5 w-1.5 rounded-full bg-current; }
 
-.editor-control { @apply grid h-7 w-7 place-items-center rounded-lg text-[var(--muted)] transition hover:bg-[var(--paper)] hover:text-[var(--ink)] disabled:pointer-events-none disabled:opacity-25; }
+.editor-control { @apply relative grid h-7 w-7 place-items-center rounded-lg text-[var(--muted)] transition hover:bg-[var(--paper)] hover:text-[var(--ink)] disabled:pointer-events-none disabled:opacity-25; }
+/* The controls sit in the corner of a slide, so they stay small and carry the
+   thumb's target behind them instead of growing into the text. */
+@media (pointer: coarse) {
+  .editor-control::after { content: ""; position: absolute; inset: -8px; }
+}
 .control-dark { @apply text-white/55 hover:bg-white/10 hover:text-white; }
 
 /* The reel spine: a stamped margin on the left, the words on the right. */
@@ -749,6 +768,12 @@ onBeforeUnmount(() => {
 .beat-stamp { @apply text-[11.5px] tabular-nums text-[var(--muted)] sm:pt-1; }
 .beat-body { @apply block; }
 .editor-textarea { @apply mt-2 w-full resize-none bg-transparent text-[15.5px] leading-7 outline-none placeholder:text-[var(--faint)]; }
+
+/* iOS zooms the page in whenever a focused field is set under 16px, and never
+   zooms back out, so on a touch pointer the field is lifted to the threshold.
+   The size the design asks for is kept everywhere a pointer is doing the
+   typing. */
+@media (pointer: coarse) { .editor-textarea { font-size: 16px; } }
 /* The hook is the only line in the draft that is set as display type. */
 .editor-hook { @apply mt-2 w-full resize-none bg-transparent font-serif text-[27px] leading-[1.18] tracking-[-.025em] outline-none placeholder:text-[var(--faint)]; }
 </style>

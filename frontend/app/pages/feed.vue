@@ -158,7 +158,9 @@ onMounted(loadFeed)
           <p class="text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--faint)]">{{ $t('feed.moreEyebrow') }}</p>
           <h2 class="mt-2 font-serif text-[28px] tracking-[-.025em]">{{ $t('feed.moreTitle') }}</h2>
         </div>
-        <button class="inline-flex h-9 items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-3 text-[12.5px] text-[var(--muted)] transition hover:text-[var(--ink)] disabled:opacity-60 sm:px-4" :aria-label="refreshing ? $t('feed.refreshing') : $t('feed.refresh')" :disabled="refreshing" @click="refresh">
+        <!-- Icon-only on a phone, so it is a circle a thumb can land on rather
+             than a pill squeezed to the width of its glyph. -->
+        <button class="inline-flex h-11 w-11 items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] text-[12.5px] text-[var(--muted)] transition hover:text-[var(--ink)] disabled:opacity-60 sm:h-9 sm:w-auto sm:px-4" :aria-label="refreshing ? $t('feed.refreshing') : $t('feed.refresh')" :disabled="refreshing" @click="refresh">
           <AppIcon name="sparkles" :size="14" />
           <span class="hidden sm:inline">{{ refreshing ? $t('feed.refreshing') : $t('feed.refresh') }}</span>
         </button>

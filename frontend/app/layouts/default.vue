@@ -35,7 +35,10 @@ const groups = [
 ]
 
 // The mobile bar keeps a single flat row; the grouped rail is a desktop shape.
-const mobileNav = groups.flatMap(group => group.items)
+const mobileNav = [
+  ...groups.flatMap(group => group.items),
+  { label: 'nav.settings', to: '/settings', icon: 'settings' }
+]
 
 const titles: Record<string, string> = {
   '/feed': 'nav.forYou',
@@ -54,7 +57,7 @@ const pageTitle = computed(() => {
 
 <template>
   <div class="min-h-screen bg-[var(--paper)] text-[var(--ink)]">
-    <aside class="fixed inset-y-0 left-0 z-30 hidden w-[264px] flex-col border-r border-[var(--line)] bg-[var(--rail)] px-3 py-5 md:flex">
+    <aside class="fixed inset-y-0 left-0 z-30 hidden w-[264px] flex-col border-r border-[var(--line)] bg-[var(--rail)] py-5 pl-[max(.75rem,env(safe-area-inset-left))] pr-3 md:flex">
       <NuxtLink to="/feed" class="b-focus block w-fit px-2 py-1">
         <PersonalLogo :size="22" />
       </NuxtLink>
@@ -109,24 +112,44 @@ const pageTitle = computed(() => {
     </aside>
 
     <div class="md:ml-[264px]">
-      <header class="sticky top-0 z-20 flex h-16 items-center border-b border-[var(--line)] bg-[var(--paper)]/95 px-5 backdrop-blur md:hidden">
-        <NuxtLink to="/feed" class="b-focus flex items-center gap-2.5">
-          <PersonalMark :size="19" tone="signature" />
-          <span class="font-serif text-[19px] tracking-[-.02em]">{{ $t(pageTitle) }}</span>
-        </NuxtLink>
+      <!-- The bar sits under the status bar rather than beside it: its own
+           background runs up into the inset, and the row keeps its height. -->
+      <header class="sticky top-0 z-20 border-b border-[var(--line)] bg-[var(--paper)]/95 pt-[env(safe-area-inset-top)] backdrop-blur md:hidden">
+        <div class="flex h-16 items-center px-5">
+          <NuxtLink to="/feed" class="b-focus -mx-2 flex h-11 items-center gap-2.5 px-2">
+            <PersonalMark :size="19" tone="signature" />
+            <span class="font-serif text-[19px] tracking-[-.02em]">{{ $t(pageTitle) }}</span>
+          </NuxtLink>
+        </div>
       </header>
 
-      <div class="pb-20 md:pb-0 md:pt-8"><slot /></div>
+      <!-- The tab bar and the home indicator both stand in front of the page, so
+           the scroll has to end above the two of them. -->
+      <div class="pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-0 md:pt-8"><slot /></div>
     </div>
 
-    <nav class="fixed inset-x-0 bottom-0 z-30 flex h-16 items-center justify-around border-t border-[var(--line)] bg-[var(--surface)]/95 px-2 backdrop-blur md:hidden">
-      <NuxtLink v-for="item in mobileNav" :key="item.to" :to="item.to" class="flex min-w-12 flex-col items-center gap-1 text-[10px]" :class="route.path === item.to ? 'text-[var(--ink)]' : 'text-[var(--faint)]'">
-        <AppIcon :name="item.icon" :size="18" :class="route.path === item.to ? 'text-[var(--accent)]' : ''" />{{ $t(item.label) }}
-      </NuxtLink>
-      <NuxtLink to="/settings" class="flex min-w-12 flex-col items-center gap-1 text-[10px]" :class="route.path === '/settings' ? 'text-[var(--ink)]' : 'text-[var(--faint)]'">
-        <AppIcon name="settings" :size="18" :class="route.path === '/settings' ? 'text-[var(--accent)]' : ''" />{{ $t('nav.settings') }}
-      </NuxtLink>
-    </nav>
+    <!-- The bar floats over the page as a pill rather than sitting on the edge:
+         icons only, with a short rule under the active one doing the work the
+         labels used to. Each tab is still a 44pt target. -->
+    <div class="pointer-events-none fixed inset-x-0 bottom-0 z-30 flex justify-center px-4 pb-[calc(.75rem+env(safe-area-inset-bottom))] md:hidden">
+      <nav class="pointer-events-auto flex items-center gap-0.5 rounded-full border border-[var(--line)] bg-[var(--surface)] px-2 py-1.5 shadow-[0_2px_6px_rgba(23,23,26,.06),0_14px_34px_rgba(23,23,26,.14)]">
+        <NuxtLink
+          v-for="item in mobileNav"
+          :key="item.to"
+          :to="item.to"
+          :aria-label="$t(item.label)"
+          :aria-current="route.path === item.to ? 'page' : undefined"
+          class="b-focus relative grid h-11 w-[54px] place-items-center rounded-full transition"
+          :class="route.path === item.to ? 'text-[var(--accent)]' : 'text-[var(--faint)]'"
+        >
+          <AppIcon :name="item.icon" :size="21" />
+          <span
+            class="absolute bottom-1 h-[2px] w-4 rounded-full bg-[var(--accent)] transition-opacity"
+            :class="route.path === item.to ? 'opacity-100' : 'opacity-0'"
+          />
+        </NuxtLink>
+      </nav>
+    </div>
 
   </div>
 </template>

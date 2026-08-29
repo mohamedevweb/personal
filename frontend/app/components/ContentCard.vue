@@ -28,7 +28,10 @@ const visibleCaption = computed(() => (isLongCaption.value ? `${caption.value.sl
 </script>
 
 <template>
-  <article class="group flex h-full flex-col overflow-hidden rounded-[20px] border border-[var(--line)] bg-[var(--surface)] shadow-[0_1px_2px_rgba(23,23,26,.04)] transition duration-300 hover:shadow-[0_12px_34px_rgba(23,23,26,.08)]">
+  <!-- A grid item's automatic minimum is its own min-content, and a handle set
+       to truncate never gets narrower than the handle. Without this the card
+       pushes its track wide and the page scrolls sideways on a phone. -->
+  <article class="group flex h-full min-w-0 flex-col overflow-hidden rounded-[20px] border border-[var(--line)] bg-[var(--surface)] shadow-[0_1px_2px_rgba(23,23,26,.04)] transition duration-300 hover:shadow-[0_12px_34px_rgba(23,23,26,.08)]">
     <!-- The post is shown the way it looks on Instagram: same header, square
          media, action bar, like count and caption ordering. -->
     <header class="flex items-center gap-2.5 px-3 py-2">
@@ -66,6 +69,9 @@ const visibleCaption = computed(() => (isLongCaption.value ? `${caption.value.sl
       </CarouselMedia>
     </div>
 
+    <!-- The glyphs are Instagram's row, drawn at Instagram's size. The two that
+         actually do something carry a thumb-sized hit area behind them instead
+         of being drawn bigger, so the row keeps its spacing. -->
     <div class="flex items-center gap-3.5 px-3 pb-0.5 pt-2 text-[var(--ink)]">
       <AppIcon name="heart" :size="20" :stroke-width="1.6" />
       <AppIcon name="chat" :size="20" :stroke-width="1.6" class="-scale-x-100" />
@@ -75,13 +81,13 @@ const visibleCaption = computed(() => (isLongCaption.value ? `${caption.value.sl
         :href="post.source_url"
         target="_blank"
         rel="noopener noreferrer"
-        class="transition hover:opacity-60"
+        class="relative transition after:absolute after:-inset-2.5 after:content-[''] hover:opacity-60"
         :aria-label="$t('contentCard.openSource')"
       >
         <AppIcon name="arrow" :size="20" class="-rotate-45" />
       </a>
       <button
-        class="ml-auto transition hover:opacity-60"
+        class="relative ml-auto transition after:absolute after:-inset-2.5 after:content-[''] hover:opacity-60"
         :aria-label="post.is_saved ? $t('contentCard.saved') : $t('contentCard.save')"
         @click="$emit('save', post)"
       >

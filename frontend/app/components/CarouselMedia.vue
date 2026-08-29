@@ -88,7 +88,7 @@ watch(() => props.urls, () => {
     <button
       v-if="hasPrevious"
       type="button"
-      class="absolute left-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition hover:bg-black/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+      class="absolute left-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition after:absolute after:-inset-1.5 after:content-[''] hover:bg-black/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
       :aria-label="$t('contentCard.previousSlide')"
       @click="showPrevious"
     >
@@ -97,19 +97,21 @@ watch(() => props.urls, () => {
     <button
       v-if="hasNext"
       type="button"
-      class="absolute right-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition hover:bg-black/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+      class="absolute right-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition after:absolute after:-inset-1.5 after:content-[''] hover:bg-black/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
       :aria-label="$t('contentCard.nextSlide')"
       @click="showNext"
     >
       <AppIcon name="chevron" :size="18" />
     </button>
 
-    <span v-if="urls.length > 1" class="absolute bottom-2 left-1/2 flex -translate-x-1/2">
+    <!-- The dots stay Instagram's size; the button around each one is the size a
+         thumb needs, which is why the row sits low enough to clear the caption. -->
+    <span v-if="urls.length > 1" class="absolute bottom-0 left-1/2 flex -translate-x-1/2">
       <button
         v-for="(_, index) in urls"
         :key="index"
         type="button"
-        class="inline-flex h-4 w-4 items-center justify-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+        class="inline-flex h-9 w-6 items-end justify-center rounded-full pb-[13px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
         :aria-label="$t('contentCard.goToSlide', { slide: index + 1 })"
         :aria-current="index === activeIndex ? 'true' : undefined"
         @click="activeIndex = index"

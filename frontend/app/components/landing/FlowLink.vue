@@ -52,8 +52,11 @@ const labelLeft = computed(() => `${((props.from + props.to) / 2 / COLUMN) * 100
 
 <template>
   <div class="relative" :style="{ '--label-x': labelLeft }">
-    <!-- Phone: a plain drop, with the signature growing down it. -->
-    <div class="relative mx-auto h-14 w-px bg-[var(--b-line)] md:hidden">
+    <!-- Phone: a plain drop, with the signature growing down it. The caption is
+         printed over the middle of it, and it wraps to two or three lines at
+         this width, so the drop is long enough to hold those lines and still
+         leave the line visible above and below them. -->
+    <div class="relative mx-auto w-px bg-[var(--b-line)] md:hidden" :class="label ? 'h-24' : 'h-14'">
       <span
         class="flow-drop absolute inset-x-0 top-0 origin-top bg-[var(--b-red-500)]"
         :class="active ? 'h-full' : 'h-0'"
@@ -84,7 +87,7 @@ const labelLeft = computed(() => `${((props.from + props.to) / 2 / COLUMN) * 100
          it: the label belongs to the circuit, not beside it. -->
     <p
       v-if="label"
-      class="b-mono absolute left-1/2 top-1/2 max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 bg-[#f2efe8] px-3 text-center text-[var(--b-stone)] md:left-[var(--label-x)] md:max-w-none md:whitespace-nowrap"
+      class="b-mono absolute left-1/2 top-1/2 max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 bg-[#f2efe8] px-3 py-1 text-center leading-[1.7] text-[var(--b-stone)] md:left-[var(--label-x)] md:max-w-none md:py-0 md:leading-normal md:whitespace-nowrap"
     >
       {{ label }}
     </p>

@@ -242,10 +242,12 @@ onMounted(loadProfile)
           </div>
         </template>
 
-        <div class="ml-auto flex shrink-0 items-center justify-end gap-2">
-          <button v-if="editing" type="button" class="rounded-full px-4 py-2.5 text-sm text-[var(--muted)] transition hover:text-[var(--ink)]" @click="editing = false">{{ $t('personal.cancel') }}</button>
-          <button v-if="editing" type="submit" class="inline-flex h-11 items-center justify-center rounded-full b-btn-red px-5 text-[14px] font-medium transition disabled:opacity-60" :disabled="saving">{{ saving ? $t('personal.saving') : $t('personal.saveMemory') }}</button>
-          <button v-else type="button" class="inline-flex h-11 w-fit items-center justify-center rounded-full b-btn-red px-5 text-[14px] font-medium transition" @click="beginEdit">{{ $t('personal.editMemory') }}</button>
+        <!-- On a phone the row has already wrapped, so the actions take the new
+             line whole instead of hanging off its right edge. -->
+        <div class="flex w-full shrink-0 items-center gap-2 sm:ml-auto sm:w-auto sm:justify-end">
+          <button v-if="editing" type="button" class="inline-flex h-11 items-center justify-center rounded-full px-4 text-sm text-[var(--muted)] transition hover:text-[var(--ink)]" @click="editing = false">{{ $t('personal.cancel') }}</button>
+          <button v-if="editing" type="submit" class="inline-flex h-11 flex-1 items-center justify-center rounded-full b-btn-red px-5 text-[14px] font-medium transition disabled:opacity-60 sm:flex-none" :disabled="saving">{{ saving ? $t('personal.saving') : $t('personal.saveMemory') }}</button>
+          <button v-else type="button" class="inline-flex h-11 w-full items-center justify-center rounded-full b-btn-red px-5 text-[14px] font-medium transition sm:w-fit" @click="beginEdit">{{ $t('personal.editMemory') }}</button>
         </div>
       </div>
 
@@ -299,4 +301,10 @@ onMounted(loadProfile)
 .memory-label { @apply text-[10px] font-semibold uppercase tracking-[.16em] text-[var(--faint)]; }
 .memory-copy { @apply mt-3 text-[17px] leading-7 text-[var(--copy)]; }
 .memory-input { @apply mt-3 w-full rounded-[12px] border border-[var(--line)] bg-[var(--paper)] px-3 py-2.5 text-[15px] outline-none transition focus:border-[var(--muted)]; }
+
+/* iOS zooms the page in whenever a focused field is set under 16px, and never
+   zooms back out, so on a touch pointer the field is lifted to the threshold.
+   The size the design asks for is kept everywhere a pointer is doing the
+   typing. */
+@media (pointer: coarse) { .memory-input { font-size: 16px; } }
 </style>

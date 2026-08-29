@@ -609,8 +609,6 @@
     "removeError": "Personal could not remove this post. Please try again."
   },
   "drafts": {
-    "eyebrow": "Your studio",
-    "subtitle": "Every remix you are writing or have marked ready, kept in one place.",
     "newDraft": "New draft",
     "open": "Open",
     "updated": "Updated {date}",

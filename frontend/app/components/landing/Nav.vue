@@ -39,7 +39,7 @@ onUnmounted(() => {
        rail — so the wordmark lands on the same left edge as the section
        headings and the footer logo, with the pill hanging past it on both
        sides. -->
-  <header class="pointer-events-none sticky top-0 z-50 px-5 pt-3 md:px-10 md:pt-5">
+  <header class="pointer-events-none sticky top-0 z-50 px-[max(1.25rem,env(safe-area-inset-left))] pr-[max(1.25rem,env(safe-area-inset-right))] pt-[calc(.75rem+env(safe-area-inset-top))] md:px-10 md:pt-5">
     <div class="mx-auto max-w-[1200px]">
       <div
         class="pointer-events-auto -mx-3 flex h-[62px] items-center justify-between rounded-full px-[11px] transition-all duration-500 md:-mx-7 md:px-[27px]"

@@ -3,7 +3,9 @@ const { toasts, remove } = useToast()
 </script>
 
 <template>
-  <div class="pointer-events-none fixed inset-x-4 top-4 z-[100] flex flex-col items-end gap-3 md:left-auto md:right-6 md:top-6 md:w-[390px]" :aria-label="$t('toast.regionLabel')">
+  <!-- Toasts land over the app's own header, so they start below the status bar
+       rather than under it. -->
+  <div class="pointer-events-none fixed inset-x-4 top-[calc(1rem+env(safe-area-inset-top))] z-[100] flex flex-col items-end gap-3 md:left-auto md:right-6 md:top-6 md:w-[390px]" :aria-label="$t('toast.regionLabel')">
     <TransitionGroup name="toast">
       <article
         v-for="toast in toasts"

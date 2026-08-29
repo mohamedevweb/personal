@@ -609,8 +609,6 @@
     "removeError": "Personal n’a pas pu retirer ce post. Réessaie."
   },
   "drafts": {
-    "eyebrow": "Ton studio",
-    "subtitle": "Tous les remix que tu écris ou as marqués comme prêts, réunis au même endroit.",
     "newDraft": "Nouveau brouillon",
     "open": "Ouvrir",
     "updated": "Mis à jour le {date}",

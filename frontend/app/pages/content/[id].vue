@@ -119,7 +119,20 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
             </div>
           </CarouselMedia>
         </div>
-        <div class="mt-4 flex items-center gap-3"><a :href="creatorProfileUrl(post.creator.username)" target="_blank" rel="noopener noreferrer" class="flex flex-1 items-center gap-3"><img :src="post.creator.avatar_url || ''" alt="" class="h-9 w-9 rounded-full"><div class="flex-1"><p class="text-sm font-medium hover:underline">@{{ post.creator.username }}</p><p class="text-xs text-[var(--faint)]">{{ $t('content.followers', { count: compactNumber(post.creator.followers) }) }} · {{ relativeDate(post.published_at, locale) }}</p></div></a><a v-if="post.source_url" :href="post.source_url" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs text-[var(--muted)] transition hover:text-[var(--ink)]">{{ $t('content.openSource') }}<AppIcon name="arrow" :size="13" class="-rotate-45" /></a><p v-if="post.views > 0" class="text-xs text-[var(--muted)]">{{ $t('content.views', { count: compactNumber(post.views) }) }}</p></div>
+        <!-- A handle can be thirty characters long, so it truncates rather than
+             pushing the link and the view count off a phone; if the three still
+             do not fit on one line, the metadata takes the next one. -->
+        <div class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
+          <a :href="creatorProfileUrl(post.creator.username)" target="_blank" rel="noopener noreferrer" class="flex min-w-0 flex-1 basis-48 items-center gap-3">
+            <img :src="post.creator.avatar_url || ''" alt="" class="h-9 w-9 shrink-0 rounded-full">
+            <span class="min-w-0 flex-1">
+              <span class="block truncate text-sm font-medium hover:underline">@{{ post.creator.username }}</span>
+              <span class="block truncate text-xs text-[var(--faint)]">{{ $t('content.followers', { count: compactNumber(post.creator.followers) }) }} · {{ relativeDate(post.published_at, locale) }}</span>
+            </span>
+          </a>
+          <a v-if="post.source_url" :href="post.source_url" target="_blank" rel="noopener noreferrer" class="inline-flex h-9 shrink-0 items-center gap-1.5 text-xs text-[var(--muted)] transition hover:text-[var(--ink)]">{{ $t('content.openSource') }}<AppIcon name="arrow" :size="13" class="-rotate-45" /></a>
+          <p v-if="post.views > 0" class="shrink-0 text-xs text-[var(--muted)]">{{ $t('content.views', { count: compactNumber(post.views) }) }}</p>
+        </div>
       </section>
 
       <section class="min-w-0">

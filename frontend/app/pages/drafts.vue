@@ -90,33 +90,21 @@ onBeforeUnmount(() => {
 
 <template>
   <main class="page-shell pb-16 pt-2">
-    <header class="rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-6">
-      <div class="flex items-start gap-4">
-        <span class="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-[var(--accent-soft)] text-[var(--accent-ink)]">
-          <AppIcon name="draft" :size="19" />
-        </span>
-        <div>
-          <p class="text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--faint)]">{{ $t('drafts.eyebrow') }}</p>
-          <p class="mt-2 max-w-xl text-[15px] leading-6 text-[var(--muted)]">{{ $t('drafts.subtitle') }}</p>
-        </div>
-      </div>
-    </header>
-
-    <div v-if="loading" class="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+    <div v-if="loading" class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
       <div v-for="index in 3" :key="index" class="h-56 animate-pulse rounded-[18px] bg-[var(--sand-soft)]" />
     </div>
 
-    <div v-else-if="error" role="alert" class="mt-5 rounded-[18px] border border-[var(--danger-line)] bg-[var(--danger-soft)] px-6 py-5 text-sm text-[var(--danger)]">
+    <div v-else-if="error" role="alert" class="rounded-[18px] border border-[var(--danger-line)] bg-[var(--danger-soft)] px-6 py-5 text-sm text-[var(--danger)]">
       {{ error }}
     </div>
 
-    <div v-else-if="remixes.length" class="mt-5 grid auto-rows-fr gap-5 sm:grid-cols-2 xl:grid-cols-3">
+    <div v-else-if="remixes.length" class="grid auto-rows-fr gap-5 sm:grid-cols-2 xl:grid-cols-3">
       <!-- The card holds two actions now, so opening the draft is a link stretched
            over it and the trash stays a button of its own above that surface. -->
       <article
         v-for="remix in remixes"
         :key="remix.id"
-        class="group relative flex min-h-56 flex-col rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-5 shadow-[0_1px_2px_rgba(23,23,26,.04)] transition focus-within:ring-2 focus-within:ring-[var(--accent)]"
+        class="group relative flex min-h-56 min-w-0 flex-col rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-5 shadow-[0_1px_2px_rgba(23,23,26,.04)] transition focus-within:ring-2 focus-within:ring-[var(--accent)]"
         :class="remix.status !== 'generating' && 'hover:-translate-y-0.5 hover:shadow-[0_12px_30px_rgba(23,23,26,.07)]'"
       >
         <div class="flex items-center justify-between gap-3">
@@ -146,7 +134,7 @@ onBeforeUnmount(() => {
           <div v-if="remix.status !== 'generating'" class="flex shrink-0 items-center gap-2">
             <button
               type="button"
-              class="relative z-10 inline-flex h-8 items-center gap-1.5 rounded-full px-2 text-[12px] font-medium text-[var(--faint)] transition hover:bg-[var(--danger-soft)] hover:text-[var(--danger)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:opacity-60"
+              class="relative z-10 inline-flex h-9 min-w-9 items-center justify-center gap-1.5 rounded-full px-2 text-[12px] font-medium text-[var(--faint)] transition after:absolute after:-inset-1.5 after:content-[''] hover:bg-[var(--danger-soft)] hover:text-[var(--danger)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] disabled:opacity-60"
               :class="confirmingDeleteId === remix.id && 'bg-[var(--danger-soft)] text-[var(--danger)]'"
               :aria-label="confirmingDeleteId === remix.id ? $t('drafts.deleteConfirm') : $t('drafts.delete')"
               :disabled="deletingId === remix.id"
@@ -166,7 +154,7 @@ onBeforeUnmount(() => {
       </article>
     </div>
 
-    <div v-else class="mt-5 rounded-[18px] border border-dashed border-[var(--line)] bg-[var(--surface)] px-6 py-16 text-center">
+    <div v-else class="rounded-[18px] border border-dashed border-[var(--line)] bg-[var(--surface)] px-6 py-16 text-center">
       <p class="font-serif text-[26px] tracking-[-.02em]">{{ $t('drafts.emptyTitle') }}</p>
       <p class="mx-auto mt-3 max-w-md text-sm leading-6 text-[var(--muted)]">{{ $t('drafts.emptyCopy') }}</p>
     </div>

@@ -62,6 +62,11 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
+      // The app is installable, so it has to draw into the notch and the home
+      // indicator rather than being letterboxed away from them. Opening the
+      // viewport is what makes env(safe-area-inset-*) report anything at all;
+      // every fixed edge in the shell then pads itself back out of the way.
+      viewport: 'width=device-width, initial-scale=1, viewport-fit=cover',
       meta: [
         { name: 'theme-color', content: '#e04f36' }
       ],

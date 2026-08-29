@@ -52,17 +52,17 @@ async function submit() {
       ref="field"
       v-model="form.content"
       required
-      class="mt-3 min-h-28 w-full rounded-[12px] border border-[var(--line)] bg-[var(--paper)] p-3.5 text-[15px] leading-6 outline-none transition focus:border-[var(--muted)]"
+      class="mt-3 min-h-28 w-full rounded-[12px] border border-[var(--line)] bg-[var(--paper)] p-3.5 text-[15px] leading-6 outline-none transition focus:border-[var(--muted)] [@media(pointer:coarse)]:text-[16px]"
       :placeholder="$t('moments.composerPlaceholder')"
     />
     <div class="mt-3 grid gap-3 sm:grid-cols-2">
       <label class="text-xs text-[var(--muted)]">{{ $t('moments.category') }}
-        <select v-model="form.category" class="mt-1.5 w-full rounded-[12px] border border-[var(--line)] bg-[var(--surface)] px-3 py-2.5 text-sm outline-none">
+        <select v-model="form.category" class="mt-1.5 w-full rounded-[12px] border border-[var(--line)] bg-[var(--surface)] px-3 py-2.5 text-sm outline-none [@media(pointer:coarse)]:text-[16px]">
           <option v-for="category in categories" :key="category" :value="category">{{ $t('moments.categories.' + category) }}</option>
         </select>
       </label>
       <label class="text-xs text-[var(--muted)]">{{ $t('moments.date') }}
-        <input v-model="form.happened_at" type="date" class="mt-1.5 w-full rounded-[12px] border border-[var(--line)] bg-[var(--surface)] px-3 py-2.5 text-sm outline-none">
+        <input v-model="form.happened_at" type="date" class="mt-1.5 w-full rounded-[12px] border border-[var(--line)] bg-[var(--surface)] px-3 py-2.5 text-sm outline-none [@media(pointer:coarse)]:text-[16px]">
       </label>
     </div>
     <div class="mt-4 flex items-center justify-end gap-4">

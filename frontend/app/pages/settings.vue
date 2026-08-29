@@ -218,4 +218,10 @@ watch(error, (message) => {
 
 <style scoped>
 .settings-input { @apply mt-2 w-full rounded-[14px] border border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-[15px] outline-none transition focus:border-[var(--ink)]; }
+
+/* iOS zooms the page in whenever a focused field is set under 16px, and never
+   zooms back out, so on a touch pointer the field is lifted to the threshold.
+   The size the design asks for is kept everywhere a pointer is doing the
+   typing. */
+@media (pointer: coarse) { .settings-input { font-size: 16px; } }
 </style>

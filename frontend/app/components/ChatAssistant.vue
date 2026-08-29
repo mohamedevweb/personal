@@ -106,7 +106,7 @@ onUnmounted(() => {
     <!-- Launcher: floats above the mobile bottom nav, and sits at the foot of
          the desktop rail where the assistant belongs. -->
     <button
-      class="fixed bottom-20 right-5 z-40 grid h-14 w-14 place-items-center rounded-full bg-[var(--ink)] text-[var(--paper)] shadow-[0_8px_24px_rgba(23,23,26,.24)] transition hover:scale-105 md:hidden"
+      class="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-5 z-40 grid h-14 w-14 place-items-center rounded-full bg-[var(--ink)] text-[var(--paper)] shadow-[0_8px_24px_rgba(23,23,26,.24)] transition hover:scale-105 md:hidden"
       :aria-label="$t('chat.open')"
       @click="openChat"
     >
@@ -196,7 +196,9 @@ onUnmounted(() => {
 
               </div>
 
-              <div class="border-t border-[var(--line-soft)] bg-[var(--surface)] px-4 pb-4 pt-4 sm:px-5 sm:pb-5">
+              <!-- The sheet is flush with the bottom of the screen on a phone, so the
+                   composer clears the home indicator itself. -->
+              <div class="border-t border-[var(--line-soft)] bg-[var(--surface)] px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4 sm:px-5 sm:pb-5">
                 <div class="flex items-end gap-2 rounded-[16px] border border-[var(--line)] bg-[var(--paper)] px-3.5 py-2.5 shadow-[0_1px_3px_rgba(23,23,26,.04)] transition focus-within:border-[var(--muted)] focus-within:ring-2 focus-within:ring-[var(--line-soft)]">
                   <textarea
                     ref="inputEl"
@@ -204,7 +206,7 @@ onUnmounted(() => {
                     rows="1"
                     :placeholder="$t('chat.placeholder')"
                     :aria-label="$t('chat.placeholder')"
-                    class="max-h-32 flex-1 resize-none bg-transparent py-1 text-[14px] leading-6 text-[var(--ink)] outline-none placeholder:text-[var(--faint)]"
+                    class="max-h-32 flex-1 resize-none bg-transparent py-1 text-[14px] leading-6 text-[var(--ink)] outline-none placeholder:text-[var(--faint)] [@media(pointer:coarse)]:text-[16px]"
                     @keydown="onKeydown"
                   />
                   <div class="flex items-center gap-2">

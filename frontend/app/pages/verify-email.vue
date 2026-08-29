@@ -42,7 +42,7 @@ async function resend() {
       </div>
     </header>
 
-    <section class="mx-auto flex min-h-[calc(100vh-5rem)] max-w-md flex-col justify-center px-6 py-14">
+    <section class="mx-auto flex min-h-[calc(100dvh-5rem)] max-w-md flex-col justify-center px-6 py-14">
       <template v-if="verified">
         <h1 class="font-serif text-[44px] leading-[1.04] tracking-[-0.035em]">{{ $t('verifyEmail.verifiedTitle') }}</h1>
         <p class="mt-5 text-[16px] leading-7 text-[var(--muted)]">{{ $t('verifyEmail.verifiedCopy') }}</p>
