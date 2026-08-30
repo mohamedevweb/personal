@@ -23,11 +23,11 @@ export function usePersonalApi() {
     if (!import.meta.dev) return false
 
     if (!developmentBootstrap) {
-      developmentBootstrap = $fetch('/api/development/session', {
+      developmentBootstrap = $fetch<{ token?: string }>('/api/development/session', {
         baseURL: config.public.apiBase,
         credentials: 'include',
         headers: { Accept: 'application/json', 'Accept-Language': $i18n.locale.value }
-      }).then((response: { token?: string }) => {
+      }).then((response) => {
         if (import.meta.server && response.token) token.value = response.token
         authenticated.value = true
         return true

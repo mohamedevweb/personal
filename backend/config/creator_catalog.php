@@ -11,12 +11,28 @@ return [
     'target_total' => 25,
     'target_per_vertical' => 5,
 
+    // The versioned Golden Catalog still contains the original five French
+    // verticals. Discovery and feed classification also support the broader
+    // verticals below, which are populated by the production seed batches.
+    'manifest_verticals' => [
+        'sport-fitness',
+        'food-cooking',
+        'personal-branding',
+        'tech-ai',
+        'wellness',
+    ],
+
     'verticals' => [
         'sport-fitness' => ['name' => 'Sport & Fitness', 'aliases' => ['sport', 'fitness', 'football', 'soccer', 'athlete', 'athlète', 'musculation', 'running', 'coaching sportif', 'nutrition sportive', 'workout', 'strength training']],
         'food-cooking' => ['name' => 'Food & Cooking', 'aliases' => ['food', 'cuisine', 'recettes', 'alimentation saine', 'patisserie', 'pâtisserie', 'healthy food', 'cooking', 'baking']],
         'personal-branding' => ['name' => 'Personal Branding', 'aliases' => ['marque personnelle', 'création de contenu', 'creation de contenu', 'marketing', 'creator economy', 'entrepreneuriat', 'entrepreneurship', 'content creation']],
         'tech-ai' => ['name' => 'Tech & AI', 'aliases' => ['tech', 'technologie', 'ia', 'ai', 'intelligence artificielle', 'développement', 'developpement', 'development', 'saas', 'productivité', 'productivity']],
         'wellness' => ['name' => 'Wellness', 'aliases' => ['bien-être', 'bien etre', 'wellbeing', 'santé mentale', 'sante mentale', 'mental health', 'mindfulness', 'méditation', 'meditation', 'sommeil', 'sleep', 'récupération', 'recovery', 'santé globale']],
+        'events' => ['name' => 'Events', 'aliases' => ['events', 'event', 'événementiel', 'evenementiel', 'wedding', 'weddings', 'mariage', 'mariages', 'event planning', 'wedding planner', 'conference', 'conference planning', 'concert', 'festival']],
+        'languages' => ['name' => 'Languages', 'aliases' => ['languages', 'langues', 'language learning', 'french learning', 'english learning', 'apprendre le français', 'apprentissage des langues', 'grammar', 'pronunciation', 'ielts']],
+        'lifestyle' => ['name' => 'Lifestyle', 'aliases' => ['lifestyle', 'mode de vie', 'habits', 'habitudes', 'routines', 'routine', 'discipline', 'self-development', 'self development', 'personal development', 'développement personnel', 'minimalism', 'personal growth']],
+        'local-culture' => ['name' => 'Local & Culture', 'aliases' => ['local culture', 'local / culture', 'culture locale', 'local discovery', 'city guide', 'city guides', 'paris', 'lyon', 'london', 'new york', 'nyc', 'sorties', 'addresses']],
+        'travel' => ['name' => 'Travel', 'aliases' => ['travel', 'voyage', 'tourism', 'tourisme', 'destination', 'destinations', 'travel tips', 'adventure', 'road trip', 'backpacking']],
     ],
 
     // Adjacent subjects may be useful, but they never fill the personalised
@@ -28,6 +44,11 @@ return [
         'personal-branding' => ['tech-ai'],
         'tech-ai' => ['personal-branding'],
         'wellness' => ['sport-fitness', 'food-cooking'],
+        'events' => ['local-culture', 'lifestyle'],
+        'languages' => ['lifestyle'],
+        'lifestyle' => ['wellness', 'personal-branding', 'languages'],
+        'local-culture' => ['events', 'travel'],
+        'travel' => ['local-culture', 'events'],
     ],
 
     // These narrower clusters disambiguate broad verticals. In particular,
@@ -43,6 +64,11 @@ return [
         'recipes' => ['recipe', 'recipes', 'recette', 'recettes', 'meal prep', 'vegan cooking', 'cuisine maison'],
         'baking' => ['baking', 'patisserie', 'pâtisserie', 'pastry', 'bread', 'dessert', 'desserts'],
         'mental-wellness' => ['mental health', 'santé mentale', 'sante mentale', 'mindfulness', 'méditation', 'meditation', 'stress', 'burnout'],
+        'events' => ['event', 'events', 'event planning', 'wedding', 'weddings', 'mariage', 'mariages', 'conference', 'concert', 'festival'],
+        'languages' => ['language learning', 'french learning', 'english learning', 'grammar', 'pronunciation', 'ielts', 'langues'],
+        'lifestyle' => ['lifestyle', 'habits', 'habitudes', 'routine', 'routines', 'discipline', 'self-development', 'personal development', 'développement personnel', 'minimalism'],
+        'local-culture' => ['local culture', 'local discovery', 'city guide', 'city guides', 'culture locale', 'paris', 'lyon', 'london', 'new york', 'nyc', 'sorties'],
+        'travel' => ['travel', 'voyage', 'tourism', 'tourisme', 'destination', 'destinations', 'travel tips', 'adventure', 'road trip', 'backpacking'],
     ],
 
     'audit' => [

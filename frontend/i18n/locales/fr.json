@@ -723,7 +723,12 @@
       "personal-branding": "Personal branding",
       "tech-ai": "Tech et IA",
       "beauty-fashion": "Beauté et mode",
-      "wellness": "Bien-être"
+      "wellness": "Bien-être",
+      "events": "Événementiel",
+      "languages": "Langues",
+      "lifestyle": "Lifestyle",
+      "local-culture": "Local et culture",
+      "travel": "Voyage"
     },
     "views": "{count} vues",
     "playReel": "Lire le Reel de {'@'}{username}",

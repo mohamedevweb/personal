@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\PersonalAccessToken;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends Controller
@@ -97,7 +98,7 @@ class AuthController extends Controller
         return str($request->userAgent() ?? 'api')->limit(60, '')->toString();
     }
 
-    private function tokenCookie(string $token): \Symfony\Component\HttpFoundation\Cookie
+    private function tokenCookie(string $token): Cookie
     {
         return cookie(
             'personal_token',

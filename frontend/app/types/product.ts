@@ -103,7 +103,7 @@ export interface PersonalProfile {
   niche: string | null
   market: 'FR' | 'GB' | 'US' | null
   market_confidence: number | null
-  primary_vertical: 'sport-fitness' | 'food-cooking' | 'personal-branding' | 'tech-ai' | 'beauty-fashion' | 'wellness' | null
+  primary_vertical: 'sport-fitness' | 'food-cooking' | 'personal-branding' | 'tech-ai' | 'beauty-fashion' | 'wellness' | 'events' | 'languages' | 'lifestyle' | 'local-culture' | 'travel' | null
   audience_description: string | null
   positioning: string | null
   topics: string[] | null

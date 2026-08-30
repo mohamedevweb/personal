@@ -47,7 +47,9 @@ class CreatorCatalog
             throw new InvalidArgumentException('Creator catalog handles must be present and unique.');
         }
 
-        $verticals = array_keys((array) config('creator_catalog.verticals'));
+        // The Golden Catalog has a fixed editorial quota. Discovery can expose
+        // additional canonical verticals without changing that manifest.
+        $verticals = array_values((array) config('creator_catalog.manifest_verticals', array_keys((array) config('creator_catalog.verticals'))));
         $markets = (array) config('creator_catalog.markets');
 
         foreach ($entries as $entry) {

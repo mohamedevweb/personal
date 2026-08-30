@@ -104,7 +104,7 @@ class AuthTest extends TestCase
         $user = User::factory()->create();
         $token = $user->createToken('browser')->plainTextToken;
 
-        $this->withUnencryptedCookie('personal_token', $token)
+        $this->withCredentials()->withUnencryptedCookie('personal_token', $token)
             ->getJson('/api/auth/me')
             ->assertOk()
             ->assertJsonPath('user.id', $user->id);

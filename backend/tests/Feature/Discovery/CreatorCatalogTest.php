@@ -7,6 +7,7 @@ use App\Jobs\Discovery\MeasureAccountEngagement;
 use App\Models\Creator;
 use App\Models\CreatorProfile;
 use App\Models\User;
+use App\Services\Discovery\CanonicalCreatorVerticals;
 use App\Services\Discovery\CreatorCatalog;
 use App\Services\Discovery\CreatorCatalogEligibility;
 use App\Services\Discovery\CreatorCatalogImporter;
@@ -32,11 +33,17 @@ class CreatorCatalogTest extends TestCase
         $this->assertCount(25, $entries);
         $this->assertCount(25, $entries->pluck('handle')->map(fn (string $handle): string => strtolower($handle))->unique());
 
-        foreach (array_keys(config('creator_catalog.verticals')) as $vertical) {
+        foreach (config('creator_catalog.manifest_verticals') as $vertical) {
             $group = $entries->where('vertical', $vertical);
             $this->assertCount(5, $group);
             $this->assertTrue($group->every(fn (array $entry): bool => $entry['market'] === 'FR'));
         }
+
+        $this->assertSame('events', app(CanonicalCreatorVerticals::class)->canonical('Événementiel'));
+        $this->assertSame('languages', app(CanonicalCreatorVerticals::class)->canonical('Langues'));
+        $this->assertSame('lifestyle', app(CanonicalCreatorVerticals::class)->canonical('Lifestyle'));
+        $this->assertSame('local-culture', app(CanonicalCreatorVerticals::class)->canonical('Local / Culture'));
+        $this->assertSame('travel', app(CanonicalCreatorVerticals::class)->canonical('Voyage'));
 
         $this->assertCount(22, $entries->where('status', 'approved'));
         $this->assertCount(0, $entries->where('status', 'pending'));
