@@ -120,7 +120,7 @@ class RealignFeedCatalog extends Command
                     $attributes['primary_language'] = $detectedMarket['language'];
                 }
 
-                if ($creator->primary_vertical !== $detectedVertical) {
+                if ($detectedVertical !== null && $creator->primary_vertical !== $detectedVertical) {
                     $attributes['primary_vertical'] = $detectedVertical;
                 }
 
@@ -130,7 +130,7 @@ class RealignFeedCatalog extends Command
                     $result['markets_unresolved']++;
                 }
 
-                if ($detectedVertical !== $creator->primary_vertical) {
+                if ($detectedVertical !== null && $detectedVertical !== $creator->primary_vertical) {
                     $result['verticals']++;
                 }
 

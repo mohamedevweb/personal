@@ -485,8 +485,8 @@ onBeforeUnmount(() => {
                  the top, one slide at a time — so what is typed is what a reader
                  gets, and the picture to shoot is named on the slide it belongs
                  to rather than in a brief nobody opens. -->
-            <div v-if="remix.format === 'carousel'" class="mt-4">
-              <div class="w-full">
+            <div v-if="remix.format === 'carousel'" class="mt-4 lg:mt-0">
+              <div class="mx-auto w-full max-w-[468px]">
                 <template v-if="slide">
                   <article class="overflow-hidden rounded-[14px] border border-[var(--line)] bg-[var(--surface)]">
                     <header class="flex items-center gap-3 px-4 py-3">
@@ -617,7 +617,7 @@ onBeforeUnmount(() => {
                       <AppIcon name="arrow-up" :size="14" class="rotate-90" />
                     </button>
                     <button class="editor-control" :title="$t('remix.regenerate')" :aria-label="$t('remix.regenerate')" :disabled="!!regeneratingBlock" @click="regenerateBlock('slide', activeSlide)">
-                      <AppIcon name="refresh" :size="14" :class="regeneratingBlock === `slide:${activeSlide}` && 'animate-spin'" />
+                      <AppIcon name="sparkles" :size="14" :class="regeneratingBlock === `slide:${activeSlide}` && 'animate-spin'" />
                     </button>
                     <button class="editor-control text-[var(--danger)]" :title="$t('remix.delete')" :aria-label="$t('remix.delete')" @click="deleteSlide(activeSlide); showSlide(activeSlide)">
                       <AppIcon name="trash" :size="14" />
@@ -810,13 +810,6 @@ onBeforeUnmount(() => {
                   <span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" />{{ remix.generated_content.your_context }}
                 </p>
               </div>
-              <NuxtLink
-                v-if="remix.life_moment"
-                to="/personal"
-                class="flex items-center justify-between border-t border-[var(--line-soft)] px-5 py-3 text-[12.5px] text-[var(--muted)] transition hover:bg-[var(--paper)] hover:text-[var(--ink)]"
-              >
-                {{ $t('remix.editMoments') }}<AppIcon name="arrow" :size="14" />
-              </NuxtLink>
             </div>
           </aside>
         </div>
