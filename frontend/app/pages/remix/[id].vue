@@ -551,45 +551,41 @@ onBeforeUnmount(() => {
                           :class="activeSlide === 0 ? 'caret-white text-white/65 placeholder:text-white/30' : 'text-[var(--copy)] placeholder:text-[var(--faint)]'"
                         />
                       </div>
-                    </div>
 
-                    <!-- Swiping is how a carousel is read, so the deck is moved
-                         through from a rail under the frame rather than from
-                         arrows parked on top of the words. The dot for the slide
-                         on screen stretches, so the position is readable without
-                         counting. -->
-                    <div v-if="slides.length > 1" class="flex items-center justify-center gap-2 py-2.5">
+                      <!-- Navigation arrows overlaid on the slide, same as CarouselMedia -->
                       <button
-                        class="slide-step b-focus"
-                        :disabled="activeSlide === 0"
+                        v-if="activeSlide > 0"
+                        type="button"
+                        class="absolute left-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition after:absolute after:-inset-1.5 after:content-[''] hover:bg-black/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                         :aria-label="$t('remix.previousSlide')"
                         @click="showSlide(activeSlide - 1)"
                       >
-                        <AppIcon name="chevron" :size="14" class="rotate-180" />
+                        <AppIcon name="chevron" :size="18" class="rotate-180" />
                       </button>
-                      <span class="flex items-center gap-0.5">
-                        <button
-                          v-for="(item, index) in slides"
-                          :key="item.id"
-                          class="b-focus grid h-6 w-4 shrink-0 place-items-center"
-                          :aria-label="$t('remix.slideOf', { index: index + 1, total: slides.length })"
-                          :aria-current="index === activeSlide"
-                          @click="showSlide(index)"
-                        >
-                          <span
-                            class="h-1.5 rounded-full transition-all duration-300"
-                            :class="index === activeSlide ? 'w-4 bg-[var(--accent)]' : 'w-1.5 bg-[var(--line)]'"
-                          />
-                        </button>
-                      </span>
                       <button
-                        class="slide-step b-focus"
-                        :disabled="activeSlide === slides.length - 1"
+                        v-if="activeSlide < slides.length - 1"
+                        type="button"
+                        class="absolute right-3 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition after:absolute after:-inset-1.5 after:content-[''] hover:bg-black/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                         :aria-label="$t('remix.nextSlide')"
                         @click="showSlide(activeSlide + 1)"
                       >
-                        <AppIcon name="chevron" :size="14" />
+                        <AppIcon name="chevron" :size="18" />
                       </button>
+
+                      <!-- Navigation dots at the bottom, same as CarouselMedia -->
+                      <span v-if="slides.length > 1" class="absolute bottom-0 left-1/2 flex -translate-x-1/2">
+                        <button
+                          v-for="(_, index) in slides"
+                          :key="index"
+                          type="button"
+                          class="inline-flex h-9 w-6 items-end justify-center rounded-full pb-[13px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+                          :aria-label="$t('remix.slideOf', { index: index + 1, total: slides.length })"
+                          :aria-current="index === activeSlide ? 'true' : undefined"
+                          @click="showSlide(index)"
+                        >
+                          <i class="h-[5px] w-[5px] rounded-full shadow-[0_1px_2px_rgba(0,0,0,.25)]" :class="index === activeSlide ? 'bg-white' : 'bg-white/45'" />
+                        </button>
+                      </span>
                     </div>
 
                     <!-- The row a reader sees under any post. It does nothing

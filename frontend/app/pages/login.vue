@@ -151,9 +151,6 @@ function toggleMode() {
               <p class="text-[11px] font-semibold uppercase tracking-[.16em] text-[#a8a196]">
                 {{ $t('login.aside.card.eyebrow') }}
               </p>
-              <span class="grid h-7 w-7 place-items-center rounded-full bg-[rgba(224,79,54,.16)] text-[var(--b-red-lit)]" aria-hidden="true">
-                <AppIcon name="sparkles" :size="14" />
-              </span>
             </div>
 
             <p class="mt-4 font-display text-[38px] leading-none tracking-[-.02em] text-[var(--b-red-lit)]">{{ $t('login.aside.card.metric') }}</p>
