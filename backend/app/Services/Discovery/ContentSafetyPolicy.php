@@ -3,6 +3,7 @@
 namespace App\Services\Discovery;
 
 use App\Models\ContentPost;
+use App\Models\Creator;
 use App\Services\Instagram\ContentMedia;
 use App\Services\Instagram\InstagramMediaProxy;
 use Illuminate\Support\Facades\Log;
@@ -68,6 +69,22 @@ class ContentSafetyPolicy
             ->all();
 
         return $this->inspect($text, $images, $post->metadata ?? []);
+    }
+
+    public function storedCreator(Creator $creator): ContentSafetyDecision
+    {
+        $profile = new DiscoveredProfile(
+            username: $creator->username,
+            displayName: $creator->display_name,
+            avatarUrl: $creator->avatar_url,
+            followers: (int) $creator->followers,
+            posts: collect(),
+            bio: $creator->bio,
+            externalId: $creator->instagram_user_id,
+            metadata: $creator->metadata ?? [],
+        );
+
+        return $this->creator($profile);
     }
 
     /** @param list<string|null> $imageUrls */

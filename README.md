@@ -101,6 +101,14 @@ Niche is read from the account itself. `CreatorNicheService` classifies a discov
 
 **Content safety.** Every measured account is checked before its publications can enter the shared catalogue. A deterministic French and English policy rejects explicit and abusive profile text, captions, hashtags and provider safety flags. When an OpenAI key is configured, `omni-moderation-latest` also checks each caption and image for sexual, hateful, harassing, violent, self-harm and illicit material. A second structured visual check enforces the product rule across every carousel frame: sexual or suggestive content, nudity, lingerie or bikinis, sexual or adult topics and graphic violence are blocked even in artistic, editorial or commercial contexts. Blocked creators are not scraped again, blocked posts are never scored, and an unavailable check leaves content pending by default instead of admitting it. The policy version is stored with each decision. Older database rows can be rechecked in bounded passes with `personal:enforce-content-safety-policy`, so a new version cannot silently inherit an outdated allowed decision. The policy can be configured with the `DISCOVERY_CONTENT_SAFETY_*` and `DISCOVERY_CONTENT_POLICY_*` variables in `backend/.env.example`.
 
+After a policy or market migration, realign existing rows with the bounded command below. It checks pending creators and posts, recalculates canonical creator verticals and fills only markets that are currently `null` when the stored profile and captions provide a positive signal. It never deletes content or replaces an existing market with an ambiguous result. Use `--markets-only` when OpenAI is unavailable and only the deterministic market/vertical pass is needed:
+
+```bash
+docker compose exec app php artisan personal:realign-feed-catalog --dry-run
+docker compose exec app php artisan personal:realign-feed-catalog --markets-only
+docker compose exec app php artisan personal:realign-feed-catalog --limit=50
+```
+
 Instagram CDN images and Reel videos are exposed to the frontend through signed API URLs. The API fetches each image server-side and keeps a temporary local cache under `storage/app/private/instagram-media`, which avoids browser blocking caused by Instagram's cross-origin resource policy. Reel videos are streamed on demand with byte-range support so the native player can start and seek without downloading the whole file first. `APP_URL` must be the public HTTPS URL of the backend so the generated media URLs are reachable from the frontend. Cache duration, signature lifetime, request timeout and media size limits are configurable with the `INSTAGRAM_MEDIA_*` variables documented in `backend/.env.example`.
 
 Docker stores that cache in the shared `instagram-media-cache` volume. The API and queue workers therefore reuse the same files, and rebuilding a container does not discard the only usable copy after an Instagram CDN URL expires.
