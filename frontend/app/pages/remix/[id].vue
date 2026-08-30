@@ -384,7 +384,7 @@ onBeforeUnmount(() => {
           <!-- A phone has no room for the state, the three tools and the two
                buttons that write, so the fade says the row carries on rather
                than leaving a chip looking accidentally cut. -->
-          <div class="flex min-w-0 flex-1 items-center gap-3 overflow-x-auto pr-2 [mask-image:linear-gradient(to_right,#000_calc(100%-1.75rem),transparent)] [scrollbar-width:none] md:[mask-image:none] [&::-webkit-scrollbar]:hidden">
+          <div class="-mt-2 flex min-w-0 flex-1 items-center gap-3 overflow-x-auto pr-2 [mask-image:linear-gradient(to_right,#000_calc(100%-1.75rem),transparent)] [scrollbar-width:none] md:[mask-image:none] [&::-webkit-scrollbar]:hidden">
             <span class="status-chip" :class="isReady ? 'status-ready' : 'status-draft'">
               <span class="status-dot" />{{ isReady ? $t('remix.statusReady') : $t('remix.statusDraft') }}
             </span>
@@ -431,7 +431,7 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
-          <div class="flex shrink-0 items-center gap-2">
+          <div class="-mt-2 flex shrink-0 items-center gap-2">
             <span class="mr-1 hidden h-5 w-px bg-[var(--line)] sm:block" />
             <button class="bar-button" :disabled="saving || !dirty" @click="save(remix.status === 'ready' ? 'ready' : 'draft')">
               {{ $t('remix.saveDraft') }}
