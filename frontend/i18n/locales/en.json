@@ -728,8 +728,7 @@
     "views": "{count} views",
     "playReel": "Play {'@'}{username}'s Reel",
     "openSource": "View original post",
-    "creatingCopy": "Personal is reading the pattern and your moment.",
-    "remixFooter": "You can move, rewrite and edit every slide afterwards."
+    "creatingCopy": "Personal is reading the pattern and your moment."
   },
   "remix": {
     "backToAnalysis": "Back to the pattern",

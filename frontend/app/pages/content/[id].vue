@@ -204,7 +204,6 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
               {{ selectedMoment === null ? $t('content.chooseMomentFirst') : $t('content.remixForMe') }}
               <AppIcon name="sparkles" :size="16" />
             </button>
-            <p class="mt-3 text-center text-[12px] text-[var(--faint)]">{{ $t('content.remixFooter') }}</p>
           </div>
         </div>
 

@@ -728,8 +728,7 @@
     "views": "{count} vues",
     "playReel": "Lire le Reel de {'@'}{username}",
     "openSource": "Voir le post original",
-    "creatingCopy": "Personal lit le schéma et ton moment.",
-    "remixFooter": "Tu pourras déplacer, réécrire et modifier chaque slide ensuite."
+    "creatingCopy": "Personal lit le schéma et ton moment."
   },
   "remix": {
     "backToAnalysis": "Retour au schéma",

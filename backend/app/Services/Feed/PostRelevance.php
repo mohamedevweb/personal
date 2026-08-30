@@ -42,10 +42,30 @@ class PostRelevance
         $creatorVertical = $creatorClassification['vertical'];
         $affinity = $this->affinity->score($profile, $post->creator, $post);
 
-        // Nothing to place the post against yet: a profile with no readable
-        // subject gets the whole eligible pool rather than an empty screen.
+        $sharedClusters = array_intersect(
+            $profileClassification['clusters'],
+            array_unique([...$postClassification['clusters'], ...$creatorClassification['clusters']]),
+        );
+        $exploreMinimum = max(0.0, (float) config('services.discovery.personalization.explore_minimum_affinity'));
+
+        // No vertical to place the post against. An empty profile has nothing to
+        // filter with and gets the best of the pool; a profile that does say
+        // what it is about is judged on its subjects instead, so an
+        // unclassifiable niche never turns into a feed of every vertical.
         if ($primary === null) {
-            return $this->verdict(self::FOR_YOU, $affinity, null, $contentVertical);
+            $comparable = $profileClassification['clusters'] !== []
+                || $profileClassification['tokens'] !== [];
+
+            if (! $comparable || $affinity === null) {
+                return $this->verdict(self::FOR_YOU, $affinity, null, $contentVertical);
+            }
+
+            return $this->verdict(
+                $sharedClusters !== [] || $affinity >= $exploreMinimum ? self::FOR_YOU : null,
+                $affinity,
+                null,
+                $contentVertical,
+            );
         }
 
         // The post says on its own what it is about, and it is this creator's
@@ -76,11 +96,6 @@ class PostRelevance
         // A neighbouring subject: useful, but it has to earn its place with a
         // shared cluster or real affinity.
         $candidateVertical = $contentVertical ?? $creatorVertical;
-        $sharedClusters = array_intersect(
-            $profileClassification['clusters'],
-            array_unique([...$postClassification['clusters'], ...$creatorClassification['clusters']]),
-        );
-        $exploreMinimum = max(0.0, (float) config('services.discovery.personalization.explore_minimum_affinity'));
 
         if ($candidateVertical !== null
             && $this->adjacent($primary, $candidateVertical)
