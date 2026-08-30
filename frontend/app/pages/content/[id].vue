@@ -128,6 +128,9 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
             <span class="min-w-0 flex-1">
               <span class="block truncate text-sm font-medium hover:underline">@{{ post.creator.username }}</span>
               <span class="block truncate text-xs text-[var(--faint)]">{{ $t('content.followers', { count: compactNumber(post.creator.followers) }) }} · {{ relativeDate(post.published_at, locale) }}</span>
+              <span v-if="post.creator.vertical" class="mt-1 block truncate text-[11px] font-medium text-[var(--accent-ink)]">
+                {{ $t('content.vertical') }} · {{ $t(`content.verticals.${post.creator.vertical}`) }}
+              </span>
             </span>
           </a>
           <a v-if="post.source_url" :href="post.source_url" target="_blank" rel="noopener noreferrer" class="inline-flex h-9 shrink-0 items-center gap-1.5 text-xs text-[var(--muted)] transition hover:text-[var(--ink)]">{{ $t('content.openSource') }}<AppIcon name="arrow" :size="13" class="-rotate-45" /></a>

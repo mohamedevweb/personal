@@ -4,6 +4,7 @@ export interface Creator {
   avatar_url: string | null
   niche: string
   niche_topics: string[]
+  vertical?: PersonalProfile['primary_vertical']
   followers: number
   average_views: number
 }

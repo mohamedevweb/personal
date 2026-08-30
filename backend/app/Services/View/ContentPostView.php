@@ -4,6 +4,7 @@ namespace App\Services\View;
 
 use App\Models\ContentPost;
 use App\Models\User;
+use App\Services\Discovery\CanonicalCreatorVerticals;
 use App\Services\Discovery\OutlierScore;
 use App\Services\Instagram\ContentMedia;
 use App\Services\Instagram\InstagramMediaProxy;
@@ -14,6 +15,7 @@ class ContentPostView
     public function __construct(
         private readonly InstagramMediaProxy $media,
         private readonly OutlierScore $performance,
+        private readonly CanonicalCreatorVerticals $verticals,
     ) {}
 
     /**
@@ -65,6 +67,10 @@ class ContentPostView
                 'avatar_url' => $this->mediaUrl('media.creator', 'creator', $post->creator->id, $post->creator->avatar_url),
                 'niche' => $post->creator->niche,
                 'niche_topics' => $post->creator->niche_topics ?? [],
+                'vertical' => $this->verticals->fromSignals([
+                    $post->creator->niche,
+                    ...($post->creator->niche_topics ?? []),
+                ]),
                 'followers' => $post->creator->followers,
                 'average_views' => $post->creator->average_views,
             ],

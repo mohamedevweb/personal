@@ -5,7 +5,7 @@ definePageMeta({ layout: false })
 
 const route = useRoute()
 const { t, te, locale } = useI18n()
-const { status, loading, error, connect, loadStatus, startPolling, stopPolling } = useInstagram()
+const { status, connecting, error, connect, loadStatus, startPolling, stopPolling } = useInstagram()
 const { apiFetch } = usePersonalApi()
 const toast = useToast()
 const accountHandleInput = ref('')
@@ -328,7 +328,7 @@ onMounted(async () => {
 
           <button
             class="mt-10 inline-flex h-[54px] w-full items-center justify-center gap-3 rounded-full b-btn-red px-7 text-[15px] font-medium transition hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-60 sm:w-auto"
-            :disabled="loading"
+            :disabled="connecting"
             @click="connect"
           >
             <svg aria-hidden="true" viewBox="0 0 24 24" class="h-5 w-5 fill-none stroke-current" stroke-width="1.8">
@@ -336,7 +336,7 @@ onMounted(async () => {
               <circle cx="12" cy="12" r="4" />
               <circle cx="17.5" cy="6.5" r=".8" class="fill-current stroke-0" />
             </svg>
-            {{ loading ? $t('onboarding.preparing') : $t('onboarding.continueWithInstagram') }}
+            {{ connecting ? $t('onboarding.preparing') : $t('onboarding.continueWithInstagram') }}
             <span aria-hidden="true">↗</span>
           </button>
 
@@ -479,7 +479,7 @@ onMounted(async () => {
           <button
             v-if="status.account?.sync_status === 'failed'"
             class="mt-8 inline-flex h-11 items-center rounded-full border border-[var(--line)] bg-[var(--surface)] px-6 text-[14px] font-medium transition hover:bg-[var(--paper)]"
-            :disabled="loading"
+            :disabled="connecting"
             @click="connect"
           >
             {{ $t('onboarding.reconnect') }}

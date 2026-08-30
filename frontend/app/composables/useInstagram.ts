@@ -30,10 +30,14 @@ export function useInstagram() {
     onboarding_complete: false
   }))
   const statusLoaded = useState('instagram-status-loaded', () => false)
-  const loading = useState('instagram-status-loading', () => true)
+  // Leaving for Instagram is its own wait, told apart from the first read of the
+  // status so a page that already knows the status never looks busy.
+  const connecting = useState('instagram-connecting', () => false)
   const error = useState<string | null>('instagram-status-error', () => null)
 
   async function loadStatus(force = true) {
+    // The global route middleware reads the status too and marks it loaded, so a
+    // page arriving after it asks for nothing.
     if (!force && statusLoaded.value) return
     if (statusRequest) return statusRequest
 
@@ -47,7 +51,6 @@ export function useInstagram() {
         error.value = apiErrorMessage(exception, t('instagram.statusError'))
       })
       .finally(() => {
-        loading.value = false
         statusRequest = null
       })
 
@@ -78,7 +81,7 @@ export function useInstagram() {
   }
 
   async function connect() {
-    loading.value = true
+    connecting.value = true
     error.value = null
 
     try {
@@ -86,7 +89,7 @@ export function useInstagram() {
       window.location.assign(response.authorization_url)
     } catch (exception: unknown) {
       error.value = apiErrorMessage(exception, t('instagram.connectError'))
-      loading.value = false
+      connecting.value = false
     }
   }
 
@@ -138,11 +141,26 @@ export function useInstagram() {
     pollTimer = undefined
   }
 
+  // Coming back from Instagram — the back button, a page restored from the
+  // browser's cache — lands on the page that was left mid-redirect. The wait it
+  // was showing ended when the redirect did.
+  function releaseConnecting() {
+    connecting.value = false
+  }
+
+  if (import.meta.client) {
+    onMounted(() => {
+      releaseConnecting()
+      window.addEventListener('pageshow', releaseConnecting)
+    })
+    onBeforeUnmount(() => window.removeEventListener('pageshow', releaseConnecting))
+  }
+
   onBeforeUnmount(stopPolling)
 
   return {
     status,
-    loading,
+    connecting,
     error,
     analysisRunning,
     mediaEnrichmentRunning,

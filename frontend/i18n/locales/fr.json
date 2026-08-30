@@ -573,14 +573,7 @@
       "saveError": "Personal n’a pas pu mettre à jour ce favori. Réessaie."
     },
     "handle": {
-      "label": "Compte Instagram",
-      "placeholder": "{'@'}votrecompte",
-      "none": "Aucun compte Instagram",
-      "add": "Ajouter mon compte",
-      "edit": "Modifier",
-      "save": "Enregistrer",
-      "saved": "Compte mis à jour. Personal relit votre profil.",
-      "error": "Personal n’a pas pu enregistrer ce compte."
+      "none": "Aucun compte Instagram"
     },
     "nicheInsufficient": "Pas encore assez de contenu pour déterminer ta niche",
     "analysis": {
@@ -720,6 +713,15 @@
     "creating": "Création de ta version…",
     "remixForMe": "Créer ma version",
     "followers": "{count} abonnés",
+    "vertical": "Verticale",
+    "verticals": {
+      "sport-fitness": "Sport et fitness",
+      "food-cooking": "Cuisine",
+      "personal-branding": "Personal branding",
+      "tech-ai": "Tech et IA",
+      "beauty-fashion": "Beauté et mode",
+      "wellness": "Bien-être"
+    },
     "views": "{count} vues",
     "playReel": "Lire le Reel de {'@'}{username}",
     "openSource": "Voir le post original",

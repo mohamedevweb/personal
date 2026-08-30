@@ -186,6 +186,20 @@ class PersonalMvpTest extends TestCase
         $this->assertSame(['fr', 'en'], array_keys($post->analysis_translations));
     }
 
+    public function test_content_analysis_exposes_the_creators_canonical_vertical(): void
+    {
+        $post = ContentPost::query()->firstOrFail();
+        $post->creator()->update([
+            'niche' => 'Fitness coaching',
+            'niche_topics' => ['workout', 'strength training'],
+        ]);
+
+        $this->actingAs($this->user)
+            ->getJson("/api/content/{$post->id}")
+            ->assertOk()
+            ->assertJsonPath('content.creator.vertical', 'sport-fitness');
+    }
+
     public function test_french_requests_localize_mock_drafts(): void
     {
         Queue::fake();

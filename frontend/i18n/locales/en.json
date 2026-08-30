@@ -573,14 +573,7 @@
       "saveError": "Personal could not update this saved post. Try again."
     },
     "handle": {
-      "label": "Instagram account",
-      "placeholder": "{'@'}yourhandle",
-      "none": "No Instagram account",
-      "add": "Add your account",
-      "edit": "Change",
-      "save": "Save",
-      "saved": "Account updated. Personal is reading your profile again.",
-      "error": "Personal could not save that account."
+      "none": "No Instagram account"
     },
     "nicheInsufficient": "Not enough content yet to determine your niche",
     "analysis": {
@@ -720,6 +713,15 @@
     "creating": "Creating your version…",
     "remixForMe": "Remix for me",
     "followers": "{count} followers",
+    "vertical": "Vertical",
+    "verticals": {
+      "sport-fitness": "Sport and fitness",
+      "food-cooking": "Food and cooking",
+      "personal-branding": "Personal branding",
+      "tech-ai": "Tech and AI",
+      "beauty-fashion": "Beauty and fashion",
+      "wellness": "Wellness"
+    },
     "views": "{count} views",
     "playReel": "Play {'@'}{username}'s Reel",
     "openSource": "View original post",

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { status, loading, error, connect, loadStatus } = useInstagram()
+const { status, connecting, error, connect, loadStatus } = useInstagram()
 const { apiFetch } = usePersonalApi()
 const { user, loadUser, updateAccount, updatePassword, resendVerification, logout } = useAuth()
 const { address: supportAddress, mailto: supportMailto } = useSupportEmail()
@@ -190,7 +190,7 @@ watch(error, (message) => {
         </div>
         <button class="ml-auto text-xs text-[var(--faint)] transition hover:text-[var(--danger)]" @click="disconnect">{{ $t('settings.disconnect') }}</button>
       </div>
-      <button v-else class="mt-7 inline-flex h-11 items-center justify-center rounded-full b-btn-red px-5 text-[14px] font-medium transition disabled:opacity-60" :disabled="loading" @click="connect">{{ $t('settings.continueWithInstagram') }}</button>
+      <button v-else class="mt-7 inline-flex h-11 items-center justify-center rounded-full b-btn-red px-5 text-[14px] font-medium transition disabled:opacity-60" :disabled="connecting" @click="connect">{{ $t('settings.continueWithInstagram') }}</button>
     </section>
 
     <!-- Support -->
