@@ -526,13 +526,15 @@ onBeforeUnmount(() => {
                         :class="activeSlide === 0 ? 'border-white/25 bg-white/5' : 'border-[var(--line)] bg-[var(--surface)]'"
                       >
                         <p class="remix-label" :class="activeSlide === 0 && 'text-white/45'">{{ $t('remix.yourImage') }}</p>
+                        <!-- Not autosized: the band sits inside a frame with a
+                             fixed ratio, and growing it would push the words it
+                             belongs to out of the slide. -->
                         <textarea
                           v-model="slide.image"
-                          v-autosize
-                          rows="2"
+                          rows="3"
                           :aria-label="$t('remix.yourImage')"
                           :placeholder="$t('remix.imagePlaceholder')"
-                          class="mt-1.5 w-full resize-none bg-transparent text-[12.5px] leading-5 outline-none"
+                          class="slide-image-field"
                           :class="activeSlide === 0 ? 'caret-white placeholder:text-white/30' : 'text-[var(--copy)] placeholder:text-[var(--faint)]'"
                         />
                       </div>
@@ -541,7 +543,7 @@ onBeforeUnmount(() => {
                         ref="slideInputs"
                         v-model="slide.text"
                         :placeholder="activeSlide === 0 ? $t('remix.coverPlaceholder') : $t('remix.slidePlaceholder')"
-                        class="flex-1 resize-none bg-transparent font-serif text-[23px] leading-[1.22] tracking-[-.015em] outline-none"
+                        class="min-h-0 flex-1 resize-none bg-transparent font-serif text-[23px] leading-[1.22] tracking-[-.015em] outline-none"
                         :class="activeSlide === 0 ? 'caret-white placeholder:text-white/30' : 'placeholder:text-[var(--faint)]'"
                       />
 
@@ -836,12 +838,15 @@ onBeforeUnmount(() => {
 .beat-stamp { @apply text-[11.5px] tabular-nums text-[var(--muted)] sm:pt-1; }
 .beat-body { @apply block; }
 .editor-textarea { @apply mt-2 w-full resize-none bg-transparent text-[15.5px] leading-7 outline-none placeholder:text-[var(--faint)]; }
+/* The direction for the picture, inside a frame that cannot grow: it scrolls
+   rather than pushing the words it belongs to out of the slide. */
+.slide-image-field { @apply mt-1.5 w-full resize-none overflow-y-auto bg-transparent text-[12.5px] leading-5 outline-none; }
 
 /* iOS zooms the page in whenever a focused field is set under 16px, and never
    zooms back out, so on a touch pointer the field is lifted to the threshold.
    The size the design asks for is kept everywhere a pointer is doing the
    typing. */
-@media (pointer: coarse) { .editor-textarea { font-size: 16px; } }
+@media (pointer: coarse) { .editor-textarea, .slide-image-field { font-size: 16px; } }
 /* The hook is the only line in the draft that is set as display type. */
 .editor-hook { @apply mt-2 w-full resize-none bg-transparent font-serif text-[27px] leading-[1.18] tracking-[-.025em] outline-none placeholder:text-[var(--faint)]; }
 </style>

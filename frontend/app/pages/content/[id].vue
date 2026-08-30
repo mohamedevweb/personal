@@ -154,10 +154,7 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
             <span class="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] bg-[var(--ink)] text-[var(--paper)]">
               <AppIcon :name="format" :size="17" />
             </span>
-            <span class="min-w-0">
-              <span class="block text-[13.5px] font-medium">{{ $t(`remix.formats.${format}`) }}</span>
-              <span class="mt-0.5 block text-[11.5px] leading-4 text-[var(--muted)]">{{ $t('content.formatFollowsSource') }}</span>
-            </span>
+            <span class="min-w-0 truncate text-[13.5px] font-medium">{{ $t(`remix.formats.${format}`) }}</span>
           </div>
 
           <!-- Grounding is what keeps the draft yours, so the moments are shown

@@ -87,15 +87,33 @@ class PersonalMvpTest extends TestCase
 
     public function test_the_feed_query_count_does_not_grow_with_the_catalog(): void
     {
+        // The absolute count is not the contract — ranking legitimately gains
+        // queries as it gains signals. What must never change is that none of
+        // them are per-post, so the catalogue is doubled and the two counts are
+        // compared: a lookup inside the ranking loop would show up here as
+        // forty more queries rather than as an off-by-one on a magic number.
+        $before = $this->feedQueryCount();
+
+        ContentPost::query()->get()->each(function (ContentPost $post): void {
+            $copy = $post->replicate();
+            $copy->instagram_media_id = null;
+            $copy->save();
+        });
+
+        $this->assertSame($before, $this->feedQueryCount(), 'The feed issued a query per post.');
+    }
+
+    private function feedQueryCount(): int
+    {
         $queries = 0;
         DB::listen(function () use (&$queries): void {
             $queries++;
         });
 
         $this->actingAs($this->user)->getJson('/api/feed')->assertOk();
+        DB::flushQueryLog();
 
-        // The seeder ships 40 posts; a per-post lookup would put this in the forties.
-        $this->assertLessThan(12, $queries, "The feed issued {$queries} queries.");
+        return $queries;
     }
 
     public function test_saved_content_is_returned_most_recently_saved_first(): void
