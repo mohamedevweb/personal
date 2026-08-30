@@ -405,8 +405,8 @@ onBeforeUnmount(() => {
                  simply follow the state chip into the scroll. -->
             <div class="ml-auto flex shrink-0 items-center gap-2 pl-3">
               <button
-                class="bar-button"
-                :class="confirmingDelete ? 'text-[var(--danger)]' : 'hover:text-[var(--danger)]'"
+                class="bar-tool"
+                :class="confirmingDelete ? 'bg-[var(--danger-soft)] text-[var(--danger)]' : 'hover:text-[var(--danger)]'"
                 :disabled="deleting || saving"
                 :aria-label="confirmingDelete ? $t('remix.deleteConfirm') : $t('remix.delete')"
                 @click="askDelete"
@@ -417,13 +417,13 @@ onBeforeUnmount(() => {
                   {{ confirmingDelete ? $t('remix.deleteConfirm') : $t('remix.delete') }}
                 </span>
               </button>
-              <button class="bar-button" :aria-label="$t('remix.copy')" @click="copyDraft">
+              <button class="bar-tool" :aria-label="$t('remix.copy')" @click="copyDraft">
                 <AppIcon :name="copied ? 'check' : 'copy'" :size="15" />
                 <span class="hidden sm:inline">{{ copied ? $t('remix.copied') : $t('remix.copy') }}</span>
               </button>
               <button
-                class="bar-button"
-                :class="confirmingRedraft ? 'text-[var(--accent-ink)]' : ''"
+                class="bar-tool"
+                :class="confirmingRedraft ? 'bg-[var(--accent-soft)] text-[var(--accent-ink)]' : ''"
                 :disabled="retrying || saving"
                 :aria-label="$t('remix.redraft')"
                 @click="askRedraft"
@@ -439,6 +439,7 @@ onBeforeUnmount(() => {
           </div>
 
           <div class="flex shrink-0 items-center gap-2">
+            <span class="mr-1 hidden h-5 w-px bg-[var(--line)] sm:block" />
             <button class="bar-button" :disabled="saving || !dirty" @click="save(remix.status === 'ready' ? 'ready' : 'draft')">
               {{ $t('remix.saveDraft') }}
             </button>
@@ -483,7 +484,10 @@ onBeforeUnmount(() => {
                  gets, and the picture to shoot is named on the slide it belongs
                  to rather than in a brief nobody opens. -->
             <div v-if="remix.format === 'carousel'" class="mt-8">
-              <div class="flex items-baseline justify-between">
+              <!-- Held to the frame's own width: the deck reads as one
+                   column instead of a caption floating wide of the card it
+                   names. -->
+              <div class="mx-auto flex w-full max-w-[468px] items-baseline justify-between">
                 <p class="remix-label">{{ $t('remix.slideDeck') }}</p>
                 <p class="text-[12px] text-[var(--faint)]">{{ $t('remix.slideCount', { count: slides.length }) }}</p>
               </div>
@@ -508,75 +512,95 @@ onBeforeUnmount(() => {
 
                     <!-- The slide itself, at the ratio Instagram gives it. -->
                     <div
-                      class="relative flex aspect-[4/5] flex-col gap-3 p-5"
+                      class="relative flex aspect-[4/5] flex-col p-5"
                       :class="activeSlide === 0 ? 'b-night text-white' : 'bg-[var(--paper)]'"
                     >
                       <div class="flex items-center justify-between">
-                        <span class="remix-label" :class="activeSlide === 0 && 'text-[var(--gold)]'">
+                        <span class="remix-label" :class="activeSlide === 0 && 'remix-label-gold'">
                           {{ activeSlide === 0 ? $t('remix.cover') : $t('remix.slideOf', { index: activeSlide + 1, total: slides.length }) }}
                         </span>
                         <span class="text-[10px] tabular-nums" :class="activeSlide === 0 ? 'text-white/40' : 'text-[var(--faint)]'">{{ slide.text.length }}</span>
                       </div>
 
-                      <!-- What to put behind the words. It is dashed because the
-                           picture is not here yet: it is what the creator goes
-                           and makes. -->
+                      <!-- The words are the slide. They sit on the frame's
+                           middle line, the way a text slide is actually set,
+                           and grow from there until they fill it — past that
+                           the field scrolls rather than pushing the note it
+                           sits above out of the picture. -->
+                      <div class="flex min-h-0 flex-1 flex-col justify-center">
+                        <textarea
+                          ref="slideInputs"
+                          v-model="slide.text"
+                          v-autosize
+                          rows="1"
+                          :placeholder="activeSlide === 0 ? $t('remix.coverPlaceholder') : $t('remix.slidePlaceholder')"
+                          class="max-h-full w-full resize-none overflow-y-auto bg-transparent font-serif text-[25px] leading-[1.2] tracking-[-.015em] outline-none"
+                          :class="activeSlide === 0 ? 'caret-white placeholder:text-white/30' : 'placeholder:text-[var(--faint)]'"
+                        />
+                      </div>
+
+                      <!-- What to put behind the words: a director's note along
+                           the bottom edge, under a hairline so it never reads as
+                           part of the copy. Dashed because the picture is not
+                           here yet — it is what the creator goes and makes. -->
                       <div
-                        class="rounded-[12px] border border-dashed p-3"
-                        :class="activeSlide === 0 ? 'border-white/25 bg-white/5' : 'border-[var(--line)] bg-[var(--surface)]'"
+                        class="mt-4 shrink-0 border-t border-dashed pt-2.5"
+                        :class="activeSlide === 0 ? 'border-white/20' : 'border-[var(--line)]'"
                       >
-                        <p class="remix-label" :class="activeSlide === 0 && 'text-white/45'">{{ $t('remix.yourImage') }}</p>
-                        <!-- Not autosized: the band sits inside a frame with a
+                        <p class="remix-label inline-flex items-center gap-1.5" :class="activeSlide === 0 && 'remix-label-dim'">
+                          <AppIcon name="image" :size="12" />{{ $t('remix.yourImage') }}
+                        </p>
+                        <!-- Not autosized: the note sits inside a frame with a
                              fixed ratio, and growing it would push the words it
                              belongs to out of the slide. -->
                         <textarea
                           v-model="slide.image"
-                          rows="3"
+                          rows="2"
                           :aria-label="$t('remix.yourImage')"
                           :placeholder="$t('remix.imagePlaceholder')"
                           class="slide-image-field"
-                          :class="activeSlide === 0 ? 'caret-white placeholder:text-white/30' : 'text-[var(--copy)] placeholder:text-[var(--faint)]'"
+                          :class="activeSlide === 0 ? 'caret-white text-white/65 placeholder:text-white/30' : 'text-[var(--copy)] placeholder:text-[var(--faint)]'"
                         />
                       </div>
+                    </div>
 
-                      <textarea
-                        ref="slideInputs"
-                        v-model="slide.text"
-                        :placeholder="activeSlide === 0 ? $t('remix.coverPlaceholder') : $t('remix.slidePlaceholder')"
-                        class="min-h-0 flex-1 resize-none bg-transparent font-serif text-[23px] leading-[1.22] tracking-[-.015em] outline-none"
-                        :class="activeSlide === 0 ? 'caret-white placeholder:text-white/30' : 'placeholder:text-[var(--faint)]'"
-                      />
-
-                      <!-- Swiping is how a carousel is read, so the frame is
-                           moved through rather than scrolled past. -->
+                    <!-- Swiping is how a carousel is read, so the deck is moved
+                         through from a rail under the frame rather than from
+                         arrows parked on top of the words. The dot for the slide
+                         on screen stretches, so the position is readable without
+                         counting. -->
+                    <div v-if="slides.length > 1" class="flex items-center justify-center gap-2 py-2.5">
                       <button
-                        v-if="activeSlide > 0"
-                        class="slide-arrow b-focus left-2"
+                        class="slide-step b-focus"
+                        :disabled="activeSlide === 0"
                         :aria-label="$t('remix.previousSlide')"
                         @click="showSlide(activeSlide - 1)"
                       >
-                        <AppIcon name="chevron" :size="15" class="rotate-180" />
+                        <AppIcon name="chevron" :size="14" class="rotate-180" />
                       </button>
+                      <span class="flex items-center gap-0.5">
+                        <button
+                          v-for="(item, index) in slides"
+                          :key="item.id"
+                          class="b-focus grid h-6 w-4 shrink-0 place-items-center"
+                          :aria-label="$t('remix.slideOf', { index: index + 1, total: slides.length })"
+                          :aria-current="index === activeSlide"
+                          @click="showSlide(index)"
+                        >
+                          <span
+                            class="h-1.5 rounded-full transition-all duration-300"
+                            :class="index === activeSlide ? 'w-4 bg-[var(--accent)]' : 'w-1.5 bg-[var(--line)]'"
+                          />
+                        </button>
+                      </span>
                       <button
-                        v-if="activeSlide < slides.length - 1"
-                        class="slide-arrow b-focus right-2"
+                        class="slide-step b-focus"
+                        :disabled="activeSlide === slides.length - 1"
                         :aria-label="$t('remix.nextSlide')"
                         @click="showSlide(activeSlide + 1)"
                       >
-                        <AppIcon name="chevron" :size="15" />
+                        <AppIcon name="chevron" :size="14" />
                       </button>
-                    </div>
-
-                    <div v-if="slides.length > 1" class="flex items-center justify-center gap-1.5 py-3">
-                      <button
-                        v-for="(item, index) in slides"
-                        :key="item.id"
-                        class="b-focus h-1.5 w-1.5 rounded-full transition"
-                        :class="index === activeSlide ? 'bg-[var(--accent)]' : 'bg-[var(--line)]'"
-                        :aria-label="$t('remix.slideOf', { index: index + 1, total: slides.length })"
-                        :aria-current="index === activeSlide"
-                        @click="showSlide(index)"
-                      />
                     </div>
 
                     <!-- The row a reader sees under any post. It does nothing
@@ -674,7 +698,7 @@ onBeforeUnmount(() => {
                 </div>
                 <div class="beat">
                   <!-- Not spoken, so it carries no timecode. -->
-                  <span class="beat-stamp text-[var(--faint)]"><AppIcon name="eye" :size="14" /></span>
+                  <span class="beat-stamp beat-stamp-quiet"><AppIcon name="eye" :size="14" /></span>
                   <span class="beat-body">
                     <span class="flex items-center justify-between gap-3"><span class="remix-label">{{ $t('remix.onScreen') }}</span><button type="button" class="block-rewrite" :disabled="!!regeneratingBlock" @click.prevent="regenerateBlock('visual')"><AppIcon name="refresh" :size="13" :class="regeneratingBlock === 'visual' && 'animate-spin'" />{{ $t('remix.rewriteBlock') }}</button></span>
                     <textarea v-model="remix.generated_content.visual" v-autosize rows="2" :aria-label="$t('remix.onScreen')" :placeholder="$t('remix.visualPlaceholder')" class="editor-textarea text-[var(--copy)]" />
@@ -814,16 +838,25 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .remix-label { @apply text-[10px] font-semibold uppercase tracking-[.16em] text-[var(--faint)]; }
+/* The label carries its own colour, so a utility of the same weight never wins
+   against it. The two grounds it changes on get a variant here instead. */
+.remix-label-gold { @apply text-[var(--gold)]; }
+.remix-label-dim { @apply text-white/45; }
 .block-rewrite { @apply inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-[11px] text-[var(--muted)] transition hover:bg-[var(--paper)] hover:text-[var(--ink)] disabled:cursor-wait disabled:opacity-50; }
 
 .bar-button { @apply inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-[var(--line)] bg-[var(--surface)] px-3.5 text-[12.5px] text-[var(--muted)] transition hover:text-[var(--ink)] disabled:opacity-50 sm:px-4; }
+/* The tools only ever read or redo; the two buttons that write the draft are
+   the only ones in the bar wearing an outline, so the eye finds them without
+   reading five identical pills. */
+.bar-tool { @apply inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 text-[12.5px] text-[var(--muted)] transition hover:bg-[var(--paper)] hover:text-[var(--ink)] disabled:opacity-40 sm:px-3; }
 
 .status-chip { @apply inline-flex h-7 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 text-[11px] font-medium; }
 .status-draft { @apply border-[var(--line)] bg-[var(--surface)] text-[var(--muted)]; }
 .status-ready { @apply border-[var(--positive-line)] bg-[var(--positive-soft)] text-[var(--positive)]; }
 .status-dot { @apply h-1.5 w-1.5 rounded-full bg-current; }
 
-.slide-arrow { @apply absolute top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full bg-black/55 text-white backdrop-blur transition hover:bg-black/75; }
+/* One step through the deck, in the rail under the frame. */
+.slide-step { @apply grid h-7 w-7 shrink-0 place-items-center rounded-full text-[var(--muted)] transition hover:bg-[var(--paper)] hover:text-[var(--ink)] disabled:pointer-events-none disabled:opacity-25; }
 
 .editor-control { @apply relative grid h-7 w-7 place-items-center rounded-lg text-[var(--muted)] transition hover:bg-[var(--paper)] hover:text-[var(--ink)] disabled:pointer-events-none disabled:opacity-25; }
 /* The controls sit in the corner of a slide, so they stay small and carry the
@@ -831,16 +864,17 @@ onBeforeUnmount(() => {
 @media (pointer: coarse) {
   .editor-control::after { content: ""; position: absolute; inset: -8px; }
 }
-.control-dark { @apply text-white/55 hover:bg-white/10 hover:text-white; }
 
 /* The reel spine: a stamped margin on the left, the words on the right. */
 .beat { @apply grid gap-2 border-b border-[var(--line-soft)] px-5 py-5 last:border-0 sm:grid-cols-[76px_minmax(0,1fr)] sm:gap-5 sm:px-6; }
 .beat-stamp { @apply text-[11.5px] tabular-nums text-[var(--muted)] sm:pt-1; }
+/* The beat that carries no timecode: same reason as the label above. */
+.beat-stamp-quiet { @apply text-[var(--faint)]; }
 .beat-body { @apply block; }
 .editor-textarea { @apply mt-2 w-full resize-none bg-transparent text-[15.5px] leading-7 outline-none placeholder:text-[var(--faint)]; }
 /* The direction for the picture, inside a frame that cannot grow: it scrolls
    rather than pushing the words it belongs to out of the slide. */
-.slide-image-field { @apply mt-1.5 w-full resize-none overflow-y-auto bg-transparent text-[12.5px] leading-5 outline-none; }
+.slide-image-field { @apply mt-1 w-full resize-none overflow-y-auto bg-transparent text-[12.5px] leading-5 outline-none; }
 
 /* iOS zooms the page in whenever a focused field is set under 16px, and never
    zooms back out, so on a touch pointer the field is lifted to the threshold.

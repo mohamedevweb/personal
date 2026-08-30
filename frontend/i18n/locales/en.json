@@ -730,7 +730,7 @@
     "playReel": "Play {'@'}{username}'s Reel",
     "openSource": "View original post",
     "creatingCopy": "Personal is reading the pattern and your moment.",
-    "remixFooter": "You can change the format and edit every word afterwards."
+    "remixFooter": "You can move, rewrite and edit every slide afterwards."
   },
   "remix": {
     "backToAnalysis": "Back to the pattern",

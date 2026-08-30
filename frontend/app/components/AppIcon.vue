@@ -28,6 +28,7 @@ defineProps<{ name: string, size?: number, filled?: boolean, strokeWidth?: numbe
     <template v-else-if="name === 'reel'"><rect x="2.5" y="2.5" width="19" height="19" rx="4.5"/><path d="M2.6 8.2h18.8M8.6 2.6 11.6 8.2m3.8-5.6 3 5.6"/><path d="m10.4 12.1 4.3 2.5-4.3 2.5v-5Z"/></template>
     <template v-else-if="name === 'eye'"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3.1"/></template>
     <template v-else-if="name === 'eye-off'"><path d="M4 4l16 16"/><path d="M9.6 5.9A8.9 8.9 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a17 17 0 0 1-3.4 4.1M6.4 7.9A17 17 0 0 0 2.5 12S6 18.5 12 18.5c1 0 1.9-.2 2.7-.5"/><path d="M10 10a3.1 3.1 0 0 0 4.2 4.2"/></template>
+    <template v-else-if="name === 'image'"><rect x="3" y="4.5" width="18" height="15" rx="2.5"/><circle cx="8.6" cy="9.8" r="1.6"/><path d="m3.6 17.4 4.6-4.2 3.3 3 3.1-2.8 5.8 5"/></template>
     <template v-else-if="name === 'text'"><path d="M4 6.5h16M4 12h16M4 17.5h9"/></template>
     <template v-else-if="name === 'copy'"><rect x="9" y="9" width="12" height="12" rx="2.4"/><path d="M6 15H4.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V6"/></template>
     <template v-else-if="name === 'refresh'"><path d="M20 11a8 8 0 1 0-.6 4"/><path d="M20 4.5V11h-6.5"/></template>
