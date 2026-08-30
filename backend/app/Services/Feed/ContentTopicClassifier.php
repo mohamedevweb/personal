@@ -30,6 +30,7 @@ class ContentTopicClassifier
     public function creator(Creator $creator): array
     {
         $classification = $this->classify([
+            $creator->username,
             $creator->niche,
             ...($creator->niche_topics ?? []),
             $creator->bio,

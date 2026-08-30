@@ -238,6 +238,13 @@ class FeedRankingTest extends TestCase
             'tags' => ['saas', 'startup'],
         ]);
 
+        $consumerTechCreator = $this->creator('gadget.reviews', 50000, 900);
+        $consumerTechCreator->update(['niche' => 'tech-ai', 'niche_topics' => ['smartphones', 'gadgets']]);
+        $consumerTech = $this->storePost($consumerTechCreator, 5.0, [
+            'caption' => 'Mon test du dernier smartphone haut de gamme',
+            'tags' => ['smartphone', 'gadgets'],
+        ]);
+
         $businessCreator = $this->creator('founder.stories', 30000, 900);
         $businessCreator->update(['niche' => 'personal-branding', 'niche_topics' => ['founders', 'entrepreneurship']]);
         $adjacent = $this->storePost($businessCreator, 2.1, [
@@ -258,6 +265,8 @@ class FeedRankingTest extends TestCase
         $sections = app(RecommendationService::class)->sectionsForUser($this->user);
 
         $this->assertSame([$saas->id], $sections['items']->pluck('id')->all());
+        $this->assertNotContains($consumerTech->id, $sections['items']->pluck('id'));
+        $this->assertNotContains($consumerTech->id, $sections['explore_items']->pluck('id'));
         $this->assertContains($adjacent->id, $sections['explore_items']->pluck('id'));
         $this->assertTrue($sections['items']->every(
             fn (array $item): bool => ! in_array($item['creator']['niche'], ['sport-fitness', 'food-cooking', 'wellness'], true),
@@ -335,12 +344,8 @@ class FeedRankingTest extends TestCase
         $this->assertContains($rival->id, $feed->pluck('id'));
     }
 
-    /**
-     * Case A — a post from the member's own vertical enters For You on that
-     * evidence alone. The affinity bar is pushed to a value nothing can reach,
-     * and the post is still kept: the threshold ranks, it no longer filters.
-     */
-    public function test_a_post_in_the_members_vertical_is_kept_however_thin_its_affinity(): void
+    /** A broad vertical never overrides a precise topic mismatch. */
+    public function test_a_post_in_the_members_vertical_is_rejected_without_a_shared_cluster(): void
     {
         config(['services.discovery.personalization.minimum_affinity' => 0.99]);
         $this->user->creatorProfile()->update([
@@ -352,8 +357,8 @@ class FeedRankingTest extends TestCase
             ],
         ]);
 
-        // Same vertical, nothing else in common: barbecue against a vegan meal
-        // prep profile. This is the post the old affinity gate deleted.
+        // Same broad vertical, nothing else in common: barbecue against a vegan
+        // meal prep profile. The post must not become a For You filler item.
         $distant = $this->creator('bbq.school', 20_000, 900);
         $distant->update(['niche' => 'Barbecue et grillades', 'niche_topics' => ['barbecue', 'grillades', 'viande']]);
         $post = $this->storePost($distant, 2.0, [
@@ -363,16 +368,12 @@ class FeedRankingTest extends TestCase
 
         $verdict = app(PostRelevance::class)->assess($this->user->creatorProfile->fresh(), $post);
 
-        $this->assertSame(PostRelevance::FOR_YOU, $verdict['bucket']);
+        $this->assertNull($verdict['bucket']);
         $this->assertSame('food-cooking', $verdict['content_vertical']);
-        $this->assertContains($post->id, app(RecommendationService::class)->forUser($this->user)->pluck('id'));
+        $this->assertNotContains($post->id, app(RecommendationService::class)->forUser($this->user)->pluck('id'));
     }
 
-    /**
-     * Case B — both are kept, and affinity decides the order between them. The
-     * weaker match even carries the better raw performance, so nothing but
-     * affinity can be putting the closer post first.
-     */
+    /** Shared clusters keep both posts eligible, then affinity orders them. */
     public function test_between_two_posts_of_the_same_vertical_affinity_decides_the_order(): void
     {
         $this->user->creatorProfile()->update([

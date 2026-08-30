@@ -8,12 +8,10 @@ use App\Models\CreatorProfile;
 /**
  * Decides which section a post belongs to, never how good it is.
  *
- * The vertical answers "is this the creator's universe"; performance has already
- * answered "is this worth reading" upstream; affinity answers "in what order",
- * in the ranking. A post from the member's own vertical therefore enters For You
- * on the strength of that vertical alone — an affinity score measures how much
- * of a profile a single post covers, which is a ranking signal, not a right of
- * entry. Adjacent subjects stay stricter, because a neighbouring vertical is a
+ * The vertical is the broad recall layer; semantic clusters decide whether the
+ * post is actually in the creator's universe. Performance has already answered
+ * "is this worth reading" upstream, and affinity answers "in what order" in the
+ * ranking. Adjacent subjects stay stricter, because a neighbouring vertical is a
  * weaker claim and Explore is a smaller shelf.
  */
 class PostRelevance
@@ -46,6 +44,10 @@ class PostRelevance
             $profileClassification['clusters'],
             array_unique([...$postClassification['clusters'], ...$creatorClassification['clusters']]),
         );
+        $sharedTokens = array_intersect(
+            $profileClassification['tokens'],
+            array_unique([...$postClassification['tokens'], ...$creatorClassification['tokens']]),
+        );
         $exploreMinimum = max(0.0, (float) config('services.discovery.personalization.explore_minimum_affinity'));
 
         // No vertical to place the post against. An empty profile has nothing to
@@ -61,24 +63,45 @@ class PostRelevance
             }
 
             return $this->verdict(
-                $sharedClusters !== [] || $affinity >= $exploreMinimum ? self::FOR_YOU : null,
+                $sharedClusters !== []
+                    || count(array_filter($sharedTokens, fn (string $token): bool => strlen($token) >= 6)) >= 1
+                    || $affinity >= $exploreMinimum
+                    ? self::FOR_YOU
+                    : null,
                 $affinity,
                 null,
                 $contentVertical,
             );
         }
 
-        // The post says on its own what it is about, and it is this creator's
-        // subject. That is the strongest evidence there is, and it is enough.
+        $candidateClusters = array_values(array_unique([
+            ...$postClassification['clusters'],
+            ...$creatorClassification['clusters'],
+        ]));
+
+        // A broad vertical is only the recall layer. Once a profile has a
+        // precise subject, a post from the same broad vertical still needs a
+        // shared semantic cluster. Without this second gate, consumer-tech
+        // reviews and SaaS founder content both look like `tech-ai` and the
+        // strongest unrelated post wins on performance.
         if ($contentVertical === $primary) {
+            if ($profileClassification['clusters'] !== []
+                && ($candidateClusters === [] || $sharedClusters === [])) {
+                return $this->verdict(null, $affinity, $primary, $contentVertical);
+            }
+
             return $this->verdict(self::FOR_YOU, $affinity, $primary, $contentVertical);
         }
 
         // The post itself could not be read, but the account publishing it lives
-        // in the member's universe. Related enough and it belongs in For You;
-        // otherwise it drops to Explore — never out of the feed, since the only
-        // thing against it is that a caption was unreadable.
+        // in the member's universe. A precise profile still requires the account
+        // to share a cluster before its unreadable post can be trusted.
         if ($contentVertical === null && $creatorVertical === $primary) {
+            if ($profileClassification['clusters'] !== []
+                && ($creatorClassification['clusters'] === [] || $sharedClusters === [])) {
+                return $this->verdict(null, $affinity, $primary, $contentVertical);
+            }
+
             $minimum = max(0.0, (float) config('services.discovery.personalization.minimum_affinity'));
             // A profile with almost no subject of its own cannot produce a
             // meaningful affinity, so there is nothing to judge the post with.
@@ -93,13 +116,15 @@ class PostRelevance
             );
         }
 
-        // A neighbouring subject: useful, but it has to earn its place with a
-        // shared cluster or real affinity.
+        // A neighbouring subject is optional discovery, not a relevance escape
+        // hatch. It must share an explicit cluster with the profile. A generic
+        // token overlap such as `tech` is not enough to surface a gadget account
+        // next to a startup profile.
         $candidateVertical = $contentVertical ?? $creatorVertical;
 
         if ($candidateVertical !== null
             && $this->adjacent($primary, $candidateVertical)
-            && ($sharedClusters !== [] || ($affinity ?? 0.0) >= $exploreMinimum)) {
+            && $sharedClusters !== []) {
             return $this->verdict(self::EXPLORE, $affinity, $primary, $contentVertical);
         }
 
