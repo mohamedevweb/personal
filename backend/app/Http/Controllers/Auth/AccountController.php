@@ -67,6 +67,7 @@ class AccountController extends Controller
         }
 
         $user->update(['password' => Hash::make($data['password'])]);
+        $user->tokens()->delete();
 
         return response()->json(['message' => __('Your password has been updated.')]);
     }

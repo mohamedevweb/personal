@@ -103,12 +103,6 @@ const captionOverLimit = computed(() => caption.value.length > CAPTION_LIMIT)
 
 /* --- Slides --------------------------------------------------------------- */
 
-function moveSlide(index: number, direction: -1 | 1) {
-  const list = remix.value?.generated_content.slides
-  if (!list?.[index + direction]) return
-  ;[list[index], list[index + direction]] = [list[index + direction]!, list[index]!]
-}
-
 function deleteSlide(index: number) {
   remix.value?.generated_content.slides?.splice(index, 1)
 }
@@ -377,20 +371,20 @@ onBeforeUnmount(() => {
       <div class="page-shell pt-2">
         <!-- Saving is manual, so the two buttons that write the draft stay
              outside the horizontal scroller on a phone. -->
-        <div class="flex min-h-16 items-center gap-3">
+        <div class="flex items-start gap-3">
+          <NuxtLink
+            :to="`/content/${remix.source_content?.id}`"
+            :aria-label="$t('remix.backToAnalysis')"
+            class="shrink-0 text-sm text-[var(--muted)] transition hover:text-[var(--ink)]"
+          >
+            <span class="sm:hidden" aria-hidden="true">←</span>
+            <span class="hidden sm:inline">{{ $t('remix.backToAnalysis') }}</span>
+          </NuxtLink>
+
           <!-- A phone has no room for the state, the three tools and the two
                buttons that write, so the fade says the row carries on rather
                than leaving a chip looking accidentally cut. -->
           <div class="flex min-w-0 flex-1 items-center gap-3 overflow-x-auto pr-2 [mask-image:linear-gradient(to_right,#000_calc(100%-1.75rem),transparent)] [scrollbar-width:none] md:[mask-image:none] [&::-webkit-scrollbar]:hidden">
-            <NuxtLink
-              :to="`/content/${remix.source_content?.id}`"
-              :aria-label="$t('remix.backToAnalysis')"
-              class="b-focus -ml-1 flex shrink-0 items-center gap-1.5 rounded-full px-1 py-1 text-[13px] text-[var(--muted)] transition hover:text-[var(--ink)]"
-            >
-              <AppIcon name="chevron" :size="15" class="rotate-180" />
-              <span class="hidden sm:inline">{{ $t('remix.backToAnalysis') }}</span>
-            </NuxtLink>
-
             <span class="status-chip" :class="isReady ? 'status-ready' : 'status-draft'">
               <span class="status-dot" />{{ isReady ? $t('remix.statusReady') : $t('remix.statusDraft') }}
             </span>
@@ -465,7 +459,7 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="page-shell pt-6">
-        <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_312px] lg:gap-10">
+        <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_312px] lg:gap-8 xl:grid-cols-[minmax(0,1fr)_360px] xl:gap-7">
           <!-- The draft comes first: on a phone you land on your own words, not
                on the post they were borrowed from. -->
           <section class="min-w-0">
@@ -485,7 +479,7 @@ onBeforeUnmount(() => {
                  gets, and the picture to shoot is named on the slide it belongs
                  to rather than in a brief nobody opens. -->
             <div v-if="remix.format === 'carousel'" class="mt-4 lg:mt-0">
-              <div class="mx-auto w-full max-w-[600px]">
+              <div class="w-full">
                 <template v-if="slide">
                   <article class="overflow-hidden rounded-[14px] border border-[var(--line)] bg-[var(--surface)]">
                     <header class="flex items-center gap-3 px-4 py-3">
@@ -611,12 +605,6 @@ onBeforeUnmount(() => {
                   <!-- The tools for the slide on screen, under the frame rather
                        than over the words. -->
                   <div class="mt-3 flex flex-wrap items-center gap-1">
-                    <button class="editor-control" :title="$t('remix.moveUp')" :aria-label="$t('remix.moveUp')" :disabled="activeSlide === 0" @click="moveSlide(activeSlide, -1); showSlide(activeSlide - 1)">
-                      <AppIcon name="arrow-up" :size="14" class="-rotate-90" />
-                    </button>
-                    <button class="editor-control" :title="$t('remix.moveDown')" :aria-label="$t('remix.moveDown')" :disabled="activeSlide === slides.length - 1" @click="moveSlide(activeSlide, 1); showSlide(activeSlide + 1)">
-                      <AppIcon name="arrow-up" :size="14" class="rotate-90" />
-                    </button>
                     <button class="editor-control" :title="$t('remix.regenerate')" :aria-label="$t('remix.regenerate')" :disabled="!!regeneratingBlock" @click="regenerateBlock('slide', activeSlide)">
                       <AppIcon name="sparkles" :size="14" :class="regeneratingBlock === `slide:${activeSlide}` && 'animate-spin'" />
                     </button>

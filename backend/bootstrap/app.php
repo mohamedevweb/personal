@@ -2,6 +2,7 @@
 
 use App\Exceptions\ContentGenerationException;
 use App\Exceptions\InstagramIntegrationException;
+use App\Http\Middleware\AuthenticateFromTokenCookie;
 use App\Http\Middleware\UseRequestLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -20,7 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();
         $middleware->throttleApi();
-        $middleware->api(prepend: [UseRequestLocale::class]);
+        $middleware->api(prepend: [UseRequestLocale::class, AuthenticateFromTokenCookie::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         Integration::handles($exceptions);

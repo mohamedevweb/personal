@@ -104,7 +104,6 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
                post rather than its first frame: same arrows, dots and swipe as
                the feed card, on the same slides. -->
           <CarouselMedia v-else :urls="mediaUrls" :alt="post.hook">
-            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/5 to-transparent" />
             <!-- The format reads as the same corner glyph Instagram uses, and the
                  feed card already uses: a word for it only spent the headline's room. -->
             <AppIcon
@@ -114,9 +113,6 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
               :stroke-width="1.9"
               class="pointer-events-none absolute right-5 top-5 text-white drop-shadow-[0_1px_3px_rgba(0,0,0,.55)]"
             />
-            <div class="pointer-events-none absolute inset-x-6 bottom-7">
-              <h1 class="text-[28px] font-medium leading-[1.12] tracking-[-.03em] text-white">{{ post.hook }}</h1>
-            </div>
           </CarouselMedia>
         </div>
         <!-- The source caption belongs to the post, but not to its media frame. -->

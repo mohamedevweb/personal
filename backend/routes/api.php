@@ -130,9 +130,21 @@ if (app()->isLocal() && config('app.enable_dev_session')) {
 
         $user->tokens()->where('name', 'local-development')->delete();
 
+        $token = $user->createToken('local-development')->plainTextToken;
+
         return response()->json([
             'user' => $user,
-            'token' => $user->createToken('local-development')->plainTextToken,
-        ]);
+            'token' => $token,
+        ])->cookie(cookie(
+            'personal_token',
+            $token,
+            60 * 24 * 30,
+            '/',
+            config('session.domain'),
+            config('session.secure') ?? app()->isProduction(),
+            true,
+            false,
+            config('session.same_site', 'lax'),
+        ));
     })->middleware('throttle:auth');
 }

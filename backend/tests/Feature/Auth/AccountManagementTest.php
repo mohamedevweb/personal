@@ -133,4 +133,20 @@ class AccountManagementTest extends TestCase
 
         $this->assertTrue(Hash::check('brand-new-secret', $user->fresh()->password));
     }
+
+    public function test_updating_the_password_revokes_existing_api_tokens(): void
+    {
+        $user = User::factory()->create(['password' => Hash::make('current-secret')]);
+        $currentToken = $user->createToken('current')->plainTextToken;
+        $otherToken = $user->createToken('other')->plainTextToken;
+
+        $this->withToken($currentToken)->putJson('/api/me/password', [
+            'current_password' => 'current-secret',
+            'password' => 'brand-new-secret',
+            'password_confirmation' => 'brand-new-secret',
+        ])->assertOk();
+
+        $this->withToken($currentToken)->getJson('/api/auth/me')->assertUnauthorized();
+        $this->withToken($otherToken)->getJson('/api/auth/me')->assertUnauthorized();
+    }
 }

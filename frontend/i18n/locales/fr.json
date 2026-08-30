@@ -731,7 +731,7 @@
     "creatingCopy": "Personal lit le schéma et ton moment."
   },
   "remix": {
-    "backToAnalysis": "Retour au schéma",
+    "backToAnalysis": "← Retour au schéma",
     "generation": {
       "eyebrow": "Création de ton remix",
       "title": "Le schéma reste. Tout le reste devient le tien.",
@@ -832,8 +832,6 @@
     "originalPattern": "Le schéma",
     "whyItWorks": "Pourquoi ça marche",
     "yourContext": "Votre moment",
-    "moveUp": "Déplacer avant",
-    "moveDown": "Déplacer après",
     "regenerate": "Réécrire cette slide",
     "rewriteBlock": "Réécrire",
     "rewriteError": "Personal n’a pas pu réécrire ce bloc. Réessaie.",

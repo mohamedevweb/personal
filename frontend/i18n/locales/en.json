@@ -731,7 +731,7 @@
     "creatingCopy": "Personal is reading the pattern and your moment."
   },
   "remix": {
-    "backToAnalysis": "Back to the pattern",
+    "backToAnalysis": "← Back to the pattern",
     "generation": {
       "eyebrow": "Building your remix",
       "title": "The pattern stays. Everything else becomes yours.",
@@ -832,8 +832,6 @@
     "originalPattern": "The pattern",
     "whyItWorks": "Why it works",
     "yourContext": "Your moment",
-    "moveUp": "Move earlier",
-    "moveDown": "Move later",
     "regenerate": "Rewrite this slide",
     "rewriteBlock": "Rewrite",
     "rewriteError": "Personal could not rewrite this block. Try again.",

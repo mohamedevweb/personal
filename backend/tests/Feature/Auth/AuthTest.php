@@ -96,6 +96,17 @@ class AuthTest extends TestCase
         $this->withToken($keep)->getJson('/api/auth/me')->assertOk();
     }
 
+    public function test_the_http_only_token_cookie_authenticates_browser_requests(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('browser')->plainTextToken;
+
+        $this->withCookie('personal_token', $token)
+            ->getJson('/api/auth/me')
+            ->assertOk()
+            ->assertJsonPath('user.id', $user->id);
+    }
+
     public function test_product_endpoints_require_authentication(): void
     {
         $this->getJson('/api/feed')->assertUnauthorized();

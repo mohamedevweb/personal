@@ -18,17 +18,31 @@ const publicRoutes = new Set([
 const signedInRedirects = new Set(['/login', '/forgot-password'])
 
 export default defineNuxtRouteMiddleware(async (to) => {
-  const { token, bootstrapDevelopmentToken, apiFetch } = usePersonalApi()
+  const { authenticated, bootstrapDevelopmentToken, apiFetch } = usePersonalApi()
 
-  if (signedInRedirects.has(to.path) && token.value) {
-    return navigateTo('/feed')
+  if (signedInRedirects.has(to.path)) {
+    try {
+      await apiFetch('/api/auth/me', {}, false, false)
+      return navigateTo('/feed')
+    } catch {
+      // No authenticated cookie, so the sign-in page remains reachable.
+    }
   }
 
   if (publicRoutes.has(to.path)) return
 
   // Local development can mint a demo token; everywhere else this is a sign-in.
-  if (!token.value && !(await bootstrapDevelopmentToken())) {
-    return navigateTo('/login')
+  if (!authenticated.value && await bootstrapDevelopmentToken()) {
+    authenticated.value = true
+  }
+
+  if (!authenticated.value) {
+    try {
+      await apiFetch('/api/auth/me', {}, false, false)
+      authenticated.value = true
+    } catch {
+      return navigateTo('/login')
+    }
   }
 
   // Email verification gate: an account has to confirm its address before any of

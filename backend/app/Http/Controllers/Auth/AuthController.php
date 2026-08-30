@@ -35,10 +35,19 @@ class AuthController extends Controller
         // gated until the creator confirms the address.
         event(new Registered($user));
 
+        return $this->tokenResponse($user, $view, $request, Response::HTTP_CREATED);
+    }
+
+    private function tokenResponse(User $user, UserView $view, Request $request, int $status = Response::HTTP_OK): JsonResponse
+    {
+        $token = $user->createToken($this->tokenName($request))->plainTextToken;
+
         return response()->json([
             'user' => $view->make($user),
-            'token' => $user->createToken($this->tokenName($request))->plainTextToken,
-        ], Response::HTTP_CREATED);
+            // Keep the token in the API response for non-browser API clients.
+            // The Nuxt app authenticates with the HttpOnly cookie below.
+            'token' => $token,
+        ], $status)->cookie($this->tokenCookie($token));
     }
 
     public function login(Request $request, UserView $view): JsonResponse
@@ -56,10 +65,7 @@ class AuthController extends Controller
             ]);
         }
 
-        return response()->json([
-            'user' => $view->make($user),
-            'token' => $user->createToken($this->tokenName($request))->plainTextToken,
-        ]);
+        return $this->tokenResponse($user, $view, $request);
     }
 
     public function logout(Request $request): Response
@@ -78,7 +84,7 @@ class AuthController extends Controller
             $request->session()->regenerateToken();
         }
 
-        return response()->noContent();
+        return response()->noContent()->withCookie(cookie()->forget('personal_token'));
     }
 
     public function me(Request $request, UserView $view): JsonResponse
@@ -89,5 +95,20 @@ class AuthController extends Controller
     private function tokenName(Request $request): string
     {
         return str($request->userAgent() ?? 'api')->limit(60, '')->toString();
+    }
+
+    private function tokenCookie(string $token): \Symfony\Component\HttpFoundation\Cookie
+    {
+        return cookie(
+            'personal_token',
+            $token,
+            60 * 24 * 30,
+            '/',
+            config('session.domain'),
+            config('session.secure') ?? app()->isProduction(),
+            true,
+            false,
+            config('session.same_site', 'lax'),
+        );
     }
 }
