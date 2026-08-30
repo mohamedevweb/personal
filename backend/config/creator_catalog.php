@@ -19,6 +19,32 @@ return [
         'wellness' => ['name' => 'Wellness', 'aliases' => ['bien-être', 'bien etre', 'wellbeing', 'santé mentale', 'sante mentale', 'mental health', 'mindfulness', 'méditation', 'meditation', 'sommeil', 'sleep', 'récupération', 'recovery', 'santé globale']],
     ],
 
+    // Adjacent subjects may be useful, but they never fill the personalised
+    // feed. They live in their own exploration section so relevance remains an
+    // entry rule rather than a soft ordering preference.
+    'adjacent_verticals' => [
+        'sport-fitness' => ['wellness'],
+        'food-cooking' => ['wellness'],
+        'personal-branding' => ['tech-ai'],
+        'tech-ai' => ['personal-branding'],
+        'wellness' => ['sport-fitness', 'food-cooking'],
+    ],
+
+    // These narrower clusters disambiguate broad verticals. In particular,
+    // startup/SaaS content must not be treated as equivalent to gadget reviews
+    // merely because both happen to sit under Tech & AI.
+    'semantic_clusters' => [
+        'startup-saas' => ['startup', 'startups', 'saas', 'software as a service', 'founder', 'founders', 'fondateur', 'fondateurs', 'fondatrice', 'fondatrices', 'indie hacker', 'indie hackers', 'build in public', 'entrepreneurship', 'entrepreneuriat', 'early stage', 'early-stage'],
+        'creator-marketing' => ['personal branding', 'marque personnelle', 'content creation', 'création de contenu', 'creation de contenu', 'creator economy', 'marketing', 'audience building', 'copywriting'],
+        'consumer-tech' => ['smartphone', 'smartphones', 'gadget', 'gadgets', 'setup', 'hardware', 'high tech', 'high-tech', 'tech review', 'product review', 'produits tech'],
+        'product-building' => ['product design', 'design produit', 'product management', 'développement produit', 'developpement produit', 'software development', 'développement logiciel', 'developpement logiciel', 'developer tools', 'outils de développement', 'outils de developpement'],
+        'strength-training' => ['musculation', 'strength training', 'powerlifting', 'bodybuilding', 'workout', 'gym'],
+        'endurance' => ['running', 'course à pied', 'course a pied', 'marathon', 'cycling', 'cyclisme', 'triathlon'],
+        'recipes' => ['recipe', 'recipes', 'recette', 'recettes', 'meal prep', 'vegan cooking', 'cuisine maison'],
+        'baking' => ['baking', 'patisserie', 'pâtisserie', 'pastry', 'bread', 'dessert', 'desserts'],
+        'mental-wellness' => ['mental health', 'santé mentale', 'sante mentale', 'mindfulness', 'méditation', 'meditation', 'stress', 'burnout'],
+    ],
+
     'audit' => [
         'min_followers' => (int) env('CATALOG_MIN_FOLLOWERS', 25000),
         'active_within_days' => (int) env('CATALOG_ACTIVE_WITHIN_DAYS', 30),

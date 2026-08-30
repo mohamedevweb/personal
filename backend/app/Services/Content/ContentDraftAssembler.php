@@ -43,7 +43,7 @@ class ContentDraftAssembler
                 'tone' => $profile?->tone ?? [],
                 'topics' => $profile?->topics ?? [],
             ],
-        ] + $this->formatPayload($format, $generated);
+        ] + $this->formatPayload($format, $generated, $source);
     }
 
     public function block(?string $json): string
@@ -62,7 +62,7 @@ class ContentDraftAssembler
      * @param  array<string, mixed>  $generated
      * @return array<string, mixed>
      */
-    private function formatPayload(string $format, array $generated): array
+    private function formatPayload(string $format, array $generated, ContentPost $source): array
     {
         if ($format !== 'carousel') {
             return array_intersect_key($generated, array_flip(match ($format) {
@@ -71,14 +71,27 @@ class ContentDraftAssembler
             }));
         }
 
-        $slides = (array) ($generated['slides'] ?? []);
+        $slides = array_values(array_filter((array) ($generated['slides'] ?? []), is_array(...)));
+
+        // The deck has as many slides as the post it copies, whatever the model
+        // returned: extra slides are dropped, and a missing one is left blank
+        // for the creator rather than quietly shortening the story.
+        $slides = array_pad(
+            array_slice($slides, 0, $count = RemixFormat::slideCount($source)),
+            $count,
+            [],
+        );
 
         // Slide ids drive the editor's reorder and delete controls, so they are
-        // numbered here rather than trusted from the response.
+        // numbered here rather than trusted from the response. The source
+        // position is stamped the same way: slide N is written against slide N
+        // of the original, and the editor shows them side by side.
         return ['slides' => array_values(array_map(
             fn (int $index, array $slide): array => [
                 'id' => $index + 1,
                 'text' => (string) ($slide['text'] ?? ''),
+                'image' => (string) ($slide['image'] ?? ''),
+                'source_position' => $index + 1,
             ],
             array_keys($slides),
             $slides,

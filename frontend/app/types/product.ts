@@ -45,6 +45,8 @@ export interface ContentPost {
   why_it_works: string
   hook_analysis: string
   structure_analysis: string
+  /** What was read off the slides of a carousel, in reading order. Empty until the visual analysis has run. */
+  carousel_slides?: { position: number, text: string, role: string }[]
   analysis_status?: 'pending' | 'complete'
   recommendation_score?: number | null
   /** Match between this post's creator/topics and the member's Creator DNA. */
@@ -65,7 +67,10 @@ export interface FeedResponse {
   }
   featured_opportunity?: Opportunity | null
   items: ContentPost[]
+  explore_items: ContentPost[]
 }
+
+export type DismissReason = 'topic' | 'creator' | 'language'
 
 export interface LifeMoment {
   id: number
@@ -148,7 +153,14 @@ export interface Remix {
     why_it_works: string[]
     your_context: string
     your_version: string
-    slides?: { id: number, text: string }[]
+    slides?: {
+      id: number
+      text: string
+      /** Which picture to put on this slide, and how to frame it. */
+      image?: string
+      /** The slide of the source this one was written against, 1-based. Null on a slide added by hand. */
+      source_position?: number | null
+    }[]
     hook?: string
     script?: string
     visual?: string

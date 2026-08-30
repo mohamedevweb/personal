@@ -52,14 +52,14 @@ class MockContentGenerationService implements ContentGenerationService
         ];
 
         return match ($format) {
-            'carousel' => $base + ['slides' => [
-                ['id' => 1, 'text' => $idea],
-                ['id' => 2, 'text' => 'My original assumption was simple: creators needed more tools to make content.'],
-                ['id' => 3, 'text' => 'But every conversation revealed the same hidden problem.'],
-                ['id' => 4, 'text' => 'They did not need more blank pages. They needed better starting points.'],
-                ['id' => 5, 'text' => 'The shift: connect what is working with what is actually happening in your life.'],
-                ['id' => 6, 'text' => 'That is the idea I am building now, and it changed how I think about personal branding.'],
-            ]],
+            'carousel' => $base + ['slides' => $this->slides($source, [
+                [$idea, 'A photo of you at the desk where this started, shot straight on, the line across the top.'],
+                ['My original assumption was simple: creators needed more tools to make content.', 'A screenshot of the tools you were comparing, text over the empty half.'],
+                ['But every conversation revealed the same hidden problem.', 'A close-up of your notes from one of those conversations.'],
+                ['They did not need more blank pages. They needed better starting points.', 'A blank page next to a page you already filled, side by side.'],
+                ['The shift: connect what is working with what is actually happening in your life.', 'A photo of the thing you are working on right now, held in your hand.'],
+                ['That is the idea I am building now, and it changed how I think about personal branding.', 'You looking into the camera, the closing line under your face.'],
+            ])],
             'reel' => $base + [
                 'hook' => $idea,
                 'script' => "I kept assuming the hard part of content was production. It wasn't. The real problem was deciding what was worth saying. After talking to creators, I saw the same pattern: the best ideas happen when a proven format meets a story only you can tell. That insight changed the product I am building.",
@@ -101,14 +101,14 @@ class MockContentGenerationService implements ContentGenerationService
         ];
 
         return match ($format) {
-            'carousel' => $base + ['slides' => [
-                ['id' => 1, 'text' => $idea],
-                ['id' => 2, 'text' => "Mon idée de départ était simple. Les créateurs avaient besoin de plus d'outils pour produire du contenu."],
-                ['id' => 3, 'text' => 'Mais chaque conversation révélait le même problème caché.'],
-                ['id' => 4, 'text' => "Ils n'avaient pas besoin de plus de pages blanches. Ils avaient besoin de meilleurs points de départ."],
-                ['id' => 5, 'text' => 'Le déclic a été de relier ce qui fonctionne à ce qui se passe réellement dans ta vie.'],
-                ['id' => 6, 'text' => "C'est ce que je construis maintenant. Cette idée a changé ma vision du personal branding."],
-            ]],
+            'carousel' => $base + ['slides' => $this->slides($source, [
+                [$idea, 'Une photo de toi au bureau où tout a commencé, de face, la phrase en haut.'],
+                ["Mon idée de départ était simple. Les créateurs avaient besoin de plus d'outils pour produire du contenu.", 'Une capture des outils que tu comparais, le texte sur la moitié vide.'],
+                ['Mais chaque conversation révélait le même problème caché.', 'Un gros plan sur tes notes prises pendant une de ces conversations.'],
+                ["Ils n'avaient pas besoin de plus de pages blanches. Ils avaient besoin de meilleurs points de départ.", 'Une page blanche à côté d\'une page déjà remplie, côte à côte.'],
+                ['Le déclic a été de relier ce qui fonctionne à ce qui se passe réellement dans ta vie.', 'Une photo de ce que tu construis en ce moment, tenu dans ta main.'],
+                ["C'est ce que je construis maintenant. Cette idée a changé ma vision du personal branding.", 'Toi face caméra, la phrase de fin sous ton visage.'],
+            ])],
             'reel' => $base + [
                 'hook' => $idea,
                 'script' => "Je pensais que la partie difficile était la production. Ce n'était pas le cas. Le vrai problème était de décider ce qui méritait d'être raconté. En parlant avec des créateurs, j'ai vu le même schéma. Les meilleures idées apparaissent quand un format éprouvé rencontre une histoire que toi seul peux raconter. Cette découverte a changé le produit que je construis.",
@@ -120,6 +120,30 @@ class MockContentGenerationService implements ContentGenerationService
                 'caption' => $idea."\n\nJe pensais que les créateurs avaient besoin d'un nouvel outil pour produire plus vite. Mais leurs retours disaient autre chose. La partie la plus difficile arrive avant la page blanche.\n\nLa matière utile était déjà là, dans les conversations clients, les erreurs, les pivots et les petites victoires. Il manquait seulement la bonne histoire à raconter au bon moment.\n\nCette prise de conscience a changé ce que j'ai décidé de construire.",
             ],
         };
+    }
+
+    /**
+     * The deck the real providers are asked for: exactly as many slides as the
+     * source has, each one a line and the picture to put behind it. The written
+     * slides repeat when the source is longer than this canned story.
+     *
+     * @param  list<array{0: string, 1: string}>  $written
+     * @return list<array<string, mixed>>
+     */
+    private function slides(ContentPost $source, array $written): array
+    {
+        $count = RemixFormat::slideCount($source);
+
+        return array_map(function (int $index) use ($written): array {
+            [$text, $image] = $written[$index % count($written)];
+
+            return [
+                'id' => $index + 1,
+                'text' => $text,
+                'image' => $image,
+                'source_position' => $index + 1,
+            ];
+        }, range(0, $count - 1));
     }
 
     private function firstSentence(string $content): string

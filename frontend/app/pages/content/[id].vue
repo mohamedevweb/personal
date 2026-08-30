@@ -9,15 +9,15 @@ const { locale, t } = useI18n()
 const toast = useToast()
 const post = ref<ContentPost | null>(null)
 const moments = ref<LifeMoment[]>([])
-type RemixFormat = 'reel' | 'carousel'
-const requestedFormat = Array.isArray(route.query.format) ? route.query.format[0] : route.query.format
-const format = ref<RemixFormat>(['reel', 'carousel'].includes(requestedFormat || '') ? requestedFormat as RemixFormat : 'carousel')
 const selectedMoment = ref<number | null>(null)
 const composerOpen = ref(false)
 const generating = ref(false)
 const loading = ref(true)
 const isReel = computed(() => (post.value?.format || '').toLowerCase().includes('reel'))
 const isCarousel = computed(() => (post.value?.format || '').toLowerCase().includes('carousel'))
+// The draft takes the shape of the post it borrows from. A single image is a
+// carousel of one slide, which is what the server decides too.
+const format = computed<'reel' | 'carousel'>(() => (isReel.value ? 'reel' : 'carousel'))
 // A carousel arrives as its frames; anything else has only the one to show.
 const mediaUrls = computed(() => {
   const urls = post.value?.media_urls?.filter(Boolean) || []
@@ -60,7 +60,7 @@ async function createRemix() {
   generating.value = true
   try {
     const response = await apiFetch<{ remix: Pick<Remix, 'id' | 'status'> }>(`/api/content/${post.value.id}/remix`, {
-      method: 'POST', body: { format: format.value, life_moment_id: selectedMoment.value }
+      method: 'POST', body: { life_moment_id: selectedMoment.value }
     })
     if (await openWhenReady(response.remix) === 'failed') toast.error(t('feed.remixError'))
   } catch (exception: unknown) {
@@ -148,25 +148,16 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
             <p class="mt-1.5 text-[13.5px] leading-6 text-[var(--muted)]">{{ $t('content.makeItYoursCopy') }}</p>
           </div>
 
-          <!-- The two shapes, named and no more: the icon and the word carry
-               the choice. -->
-          <div class="grid gap-px bg-[var(--line-soft)] sm:grid-cols-2">
-            <button
-              v-for="item in (['reel', 'carousel'] as const)"
-              :key="item"
-              class="group flex items-start gap-3 px-5 py-4 text-left transition sm:block"
-              :class="format === item ? 'bg-[var(--accent-soft)]' : 'bg-[var(--surface)] hover:bg-[var(--paper)]'"
-              :aria-pressed="format === item"
-              @click="format = item"
-            >
-              <span
-                class="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] transition"
-                :class="format === item ? 'bg-[var(--ink)] text-[var(--paper)]' : 'bg-[var(--sand-soft)] text-[var(--muted)]'"
-              >
-                <AppIcon :name="item" :size="17" />
-              </span>
-              <span class="block text-[13.5px] font-medium sm:mt-3">{{ $t(`remix.formats.${item}`) }}</span>
-            </button>
+          <!-- The shape is not a question: a carousel is remixed as a carousel,
+               a reel as a reel. The card says which one is coming. -->
+          <div class="flex items-center gap-3 bg-[var(--accent-soft)] px-5 py-4">
+            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] bg-[var(--ink)] text-[var(--paper)]">
+              <AppIcon :name="format" :size="17" />
+            </span>
+            <span class="min-w-0">
+              <span class="block text-[13.5px] font-medium">{{ $t(`remix.formats.${format}`) }}</span>
+              <span class="mt-0.5 block text-[11.5px] leading-4 text-[var(--muted)]">{{ $t('content.formatFollowsSource') }}</span>
+            </span>
           </div>
 
           <!-- Grounding is what keeps the draft yours, so the moments are shown
@@ -224,10 +215,6 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
              the method it came from are one panel rather than two stray blocks. -->
         <div class="mt-8 overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">
           <div class="border-b border-[var(--accent-line)] bg-[var(--accent-soft)] px-5 py-4">
-            <span v-if="post.analysis_status === 'pending'" class="mb-3 inline-flex items-center gap-2 rounded-full border border-[var(--accent-line)] bg-[var(--surface)] px-2.5 py-1 text-[11px] text-[var(--muted)]">
-              <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--ai)]" />
-              {{ $t('content.analysisImproving') }}
-            </span>
             <p class="flex items-baseline gap-3 text-[var(--accent-ink)]">
               <span class="font-serif text-[44px] leading-none tracking-[-.02em]">{{ post.performance_ratio.toFixed(1) }}×</span>
               <span class="max-w-[16rem] text-[13px] leading-[1.35]">{{ $t('content.usualPerformance') }}</span>

@@ -19,9 +19,9 @@ class FeedController extends Controller
             'exclude' => ['sometimes', 'array', 'max:500'],
             'exclude.*' => ['integer', 'distinct'],
         ]);
-        $items = $recommendations->forUser($request->user(), excludeIds: $data['exclude'] ?? []);
+        $sections = $recommendations->sectionsForUser($request->user(), excludeIds: $data['exclude'] ?? []);
 
-        return $this->response($request, $items);
+        return $this->response($request, $sections['items'], $sections['explore_items']);
     }
 
     public function global(Request $request, RecommendationService $recommendations): JsonResponse
@@ -31,8 +31,11 @@ class FeedController extends Controller
         return $this->response($request, $items);
     }
 
-    /** @param Collection<int, array<string, mixed>> $items */
-    private function response(Request $request, Collection $items): JsonResponse
+    /**
+     * @param  Collection<int, array<string, mixed>>  $items
+     * @param  Collection<int, array<string, mixed>>  $exploreItems
+     */
+    private function response(Request $request, Collection $items, ?Collection $exploreItems = null): JsonResponse
     {
         $profile = $request->user()->creatorProfile;
 
@@ -49,6 +52,7 @@ class FeedController extends Controller
                 ->orderByDesc('relevance_score')
                 ->first(),
             'items' => $items,
+            'explore_items' => $exploreItems ?? collect(),
         ]);
     }
 }

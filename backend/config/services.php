@@ -152,6 +152,9 @@ return [
         'personalization' => [
             'performance_weight' => (float) env('FEED_WEIGHT_PERFORMANCE', 0.75),
             'affinity_weight' => (float) env('FEED_WEIGHT_CREATOR_AFFINITY', 0.25),
+            'minimum_affinity' => (float) env('FEED_MIN_CREATOR_AFFINITY', 0.50),
+            'explore_minimum_affinity' => (float) env('FEED_EXPLORE_MIN_CREATOR_AFFINITY', 0.20),
+            'explore_size' => (int) env('FEED_EXPLORE_SIZE', 6),
         ],
         // Reach-bait tags. These are not niches — they are what accounts with no
         // audience post under in order to be seen, so scraping them returns spam by

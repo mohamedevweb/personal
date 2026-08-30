@@ -34,9 +34,9 @@ class ClaudeContentGenerationTest extends TestCase
             'why_it_works' => ['A specific decision creates tension', 'The lesson is usable'],
             'your_version' => 'I pivoted after four months of research.',
             'slides' => [
-                ['text' => 'I pivoted after four months of research.'],
-                ['text' => 'The research said one thing. My customers said another.'],
-                ['text' => 'Here is what I changed.'],
+                ['text' => 'I pivoted after four months of research.', 'image' => 'Portrait of you, the line across the top third.'],
+                ['text' => 'The research said one thing. My customers said another.', 'image' => 'Screenshot of your own dashboard.'],
+                ['text' => 'Here is what I changed.', 'image' => 'Your desk shot from above.'],
             ],
         ]);
 
@@ -47,8 +47,11 @@ class ClaudeContentGenerationTest extends TestCase
         $this->assertSame($post->hook, $result['original_pattern']);
         $this->assertSame($moment->content, $result['your_context']);
         $this->assertSame('Entrepreneurship / SaaS', $result['profile_used']['niche']);
+        // One slide for each slide of the source, in its order.
         $this->assertSame([1, 2, 3], array_column($result['slides'], 'id'));
+        $this->assertSame([1, 2, 3], array_column($result['slides'], 'source_position'));
         $this->assertSame('Here is what I changed.', $result['slides'][2]['text']);
+        $this->assertSame('Your desk shot from above.', $result['slides'][2]['image']);
         $this->assertArrayNotHasKey('caption', $result);
 
         $body = $this->sentBodies[0];
@@ -60,6 +63,10 @@ class ClaudeContentGenerationTest extends TestCase
         );
         $this->assertStringContainsString($moment->content, $body['messages'][0]['content']);
         $this->assertStringContainsString($post->structure_analysis, $body['messages'][0]['content']);
+        // The plan of the source carousel is what the draft follows slide by slide.
+        $this->assertStringContainsString('THE SOURCE CAROUSEL, SLIDE BY SLIDE', $body['messages'][0]['content']);
+        $this->assertStringContainsString('Screenshot of a dashboard.', $body['messages'][0]['content']);
+        $this->assertStringContainsString('Write a 3-slide Instagram carousel', $body['messages'][0]['content']);
     }
 
     public function test_a_caption_request_only_asks_for_caption_fields(): void

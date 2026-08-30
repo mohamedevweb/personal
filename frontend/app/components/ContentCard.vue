@@ -1,12 +1,24 @@
 <script setup lang="ts">
-import type { ContentPost } from '~/types/product'
+import type { ContentPost, DismissReason } from '~/types/product'
 import { compactNumber, creatorProfileUrl, relativeDate } from '~/types/product'
 
-const props = withDefaults(defineProps<{ post: ContentPost, remixing?: boolean }>(), {
-  remixing: false
+const props = withDefaults(defineProps<{ post: ContentPost, remixing?: boolean, dismissible?: boolean }>(), {
+  remixing: false,
+  dismissible: false
 })
-defineEmits<{ save: [post: ContentPost], remix: [post: ContentPost] }>()
+const emit = defineEmits<{
+  save: [post: ContentPost]
+  remix: [post: ContentPost]
+  dismiss: [post: ContentPost, reason: DismissReason]
+}>()
 const { locale } = useI18n()
+const dismissMenu = ref<HTMLDetailsElement | null>(null)
+const dismissReasons: DismissReason[] = ['topic', 'creator', 'language']
+
+function dismiss(reason: DismissReason) {
+  dismissMenu.value?.removeAttribute('open')
+  emit('dismiss', props.post, reason)
+}
 
 const mediaKind = computed(() => {
   const format = (props.post.format || '').toLowerCase()
@@ -54,7 +66,18 @@ const visibleCaption = computed(() => (isLongCaption.value ? `${caption.value.sl
           <span class="block truncate text-[11px] text-[var(--faint)]">{{ $t('contentCard.followers', { count: compactNumber(post.creator.followers) }) }}</span>
         </span>
       </a>
-      <AppIcon name="dots" :size="16" class="shrink-0 text-[var(--muted)]" />
+      <details v-if="dismissible" ref="dismissMenu" class="relative shrink-0">
+        <summary class="grid h-8 w-8 cursor-pointer list-none place-items-center rounded-full text-[var(--muted)] transition hover:bg-[var(--paper)] hover:text-[var(--ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]" :aria-label="$t('contentCard.notForMe')">
+          <AppIcon name="dots" :size="16" />
+        </summary>
+        <div class="absolute right-0 top-9 z-20 w-44 overflow-hidden rounded-[13px] border border-[var(--line)] bg-[var(--surface)] p-1.5 shadow-[0_12px_30px_rgba(23,23,26,.14)]">
+          <p class="px-2.5 pb-1.5 pt-1 text-[10px] font-semibold uppercase tracking-[.14em] text-[var(--faint)]">{{ $t('contentCard.notForMe') }}</p>
+          <button v-for="reason in dismissReasons" :key="reason" type="button" class="block w-full rounded-[9px] px-2.5 py-2 text-left text-[12px] transition hover:bg-[var(--paper)]" @click="dismiss(reason)">
+            {{ $t(`contentCard.dismissReasons.${reason}`) }}
+          </button>
+        </div>
+      </details>
+      <AppIcon v-else name="dots" :size="16" class="shrink-0 text-[var(--muted)]" />
     </header>
 
     <div class="relative aspect-square overflow-hidden bg-[var(--sand)]">

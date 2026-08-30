@@ -35,7 +35,7 @@ class OpenAiContentGenerationService implements ContentGenerationService
     {
         $response = $this->request(
             $this->blueprint->brief($source, $user, $format, $moment),
-            $this->blueprint->schema($format),
+            $this->blueprint->schema($format, $source),
         );
 
         $this->guardAgainstUnusableResponse($response);

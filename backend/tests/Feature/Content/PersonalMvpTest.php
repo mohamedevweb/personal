@@ -11,6 +11,7 @@ use App\Models\Remix;
 use App\Models\SavedContent;
 use App\Models\User;
 use App\Services\Content\ContentGenerationService;
+use App\Services\Discovery\ContentPostMediaRefresh;
 use App\Services\Discovery\PostInsightService;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -32,18 +33,19 @@ class PersonalMvpTest extends TestCase
         $this->user = User::query()->where('email', 'creator@personal.local')->firstOrFail();
     }
 
-    public function test_feed_returns_ranked_global_content(): void
+    public function test_feed_returns_only_the_ranked_relevant_content_available(): void
     {
         $response = $this->actingAs($this->user)->getJson('/api/feed');
 
         $response->assertOk()
             ->assertJsonMissingPath('greeting_name')
-            ->assertJsonCount(24, 'items')
             ->assertJsonStructure(['personalization' => ['niche', 'tone'], 'featured_opportunity', 'items' => [[
                 'id', 'hook', 'performance_ratio', 'recommendation_score', 'why_recommended', 'creator',
             ]]]);
 
         $scores = collect($response->json('items'))->pluck('recommendation_score');
+        $this->assertNotEmpty($scores);
+        $this->assertLessThanOrEqual(24, $scores->count());
         $this->assertSame($scores->sortDesc()->values()->all(), $scores->values()->all());
     }
 
@@ -57,7 +59,6 @@ class PersonalMvpTest extends TestCase
         ]))->assertOk();
         $nextIds = collect($next->json('items'))->pluck('id');
 
-        $this->assertNotEmpty($nextIds);
         $this->assertSame([], $nextIds->intersect($firstIds)->values()->all());
 
         $seenIds = $firstIds->concat($nextIds)->unique()->values()->all();
@@ -220,7 +221,6 @@ class PersonalMvpTest extends TestCase
         $response = $this->actingAs($this->user)
             ->withHeader('Accept-Language', 'fr')
             ->postJson("/api/content/{$post->id}/remix", [
-                'format' => 'carousel',
                 'life_moment_id' => $momentResponse->json('moment.id'),
             ])
             ->assertAccepted()
@@ -231,6 +231,7 @@ class PersonalMvpTest extends TestCase
         (new GenerateRemix($remixId, 'fr'))->handle(
             app(ContentGenerationService::class),
             app(PostInsightService::class),
+            app(ContentPostMediaRefresh::class),
         );
 
         $this->assertSame(
@@ -262,7 +263,6 @@ class PersonalMvpTest extends TestCase
         $moment = $this->user->moments()->firstOrFail();
 
         $response = $this->actingAs($this->user)->postJson("/api/content/{$post->id}/remix", [
-            'format' => 'carousel',
             'life_moment_id' => $moment->id,
         ]);
 
@@ -279,11 +279,14 @@ class PersonalMvpTest extends TestCase
         (new GenerateRemix($remixId, 'en'))->handle(
             app(ContentGenerationService::class),
             app(PostInsightService::class),
+            app(ContentPostMediaRefresh::class),
         );
         $remix = Remix::query()->findOrFail($remixId);
 
         $this->assertSame('draft', $remix->status);
-        $this->assertCount(6, $remix->generated_content['slides']);
+        $this->assertCount(count($post->media_urls), $remix->generated_content['slides']);
+        $this->assertSame([1, 2, 3, 4, 5], array_column($remix->generated_content['slides'], 'source_position'));
+        $this->assertNotSame('', $remix->generated_content['slides'][0]['image']);
         $this->assertSame($post->hook, $remix->generated_content['original_pattern']);
         $this->assertSame($moment->content, $remix->generated_content['your_context']);
     }
@@ -293,9 +296,8 @@ class PersonalMvpTest extends TestCase
         Queue::fake();
         $post = ContentPost::query()->firstOrFail();
 
-        $this->actingAs($this->user)->postJson("/api/content/{$post->id}/remix", [
-            'format' => 'carousel',
-        ])->assertUnprocessable()
+        $this->actingAs($this->user)->postJson("/api/content/{$post->id}/remix", [])
+            ->assertUnprocessable()
             ->assertJsonValidationErrors('life_moment_id');
 
         Queue::assertNothingPushed();
@@ -312,7 +314,6 @@ class PersonalMvpTest extends TestCase
         ]);
 
         $this->actingAs($this->user)->postJson("/api/content/{$post->id}/remix", [
-            'format' => 'carousel',
             'life_moment_id' => $otherMoment->id,
         ])->assertNotFound();
 
@@ -326,7 +327,6 @@ class PersonalMvpTest extends TestCase
         $moment = $this->user->moments()->firstOrFail();
 
         $first = $this->actingAs($this->user)->postJson("/api/content/{$post->id}/remix", [
-            'format' => 'carousel',
             'life_moment_id' => $moment->id,
         ])->assertAccepted();
 
@@ -334,7 +334,6 @@ class PersonalMvpTest extends TestCase
         $remix->update(['generated_content' => ['slides' => [['id' => 1, 'text' => 'My own words.']]], 'status' => 'draft']);
 
         $second = $this->actingAs($this->user)->postJson("/api/content/{$post->id}/remix", [
-            'format' => 'carousel',
             'life_moment_id' => $moment->id,
         ])->assertAccepted();
 
@@ -344,30 +343,37 @@ class PersonalMvpTest extends TestCase
         Queue::assertPushed(GenerateRemix::class, 1);
     }
 
-    public function test_each_format_keeps_its_own_draft(): void
+    public function test_a_draft_takes_the_shape_of_the_post_it_borrows(): void
     {
         Queue::fake();
-        $post = ContentPost::query()->firstOrFail();
+        $moment = $this->user->moments()->firstOrFail();
+        $carousel = ContentPost::query()->where('format', 'Carousel')->firstOrFail();
+        $reel = ContentPost::query()->where('format', 'Reel')->firstOrFail();
+
+        $this->actingAs($this->user)->postJson("/api/content/{$carousel->id}/remix", [
+            'life_moment_id' => $moment->id,
+        ])->assertAccepted()->assertJsonPath('remix.format', 'carousel');
+
+        $this->actingAs($this->user)->postJson("/api/content/{$reel->id}/remix", [
+            'life_moment_id' => $moment->id,
+        ])->assertAccepted()->assertJsonPath('remix.format', 'reel');
+    }
+
+    /** A post that is a single picture is a carousel of one slide. */
+    public function test_a_single_image_post_is_drafted_as_one_slide(): void
+    {
+        $post = ContentPost::query()->where('format', 'Carousel')->firstOrFail();
+        $post->forceFill(['format' => 'image', 'media_urls' => []])->save();
         $moment = $this->user->moments()->firstOrFail();
 
-        $carousel = $this->actingAs($this->user)->postJson("/api/content/{$post->id}/remix", [
-            'format' => 'carousel',
+        $response = $this->actingAs($this->user)->postJson("/api/content/{$post->id}/remix", [
             'life_moment_id' => $moment->id,
-        ])->assertAccepted();
+        ])->assertAccepted()->assertJsonPath('remix.format', 'carousel');
 
-        $reel = $this->actingAs($this->user)->postJson("/api/content/{$post->id}/remix", [
-            'format' => 'reel',
-            'life_moment_id' => $moment->id,
-        ])->assertAccepted();
-
-        $this->assertNotSame($carousel->json('remix.id'), $reel->json('remix.id'));
-
-        $back = $this->actingAs($this->user)->postJson("/api/content/{$post->id}/remix", [
-            'format' => 'carousel',
-            'life_moment_id' => $moment->id,
-        ])->assertAccepted();
-
-        $this->assertSame($carousel->json('remix.id'), $back->json('remix.id'));
+        $this->assertCount(
+            1,
+            Remix::query()->findOrFail($response->json('remix.id'))->generated_content['slides'],
+        );
     }
 
     public function test_an_archived_draft_does_not_block_a_fresh_one(): void
@@ -377,14 +383,12 @@ class PersonalMvpTest extends TestCase
         $moment = $this->user->moments()->firstOrFail();
 
         $first = $this->actingAs($this->user)->postJson("/api/content/{$post->id}/remix", [
-            'format' => 'caption',
             'life_moment_id' => $moment->id,
         ])->assertAccepted();
 
         Remix::query()->findOrFail($first->json('remix.id'))->update(['status' => 'archived']);
 
         $second = $this->actingAs($this->user)->postJson("/api/content/{$post->id}/remix", [
-            'format' => 'caption',
             'life_moment_id' => $moment->id,
         ])->assertAccepted();
 
@@ -527,7 +531,11 @@ class PersonalMvpTest extends TestCase
         $generator->shouldReceive('generate')
             ->once()
             ->andThrow(new ContentGenerationException('Provider unavailable.'));
-        (new GenerateRemix($remix->id, 'fr'))->handle($generator, app(PostInsightService::class));
+        (new GenerateRemix($remix->id, 'fr'))->handle(
+            $generator,
+            app(PostInsightService::class),
+            app(ContentPostMediaRefresh::class),
+        );
 
         $this->assertDatabaseHas('remixes', ['id' => $remix->id, 'status' => 'failed']);
     }

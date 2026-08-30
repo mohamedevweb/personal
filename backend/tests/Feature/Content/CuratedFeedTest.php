@@ -70,7 +70,7 @@ class CuratedFeedTest extends TestCase
         $this->assertSame(['FR' => 4, 'GB' => 4, 'US' => 4], $markets);
     }
 
-    public function test_primary_vertical_is_prioritized_without_breaking_the_feed_fallback(): void
+    public function test_primary_vertical_returns_a_shorter_feed_instead_of_unrelated_fallbacks(): void
     {
         $this->user->creatorProfile()->update(['primary_vertical' => 'tech-ai']);
         $this->posts('FR', 12, niche: 'sport-fitness', baseOutlier: 5);
@@ -78,9 +78,8 @@ class CuratedFeedTest extends TestCase
 
         $feed = app(RecommendationService::class)->forUser($this->user);
 
-        $this->assertSame(12, $feed->count());
-        $this->assertSame(8, $feed->take(8)->where('creator.niche', 'tech-ai')->count());
-        $this->assertSame(4, $feed->where('creator.niche', 'sport-fitness')->count());
+        $this->assertSame(8, $feed->count());
+        $this->assertTrue($feed->every(fn (array $post): bool => $post['creator']['niche'] === 'tech-ai'));
     }
 
     public function test_private_inspirations_lead_the_feed_and_keep_the_approved_catalog_as_fallback(): void

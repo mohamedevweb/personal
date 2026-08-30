@@ -4,7 +4,6 @@ namespace App\Services\Feed;
 
 use App\Models\ContentPost;
 use App\Models\User;
-use App\Services\Discovery\CanonicalCreatorVerticals;
 use App\Services\View\ContentPostView;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -31,28 +30,51 @@ class RecommendationService
         private readonly ContentPostView $view,
         private readonly FeedRanker $ranker,
         private readonly CreatorAffinity $affinity,
+        private readonly PostRelevance $relevance,
+        private readonly FeedInteractionSignals $interactions,
+        private readonly ContentTopicClassifier $classifier,
         private readonly MarketFeedAllocator $markets,
-        private readonly CanonicalCreatorVerticals $verticals,
     ) {}
 
     /** @return Collection<int, array<string, mixed>> */
     public function forUser(User $user, ?int $limit = null, array $excludeIds = []): Collection
     {
+        return $this->sectionsForUser($user, $limit, $excludeIds)['items'];
+    }
+
+    /**
+     * @return array{items: Collection<int, array<string, mixed>>, explore_items: Collection<int, array<string, mixed>>}
+     */
+    public function sectionsForUser(User $user, ?int $limit = null, array $excludeIds = []): array
+    {
         $limit = max(1, $limit ?? (int) config('services.discovery.feed_size'));
         $savedIds = $user->savedContent()->pluck('content_post_id')->flip();
         $primaryVertical = $this->primaryVertical($user);
         $inspirationIds = $user->inspirationCreators()->pluck('creators.id');
+        $interactionSignals = $this->interactions->forUser($user);
 
         $ranked = $this->candidates($user, $limit, $primaryVertical, $inspirationIds, $excludeIds)
-            ->map(fn (ContentPost $post): array => [
-                'post' => $post,
-                'ranking' => $this->personalizedRanking($post, $user),
-            ])
+            ->reject(fn (ContentPost $post): bool => $this->interactions->excludes($post, $interactionSignals))
+            ->map(function (ContentPost $post) use ($user, $interactionSignals): array {
+                $relevance = $this->relevance->assess($user->creatorProfile, $post);
+
+                return [
+                    'post' => $post,
+                    'bucket' => $relevance['bucket'],
+                    'ranking' => $this->personalizedRanking(
+                        $post,
+                        $user,
+                        $relevance['affinity'],
+                        $this->interactions->adjustment($post, $interactionSignals),
+                    ),
+                ];
+            })
             ->sortByDesc('ranking.score')
             ->values();
 
         $inspirationLookup = $inspirationIds->flip();
-        $inspired = $ranked
+        $forYou = $ranked->where('bucket', PostRelevance::FOR_YOU)->values();
+        $inspired = $forYou
             ->filter(fn (array $item): bool => $inspirationLookup->has($item['post']->creator_id))
             ->groupBy('post.creator_id')
             ->flatMap(fn (Collection $posts): Collection => $posts->take(2))
@@ -60,13 +82,25 @@ class RecommendationService
             ->take($limit)
             ->values();
         $fallback = $this->markets->allocate(
-            $ranked->reject(fn (array $item): bool => $inspirationLookup->has($item['post']->creator_id)),
+            $forYou->reject(fn (array $item): bool => $inspirationLookup->has($item['post']->creator_id)),
             $user->creatorProfile?->market,
             max(0, $limit - $inspired->count()),
             $primaryVertical,
         );
+        $items = $inspired->concat($fallback)->take($limit)->values();
+        $exploreLimit = max(0, (int) config('services.discovery.personalization.explore_size'));
+        $explore = $exploreLimit === 0
+            ? collect()
+            : $this->markets->allocate(
+                $ranked->where('bucket', PostRelevance::EXPLORE)->values(),
+                $user->creatorProfile?->market,
+                $exploreLimit,
+            );
 
-        return $this->render($inspired->concat($fallback), $user, $savedIds);
+        return [
+            'items' => $this->render($items, $user, $savedIds),
+            'explore_items' => $this->render($explore, $user, $savedIds),
+        ];
     }
 
     /** @return Collection<int, array<string, mixed>> */
@@ -147,30 +181,6 @@ class RecommendationService
                 ->limit($limit * self::CANDIDATE_MULTIPLIER)
                 ->get();
 
-        if (config('creator_catalog.curated_only')) {
-            return $inspired->concat(collect(['FR', 'GB', 'US'])
-                ->flatMap(function (string $market) use ($query, $limit, $primaryVertical): Collection {
-                    $marketQuery = (clone $query)
-                        ->whereHas('creator', fn (Builder $creator): Builder => $creator->where('market', $market));
-                    $matching = $primaryVertical
-                        ? (clone $marketQuery)
-                            ->whereHas('creator', fn (Builder $creator): Builder => $creator->where('niche', $primaryVertical))
-                            ->orderByDesc('outlier_score')
-                            ->limit($limit * self::CANDIDATE_MULTIPLIER)
-                            ->get()
-                        : collect();
-
-                    return $matching->concat(
-                        $marketQuery
-                            ->orderByDesc('outlier_score')
-                            ->limit($limit * self::CANDIDATE_MULTIPLIER)
-                            ->get(),
-                    );
-                }))
-                ->unique('id')
-                ->values();
-        }
-
         $matching = $primaryVertical
             ? (clone $query)
                 ->whereHas('creator', fn (Builder $creator): Builder => $creator->where('niche', $primaryVertical))
@@ -181,7 +191,10 @@ class RecommendationService
 
         return $inspired->concat($matching)->concat(
             $query->orderByDesc('outlier_score')
-                ->limit($limit * self::CANDIDATE_MULTIPLIER)
+                // The allocator applies market quotas after semantic filtering.
+                // One bounded cross-market query is enough to give each market
+                // room without issuing a matching and fallback query per market.
+                ->limit($limit * self::CANDIDATE_MULTIPLIER * count(config('creator_catalog.markets')))
                 ->get(),
         )->unique('id')->values();
     }
@@ -232,10 +245,14 @@ class RecommendationService
     }
 
     /** @return array<string, float|null> */
-    private function personalizedRanking(ContentPost $post, User $user): array
-    {
+    private function personalizedRanking(
+        ContentPost $post,
+        User $user,
+        ?float $affinity = null,
+        float $interactionAdjustment = 0.0,
+    ): array {
         $ranking = $this->ranker->rank($post);
-        $affinity = $this->affinity->score($user->creatorProfile, $post->creator, $post);
+        $affinity ??= $this->affinity->score($user->creatorProfile, $post->creator, $post);
 
         if ($affinity === null) {
             return [...$ranking, 'creator_fit' => null];
@@ -247,9 +264,9 @@ class RecommendationService
 
         return [
             ...$ranking,
-            'score' => round($total > 0
+            'score' => round(min(100, ($total > 0
                 ? (($ranking['score'] * $performanceWeight) + ($affinity * 100 * $affinityWeight)) / $total
-                : $ranking['score'], 1),
+                : $ranking['score']) + $interactionAdjustment), 1),
             'creator_fit' => $affinity,
         ];
     }
@@ -258,10 +275,10 @@ class RecommendationService
     {
         $profile = $user->creatorProfile;
 
-        return $this->verticals->canonical($profile?->primary_vertical)
-            ?? $this->verticals->fromSignals([
-                $profile?->niche,
-                ...($profile?->topics ?? []),
-            ]);
+        if (! $profile) {
+            return null;
+        }
+
+        return $this->classifier->profile($profile)['vertical'];
     }
 }

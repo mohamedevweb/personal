@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ContentPost, FeedResponse } from '~/types/product'
+import type { ContentPost, DismissReason, FeedResponse } from '~/types/product'
 
 /**
  * The feed pages itself by exclusion: every request carries the ids already on
@@ -17,6 +17,7 @@ const exhausted = ref(false)
 const extendFailed = ref(false)
 const meta = ref<FeedResponse | null>(null)
 const posts = ref<ContentPost[]>([])
+const explorePosts = ref<ContentPost[]>([])
 const sentinel = ref<HTMLElement | null>(null)
 const rotation = createFeedRotation()
 let observer: IntersectionObserver | null = null
@@ -38,6 +39,7 @@ async function loadFeed(): Promise<void> {
     rotation.forget()
     meta.value = response
     posts.value = rotation.accept(response.items)
+    explorePosts.value = response.explore_items
     exhausted.value = posts.value.length === 0
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('feed.loadError')))
@@ -108,6 +110,7 @@ async function refresh() {
 
     meta.value = response
     posts.value = fresh
+    explorePosts.value = response.explore_items
     window.scrollTo({ top: 0, behavior: 'smooth' })
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('feed.loadError')))
@@ -122,6 +125,17 @@ async function save(post: ContentPost) {
     post.is_saved = response.saved
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('feed.saveError')))
+  }
+}
+
+async function dismiss(post: ContentPost, reason: DismissReason) {
+  try {
+    await apiFetch(`/api/content/${post.id}/dismiss`, { method: 'POST', body: { reason } })
+    posts.value = posts.value.filter(item => item.id !== post.id)
+    explorePosts.value = explorePosts.value.filter(item => item.id !== post.id)
+    toast.success(t('feed.dismissed'))
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('feed.dismissError')))
   }
 }
 
@@ -166,7 +180,7 @@ onMounted(loadFeed)
         </button>
       </div>
       <div class="mt-5 grid auto-rows-fr gap-5 sm:grid-cols-2 xl:grid-cols-3">
-        <ContentCard v-for="post in posts" :key="post.id" :post="post" @save="save" @remix="openRemix" />
+        <ContentCard v-for="post in posts" :key="post.id" :post="post" dismissible @save="save" @dismiss="dismiss" @remix="openRemix" />
       </div>
 
       <div v-if="loadingMore" class="mt-5 grid auto-rows-fr gap-5 sm:grid-cols-2 xl:grid-cols-3" aria-hidden="true">
@@ -195,6 +209,17 @@ onMounted(loadFeed)
       <div class="mt-6 flex flex-wrap justify-center gap-2">
         <NuxtLink to="/personal" class="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-[14px] font-medium transition hover:bg-[var(--paper)]">{{ $t('feed.adjustContext') }}</NuxtLink>
         <button class="inline-flex h-11 items-center justify-center gap-2 rounded-full b-btn-red px-5 text-[14px] font-medium transition disabled:cursor-wait disabled:opacity-60" :disabled="refreshing" @click="refresh"><AppIcon name="sparkles" :size="16" />{{ refreshing ? $t('feed.refreshing') : $t('feed.refresh') }}</button>
+      </div>
+    </section>
+
+    <section v-if="!loading && explorePosts.length" class="mt-12 border-t border-[var(--line)] pt-7">
+      <div class="max-w-2xl">
+        <p class="text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--faint)]">{{ $t('feed.exploreEyebrow') }}</p>
+        <h2 class="mt-2 font-serif text-[28px] tracking-[-.025em]">{{ $t('feed.exploreTitle') }}</h2>
+        <p class="mt-2 text-sm leading-6 text-[var(--muted)]">{{ $t('feed.exploreBody') }}</p>
+      </div>
+      <div class="mt-5 grid auto-rows-fr gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        <ContentCard v-for="post in explorePosts" :key="post.id" :post="post" dismissible @save="save" @dismiss="dismiss" @remix="openRemix" />
       </div>
     </section>
   </main>

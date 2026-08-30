@@ -30,7 +30,7 @@ class ClaudeContentGenerationService implements ContentGenerationService
     {
         $text = $this->request(
             $this->blueprint->brief($source, $user, $format, $moment),
-            $this->blueprint->schema($format),
+            $this->blueprint->schema($format, $source),
         );
 
         return $this->assembler->assemble($text, $source, $user, $format, $moment);

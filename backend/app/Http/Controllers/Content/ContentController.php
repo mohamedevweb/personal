@@ -10,6 +10,7 @@ use App\Models\ContentPost;
 use App\Models\DismissedContent;
 use App\Models\SavedContent;
 use App\Services\Content\RemixDraftService;
+use App\Services\Content\RemixFormat;
 use App\Services\Discovery\PostInsightService;
 use App\Services\View\ContentPostView;
 use Illuminate\Http\JsonResponse;
@@ -113,10 +114,17 @@ class ContentController extends Controller
 
     public function dismiss(Request $request, ContentPost $content): JsonResponse
     {
-        DismissedContent::query()->firstOrCreate([
-            'user_id' => $request->user()->id,
-            'content_post_id' => $content->id,
+        $data = $request->validate([
+            'reason' => ['sometimes', 'string', 'in:topic,creator,language'],
         ]);
+
+        DismissedContent::query()->updateOrCreate(
+            [
+                'user_id' => $request->user()->id,
+                'content_post_id' => $content->id,
+            ],
+            ['reason' => $data['reason'] ?? 'topic'],
+        );
 
         return response()->json(['dismissed' => true]);
     }
@@ -127,11 +135,18 @@ class ContentController extends Controller
         RemixDraftService $drafts,
     ): JsonResponse {
         $data = $request->validate([
-            'format' => ['required', 'in:reel,carousel,caption'],
             'life_moment_id' => ['required', 'integer'],
         ]);
         $moment = $request->user()->moments()->findOrFail($data['life_moment_id']);
-        $remix = $drafts->start($content, $request->user(), $data['format'], $moment, app()->getLocale());
+        // The shape is the post's, not a choice: a carousel is remixed as a
+        // carousel, a reel as a reel.
+        $remix = $drafts->start(
+            $content,
+            $request->user(),
+            RemixFormat::for($content),
+            $moment,
+            app()->getLocale(),
+        );
 
         return response()->json(['remix' => $remix], Response::HTTP_ACCEPTED);
     }

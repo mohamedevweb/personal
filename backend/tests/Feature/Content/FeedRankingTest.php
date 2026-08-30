@@ -5,6 +5,8 @@ namespace Tests\Feature\Content;
 use App\Models\ContentPost;
 use App\Models\Creator;
 use App\Models\CreatorProfile;
+use App\Models\Remix;
+use App\Models\SavedContent;
 use App\Models\User;
 use App\Services\Feed\RecommendationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -163,7 +165,7 @@ class FeedRankingTest extends TestCase
         $this->assertNotContains($blockedPost->hook, $hooks);
     }
 
-    public function test_users_receive_their_primary_vertical_before_stronger_global_posts(): void
+    public function test_users_never_receive_an_unrelated_vertical_as_feed_filler(): void
     {
         $offNiche = $this->creator('gym.bro', 20_000, 900);
         $offNiche->update(['niche' => 'sport-fitness', 'niche_topics' => ['powerlifting', 'gym']]);
@@ -184,6 +186,8 @@ class FeedRankingTest extends TestCase
 
         $this->assertSame($match->hook, $veganFeed->first()['hook']);
         $this->assertSame($stranger->hook, $strengthFeed->first()['hook']);
+        $this->assertNotContains($stranger->hook, $veganFeed->pluck('hook'));
+        $this->assertNotContains($match->hook, $strengthFeed->pluck('hook'));
         $this->assertNotSame($veganFeed->pluck('hook')->all(), $strengthFeed->pluck('hook')->all());
         $this->assertFalse($veganFeed->pluck('signals')->flatten()->contains('Great fit for you'));
         $this->assertFalse($veganFeed->pluck('signals')->flatten()->contains('Similar creator'));
@@ -206,14 +210,127 @@ class FeedRankingTest extends TestCase
         $otherCreator->update(['niche_topics' => ['pastry', 'bread', 'desserts']]);
 
         $relevant = $this->storePost($relevantCreator, 2.0, ['tags' => ['vegan', 'quick meals']]);
-        $strongerButGeneric = $this->storePost($otherCreator, 2.2, ['tags' => ['pastry', 'desserts']]);
+        $strongerButGeneric = $this->storePost($otherCreator, 2.2, [
+            'caption' => 'A pastry and bread masterclass',
+            'tags' => ['pastry', 'desserts'],
+        ]);
 
         $feed = app(RecommendationService::class)->forUser($this->user);
 
         $this->assertSame($relevant->hook, $feed->first()['hook']);
-        $this->assertGreaterThan(
-            $feed->firstWhere('id', $strongerButGeneric->id)['creator_fit_score'],
-            $feed->firstWhere('id', $relevant->id)['creator_fit_score'],
-        );
+        $this->assertFalse($feed->pluck('id')->contains($strongerButGeneric->id));
+    }
+
+    public function test_startup_profile_gets_only_startup_content_and_adjacent_ideas_are_separate(): void
+    {
+        $this->user->creatorProfile()->update([
+            'niche' => 'Early-stage tech entrepreneurship',
+            'topics' => ['SaaS startup building', 'Product design workflow', 'Development work and tools'],
+            // This is the legacy classification held by the production account.
+            'primary_vertical' => 'personal-branding',
+        ]);
+
+        $saasCreator = $this->creator('saas.builder', 30000, 900);
+        $saasCreator->update(['niche' => 'tech-ai', 'niche_topics' => ['SaaS', 'startup', 'product building']]);
+        $saas = $this->storePost($saasCreator, 1.8, [
+            'caption' => 'How I build my SaaS in public as an early-stage founder',
+            'tags' => ['saas', 'startup'],
+        ]);
+
+        $businessCreator = $this->creator('founder.stories', 30000, 900);
+        $businessCreator->update(['niche' => 'personal-branding', 'niche_topics' => ['founders', 'entrepreneurship']]);
+        $adjacent = $this->storePost($businessCreator, 2.1, [
+            'caption' => 'Three lessons from founders growing their audience',
+            'tags' => ['founders'],
+        ]);
+
+        foreach ([
+            ['sport-fitness', 'A strength training workout at the gym'],
+            ['food-cooking', 'My fastest pasta recipe'],
+            ['wellness', 'A mindfulness routine for better sleep'],
+        ] as [$vertical, $caption]) {
+            $creator = $this->creator(str_replace('-', '.', $vertical), 50000, 900);
+            $creator->update(['niche' => $vertical, 'niche_topics' => [$vertical]]);
+            $this->storePost($creator, 5.0, ['caption' => $caption, 'tags' => []]);
+        }
+
+        $sections = app(RecommendationService::class)->sectionsForUser($this->user);
+
+        $this->assertSame([$saas->id], $sections['items']->pluck('id')->all());
+        $this->assertContains($adjacent->id, $sections['explore_items']->pluck('id'));
+        $this->assertTrue($sections['items']->every(
+            fn (array $item): bool => ! in_array($item['creator']['niche'], ['sport-fitness', 'food-cooking', 'wellness'], true),
+        ));
+
+        $this->actingAs($this->user)
+            ->getJson('/api/feed')
+            ->assertOk()
+            ->assertJsonCount(1, 'items')
+            ->assertJsonFragment(['id' => $adjacent->id]);
+    }
+
+    public function test_transcript_and_carousel_text_can_change_post_eligibility(): void
+    {
+        $creator = $this->creator('mixed.creator', 30000, 900);
+        $offTopic = $this->storePost($creator, 3.0, [
+            'caption' => 'A day in my life',
+            'tags' => [],
+            'transcript' => 'My strength training workout at the gym',
+        ]);
+        $relevant = $this->storePost($creator, 1.8, [
+            'caption' => 'Swipe for the full method',
+            'tags' => [],
+            'carousel_analysis' => ['slides' => [
+                ['position' => 1, 'text' => 'Vegan meal prep recipes', 'role' => 'hook'],
+            ]],
+        ]);
+
+        $feed = app(RecommendationService::class)->forUser($this->user);
+
+        $this->assertContains($relevant->id, $feed->pluck('id'));
+        $this->assertNotContains($offTopic->id, $feed->pluck('id'));
+    }
+
+    public function test_dismissing_a_creator_removes_their_other_posts(): void
+    {
+        $creator = $this->creator('not.for.me', 30000, 900);
+        $dismissed = $this->storePost($creator, 2.0);
+        $other = $this->storePost($creator, 1.9, ['source_url' => 'https://instagram.test/not-for-me/other']);
+        $alternative = $this->storePost($this->creator('keep.this', 30000, 900), 1.8);
+
+        $this->actingAs($this->user)
+            ->postJson("/api/content/{$dismissed->id}/dismiss", ['reason' => 'creator'])
+            ->assertOk();
+
+        $feed = app(RecommendationService::class)->forUser($this->user);
+
+        $this->assertNotContains($other->id, $feed->pluck('id'));
+        $this->assertContains($alternative->id, $feed->pluck('id'));
+        $this->assertDatabaseHas('dismissed_content', [
+            'user_id' => $this->user->id,
+            'content_post_id' => $dismissed->id,
+            'reason' => 'creator',
+        ]);
+    }
+
+    public function test_saves_and_remixes_boost_similar_future_posts(): void
+    {
+        $preferredCreator = $this->creator('preferred.creator', 30000, 900);
+        $source = $this->storePost($preferredCreator, 1.7, ['published_at' => now()->subDays(40)]);
+        $preferred = $this->storePost($preferredCreator, 1.8, ['source_url' => 'https://instagram.test/preferred/current']);
+        $rival = $this->storePost($this->creator('slightly.stronger', 30000, 900), 1.9);
+        SavedContent::query()->create(['user_id' => $this->user->id, 'content_post_id' => $source->id]);
+        Remix::query()->create([
+            'user_id' => $this->user->id,
+            'source_content_id' => $source->id,
+            'format' => 'caption',
+            'generated_content' => [],
+            'status' => 'draft',
+        ]);
+
+        $feed = app(RecommendationService::class)->forUser($this->user);
+
+        $this->assertSame($preferred->id, $feed->first()['id']);
+        $this->assertContains($rival->id, $feed->pluck('id'));
     }
 }

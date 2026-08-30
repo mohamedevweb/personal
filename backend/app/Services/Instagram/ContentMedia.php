@@ -43,6 +43,29 @@ class ContentMedia
             ->implode("\n");
     }
 
+    /**
+     * The same slides, read as a plan rather than as prose: what each one does
+     * in the story and what it looks like doing it. A carousel remix follows it
+     * position by position, so the order and the numbering are the point.
+     */
+    public static function slidePlan(ContentPost $post): string
+    {
+        return (new Collection(data_get($post->carousel_analysis, 'slides') ?? []))
+            ->filter(fn (mixed $slide): bool => is_array($slide))
+            ->map(function (array $slide, int $index): string {
+                $parts = ['Slide '.($slide['position'] ?? $index + 1)];
+
+                foreach (['role' => 'Role', 'text' => 'Text on the slide', 'visual_description' => 'Visual'] as $key => $label) {
+                    if (filled($slide[$key] ?? null)) {
+                        $parts[] = $label.': '.trim((string) $slide[$key]);
+                    }
+                }
+
+                return implode("\n  ", $parts);
+            })
+            ->implode("\n");
+    }
+
     public static function frame(ContentPost $post, int $position): ?string
     {
         return self::frames($post)[$position] ?? null;

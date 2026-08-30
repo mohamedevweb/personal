@@ -53,6 +53,19 @@ trait DraftsContentFixtures
             'why_it_works' => 'Tension first, lesson last.',
             'hook_analysis' => 'A first-person admission.',
             'structure_analysis' => 'Problem, context, turning point, lesson.',
+            // Three slides, already read: a carousel draft is written against
+            // them one for one, so the number and the plan are the fixture.
+            'media_urls' => [
+                'https://cdn.example.com/slide-1.jpg',
+                'https://cdn.example.com/slide-2.jpg',
+                'https://cdn.example.com/slide-3.jpg',
+            ],
+            'carousel_analysis_status' => 'done',
+            'carousel_analysis' => ['slides' => [
+                ['position' => 1, 'text' => 'I spent 3 years building the wrong business.', 'role' => 'Hook', 'visual_description' => 'Portrait, text across the top third.'],
+                ['position' => 2, 'text' => 'Here is what the numbers said.', 'role' => 'Evidence', 'visual_description' => 'Screenshot of a dashboard.'],
+                ['position' => 3, 'text' => 'And here is what I do now.', 'role' => 'Lesson', 'visual_description' => 'Desk photo shot from above.'],
+            ]],
         ]);
 
         $moment = LifeMoment::query()->create([

@@ -33,16 +33,26 @@ class CanonicalCreatorVerticals
 
         $text = Str::lower(implode(' ', array_filter($signals, 'is_string')));
 
+        $scores = [];
+
         foreach ((array) config('creator_catalog.verticals') as $slug => $vertical) {
+            $scores[$slug] = 0.0;
+
             foreach ($vertical['aliases'] ?? [] as $alias) {
                 $quoted = preg_quote(Str::lower($alias), '/');
 
                 if (preg_match("/(?<![\\pL\\pN]){$quoted}(?![\\pL\\pN])/u", $text) === 1) {
-                    return $slug;
+                    // A phrase such as "intelligence artificielle" carries more
+                    // evidence than a generic single word. Counting all matches
+                    // also prevents the configuration order from deciding that
+                    // "tech entrepreneurship + SaaS" is only personal branding.
+                    $scores[$slug] += 1 + (substr_count(trim($alias), ' ') * 0.25);
                 }
             }
         }
 
-        return null;
+        $best = collect($scores)->sortDesc()->first();
+
+        return $best > 0 ? (string) collect($scores)->search($best, strict: true) : null;
     }
 }

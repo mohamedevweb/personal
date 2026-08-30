@@ -2,9 +2,6 @@
 import type { Remix } from '~/types/product'
 import { creatorProfileUrl } from '~/types/product'
 
-const FORMATS = ['reel', 'carousel'] as const
-type Format = typeof FORMATS[number]
-
 /* Instagram's own ceilings, so the counters on this screen mean something once
    the draft leaves it. */
 const CAPTION_LIMIT = 2200
@@ -19,11 +16,11 @@ const { apiFetch } = usePersonalApi()
 const { waitForRemix } = useRemixOpening()
 const { t } = useI18n()
 const toast = useToast()
+const { user, loadUser } = useAuth()
 
 const remix = ref<Remix | null>(null)
 const loading = ref(true)
 const saving = ref(false)
-const switching = ref<Format | null>(null)
 const copied = ref(false)
 const retrying = ref(false)
 const deleting = ref(false)
@@ -33,18 +30,43 @@ const confirmingRedraft = ref(false)
 /** Deleting has no undo, so it asks the same way. */
 const confirmingDelete = ref(false)
 const sourceAvatarFailed = ref(false)
+/** The creator's own picture, at the top of the preview. */
+const authorAvatarFailed = ref(false)
+/** Which slide the preview is showing; the deck is swiped, not scrolled. */
+const activeSlide = ref(0)
 /** The last payload the server acknowledged, used to tell edited from saved. */
 const pristine = ref('')
 let confirmTimer: ReturnType<typeof setTimeout> | undefined
 let deleteTimer: ReturnType<typeof setTimeout> | undefined
 
-const tabs = ref<HTMLButtonElement[]>([])
 const slideInputs = ref<HTMLTextAreaElement[]>([])
 
 const slides = computed(() => remix.value?.generated_content.slides ?? [])
 const caption = computed(() => remix.value?.generated_content.caption ?? '')
 const isReady = computed(() => remix.value?.status === 'ready')
 const sourceCreatorInitial = computed(() => remix.value?.source_content?.creator.username.charAt(0).toUpperCase() || '')
+
+/* --- The preview is the editor, so it needs who is posting ---------------- */
+
+const authorHandle = computed(() => user.value?.instagram_username?.replace(/^@/, '') || '')
+const authorInitial = computed(() => (authorHandle.value || user.value?.name || '?').charAt(0).toUpperCase())
+const slide = computed(() => slides.value[activeSlide.value] || null)
+
+/** The slide of the original this one was written against, shown as it is read. */
+const inspiration = computed(() => {
+  const position = slide.value?.source_position
+  if (!position) return null
+  const source = remix.value?.source_content
+  return {
+    position,
+    text: source?.carousel_slides?.find(item => item.position === position)?.text || '',
+    image: source?.media_urls?.[position - 1] || null
+  }
+})
+
+function showSlide(index: number) {
+  activeSlide.value = Math.min(Math.max(index, 0), Math.max(slides.value.length - 1, 0))
+}
 const dirty = computed(() => {
   if (!remix.value || !['draft', 'ready'].includes(remix.value.status)) return false
   return JSON.stringify(remix.value.generated_content) !== pristine.value
@@ -117,12 +139,14 @@ async function regenerateBlock(block: 'hook' | 'script' | 'visual' | 'ending' | 
 async function addSlide() {
   const list = remix.value?.generated_content.slides
   if (!list || list.length >= MAX_SLIDES) return
-  list.push({ id: Math.max(0, ...list.map(slide => slide.id)) + 1, text: '' })
+  // A slide added by hand has no counterpart in the original.
+  list.push({ id: Math.max(0, ...list.map(slide => slide.id)) + 1, text: '', image: '', source_position: null })
+  showSlide(list.length - 1)
   await nextTick()
-  slideInputs.value[list.length - 1]?.focus()
+  slideInputs.value[0]?.focus()
 }
 
-/* --- Saving, copying, switching ------------------------------------------ */
+/* --- Saving and copying --------------------------------------------------- */
 
 async function save(status: 'draft' | 'ready' = 'draft'): Promise<boolean> {
   if (!remix.value || saving.value) return false
@@ -149,7 +173,11 @@ function plainText(): string {
   const draft = remix.value?.generated_content
   if (!draft) return ''
   if (remix.value?.format === 'carousel') {
-    return (draft.slides || []).map((slide, index) => `${index + 1}. ${slide.text}`).join('\n\n')
+    // The picture to shoot travels with the words it goes under.
+    return (draft.slides || []).map((slide, index) => [
+      `${index + 1}. ${slide.text}`,
+      slide.image && `[${t('remix.yourImage')}] ${slide.image}`
+    ].filter(Boolean).join('\n')).join('\n\n')
   }
   if (remix.value?.format === 'reel') {
     return [draft.hook, draft.script, draft.visual && `[${t('remix.shotIdea')}] ${draft.visual}`, draft.ending, draft.cta]
@@ -190,56 +218,6 @@ async function copyDraft() {
     }
     toast.error(t('remix.copyError'))
   }
-}
-
-/** A new shape means a new draft, so the current one is saved before leaving. */
-async function switchFormat(format: Format) {
-  if (!remix.value || remix.value.format === format || switching.value) return
-  const sourceId = remix.value.source_content?.id
-  if (!sourceId) return
-  switching.value = format
-  try {
-    if (dirty.value) {
-      const saved = await save(remix.value.status === 'ready' ? 'ready' : 'draft')
-      if (!saved) {
-        switching.value = null
-        return
-      }
-    }
-    if (!remix.value.life_moment?.id) {
-      await navigateTo({ path: `/content/${sourceId}`, query: { format } })
-      return
-    }
-    const response = await apiFetch<{ remix: Remix }>(
-      `/api/content/${sourceId}/remix`,
-      { method: 'POST', body: { format, life_moment_id: remix.value.life_moment.id } }
-    )
-    const generated = response.remix.status === 'generating'
-      ? await waitForRemix(response.remix.id)
-      : response.remix
-    if (!generated) return
-    if (generated.status === 'failed') {
-      toast.error(t('remix.switchError'))
-      return
-    }
-    await navigateTo(`/remix/${generated.id}`)
-  } catch (exception: unknown) {
-    toast.error(apiErrorMessage(exception, t('remix.switchError')))
-  } finally {
-    switching.value = null
-  }
-}
-
-/** Arrow, Home and End move between formats the way a real tablist does. */
-function onTabKeydown(event: KeyboardEvent, index: number) {
-  const step = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0
-  let next: number | null = null
-  if (step) next = (index + step + FORMATS.length) % FORMATS.length
-  else if (event.key === 'Home') next = 0
-  else if (event.key === 'End') next = FORMATS.length - 1
-  if (next === null) return
-  event.preventDefault()
-  tabs.value[next]?.focus()
 }
 
 /* A beat should be exactly as tall as the words in it, so the editor never
@@ -342,6 +320,8 @@ async function deleteDraft() {
 
 onMounted(async () => {
   window.addEventListener('beforeunload', guardUnload)
+  // The preview posts as the creator, so it needs their account.
+  if (!user.value) void loadUser().catch(() => undefined)
   await loadRemix()
 })
 
@@ -349,7 +329,7 @@ watch(() => route.params.id, async (id, previousId) => {
   if (id === previousId) return
   loading.value = true
   remix.value = null
-  switching.value = null
+  activeSlide.value = 0
   confirmingRedraft.value = false
   confirmingDelete.value = false
   await loadRemix()
@@ -391,7 +371,7 @@ onBeforeUnmount(() => {
       </div>
     </section>
 
-    <div v-else-if="remix" :inert="retrying || deleting || !!switching" :aria-busy="retrying || deleting || !!switching">
+    <div v-else-if="remix" :inert="retrying || deleting" :aria-busy="retrying || deleting">
       <!-- Everything that changes the draft's state lives in one bar that stays
            in reach while the editor scrolls. -->
       <div class="sticky top-[calc(4rem+env(safe-area-inset-top))] z-10 border-b border-[var(--line)] bg-[var(--paper)]/92 backdrop-blur md:top-[74px]">
@@ -490,91 +470,177 @@ onBeforeUnmount(() => {
                on the post they were borrowed from. -->
           <section class="min-w-0">
             <div class="flex flex-wrap items-center gap-3">
-              <div
-                class="inline-flex items-center gap-1 rounded-full border border-[var(--line)] bg-[var(--surface)] p-1"
-                role="tablist"
-                :aria-label="$t('remix.formatLabel')"
-              >
-                <button
-                  v-for="(item, index) in FORMATS"
-                  :key="item"
-                  ref="tabs"
-                  type="button"
-                  role="tab"
-                  :aria-selected="remix.format === item"
-                  :tabindex="remix.format === item ? 0 : -1"
-                  class="b-focus inline-flex h-9 items-center gap-2 rounded-full px-4 text-[12.5px] transition disabled:opacity-60"
-                  :class="remix.format === item ? 'bg-[var(--ink)] font-medium text-[var(--paper)]' : 'text-[var(--muted)] hover:text-[var(--ink)]'"
-                  :disabled="!!switching"
-                  @click="switchFormat(item)"
-                  @keydown="onTabKeydown($event, index)"
-                >
-                  <AppIcon :name="item" :size="15" />
-                  {{ $t(`remix.formats.${item}`) }}
-                </button>
-              </div>
-              <p class="text-[12px] leading-5 text-[var(--faint)]">
-                {{ switching ? $t('remix.switching', { format: $t(`remix.formats.${switching}`) }) : $t('remix.switchNote') }}
-              </p>
+              <span class="inline-flex h-9 items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 text-[12.5px] font-medium">
+                <AppIcon :name="remix.format === 'caption' ? 'text' : remix.format" :size="15" />
+                {{ $t(`remix.formats.${remix.format}`) }}
+              </span>
+              <p class="text-[12px] leading-5 text-[var(--faint)]">{{ $t('remix.formatFollowsSource') }}</p>
             </div>
 
-            <!-- Carousel: slides are space, so they are edited at the size they
-                 will be read, in the order they will be swiped. -->
+            <!-- Carousel: the draft is written where it will be read. The frame
+                 is the post as Instagram shows it — the creator's own account at
+                 the top, one slide at a time — so what is typed is what a reader
+                 gets, and the picture to shoot is named on the slide it belongs
+                 to rather than in a brief nobody opens. -->
             <div v-if="remix.format === 'carousel'" class="mt-8">
               <div class="flex items-baseline justify-between">
                 <p class="remix-label">{{ $t('remix.slideDeck') }}</p>
                 <p class="text-[12px] text-[var(--faint)]">{{ $t('remix.slideCount', { count: slides.length }) }}</p>
               </div>
 
-              <div class="-mx-5 mt-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-4 md:-mx-2 md:px-2">
-                <article
-                  v-for="(slide, index) in slides"
-                  :key="slide.id"
-                  class="group flex aspect-[4/5] w-[248px] shrink-0 snap-start flex-col rounded-[16px] border p-4 transition"
-                  :class="index === 0 ? 'b-night border-transparent text-white' : 'border-[var(--line)] bg-[var(--surface)]'"
-                >
-                  <header class="flex items-center justify-between">
-                    <span class="remix-label" :class="index === 0 && 'text-[var(--gold)]'">
-                      {{ index === 0 ? $t('remix.cover') : $t('remix.slideOf', { index: index + 1, total: slides.length }) }}
-                    </span>
-                    <span class="text-[10px] tabular-nums" :class="index === 0 ? 'text-white/40' : 'text-[var(--faint)]'">{{ slide.text.length }}</span>
-                  </header>
+              <div class="mx-auto mt-4 w-full max-w-[468px]">
+                <template v-if="slide">
+                  <article class="overflow-hidden rounded-[14px] border border-[var(--line)] bg-[var(--surface)]">
+                    <header class="flex items-center gap-3 px-4 py-3">
+                      <img
+                        v-if="user?.avatar_url && !authorAvatarFailed"
+                        :src="user.avatar_url"
+                        alt=""
+                        class="h-8 w-8 shrink-0 rounded-full bg-[var(--sand)] object-cover"
+                        @error="authorAvatarFailed = true"
+                      >
+                      <span v-else class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--sand)] text-[11px] font-semibold uppercase text-[var(--muted)]">
+                        {{ authorInitial }}
+                      </span>
+                      <span class="min-w-0 flex-1 truncate text-[13px] font-medium">{{ authorHandle ? `@${authorHandle}` : $t('remix.yourAccount') }}</span>
+                      <AppIcon name="dots" :size="16" class="shrink-0 text-[var(--faint)]" />
+                    </header>
 
-                  <textarea
-                    ref="slideInputs"
-                    v-model="slide.text"
-                    :placeholder="index === 0 ? $t('remix.coverPlaceholder') : $t('remix.slidePlaceholder')"
-                    class="mt-3 flex-1 resize-none bg-transparent font-serif text-[21px] leading-[1.25] tracking-[-.01em] outline-none"
-                    :class="index === 0 ? 'caret-white placeholder:text-white/30' : 'placeholder:text-[var(--faint)]'"
-                  />
+                    <!-- The slide itself, at the ratio Instagram gives it. -->
+                    <div
+                      class="relative flex aspect-[4/5] flex-col gap-3 p-5"
+                      :class="activeSlide === 0 ? 'b-night text-white' : 'bg-[var(--paper)]'"
+                    >
+                      <div class="flex items-center justify-between">
+                        <span class="remix-label" :class="activeSlide === 0 && 'text-[var(--gold)]'">
+                          {{ activeSlide === 0 ? $t('remix.cover') : $t('remix.slideOf', { index: activeSlide + 1, total: slides.length }) }}
+                        </span>
+                        <span class="text-[10px] tabular-nums" :class="activeSlide === 0 ? 'text-white/40' : 'text-[var(--faint)]'">{{ slide.text.length }}</span>
+                      </div>
 
-                  <footer class="mt-3 flex items-center justify-end gap-0.5 opacity-70 transition group-focus-within:opacity-100 group-hover:opacity-100">
-                    <button class="editor-control" :class="index === 0 && 'control-dark'" :title="$t('remix.moveUp')" :aria-label="$t('remix.moveUp')" :disabled="index === 0" @click="moveSlide(index, -1)">
+                      <!-- What to put behind the words. It is dashed because the
+                           picture is not here yet: it is what the creator goes
+                           and makes. -->
+                      <div
+                        class="rounded-[12px] border border-dashed p-3"
+                        :class="activeSlide === 0 ? 'border-white/25 bg-white/5' : 'border-[var(--line)] bg-[var(--surface)]'"
+                      >
+                        <p class="remix-label" :class="activeSlide === 0 && 'text-white/45'">{{ $t('remix.yourImage') }}</p>
+                        <textarea
+                          v-model="slide.image"
+                          v-autosize
+                          rows="2"
+                          :aria-label="$t('remix.yourImage')"
+                          :placeholder="$t('remix.imagePlaceholder')"
+                          class="mt-1.5 w-full resize-none bg-transparent text-[12.5px] leading-5 outline-none"
+                          :class="activeSlide === 0 ? 'caret-white placeholder:text-white/30' : 'text-[var(--copy)] placeholder:text-[var(--faint)]'"
+                        />
+                      </div>
+
+                      <textarea
+                        ref="slideInputs"
+                        v-model="slide.text"
+                        :placeholder="activeSlide === 0 ? $t('remix.coverPlaceholder') : $t('remix.slidePlaceholder')"
+                        class="flex-1 resize-none bg-transparent font-serif text-[23px] leading-[1.22] tracking-[-.015em] outline-none"
+                        :class="activeSlide === 0 ? 'caret-white placeholder:text-white/30' : 'placeholder:text-[var(--faint)]'"
+                      />
+
+                      <!-- Swiping is how a carousel is read, so the frame is
+                           moved through rather than scrolled past. -->
+                      <button
+                        v-if="activeSlide > 0"
+                        class="slide-arrow b-focus left-2"
+                        :aria-label="$t('remix.previousSlide')"
+                        @click="showSlide(activeSlide - 1)"
+                      >
+                        <AppIcon name="chevron" :size="15" class="rotate-180" />
+                      </button>
+                      <button
+                        v-if="activeSlide < slides.length - 1"
+                        class="slide-arrow b-focus right-2"
+                        :aria-label="$t('remix.nextSlide')"
+                        @click="showSlide(activeSlide + 1)"
+                      >
+                        <AppIcon name="chevron" :size="15" />
+                      </button>
+                    </div>
+
+                    <div v-if="slides.length > 1" class="flex items-center justify-center gap-1.5 py-3">
+                      <button
+                        v-for="(item, index) in slides"
+                        :key="item.id"
+                        class="b-focus h-1.5 w-1.5 rounded-full transition"
+                        :class="index === activeSlide ? 'bg-[var(--accent)]' : 'bg-[var(--line)]'"
+                        :aria-label="$t('remix.slideOf', { index: index + 1, total: slides.length })"
+                        :aria-current="index === activeSlide"
+                        @click="showSlide(index)"
+                      />
+                    </div>
+
+                    <!-- The row a reader sees under any post. It does nothing
+                         here: it is there so the draft is judged in place. -->
+                    <div class="flex items-center gap-4 border-t border-[var(--line-soft)] px-4 py-3 text-[var(--faint)]" aria-hidden="true">
+                      <AppIcon name="heart" :size="19" />
+                      <AppIcon name="chat" :size="19" />
+                      <AppIcon name="paper-plane" :size="19" />
+                      <AppIcon name="bookmark" :size="19" class="ml-auto" />
+                    </div>
+                  </article>
+
+                  <!-- The tools for the slide on screen, under the frame rather
+                       than over the words. -->
+                  <div class="mt-3 flex flex-wrap items-center gap-1">
+                    <button class="editor-control" :title="$t('remix.moveUp')" :aria-label="$t('remix.moveUp')" :disabled="activeSlide === 0" @click="moveSlide(activeSlide, -1); showSlide(activeSlide - 1)">
                       <AppIcon name="arrow-up" :size="14" class="-rotate-90" />
                     </button>
-                    <button class="editor-control" :class="index === 0 && 'control-dark'" :title="$t('remix.moveDown')" :aria-label="$t('remix.moveDown')" :disabled="index === slides.length - 1" @click="moveSlide(index, 1)">
+                    <button class="editor-control" :title="$t('remix.moveDown')" :aria-label="$t('remix.moveDown')" :disabled="activeSlide === slides.length - 1" @click="moveSlide(activeSlide, 1); showSlide(activeSlide + 1)">
                       <AppIcon name="arrow-up" :size="14" class="rotate-90" />
                     </button>
-                    <button class="editor-control" :class="index === 0 && 'control-dark'" :title="$t('remix.regenerate')" :aria-label="$t('remix.regenerate')" :disabled="!!regeneratingBlock" @click="regenerateBlock('slide', index)">
-                      <AppIcon name="refresh" :size="14" :class="regeneratingBlock === `slide:${index}` && 'animate-spin'" />
+                    <button class="editor-control" :title="$t('remix.regenerate')" :aria-label="$t('remix.regenerate')" :disabled="!!regeneratingBlock" @click="regenerateBlock('slide', activeSlide)">
+                      <AppIcon name="refresh" :size="14" :class="regeneratingBlock === `slide:${activeSlide}` && 'animate-spin'" />
                     </button>
-                    <button class="editor-control" :class="index === 0 ? 'control-dark' : 'text-[var(--danger)]'" :title="$t('remix.delete')" :aria-label="$t('remix.delete')" @click="deleteSlide(index)">
+                    <button class="editor-control text-[var(--danger)]" :title="$t('remix.delete')" :aria-label="$t('remix.delete')" @click="deleteSlide(activeSlide); showSlide(activeSlide)">
                       <AppIcon name="trash" :size="14" />
                     </button>
-                  </footer>
-                </article>
+                    <button
+                      v-if="slides.length < MAX_SLIDES"
+                      class="ml-auto inline-flex h-8 items-center gap-1.5 rounded-full border border-dashed border-[var(--line)] px-3 text-[12px] text-[var(--muted)] transition hover:border-[var(--ink)] hover:text-[var(--ink)]"
+                      @click="addSlide"
+                    >
+                      <AppIcon name="plus" :size="14" />{{ $t('remix.addSlide') }}
+                    </button>
+                    <p v-else class="ml-auto text-[12px] text-[var(--faint)]">{{ $t('remix.slideLimit', { max: MAX_SLIDES }) }}</p>
+                  </div>
+
+                  <!-- The slide of the original this one was written against.
+                       Same position, so the deck can be read side by side. -->
+                  <div v-if="inspiration" class="mt-4 flex gap-3 rounded-[14px] border border-[var(--line)] bg-[var(--surface)] p-3">
+                    <img
+                      v-if="inspiration.image"
+                      :src="inspiration.image"
+                      alt=""
+                      class="h-16 w-16 shrink-0 rounded-[10px] bg-[var(--sand)] object-cover"
+                    >
+                    <span v-else class="grid h-16 w-16 shrink-0 place-items-center rounded-[10px] bg-[var(--sand-soft)] text-[var(--faint)]">
+                      <AppIcon name="carousel" :size="18" />
+                    </span>
+                    <span class="min-w-0 flex-1">
+                      <span class="remix-label block">{{ $t('remix.inspiration', { index: inspiration.position }) }}</span>
+                      <span v-if="inspiration.text" class="mt-1.5 block text-[13px] leading-5 text-[var(--muted)]">{{ inspiration.text }}</span>
+                      <span v-else class="mt-1.5 block text-[13px] leading-5 text-[var(--faint)]">{{ $t('remix.inspirationUnread') }}</span>
+                    </span>
+                  </div>
+                </template>
 
                 <button
-                  v-if="slides.length < MAX_SLIDES"
-                  class="flex aspect-[4/5] w-[248px] shrink-0 snap-start flex-col items-center justify-center gap-2 rounded-[16px] border border-dashed border-[var(--line)] text-[var(--faint)] transition hover:border-[var(--ink)] hover:text-[var(--ink)]"
+                  v-else
+                  class="flex aspect-[4/5] w-full flex-col items-center justify-center gap-2 rounded-[14px] border border-dashed border-[var(--line)] text-[var(--faint)] transition hover:border-[var(--ink)] hover:text-[var(--ink)]"
                   @click="addSlide"
                 >
                   <AppIcon name="plus" :size="20" />
                   <span class="text-[12.5px]">{{ $t('remix.addSlide') }}</span>
                 </button>
               </div>
-
-              <p v-if="slides.length >= MAX_SLIDES" class="text-[12px] text-[var(--faint)]">{{ $t('remix.slideLimit', { max: MAX_SLIDES }) }}</p>
             </div>
 
             <!-- Reel: a reel is time, so the draft is stamped with the seconds
@@ -754,6 +820,8 @@ onBeforeUnmount(() => {
 .status-draft { @apply border-[var(--line)] bg-[var(--surface)] text-[var(--muted)]; }
 .status-ready { @apply border-[var(--positive-line)] bg-[var(--positive-soft)] text-[var(--positive)]; }
 .status-dot { @apply h-1.5 w-1.5 rounded-full bg-current; }
+
+.slide-arrow { @apply absolute top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full bg-black/55 text-white backdrop-blur transition hover:bg-black/75; }
 
 .editor-control { @apply relative grid h-7 w-7 place-items-center rounded-lg text-[var(--muted)] transition hover:bg-[var(--paper)] hover:text-[var(--ink)] disabled:pointer-events-none disabled:opacity-25; }
 /* The controls sit in the corner of a slide, so they stay small and carry the
