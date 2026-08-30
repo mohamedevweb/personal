@@ -35,13 +35,14 @@ class RealignFeedCatalog extends Command
         $mode = $dryRun ? 'Dry run' : 'Realignment';
 
         $this->info(sprintf(
-            '%s: %d creators checked, %d creators allowed, %d creators blocked, %d creators pending; %d markets resolved, %d verticals aligned; %d posts checked, %d posts allowed, %d posts blocked, %d posts pending.',
+            '%s: %d creators checked, %d creators allowed, %d creators blocked, %d creators pending; %d markets resolved, %d markets unresolved, %d verticals aligned; %d posts checked, %d posts allowed, %d posts blocked, %d posts pending.',
             $mode,
             $creatorResult['checked'],
             $creatorResult['allowed'],
             $creatorResult['blocked'],
             $creatorResult['pending'],
             $creatorResult['markets'],
+            $creatorResult['markets_unresolved'],
             $creatorResult['verticals'],
             $postResult['checked'],
             $postResult['allowed'],
@@ -52,7 +53,7 @@ class RealignFeedCatalog extends Command
         return self::SUCCESS;
     }
 
-    /** @return array{checked: int, allowed: int, blocked: int, pending: int, markets: int, verticals: int} */
+    /** @return array{checked: int, allowed: int, blocked: int, pending: int, markets: int, markets_unresolved: int, verticals: int} */
     private function realignCreators(
         int $limit,
         ContentSafetyPolicy $safety,
@@ -60,7 +61,7 @@ class RealignFeedCatalog extends Command
         CanonicalCreatorVerticals $verticals,
         bool $dryRun,
     ): array {
-        $result = ['checked' => 0, 'allowed' => 0, 'blocked' => 0, 'pending' => 0, 'markets' => 0, 'verticals' => 0];
+        $result = ['checked' => 0, 'allowed' => 0, 'blocked' => 0, 'pending' => 0, 'markets' => 0, 'markets_unresolved' => 0, 'verticals' => 0];
 
         if (! $this->option('markets-only')) {
             Creator::query()
@@ -93,7 +94,6 @@ class RealignFeedCatalog extends Command
         }
 
         Creator::query()
-            ->whereNull('user_id')
             ->where(function ($query): void {
                 $query->whereNull('market')->orWhereNull('primary_vertical');
             })
@@ -126,6 +126,8 @@ class RealignFeedCatalog extends Command
 
                 if ($detectedMarket['market'] !== null && $creator->market !== $detectedMarket['market']) {
                     $result['markets']++;
+                } elseif ($creator->market === null) {
+                    $result['markets_unresolved']++;
                 }
 
                 if ($detectedVertical !== $creator->primary_vertical) {
