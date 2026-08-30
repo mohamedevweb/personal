@@ -470,12 +470,14 @@ onBeforeUnmount(() => {
           <!-- The draft comes first: on a phone you land on your own words, not
                on the post they were borrowed from. -->
           <section class="min-w-0">
-            <div class="flex flex-wrap items-center gap-3">
+            <!-- The chip starts the same column its format's body does: held to
+                 the frame on a carousel, at the page's own edge on the two
+                 formats that run full width. -->
+            <div class="mx-auto w-full" :class="remix.format === 'carousel' && 'max-w-[468px]'">
               <span class="inline-flex h-9 items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 text-[12.5px] font-medium">
                 <AppIcon :name="remix.format === 'caption' ? 'text' : remix.format" :size="15" />
                 {{ $t(`remix.formats.${remix.format}`) }}
               </span>
-              <p class="text-[12px] leading-5 text-[var(--faint)]">{{ $t('remix.formatFollowsSource') }}</p>
             </div>
 
             <!-- Carousel: the draft is written where it will be read. The frame
@@ -484,15 +486,7 @@ onBeforeUnmount(() => {
                  gets, and the picture to shoot is named on the slide it belongs
                  to rather than in a brief nobody opens. -->
             <div v-if="remix.format === 'carousel'" class="mt-8">
-              <!-- Held to the frame's own width: the deck reads as one
-                   column instead of a caption floating wide of the card it
-                   names. -->
-              <div class="mx-auto flex w-full max-w-[468px] items-baseline justify-between">
-                <p class="remix-label">{{ $t('remix.slideDeck') }}</p>
-                <p class="text-[12px] text-[var(--faint)]">{{ $t('remix.slideCount', { count: slides.length }) }}</p>
-              </div>
-
-              <div class="mx-auto mt-4 w-full max-w-[468px]">
+              <div class="mx-auto w-full max-w-[468px]">
                 <template v-if="slide">
                   <article class="overflow-hidden rounded-[14px] border border-[var(--line)] bg-[var(--surface)]">
                     <header class="flex items-center gap-3 px-4 py-3">

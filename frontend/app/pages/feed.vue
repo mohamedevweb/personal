@@ -214,8 +214,7 @@ onMounted(loadFeed)
 
     <section v-if="!loading && explorePosts.length" class="mt-12 border-t border-[var(--line)] pt-7">
       <div class="max-w-2xl">
-        <p class="text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--faint)]">{{ $t('feed.exploreEyebrow') }}</p>
-        <h2 class="mt-2 font-serif text-[28px] tracking-[-.025em]">{{ $t('feed.exploreTitle') }}</h2>
+        <h2 class="font-serif text-[28px] tracking-[-.025em]">{{ $t('feed.exploreTitle') }}</h2>
         <p class="mt-2 text-sm leading-6 text-[var(--muted)]">{{ $t('feed.exploreBody') }}</p>
       </div>
       <div class="mt-5 grid auto-rows-fr gap-5 sm:grid-cols-2 xl:grid-cols-3">

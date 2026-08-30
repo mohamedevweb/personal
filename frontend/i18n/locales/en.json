@@ -478,7 +478,6 @@
     "dismissError": "Personal could not update your recommendations. Please try again.",
     "emptyTitle": "No content yet.",
     "emptyBody": "No publication is relevant enough for your profile right now. Personal is looking for new opportunities in your universe.",
-    "exploreEyebrow": "Nearby ideas",
     "exploreTitle": "Explore around your niche",
     "exploreBody": "These strong patterns come from adjacent subjects. They are kept separate from your personalised feed.",
     "refresh": "Refresh my feed",
@@ -798,9 +797,6 @@
       "carousel": "Carousel",
       "caption": "Post"
     },
-    "formatFollowsSource": "A carousel is remixed as a carousel, a reel as a reel.",
-    "slideDeck": "Slides",
-    "slideCount": "{count} slides",
     "slideOf": "Slide {index} of {total}",
     "cover": "Cover",
     "coverPlaceholder": "The line that makes someone stop.",
