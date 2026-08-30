@@ -46,9 +46,11 @@ class MarketFeedAllocator
             return $sorted;
         }
 
+        // Same reason as the candidate query: the comparison only means anything
+        // against the canonical vertical stored on the creator.
         return $sorted
-            ->filter(fn (array $item): bool => $item['post']->creator->niche === $primaryVertical)
-            ->concat($sorted->reject(fn (array $item): bool => $item['post']->creator->niche === $primaryVertical))
+            ->filter(fn (array $item): bool => $item['post']->creator->primary_vertical === $primaryVertical)
+            ->concat($sorted->reject(fn (array $item): bool => $item['post']->creator->primary_vertical === $primaryVertical))
             ->values();
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\Discovery\CanonicalCreatorVerticals;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -10,6 +11,28 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Creator extends Model
 {
     protected $guarded = [];
+
+    /**
+     * The canonical vertical is derived, never entered: `niche` is a human label
+     * written by three different sources, and the feed compares verticals. Doing
+     * it here means every write path — discovery, the catalog importer, an
+     * inspiration pick, a registered creator — stores the same value, and no
+     * query has to re-read the label as text.
+     */
+    protected static function booted(): void
+    {
+        static::saving(function (self $creator): void {
+            if (! $creator->isDirty(['niche', 'niche_topics', 'bio'])) {
+                return;
+            }
+
+            $creator->primary_vertical = app(CanonicalCreatorVerticals::class)->fromSignals([
+                $creator->niche,
+                ...($creator->niche_topics ?? []),
+                $creator->bio,
+            ]);
+        });
+    }
 
     protected function casts(): array
     {

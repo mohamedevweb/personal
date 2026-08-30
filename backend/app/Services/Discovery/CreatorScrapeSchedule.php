@@ -67,8 +67,10 @@ class CreatorScrapeSchedule
     {
         $weights = config('instagram_scraping.creator.weights');
         $selectedBy = $creator->inspiredByUsers()->count();
-        $relevantFeeds = $creator->curation_status === 'approved'
-            ? CreatorProfile::query()->where('primary_vertical', $creator->niche)->count()
+        // Members are stored with a canonical vertical, so the creator has to be
+        // compared on its own canonical vertical rather than on its label.
+        $relevantFeeds = $creator->curation_status === 'approved' && $creator->primary_vertical
+            ? CreatorProfile::query()->where('primary_vertical', $creator->primary_vertical)->count()
             : 0;
         $recentPosts = $creator->posts()->where('published_at', '>=', $now->copy()->subDays(30))->count();
         $recentOutliers = $creator->posts()

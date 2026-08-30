@@ -29,11 +29,19 @@ class ContentTopicClassifier
     /** @return array{vertical: ?string, clusters: list<string>, tokens: list<string>} */
     public function creator(Creator $creator): array
     {
-        return $this->classify([
+        $classification = $this->classify([
             $creator->niche,
             ...($creator->niche_topics ?? []),
             $creator->bio,
         ]);
+
+        // The stored vertical is the same derivation, written once when the
+        // creator was analysed. Preferring it keeps every read — the feed query,
+        // the ranking, this classification — on one value.
+        $classification['vertical'] = $this->verticals->canonical($creator->primary_vertical)
+            ?? $classification['vertical'];
+
+        return $classification;
     }
 
     /** @return array{vertical: ?string, clusters: list<string>, tokens: list<string>} */

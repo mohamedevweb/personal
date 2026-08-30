@@ -5,7 +5,6 @@ namespace App\Services\Feed;
 use App\Models\ContentPost;
 use App\Models\Creator;
 use App\Models\CreatorProfile;
-use App\Services\Discovery\CanonicalCreatorVerticals;
 
 /**
  * Measures how closely a benchmark creator matches the member's Creator DNA.
@@ -20,10 +19,7 @@ class CreatorAffinity
 
     private const TOPIC_WEIGHT = 0.30;
 
-    public function __construct(
-        private readonly CanonicalCreatorVerticals $verticals,
-        private readonly ContentTopicClassifier $classifier,
-    ) {}
+    public function __construct(private readonly ContentTopicClassifier $classifier) {}
 
     public function score(?CreatorProfile $profile, Creator $creator, ?ContentPost $post = null): ?float
     {
@@ -35,8 +31,7 @@ class CreatorAffinity
         $creatorClassification = $this->classifier->creator($creator);
         $postClassification = $post ? $this->classifier->post($post) : ['clusters' => [], 'tokens' => []];
         $profileVertical = $profileClassification['vertical'];
-        $creatorVertical = $this->verticals->canonical($creator->niche)
-            ?? $creatorClassification['vertical'];
+        $creatorVertical = $creatorClassification['vertical'];
         $profileTokens = $profileClassification['tokens'];
 
         if ($profileVertical === null && $profileTokens === []) {

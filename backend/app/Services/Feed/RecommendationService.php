@@ -183,7 +183,10 @@ class RecommendationService
 
         $matching = $primaryVertical
             ? (clone $query)
-                ->whereHas('creator', fn (Builder $creator): Builder => $creator->where('niche', $primaryVertical))
+                // The canonical vertical, not the human label: `niche` holds free
+                // text written by discovery, so comparing it to a slug matched
+                // almost nothing and this query returned an empty set in silence.
+                ->whereHas('creator', fn (Builder $creator): Builder => $creator->where('primary_vertical', $primaryVertical))
                 ->orderByDesc('outlier_score')
                 ->limit($limit * self::CANDIDATE_MULTIPLIER)
                 ->get()

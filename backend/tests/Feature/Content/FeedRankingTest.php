@@ -8,6 +8,7 @@ use App\Models\CreatorProfile;
 use App\Models\Remix;
 use App\Models\SavedContent;
 use App\Models\User;
+use App\Services\Feed\PostRelevance;
 use App\Services\Feed\RecommendationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -332,5 +333,179 @@ class FeedRankingTest extends TestCase
 
         $this->assertSame($preferred->id, $feed->first()['id']);
         $this->assertContains($rival->id, $feed->pluck('id'));
+    }
+
+    /**
+     * Case A — a post from the member's own vertical enters For You on that
+     * evidence alone. The affinity bar is pushed to a value nothing can reach,
+     * and the post is still kept: the threshold ranks, it no longer filters.
+     */
+    public function test_a_post_in_the_members_vertical_is_kept_however_thin_its_affinity(): void
+    {
+        config(['services.discovery.personalization.minimum_affinity' => 0.99]);
+        $this->user->creatorProfile()->update([
+            'creator_dna' => [
+                'primary_niche' => 'Vegan cooking',
+                'sub_niches' => ['Meal prep'],
+                'topics' => ['Vegan recipes', 'Plant protein', 'Batch cooking'],
+                'content_pillars' => ['Quick weeknight meals'],
+            ],
+        ]);
+
+        // Same vertical, nothing else in common: barbecue against a vegan meal
+        // prep profile. This is the post the old affinity gate deleted.
+        $distant = $this->creator('bbq.school', 20_000, 900);
+        $distant->update(['niche' => 'Barbecue et grillades', 'niche_topics' => ['barbecue', 'grillades', 'viande']]);
+        $post = $this->storePost($distant, 2.0, [
+            'caption' => 'Ma cuisine au barbecue: boeuf marine et feu de bois',
+            'tags' => ['barbecue', 'grillades'],
+        ]);
+
+        $verdict = app(PostRelevance::class)->assess($this->user->creatorProfile->fresh(), $post);
+
+        $this->assertSame(PostRelevance::FOR_YOU, $verdict['bucket']);
+        $this->assertSame('food-cooking', $verdict['content_vertical']);
+        $this->assertContains($post->id, app(RecommendationService::class)->forUser($this->user)->pluck('id'));
+    }
+
+    /**
+     * Case B — both are kept, and affinity decides the order between them. The
+     * weaker match even carries the better raw performance, so nothing but
+     * affinity can be putting the closer post first.
+     */
+    public function test_between_two_posts_of_the_same_vertical_affinity_decides_the_order(): void
+    {
+        $this->user->creatorProfile()->update([
+            'creator_dna' => [
+                'primary_niche' => 'Vegan cooking',
+                'sub_niches' => ['Meal prep'],
+                'topics' => ['Vegan recipes', 'Plant protein'],
+                'content_pillars' => ['Quick meals'],
+            ],
+        ]);
+
+        $close = $this->creator('plant.prep', 20_000, 900);
+        $close->update(['niche' => 'vegan cooking', 'niche_topics' => ['vegan recipes', 'meal prep', 'plant protein']]);
+        $far = $this->creator('pastry.school', 20_000, 900);
+        $far->update(['niche' => 'baking', 'niche_topics' => ['pastry', 'bread', 'desserts']]);
+
+        $closePost = $this->storePost($close, 2.0, ['caption' => 'Une recette vegan de meal prep', 'tags' => ['vegan', 'meal prep']]);
+        $farPost = $this->storePost($far, 2.2, ['caption' => 'Une recette de patisserie', 'tags' => ['patisserie']]);
+
+        $relevance = app(PostRelevance::class);
+        $this->assertSame(PostRelevance::FOR_YOU, $relevance->assess($this->user->creatorProfile, $closePost)['bucket']);
+        $this->assertSame(PostRelevance::FOR_YOU, $relevance->assess($this->user->creatorProfile, $farPost)['bucket']);
+
+        $feed = app(RecommendationService::class)->forUser($this->user);
+        $ids = $feed->pluck('id')->all();
+
+        $this->assertContains($closePost->id, $ids);
+        $this->assertContains($farPost->id, $ids);
+        $this->assertSame($closePost->id, $feed->first()['id']);
+    }
+
+    /** Case C — an adjacent vertical with nothing in common is still refused. */
+    public function test_an_adjacent_vertical_without_any_common_ground_is_refused(): void
+    {
+        $this->user->creatorProfile()->update([
+            'niche' => 'Personal branding',
+            'topics' => ['audience building', 'copywriting'],
+            'primary_vertical' => 'personal-branding',
+        ]);
+
+        $stranger = $this->creator('gadget.reviews', 30_000, 900);
+        $stranger->update(['niche' => 'tech-ai', 'niche_topics' => ['smartphone', 'gadgets']]);
+        $post = $this->storePost($stranger, 2.4, [
+            'caption' => 'Mon setup high-tech: le smartphone que je garde',
+            'tags' => ['gadgets'],
+        ]);
+
+        $verdict = app(PostRelevance::class)->assess($this->user->creatorProfile->fresh(), $post);
+
+        $this->assertNull($verdict['bucket']);
+        $this->assertNotContains($post->id, app(RecommendationService::class)->forUser($this->user)->pluck('id'));
+    }
+
+    /** Case D — an adjacent vertical that shares a cluster belongs to Explore. */
+    public function test_an_adjacent_vertical_sharing_a_cluster_lands_in_explore(): void
+    {
+        $this->user->creatorProfile()->update([
+            'niche' => 'Personal branding for founders',
+            'topics' => ['startup', 'audience building'],
+            'primary_vertical' => 'personal-branding',
+        ]);
+
+        $neighbour = $this->creator('saas.builder', 30_000, 900);
+        $neighbour->update(['niche' => 'tech-ai', 'niche_topics' => ['saas', 'startup']]);
+        $post = $this->storePost($neighbour, 2.4, [
+            'caption' => 'Comment je construis mon saas en public',
+            'tags' => ['saas', 'startup'],
+        ]);
+
+        $sections = app(RecommendationService::class)->sectionsForUser($this->user->fresh());
+
+        $this->assertSame(
+            PostRelevance::EXPLORE,
+            app(PostRelevance::class)->assess($this->user->creatorProfile->fresh(), $post)['bucket'],
+        );
+        $this->assertContains($post->id, $sections['explore_items']->pluck('id'));
+        $this->assertNotContains($post->id, $sections['items']->pluck('id'));
+    }
+
+    /**
+     * Case E — the human label and the canonical vertical are two different
+     * things. A creator described as "Entrepreneurship / SaaS" is the same
+     * universe as a member classified `tech-ai`, and the feed has to see it.
+     */
+    public function test_a_free_text_niche_is_matched_on_its_canonical_vertical(): void
+    {
+        $this->user->creatorProfile()->update([
+            'niche' => 'SaaS and AI tooling',
+            'topics' => ['saas', 'ai'],
+            'primary_vertical' => 'tech-ai',
+        ]);
+
+        $creator = $this->creator('founder.saas', 30_000, 900);
+        $creator->update(['niche' => 'Entrepreneurship / SaaS', 'niche_topics' => ['saas', 'startup']]);
+        $post = $this->storePost($creator, 2.0, ['caption' => 'Ce que mon saas m a appris', 'tags' => ['saas']]);
+
+        $this->assertSame('tech-ai', $creator->fresh()->primary_vertical);
+        $this->assertNotSame($creator->fresh()->primary_vertical, $creator->fresh()->niche);
+        $this->assertSame(
+            PostRelevance::FOR_YOU,
+            app(PostRelevance::class)->assess($this->user->creatorProfile->fresh(), $post)['bucket'],
+        );
+        $this->assertContains($post->id, app(RecommendationService::class)->forUser($this->user->fresh())->pluck('id'));
+    }
+
+    /**
+     * Case F — the gate opened for the member's own vertical, and for nothing
+     * else: unrelated verticals stay out of For You even when they perform far
+     * better, whether their subject is readable from the post or only from the
+     * account behind it.
+     */
+    public function test_unrelated_verticals_still_never_reach_for_you(): void
+    {
+        $match = $this->storePost($this->creator('small.vegan', 20_000, 900), 1.4);
+
+        foreach ([
+            ['gym.rats', 'sport-fitness', ['musculation', 'workout'], 'Une seance de musculation'],
+            ['mind.calm', 'wellness', ['meditation', 'sommeil'], 'Ma routine de meditation'],
+            ['gadget.desk', 'tech-ai', ['gadgets', 'setup'], 'Mon setup high-tech'],
+        ] as [$username, $niche, $topics, $caption]) {
+            $creator = $this->creator($username, 500_000, 900);
+            $creator->update(['niche' => $niche, 'niche_topics' => $topics]);
+            $this->storePost($creator, 6.0, ['caption' => $caption, 'tags' => $topics]);
+        }
+
+        // The same thing again, with a post nothing can be read from: only the
+        // account says what it is, and it says the wrong vertical.
+        $silent = $this->creator('silent.gym', 500_000, 900);
+        $silent->update(['niche' => 'strength coaching', 'niche_topics' => ['musculation']]);
+        $this->storePost($silent, 6.0, ['caption' => 'Jour 12', 'tags' => []]);
+
+        $items = app(RecommendationService::class)->forUser($this->user);
+
+        $this->assertSame([$match->id], $items->pluck('id')->all());
     }
 }
