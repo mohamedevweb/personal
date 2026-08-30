@@ -119,6 +119,10 @@ onBeforeUnmount(() => clearTimeout(analysisTimer))
             </div>
           </CarouselMedia>
         </div>
+        <!-- The source caption belongs to the post, but not to its media frame. -->
+        <p v-if="isCarousel && post.caption" class="mt-4 whitespace-pre-line break-words text-[13.5px] leading-6 text-[var(--copy)]">
+          {{ post.caption }}
+        </p>
         <!-- A handle can be thirty characters long, so it truncates rather than
              pushing the link and the view count off a phone; if the three still
              do not fit on one line, the metadata takes the next one. -->

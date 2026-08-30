@@ -372,13 +372,12 @@ onBeforeUnmount(() => {
     </section>
 
     <div v-else-if="remix" :inert="retrying || deleting" :aria-busy="retrying || deleting">
-      <!-- Everything that changes the draft's state lives in one bar that stays
-           in reach while the editor scrolls. -->
-      <div class="sticky top-[calc(4rem+env(safe-area-inset-top))] z-10 border-b border-[var(--line)] bg-[var(--paper)]/92 backdrop-blur md:top-[74px]">
-        <!-- Saving is manual, so the two buttons that write the draft are pinned
-             outside the scroller: on a phone the rest of the bar slides under
-             them rather than pushing them off the screen. -->
-        <div class="page-shell flex h-16 items-center gap-3">
+      <!-- Everything that changes the draft's state opens the page, like the
+           back link on the analysis screen, and scrolls away with the draft. -->
+      <div class="page-shell pt-2">
+        <!-- Saving is manual, so the two buttons that write the draft stay
+             outside the horizontal scroller on a phone. -->
+        <div class="flex min-h-16 items-center gap-3">
           <!-- A phone has no room for the state, the three tools and the two
                buttons that write, so the fade says the row carries on rather
                than leaving a chip looking accidentally cut. -->
@@ -465,7 +464,7 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <div class="page-shell pt-8">
+      <div class="page-shell pt-6">
         <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_312px] lg:gap-10">
           <!-- The draft comes first: on a phone you land on your own words, not
                on the post they were borrowed from. -->
@@ -486,7 +485,7 @@ onBeforeUnmount(() => {
                  gets, and the picture to shoot is named on the slide it belongs
                  to rather than in a brief nobody opens. -->
             <div v-if="remix.format === 'carousel'" class="mt-4 lg:mt-0">
-              <div class="mx-auto w-full max-w-[468px]">
+              <div class="mx-auto w-full max-w-[600px]">
                 <template v-if="slide">
                   <article class="overflow-hidden rounded-[14px] border border-[var(--line)] bg-[var(--surface)]">
                     <header class="flex items-center gap-3 px-4 py-3">
@@ -504,9 +503,11 @@ onBeforeUnmount(() => {
                       <AppIcon name="dots" :size="16" class="shrink-0 text-[var(--faint)]" />
                     </header>
 
-                    <!-- The slide itself, at the ratio Instagram gives it. -->
+                    <!-- Phones keep Instagram's portrait ratio. On a wide
+                         screen the frame grows sideways while retaining the
+                         previous 468px-wide slide height. -->
                     <div
-                      class="relative flex aspect-[4/5] flex-col p-5"
+                      class="relative flex aspect-[4/5] flex-col p-5 xl:aspect-auto xl:h-[585px]"
                       :class="activeSlide === 0 ? 'b-night text-white' : 'bg-[var(--paper)]'"
                     >
                       <div class="flex items-center justify-between">
@@ -654,7 +655,7 @@ onBeforeUnmount(() => {
 
                 <button
                   v-else
-                  class="flex aspect-[4/5] w-full flex-col items-center justify-center gap-2 rounded-[14px] border border-dashed border-[var(--line)] text-[var(--faint)] transition hover:border-[var(--ink)] hover:text-[var(--ink)]"
+                  class="flex aspect-[4/5] w-full flex-col items-center justify-center gap-2 rounded-[14px] border border-dashed border-[var(--line)] text-[var(--faint)] transition hover:border-[var(--ink)] hover:text-[var(--ink)] xl:aspect-auto xl:h-[585px]"
                   @click="addSlide"
                 >
                   <AppIcon name="plus" :size="20" />
@@ -751,7 +752,7 @@ onBeforeUnmount(() => {
 
           <!-- The margin: where the draft came from, kept beside it rather than
                in front of it. -->
-          <aside class="min-w-0 space-y-3 lg:sticky lg:top-[162px] lg:self-start">
+          <aside class="min-w-0 space-y-3 lg:sticky lg:top-8 lg:self-start">
             <div class="overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">
               <a
                 v-if="remix.source_content?.creator"
