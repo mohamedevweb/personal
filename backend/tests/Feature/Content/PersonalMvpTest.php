@@ -110,8 +110,10 @@ class PersonalMvpTest extends TestCase
             $queries++;
         });
 
+        // The relations already resolved by an earlier measurement would be
+        // served from memory the second time round and undercount the run.
+        $this->user->unsetRelations();
         $this->actingAs($this->user)->getJson('/api/feed')->assertOk();
-        DB::flushQueryLog();
 
         return $queries;
     }

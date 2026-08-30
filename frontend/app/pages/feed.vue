@@ -39,7 +39,7 @@ async function loadFeed(): Promise<void> {
     rotation.forget()
     meta.value = response
     posts.value = rotation.accept(response.items)
-    explorePosts.value = response.explore_items
+    explorePosts.value = response.explore_items ?? []
     exhausted.value = posts.value.length === 0
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('feed.loadError')))
@@ -110,7 +110,7 @@ async function refresh() {
 
     meta.value = response
     posts.value = fresh
-    explorePosts.value = response.explore_items
+    explorePosts.value = response.explore_items ?? []
     window.scrollTo({ top: 0, behavior: 'smooth' })
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('feed.loadError')))

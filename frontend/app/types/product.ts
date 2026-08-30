@@ -67,7 +67,8 @@ export interface FeedResponse {
   }
   featured_opportunity?: Opportunity | null
   items: ContentPost[]
-  explore_items: ContentPost[]
+  /** Absent while an older API is still deployed in front of this build. */
+  explore_items?: ContentPost[]
 }
 
 export type DismissReason = 'topic' | 'creator' | 'language'
