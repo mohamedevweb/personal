@@ -1,9 +1,18 @@
-let developmentBootstrap: Promise<string | null> | null = null
+let developmentBootstrap: Promise<boolean | null> | null = null
 
 export function usePersonalApi() {
   const config = useRuntimeConfig()
   const { $i18n } = useNuxtApp()
   const authenticated = useState('personal-authenticated', () => false)
+  // The browser must not be able to read the bearer token. Nuxt can still read
+  // this cookie during SSR and forward it to the API as an Authorization header.
+  const token = useCookie<string | null>('personal_token', {
+    httpOnly: true,
+    secure: !import.meta.dev,
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 60 * 60 * 24 * 30
+  })
 
   /**
    * Local development mints a token for a demo user so the app is usable without
@@ -18,7 +27,8 @@ export function usePersonalApi() {
         baseURL: config.public.apiBase,
         credentials: 'include',
         headers: { Accept: 'application/json', 'Accept-Language': $i18n.locale.value }
-      }).then((response) => {
+      }).then((response: { token?: string }) => {
+        if (import.meta.server && response.token) token.value = response.token
         authenticated.value = true
         return true
       }).catch(() => null).finally(() => {
@@ -34,6 +44,10 @@ export function usePersonalApi() {
       Accept: 'application/json',
       'Accept-Language': $i18n.locale.value,
       ...(options.headers || {})
+    }
+
+    if (import.meta.server && token.value && !headers.Authorization) {
+      headers.Authorization = `Bearer ${token.value}`
     }
     try {
       return await $fetch<T>(path, {

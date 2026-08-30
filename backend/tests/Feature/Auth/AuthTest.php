@@ -24,6 +24,9 @@ class AuthTest extends TestCase
         $response->assertCreated()
             ->assertJsonPath('user.email', 'ada@personal.test');
         $this->assertIsString($response->json('token'));
+        $this->assertTrue(collect($response->headers->getCookies())
+            ->first(fn ($cookie) => $cookie->getName() === 'personal_token')
+            ?->isHttpOnly());
         $this->assertDatabaseHas('users', ['email' => 'ada@personal.test']);
     }
 
@@ -101,7 +104,7 @@ class AuthTest extends TestCase
         $user = User::factory()->create();
         $token = $user->createToken('browser')->plainTextToken;
 
-        $this->withCookie('personal_token', $token)
+        $this->withUnencryptedCookie('personal_token', $token)
             ->getJson('/api/auth/me')
             ->assertOk()
             ->assertJsonPath('user.id', $user->id);

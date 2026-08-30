@@ -146,7 +146,9 @@ class AccountManagementTest extends TestCase
             'password_confirmation' => 'brand-new-secret',
         ])->assertOk();
 
+        $this->app['auth']->forgetGuards();
         $this->withToken($currentToken)->getJson('/api/auth/me')->assertUnauthorized();
+        $this->app['auth']->forgetGuards();
         $this->withToken($otherToken)->getJson('/api/auth/me')->assertUnauthorized();
     }
 }
