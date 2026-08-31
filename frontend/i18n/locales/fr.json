@@ -138,7 +138,7 @@
         },
         "write": {
           "title": "Écrire",
-          "body": "Reel, Carousel ou Post. Votre structure, votre voix, votre histoire. Une minute jusqu'à la publication.",
+          "body": "Reel ou Carousel. Votre structure, votre voix, votre histoire. Une minute jusqu'à la publication.",
           "caption": "Un brouillon, jamais un post"
         }
       },
@@ -211,6 +211,14 @@
         "sound": {
           "q": "Est-ce que ça va me ressembler ?",
           "a": "C'est tout l'enjeu. Personal apprend votre ton à partir de vos propres posts et vous montre ce qu'il a compris avant d'écrire une ligne. Chaque brouillon part de vos histoires, et vous le corrigez en langage courant."
+        },
+        "personalization": {
+          "q": "Comment Personal personnalise-t-il mes recommandations ?",
+          "a": "Tout part de ton Instagram, pas d'un profil générique. Personal lit ton profil, tes posts récents, tes légendes, ton ton, tes sujets et ton audience, puis croise cette compréhension avec tes Moments et les signaux que tu lui donnes. Tes favoris, tes remixes et tes masquages affinent ce qui apparaît ensuite. Tu peux modifier ce que Personal retient à tout moment."
+        },
+        "niche": {
+          "q": "Que vais-je voir dans mon feed de niche ?",
+          "a": "Un fil ciblé de posts récents publiés par des créateurs de ton univers. Personal repère les posts qui dépassent la performance habituelle de leur créateur, puis les filtre selon ta verticale principale et ton marché. Ce n'est pas un classement de popularité, et le fil ne se remplit pas de contenus viraux sans rapport. S'il n'y a pas assez de posts pertinents, il reste court jusqu'à l'arrivée de meilleures opportunités."
         },
         "different": {
           "q": "Encore un générateur de contenu IA ?",

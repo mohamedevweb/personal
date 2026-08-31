@@ -99,6 +99,15 @@ return [
         // measured, safe, approved and above the absolute engagement floor.
         'minimum_feed_size' => (int) env('DISCOVERY_MINIMUM_FEED_SIZE', 6),
         'fallback_min_outlier_score' => (float) env('DISCOVERY_FALLBACK_MIN_OUTLIER_SCORE', 1.0),
+        // A vertical with too little eligible inventory triggers a bounded
+        // Creator-DNA discovery pass for the members who actually use it.
+        'vertical_supply' => [
+            'enabled' => (bool) env('DISCOVERY_VERTICAL_SUPPLY_ENABLED', true),
+            'minimum_posts' => (int) env('DISCOVERY_VERTICAL_MINIMUM_POSTS', 8),
+            'minimum_creators' => (int) env('DISCOVERY_VERTICAL_MINIMUM_CREATORS', 4),
+            'cooldown_days' => (int) env('DISCOVERY_VERTICAL_SUPPLY_COOLDOWN_DAYS', 3),
+            'batch' => (int) env('DISCOVERY_VERTICAL_SUPPLY_BATCH', 20),
+        ],
         // Minimum outlier score to reach the feed: a post has to beat the account
         // that published it, not merely come from a large one.
         'min_outlier_score' => (float) env('DISCOVERY_MIN_OUTLIER_SCORE', 1.2),

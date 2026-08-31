@@ -18,11 +18,12 @@ class NicheExpansionService
     public function __construct(private readonly LlmJsonService $llm) {}
 
     /** @return list<string> */
-    public function queriesFor(User $user): array
+    public function queriesFor(User $user, bool $force = false): array
     {
         $profile = $user->creatorProfile;
 
         if ($profile
+            && ! $force
             && is_array($profile->discovery_queries)
             && $profile->discovery_queries !== []
             && $this->cacheIsFresh($profile)) {
@@ -87,6 +88,7 @@ class NicheExpansionService
                 'primary_niche' => $dna['primary_niche'] ?? $profile?->niche,
                 'sub_niches' => $dna['sub_niches'] ?? [],
                 'topics' => $dna['topics'] ?? $profile?->topics ?? [],
+                'primary_vertical' => $profile?->primary_vertical,
                 'audience' => $dna['audience'] ?? [],
                 'content_pillars' => $dna['content_pillars'] ?? [],
             ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) ?: implode(', ', $seed),
@@ -112,6 +114,7 @@ class NicheExpansionService
 
         return $this->cleanQueries([
             (string) ($dna['primary_niche'] ?? $profile?->niche ?? ''),
+            (string) ($profile?->primary_vertical ?? ''),
             ...($dna['sub_niches'] ?? []),
             ...($dna['topics'] ?? $profile?->topics ?? []),
             ...($dna['content_pillars'] ?? []),

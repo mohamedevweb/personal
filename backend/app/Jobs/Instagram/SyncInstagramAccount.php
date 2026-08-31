@@ -15,6 +15,7 @@ use App\Services\Instagram\InstagramAuthService;
 use App\Services\Instagram\NicheDetectionService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Throwable;
 
@@ -107,11 +108,18 @@ class SyncInstagramAccount implements ShouldQueue
             $creatorProfile->save();
             $registeredCreators->sync($account->fresh('media'), $creatorProfile);
 
+            // The profile and imported media are enough to open the product.
+            // Enrichment and discovery continue asynchronously after the first
+            // useful feed is available.
+            $account->update([
+                'sync_status' => 'completed',
+                'last_synced_at' => now(),
+                'sync_error' => null,
+            ]);
+
             // The DNA above reads captions. The enrichment batch reads the
             // member's own Reels and carousels, then rebuilds the deeper DNA.
             $enrichment->queue($creatorProfile);
-
-            $account->update(['sync_status' => 'finding_patterns']);
 
             // The niche is known now, so fill the feed with matching creators. It
             // runs as its own job so a scraper hiccup never fails the sync.
@@ -119,12 +127,18 @@ class SyncInstagramAccount implements ShouldQueue
                 DiscoverNicheContent::dispatch($account->user_id);
             }
 
-            $account->update([
-                'sync_status' => 'completed',
-                'last_synced_at' => now(),
-                'sync_error' => null,
-            ]);
         } catch (Throwable $exception) {
+            // Once the base profile is ready, a failure in enrichment or
+            // discovery must not send the creator back through onboarding.
+            if ($account->fresh()->sync_status === 'completed') {
+                Log::warning('Instagram follow-up sync work failed.', [
+                    'account_id' => $account->id,
+                    'exception' => $exception,
+                ]);
+
+                return;
+            }
+
             $account->update([
                 'sync_status' => 'failed',
                 'sync_error' => Str::limit($exception->getMessage(), 500),

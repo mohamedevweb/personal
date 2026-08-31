@@ -166,9 +166,13 @@ class AnalyzeCreatorHandle implements ShouldQueue
 
         $profile->save();
 
+        // The profile and its primary vertical are the onboarding contract.
+        // Let the creator enter the product now; registering their own posts,
+        // media enrichment and discovery are follow-up work on the queues.
+        $this->complete($profile);
+
         try {
             $registeredCreators->syncScraped($scraped, $profile, $posts);
-            $this->complete($profile);
             $profile->forceFill([
                 'media_enrichment_status' => 'queued',
                 'media_enrichment_error' => null,

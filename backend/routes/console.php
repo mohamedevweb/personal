@@ -29,6 +29,11 @@ if (config('instagram_scraping.scheduled')) {
         ->name('import-discovered-creators')
         ->withoutOverlapping();
 
+    Schedule::command('personal:replenish-vertical-supply')
+        ->dailyAt('02:15')
+        ->name('replenish-vertical-supply')
+        ->withoutOverlapping();
+
     Schedule::command('personal:dispatch-instagram-scrapes')
         ->dailyAt('02:30')
         ->name('dispatch-adaptive-instagram-scrapes')

@@ -28,7 +28,10 @@ class DiscoverNicheContent implements ShouldQueue
 
     public int $timeout = 300;
 
-    public function __construct(public readonly int $userId) {}
+    public function __construct(
+        public readonly int $userId,
+        public readonly bool $force = false,
+    ) {}
 
     public function handle(NicheExpansionService $expansion, InstagramDataProvider $provider): void
     {
@@ -44,7 +47,7 @@ class DiscoverNicheContent implements ShouldQueue
             return;
         }
 
-        $queries = $this->dueQueries($expansion->queriesFor($user));
+        $queries = $this->dueQueries($expansion->queriesFor($user, $this->force));
         $fallbackNiche = $user->creatorProfile?->niche ?: 'Unclassified';
         $seeds = collect();
 
@@ -154,7 +157,7 @@ class DiscoverNicheContent implements ShouldQueue
             ->pluck('query')
             ->all();
 
-        return array_values(array_diff($queries, $recent));
+        return $this->force ? $queries : array_values(array_diff($queries, $recent));
     }
 
     private function markSearched(string $query): void

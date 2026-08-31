@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const KEYS = ['sound', 'different', 'post', 'cost'] as const
+const KEYS = ['sound', 'personalization', 'niche', 'different', 'post', 'cost'] as const
 </script>
 
 <template>

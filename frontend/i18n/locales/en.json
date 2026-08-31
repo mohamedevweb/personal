@@ -138,7 +138,7 @@
         },
         "write": {
           "title": "Write",
-          "body": "Reel, Carousel or Post. Your structure, your voice, your story. One minute to posted.",
+          "body": "Reel or Carousel. Your structure, your voice, your story. One minute to posted.",
           "caption": "A draft, never a post"
         }
       },
@@ -211,6 +211,14 @@
         "sound": {
           "q": "Will it sound like me?",
           "a": "That's the whole point. Personal learns your tone from your own posts and shows you what it understood before writing a line. Every draft starts from your stories, and you correct it in plain language."
+        },
+        "personalization": {
+          "q": "How does Personal personalize my recommendations?",
+          "a": "It starts with your Instagram, not a generic persona. Personal reads your profile, recent posts, captions, tone, topics and audience, then combines that understanding with your life Moments and the signals you give it. Saves, remixes and dismissals help tune what appears next. You can edit what Personal remembers at any time."
+        },
+        "niche": {
+          "q": "What will I see in my niche feed?",
+          "a": "A focused stream of recent posts from creators in your world. Personal looks for posts that outperform their creator's usual baseline, then filters them by your primary vertical and market. It is not a popularity chart, and it does not fill the feed with generic viral content. If there are not enough relevant posts, it stays short until better ones are found."
         },
         "different": {
           "q": "Another AI content generator?",
