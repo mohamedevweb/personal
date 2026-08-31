@@ -238,6 +238,10 @@ class ScrapeCreatorsInstagramProvider implements InstagramDataProvider
         $caption = is_string($caption) ? $caption : '';
 
         $thumbnailUrl = $this->thumbnail($row);
+        // Instagram returns a small preview count in `like_count` when the
+        // creator hides likes. It is not the post total and must not become a
+        // public metric or performance signal.
+        $likesAvailable = ($row['like_and_view_counts_disabled'] ?? false) !== true;
 
         return new DiscoveredPost(
             sourceUrl: $code
@@ -249,7 +253,9 @@ class ScrapeCreatorsInstagramProvider implements InstagramDataProvider
             followers: $profile?->followers ?? 0,
             caption: $caption,
             thumbnailUrl: $thumbnailUrl,
-            likes: max(0, (int) ($row['like_count'] ?? data_get($row, 'edge_media_preview_like.count', 0))),
+            likes: $likesAvailable
+                ? max(0, (int) ($row['like_count'] ?? data_get($row, 'edge_media_preview_like.count', 0)))
+                : 0,
             comments: max(0, (int) ($row['comment_count'] ?? data_get($row, 'edge_media_to_comment.count', 0))),
             views: max(0, (int) ($row['play_count'] ?? $row['video_play_count'] ?? $row['video_view_count'] ?? $row['view_count'] ?? 0)),
             publishedAt: $this->publishedAt($row['taken_at'] ?? $row['taken_at_timestamp'] ?? null),
@@ -259,6 +265,7 @@ class ScrapeCreatorsInstagramProvider implements InstagramDataProvider
             shares: max(0, (int) ($row['reshare_count'] ?? $row['share_count'] ?? 0)),
             metadata: array_filter([
                 'code' => $code,
+                'metrics' => ['likes_available' => $likesAvailable],
                 'product_type' => $row['product_type'] ?? null,
                 'video_duration' => $row['video_duration'] ?? null,
                 'is_paid_partnership' => $row['is_paid_partnership'] ?? null,
@@ -269,7 +276,7 @@ class ScrapeCreatorsInstagramProvider implements InstagramDataProvider
                             'product_type', 'taken_at', 'taken_at_timestamp', 'like_count',
                             'comment_count', 'play_count', 'video_play_count', 'video_view_count',
                             'view_count', 'reshare_count', 'share_count', 'video_duration',
-                            'is_paid_partnership',
+                            'is_paid_partnership', 'like_and_view_counts_disabled',
                         ]),
                     ],
                 ],

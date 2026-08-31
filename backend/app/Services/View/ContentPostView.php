@@ -42,6 +42,7 @@ class ContentPostView
             'media_urls' => $this->contentMediaUrls($post),
             'views' => $post->views,
             'likes' => $post->likes,
+            'likes_available' => data_get($post->metadata, 'metrics.likes_available', true) !== false,
             'comments' => $post->comments,
             'shares' => $post->shares,
             'published_at' => $post->published_at,

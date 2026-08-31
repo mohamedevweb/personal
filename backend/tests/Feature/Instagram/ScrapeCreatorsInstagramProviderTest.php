@@ -210,6 +210,36 @@ class ScrapeCreatorsInstagramProviderTest extends TestCase
             && $request['cache_max_age'] === '3d');
     }
 
+    public function test_it_does_not_treat_a_hidden_like_preview_as_the_post_total(): void
+    {
+        Http::fake(['*/v2/instagram/user/posts*' => Http::response([
+            'success' => true,
+            'user' => ['username' => 'hidden.likes'],
+            'items' => [[
+                'pk' => '3973465083865419965',
+                'code' => 'DcklXEDN1C9',
+                'taken_at' => 1_787_894_048,
+                'product_type' => 'clips',
+                'caption' => ['text' => 'A post with hidden likes'],
+                'like_count' => 3,
+                'comment_count' => 960,
+                'play_count' => 103_230,
+                'like_and_view_counts_disabled' => true,
+            ]],
+        ])]);
+
+        $post = app(ScrapeCreatorsInstagramProvider::class)
+            ->getPosts('hidden.likes', 12)
+            ->first();
+
+        $this->assertSame(0, $post?->likes);
+        $this->assertFalse(data_get($post?->metadata, 'metrics.likes_available'));
+        $this->assertTrue(data_get(
+            $post?->metadata,
+            'providers.scrapecreators.raw_data.like_and_view_counts_disabled',
+        ));
+    }
+
     public function test_profile_not_found_returns_null(): void
     {
         Http::fake(['*' => Http::response([], 404)]);

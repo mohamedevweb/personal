@@ -80,27 +80,30 @@ class RecommendationService
             $limit,
             max(0, (int) config('services.discovery.minimum_feed_size')),
         );
-        $relevantCount = $ranked->whereIn('bucket', [PostRelevance::FOR_YOU, PostRelevance::EXPLORE])->count();
-        if ($relevantCount < $minimum) {
-            $ranked = $ranked->concat(
-                $this->fallbackCandidates($user, $limit, $inspirationIds, $excludeIds)
-                    ->reject(fn (ContentPost $post): bool => $this->interactions->excludes($post, $interactionSignals))
-                    ->map(function (ContentPost $post) use ($user, $interactionSignals): array {
-                        $relevance = $this->relevance->assess($user->creatorProfile, $post);
+        $forYouCount = $ranked->where('bucket', PostRelevance::FOR_YOU)->count();
+        if ($forYouCount < $minimum) {
+            $fallbackRanked = $this->fallbackCandidates($user, $limit, $inspirationIds, $excludeIds)
+                ->reject(fn (ContentPost $post): bool => $this->interactions->excludes($post, $interactionSignals))
+                ->map(function (ContentPost $post) use ($user, $interactionSignals): array {
+                    $relevance = $this->relevance->assess($user->creatorProfile, $post);
 
-                        return [
-                            'post' => $post,
-                            'bucket' => $relevance['bucket'],
-                            'ranking' => $this->personalizedRanking(
-                                $post,
-                                $user,
-                                $relevance['affinity'],
-                                $this->interactions->adjustment($post, $interactionSignals),
-                            ),
-                        ];
-                    }),
-            )
-                ->unique(fn (array $item): int => $item['post']->id)
+                    return [
+                        'post' => $post,
+                        'bucket' => $relevance['bucket'],
+                        'ranking' => $this->personalizedRanking(
+                            $post,
+                            $user,
+                            $relevance['affinity'],
+                            $this->interactions->adjustment($post, $interactionSignals),
+                        ),
+                    ];
+                });
+
+            $ranked = $ranked->concat($fallbackRanked)
+                ->groupBy(fn (array $item): int => $item['post']->id)
+                ->map(fn (Collection $items): array => $items->first(
+                    fn (array $item): bool => $item['bucket'] !== null,
+                ) ?? $items->first())
                 ->sortByDesc('ranking.score')
                 ->values();
         }

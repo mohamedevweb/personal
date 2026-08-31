@@ -32,6 +32,8 @@ export interface ContentPost {
   media_urls: string[]
   views: number
   likes: number
+  /** False when Instagram hides the total and the provider only exposes a preview count. */
+  likes_available?: boolean
   comments: number
   shares: number
   published_at: string

@@ -735,7 +735,10 @@ onBeforeUnmount(() => {
 
           <!-- The margin: where the draft came from, kept beside it rather than
                in front of it. -->
-          <aside class="min-w-0 space-y-3 lg:sticky lg:top-8 lg:self-start">
+          <aside
+            class="min-w-0 space-y-3 lg:sticky lg:top-8 lg:self-start"
+            :class="remix.format === 'carousel' ? '' : 'lg:mt-8'"
+          >
             <div class="overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">
               <a
                 v-if="remix.source_content?.creator"

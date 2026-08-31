@@ -103,7 +103,7 @@ const visibleCaption = computed(() => (isLongCaption.value ? `${caption.value.sl
          of caption, the comment count. Every card is then exactly as tall as
          every other, in its row and across rows. -->
     <div class="h-[80px] overflow-hidden px-3 pb-2 text-[12px] leading-[16px]">
-      <p class="truncate font-semibold">{{ $t('contentCard.likes', { count: compactNumber(post.likes) }) }}</p>
+      <p v-if="post.likes_available !== false" class="truncate font-semibold">{{ $t('contentCard.likes', { count: compactNumber(post.likes) }) }}</p>
       <p class="mt-1 line-clamp-2">
         <span class="font-semibold">{{ post.creator.username }}</span>
         {{ ' ' }}{{ visibleCaption }}<NuxtLink v-if="isLongCaption" :to="`/content/${post.id}`" class="text-[var(--faint)] transition hover:text-[var(--ink)]">{{ $t('contentCard.more') }}</NuxtLink>

@@ -24,6 +24,7 @@ class CuratedFeedTest extends TestCase
             // Quota expectations in this class intentionally exercise a 12-card
             // sample independently from the product's configured feed size.
             'services.discovery.feed_size' => 12,
+            'services.discovery.minimum_feed_size' => 0,
         ]);
         $this->user = User::factory()->create();
         CreatorProfile::query()->create(['user_id' => $this->user->id, 'market' => 'FR']);

@@ -182,6 +182,21 @@ class InstagramMediaProxyTest extends TestCase
         $this->assertSame('https://images.unsplash.com/photo.jpg', $payload['thumbnail_url']);
     }
 
+    public function test_feed_marks_hidden_instagram_likes_as_unavailable(): void
+    {
+        $user = User::factory()->create();
+        $post = $this->createPost('https://images.unsplash.com/photo.jpg');
+        $post->update([
+            'likes' => 0,
+            'metadata' => ['metrics' => ['likes_available' => false]],
+        ]);
+
+        $payload = app(ContentPostView::class)->make($post->fresh(), $user);
+
+        $this->assertSame(0, $payload['likes']);
+        $this->assertFalse($payload['likes_available']);
+    }
+
     public function test_feed_media_urls_are_stable_within_the_signature_hour(): void
     {
         config(['app.url' => 'https://api.personal.test']);
