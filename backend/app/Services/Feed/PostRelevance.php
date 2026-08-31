@@ -6,8 +6,9 @@ use App\Models\ContentPost;
 use App\Models\CreatorProfile;
 
 /**
- * Decides whether a post belongs in For You, Explore or nowhere. It is a gate,
- * not a ranking function: performance is considered only after this decision.
+ * Decides whether a post belongs in For You, Explore or nowhere. During the
+ * temporary vertical-only rollout, it gates on the canonical primary vertical
+ * and leaves niche and topic signals available for ranking and diagnostics.
  */
 class PostRelevance
 {
@@ -31,33 +32,6 @@ class PostRelevance
         $postClassification = $this->classifier->post($post);
         $creatorClassification = $this->classifier->creator($post->creator);
         $creatorAffinity = $this->affinity->score($profile, $post->creator);
-        $profileHasContext = $profileClassification['primary_niche'] !== null
-            || $profileClassification['sub_niches'] !== []
-            || $profileClassification['topics'] !== [];
-
-        // Before DNA exists there is no personal gate to apply. Keep the
-        // existing catalogue experience for that state; once any subject is
-        // known, every post must prove its own relevance.
-        if (! $profileHasContext) {
-            if ($profileClassification['vertical'] === null) {
-                return $this->verdict(self::FOR_YOU, 1.0, null, $postClassification['vertical'], [], [], [], $creatorAffinity, $profileClassification, $postClassification);
-            }
-
-            $candidateVertical = $postClassification['vertical'] ?? $creatorClassification['vertical'];
-
-            return $this->verdict(
-                $candidateVertical === $profileClassification['vertical'] ? self::FOR_YOU : null,
-                $candidateVertical === $profileClassification['vertical'] ? 0.5 : 0.0,
-                $profileClassification['vertical'],
-                $postClassification['vertical'],
-                [],
-                [],
-                [],
-                $creatorAffinity,
-                $profileClassification,
-                $postClassification,
-            );
-        }
 
         $profileNiches = $this->nicheConcepts($profileClassification);
         $postNiches = $this->nicheConcepts($postClassification);
@@ -73,120 +47,49 @@ class PostRelevance
         $primary = $profileClassification['vertical'];
         $contentVertical = $postClassification['vertical'];
         $candidateVertical = $contentVertical ?? $creatorClassification['vertical'];
-        $samePrimaryNiche = $profileClassification['primary_niche'] !== null
-            && $profileClassification['primary_niche'] === $postClassification['primary_niche'];
-        $hasPostEvidence = $postNiches !== [] || $postClassification['topics'] !== [];
 
-        if ($matchedAvoidTopics !== []) {
-            return $this->verdict(
-                null,
-                0.0,
-                $primary,
-                $contentVertical,
-                $sharedNiches,
-                $sharedTopics,
-                $matchedAvoidTopics,
-                $creatorAffinity,
-                $profileClassification,
-                $postClassification,
-            );
-        }
-
-        // With an identified profile, an unreadable post has no subject proof in
-        // the strict pass. The broader fallback may use the creator's canonical
-        // vertical, but never raw creator labels or affinity alone.
-        if (! $hasPostEvidence) {
-            if ($allowBroaderMatch && $primary !== null && $candidateVertical === $primary) {
-                return $this->verdict(
-                    self::FOR_YOU,
-                    0.4,
-                    $primary,
-                    $contentVertical,
-                    $sharedNiches,
-                    $sharedTopics,
-                    $matchedAvoidTopics,
-                    $creatorAffinity,
-                    $profileClassification,
-                    $postClassification,
-                );
-            }
-
-            if ($allowBroaderMatch && $primary !== null && $this->adjacent($primary, $candidateVertical)) {
-                return $this->verdict(
-                    self::EXPLORE,
-                    0.25,
-                    $primary,
-                    $contentVertical,
-                    $sharedNiches,
-                    $sharedTopics,
-                    $matchedAvoidTopics,
-                    $creatorAffinity,
-                    $profileClassification,
-                    $postClassification,
-                );
-            }
-
-            return $this->verdict(
-                null,
-                0.0,
-                $primary,
-                $contentVertical,
-                $sharedNiches,
-                $sharedTopics,
-                $matchedAvoidTopics,
-                $creatorAffinity,
-                $profileClassification,
-                $postClassification,
-            );
-        }
-
-        // One strong niche match is enough. The profile does not need to match
-        // every topic in its DNA, because a post normally has one main subject.
-        $postScore = $samePrimaryNiche
-            ? 1.0
-            : (count($sharedNiches) >= 1
-                ? 0.85
-                : (count($sharedTopics) >= 2 ? 0.75 : (count($sharedTopics) === 1 ? 0.65 : 0.0)));
-
-        if ($postScore <= 0.0) {
-            if ($allowBroaderMatch && $primary !== null && $this->adjacent($primary, $candidateVertical)) {
-                return $this->verdict(
-                    self::EXPLORE,
-                    0.2,
-                    $primary,
-                    $contentVertical,
-                    $sharedNiches,
-                    $sharedTopics,
-                    $matchedAvoidTopics,
-                    $creatorAffinity,
-                    $profileClassification,
-                    $postClassification,
-                );
-            }
-
-            return $this->verdict(
-                null,
-                0.0,
-                $primary,
-                $contentVertical,
-                $sharedNiches,
-                $sharedTopics,
-                $matchedAvoidTopics,
-                $creatorAffinity,
-                $profileClassification,
-                $postClassification,
-            );
-        }
-
-        if ($primary === null || $contentVertical === null || $contentVertical === $primary) {
+        // Temporary rollout rule: the canonical primary vertical is the only
+        // relevance gate. DNA niches, topics and avoid topics remain available
+        // for debugging and future ranking, but cannot block a same-vertical post.
+        if ($primary === null) {
             return $this->verdict(
                 self::FOR_YOU,
-                $postScore,
+                1.0,
+                null,
+                $contentVertical,
+                $sharedNiches,
+                $sharedTopics,
+                $matchedAvoidTopics,
+                $creatorAffinity,
+                $profileClassification,
+                $postClassification,
+            );
+        }
+
+        if ($candidateVertical === $primary) {
+            return $this->verdict(
+                self::FOR_YOU,
+                1.0,
                 $primary,
                 $contentVertical,
                 $sharedNiches,
                 $sharedTopics,
                 $matchedAvoidTopics,
+                $creatorAffinity,
+                $profileClassification,
+                $postClassification,
+            );
+        }
+
+        if ($this->adjacent($primary, $candidateVertical)) {
+            return $this->verdict(
+                self::EXPLORE,
+                0.5,
+                $primary,
+                $contentVertical,
+                $sharedNiches,
+                $sharedTopics,
+                [],
                 $creatorAffinity,
                 $profileClassification,
                 $postClassification,
@@ -194,8 +97,8 @@ class PostRelevance
         }
 
         return $this->verdict(
-            $this->adjacent($primary, $contentVertical) ? self::EXPLORE : null,
-            $postScore,
+            null,
+            0.0,
             $primary,
             $contentVertical,
             $sharedNiches,

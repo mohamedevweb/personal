@@ -66,8 +66,8 @@ class RecommendationService
         // A small catalogue can have fewer breakout posts than the requested
         // batch. Add a measured, safe second tier only when the first tier cannot
         // fill the configured minimum. The second pass allows only same or
-        // adjacent verticals with missing subject metadata; explicit unrelated
-        // subjects and avoid topics remain blocked by PostRelevance.
+        // adjacent verticals with missing subject metadata; explicitly unrelated
+        // verticals remain blocked by PostRelevance.
         $minimum = min(
             $limit,
             max(0, (int) config('services.discovery.minimum_feed_size')),

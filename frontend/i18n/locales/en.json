@@ -32,6 +32,7 @@
     "personal": "Personal",
     "saved": "Bookmark",
     "settings": "Settings",
+    "queues": "Queues",
     "groups": {
       "discover": "Discover",
       "studio": "Studio"
@@ -633,6 +634,39 @@
     "deleteConfirm": "Delete?",
     "deleted": "Draft deleted.",
     "deleteError": "Personal could not delete this draft. Please try again."
+  },
+  "queues": {
+    "eyebrow": "Operations",
+    "title": "Queues",
+    "copy": "Monitor Personal jobs in real time. Counts refresh automatically.",
+    "updated": "Updated {date}",
+    "refresh": "Refresh",
+    "loadError": "Personal could not load queue activity.",
+    "none": "None",
+    "empty": "No queue activity recorded.",
+    "emptyJobs": "No jobs waiting or running.",
+    "metrics": {
+      "active": "Active jobs",
+      "queues": "Active queues",
+      "failed": "Failed jobs"
+    },
+    "overview": "Overview",
+    "jobsTitle": "Recent jobs",
+    "jobsCopy": "Payloads and error traces stay hidden.",
+    "attempts": "1 attempt | {count} attempts",
+    "columns": {
+      "queue": "Queue",
+      "ready": "Ready",
+      "delayed": "Delayed",
+      "reserved": "Running",
+      "failed": "Failed",
+      "oldest": "Oldest"
+    },
+    "states": {
+      "ready": "Ready",
+      "delayed": "Delayed",
+      "reserved": "Running"
+    }
   },
   "settings": {
     "eyebrow": "Settings",

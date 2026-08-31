@@ -179,8 +179,11 @@ class NicheDetectionService
             ->implode(', ');
 
         $result = $this->llm->object(
-            'Build a precise Creator DNA from the stable editorial identity of an Instagram profile, not the subject '
-            .'of its latest post or current campaign. Use this evidence hierarchy: bio and linked-page metadata first, '
+            'Build a precise Creator DNA from the stable editorial identity of an Instagram profile. First synthesize '
+            .'the Creator DNA from all available evidence, then classify primary_vertical from that synthesized Creator DNA. '
+            .'Do not assign the vertical from an isolated keyword or directly from the latest post. The Creator DNA must '
+            .'describe the durable identity of the profile, not the subject of its latest post or current campaign. '
+            .'Use this evidence hierarchy: bio and linked-page metadata first, '
             .'themes repeated across distinct captions second, and isolated mentions last. Identify the narrowest '
             .'defensible primary niche, then three to six adjacent sub-niches, concrete topics, intended audiences, main content '
             .'pillars and a short list of subjects to avoid when they are clearly outside the creator’s universe. '
@@ -208,7 +211,8 @@ class NicheDetectionService
             .'personality, beliefs they have not stated, mental state or anything about their life off camera. '
             .'Base every field on '
             .'available evidence, never guesses. Return an empty string or empty list when a positioning detail, project, '
-            .'goal or strength is not supported. Choose exactly one primary_vertical from this closed editorial taxonomy: '
+            .'goal or strength is not supported. After synthesizing the Creator DNA, choose exactly one primary_vertical '
+            .'from it, using this closed editorial taxonomy: '
             .$verticalChoices.'. The vertical describes the creator’s main subject, not their location, audience, format '
             .'or one campaign. For an account that creates and promotes recurring social events, choose events even when '
             .'those events are local. Choose local-culture only when local discovery or culture is the account’s subject. '

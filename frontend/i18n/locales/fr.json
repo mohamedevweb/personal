@@ -32,6 +32,7 @@
     "personal": "Personal",
     "saved": "Favoris",
     "settings": "Réglages",
+    "queues": "Files d’attente",
     "groups": {
       "discover": "Découvrir",
       "studio": "Studio"
@@ -633,6 +634,39 @@
     "deleteConfirm": "Supprimer ?",
     "deleted": "Brouillon supprimé.",
     "deleteError": "Personal n’a pas pu supprimer ce brouillon. Réessaie."
+  },
+  "queues": {
+    "eyebrow": "Opérations",
+    "title": "Files d’attente",
+    "copy": "Surveille les jobs de Personal en temps réel. Les compteurs se mettent à jour automatiquement.",
+    "updated": "Mis à jour à {date}",
+    "refresh": "Actualiser",
+    "loadError": "Personal n’a pas pu charger l’activité des files d’attente.",
+    "none": "Aucun",
+    "empty": "Aucune activité enregistrée.",
+    "emptyJobs": "Aucun job en attente ou en cours.",
+    "metrics": {
+      "active": "Jobs actifs",
+      "queues": "Files actives",
+      "failed": "Jobs échoués"
+    },
+    "overview": "Vue d’ensemble",
+    "jobsTitle": "Jobs récents",
+    "jobsCopy": "Les payloads et les traces d’erreur restent masqués.",
+    "attempts": "{count} tentative | {count} tentatives",
+    "columns": {
+      "queue": "File",
+      "ready": "En attente",
+      "delayed": "Différés",
+      "reserved": "En cours",
+      "failed": "Échoués",
+      "oldest": "Plus ancien"
+    },
+    "states": {
+      "ready": "En attente",
+      "delayed": "Différé",
+      "reserved": "En cours"
+    }
   },
   "settings": {
     "eyebrow": "Réglages",

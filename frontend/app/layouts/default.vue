@@ -34,10 +34,11 @@ const groups = [
 ]
 
 // The mobile bar keeps a single flat row; the grouped rail is a desktop shape.
-const mobileNav = [
+const mobileNav = computed(() => [
   ...groups.flatMap(group => group.items),
+  ...(user.value?.queue_dashboard_available ? [{ label: 'nav.queues', to: '/admin/queues', icon: 'trend' }] : []),
   { label: 'nav.settings', to: '/settings', icon: 'settings' }
-]
+])
 
 // Folded, a row is a centred icon with its label read out by the tooltip and
 // the aria-label instead of standing next to it.
@@ -56,7 +57,8 @@ const titles: Record<string, string> = {
   '/drafts': 'nav.drafts',
   '/personal': 'nav.personal',
   '/saved': 'nav.saved',
-  '/settings': 'nav.settings'
+  '/settings': 'nav.settings',
+  '/admin/queues': 'nav.queues'
 }
 
 const pageTitle = computed(() => {
@@ -112,6 +114,17 @@ const pageTitle = computed(() => {
       </nav>
 
       <div class="mt-auto" :class="collapsed ? 'flex flex-col items-center gap-0.5' : ''">
+        <NuxtLink
+          v-if="user?.queue_dashboard_available"
+          to="/admin/queues"
+          :aria-label="collapsed ? $t('nav.queues') : undefined"
+          :title="collapsed ? $t('nav.queues') : undefined"
+          :class="[rowClass, rowTone(route.path === '/admin/queues')]"
+        >
+          <AppIcon name="trend" :size="17" :class="route.path === '/admin/queues' ? 'text-[var(--accent)]' : ''" />
+          <span v-if="!collapsed">{{ $t('nav.queues') }}</span>
+        </NuxtLink>
+
         <a
           :href="supportMailto"
           :aria-label="collapsed ? $t('support.nav') : undefined"

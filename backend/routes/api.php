@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\QueueDashboardController;
 use App\Http\Controllers\Auth\AccountController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\EmailVerificationController;
@@ -104,6 +105,11 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function (): void {
     Route::get('/creator-inspirations', [CreatorInspirationController::class, 'index']);
     Route::put('/creator-inspirations', [CreatorInspirationController::class, 'update'])
         ->middleware('throttle:discovery');
+});
+
+// Operational metadata is private and deliberately separate from creator data.
+Route::middleware(['auth:sanctum', 'verified', 'throttle:api'])->group(function (): void {
+    Route::get('/admin/queues', QueueDashboardController::class);
 });
 
 Route::middleware(['auth:sanctum', 'verified', 'throttle:discovery'])->group(function (): void {

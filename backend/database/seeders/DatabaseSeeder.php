@@ -61,21 +61,21 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $creators = collect([
-            ['buildwithmaya', 'Maya Chen', 'SaaS', 118000, 72000, 4200],
-            ['alexbuilds', 'Alex Morgan', 'Entrepreneurship', 84000, 44000, 2600],
-            ['nadiacreates', 'Nadia Benali', 'Creator economy', 156000, 91000, 5700],
-            ['founderframes', 'Leo Park', 'Building in public', 67000, 38000, 2100],
-            ['growthnotes', 'Amara Lewis', 'Marketing', 212000, 130000, 8100],
-            ['saaswithsam', 'Sam Rivera', 'SaaS', 94000, 51000, 3000],
-            ['theoperator', 'Nico Laurent', 'Entrepreneurship', 176000, 99000, 6200],
-            ['storybysofia', 'Sofia Marin', 'Personal branding', 132000, 76000, 4900],
-            ['productdiary', 'Yara Haddad', 'Product', 73000, 41000, 2300],
-            ['creatorbrief', 'Jamie Kim', 'Creator economy', 188000, 110000, 7000],
-            ['bootstrappedben', 'Ben Foster', 'Bootstrapping', 59000, 34000, 1900],
-            ['marketwithmina', 'Mina Okafor', 'Marketing', 145000, 85000, 5300],
-            ['lucaslaunches', 'Lucas Silva', 'Launch strategy', 101000, 58000, 3500],
-            ['honestfounder', 'Eva Brooks', 'Founder journey', 127000, 69000, 4100],
-            ['onepersonstudio', 'Omar Aziz', 'Solo business', 81000, 46000, 2800],
+            ['buildwithmaya', 'Maya Chen', 'SaaS', 118000, 72000, 4200, 'startup'],
+            ['alexbuilds', 'Alex Morgan', 'Entrepreneurship', 84000, 44000, 2600, 'business'],
+            ['nadiacreates', 'Nadia Benali', 'Creator economy', 156000, 91000, 5700, 'personal-branding'],
+            ['founderframes', 'Leo Park', 'Building in public', 67000, 38000, 2100, 'startup'],
+            ['growthnotes', 'Amara Lewis', 'Marketing', 212000, 130000, 8100, 'business'],
+            ['saaswithsam', 'Sam Rivera', 'SaaS', 94000, 51000, 3000, 'startup'],
+            ['theoperator', 'Nico Laurent', 'Entrepreneurship', 176000, 99000, 6200, 'business'],
+            ['storybysofia', 'Sofia Marin', 'Personal branding', 132000, 76000, 4900, 'personal-branding'],
+            ['productdiary', 'Yara Haddad', 'Product', 73000, 41000, 2300, 'tech-ai'],
+            ['creatorbrief', 'Jamie Kim', 'Creator economy', 188000, 110000, 7000, 'personal-branding'],
+            ['bootstrappedben', 'Ben Foster', 'Bootstrapping', 59000, 34000, 1900, 'startup'],
+            ['marketwithmina', 'Mina Okafor', 'Marketing', 145000, 85000, 5300, 'business'],
+            ['lucaslaunches', 'Lucas Silva', 'Launch strategy', 101000, 58000, 3500, 'startup'],
+            ['honestfounder', 'Eva Brooks', 'Founder journey', 127000, 69000, 4100, 'startup'],
+            ['onepersonstudio', 'Omar Aziz', 'Solo business', 81000, 46000, 2800, 'business'],
         ])->map(function (array $item, int $index) {
             return Creator::query()->updateOrCreate(['username' => $item[0]], [
                 'display_name' => $item[1],
@@ -91,6 +91,7 @@ class DatabaseSeeder extends Seeder
                 'average_likes' => $item[5],
                 'baseline_engagement' => (int) round($item[5] * 1.1),
                 'avg_engagement_rate' => round($item[5] / $item[3] * 100, 2),
+                'primary_vertical' => $item[6],
             ]);
         });
 

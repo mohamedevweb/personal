@@ -43,6 +43,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Queue Dashboard Administrators
+    |--------------------------------------------------------------------------
+    |
+    | Comma-separated emails allowed to read the internal queue dashboard. An
+    | empty value keeps the dashboard closed until it is explicitly configured.
+    |
+    */
+
+    'queue_dashboard_emails' => array_values(array_filter(array_map(
+        static fn (string $email): string => strtolower(trim($email)),
+        explode(',', (string) env('QUEUE_DASHBOARD_EMAILS', '')),
+    ))),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Debug Mode
     |--------------------------------------------------------------------------
     |

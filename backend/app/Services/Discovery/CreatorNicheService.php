@@ -75,15 +75,18 @@ class CreatorNicheService
             ->implode(', ');
 
         $result = $this->llm->object(
-            'Classify the stable editorial identity of an Instagram account, not the subject of its latest post or '
-            .'campaign. Use this evidence hierarchy: profile bio and category first, themes repeated across distinct '
+            'First synthesize a durable Creator DNA summary from the stable editorial identity of an Instagram account, '
+            .'then classify primary_vertical from that synthesized summary. Do not assign the vertical from an isolated '
+            .'keyword or directly from the latest post. The result must describe the account, not the subject of its '
+            .'latest post or campaign. Use this evidence hierarchy: profile bio and category first, themes repeated across distinct '
             .'captions second, and hashtags repeated across distinct posts third. A giveaway, competition, collaboration, '
             .'location, prop, anecdote, product mention or food shown in one post is not a niche. Treat recurring '
             .'presentation tactics such as giveaways, street interviews and challenges as content mechanics, not the '
             .'underlying subject, unless the account consistently teaches that mechanic itself. Every topic must be '
             .'supported by the bio or by at least two distinct posts. Return a durable niche label of 2 to 4 words, '
             .'3 to 8 durable lowercase topics, any recurring content mechanics separately, a one-sentence evidence '
-            .'summary, and confidence from 0 to 1. Also choose exactly one primary_vertical from this closed taxonomy: '
+            .'summary, and confidence from 0 to 1. After synthesizing that Creator DNA summary, choose exactly one '
+            .'primary_vertical from this closed taxonomy: '
             .$verticalChoices.'. The vertical describes the account’s main subject, not its location, format, audience '
             .'or a one-off campaign. An account that creates and promotes recurring social events belongs to events, '
             .'even when those events are local. Use local-culture only when local discovery or culture is the actual subject. '

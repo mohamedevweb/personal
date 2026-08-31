@@ -61,7 +61,7 @@ A post earns its place by beating the account that published it, not by coming f
 
 After the first Instagram import, onboarding sends the user directly to their feed. The approved catalogue seeds that first experience from the detected vertical without requiring a creator selection. The private inspiration infrastructure remains available outside the onboarding gate: selected accounts can lead that user's feed, with at most two posts per inspiration for diversity, while the approved catalogue supplies only publications that clear the same relevance gate. The feed is deliberately shorter when fewer relevant posts exist. Newly selected accounts are measured and checked for safety. A user-selected account stays `discovered` and never becomes part of the global catalogue without the normal editorial approval.
 
-The feed has two views. `GET /api/feed` powers **For You**, combining private inspirations with approved creators close to the user's vertical and market. Its `items` contain only publications that pass the member's semantic relevance threshold, while `explore_items` contains a small, separate set from configured adjacent verticals. Each shelf carries at most two posts from one creator, and a creator selected for **For You** is not repeated in **Explore**. `GET /api/feed/global` powers **Global**, ranking all recent, measured and safe posts from approved creators with the same outlier and freshness model, but without niche or market quotas.
+The feed has two views. `GET /api/feed` powers **For You**, combining private inspirations with approved creators close to the user's primary vertical and market. During the temporary vertical-only rollout, every eligible post in the same primary vertical can enter `items`, while configured adjacent verticals remain in `explore_items`. Each shelf carries at most two posts from one creator, and a creator selected for **For You** is not repeated in **Explore**. `GET /api/feed/global` powers **Global**, ranking all recent, measured and safe posts from approved creators with the same outlier and freshness model, but without niche or market quotas.
 
 Every member who completes Instagram sync also has one public identity in `creators`, linked through nullable `creators.user_id`. Sync reuses an existing public creator by Instagram ID and then username, so a discovered creator who later joins Personal is never duplicated or stripped of editorial approval. Their own posts are excluded from both of their feeds and their account is never suggested back to them as an inspiration. Other users may see that creator only through the normal measurement, safety and catalogue rules.
 
@@ -74,6 +74,8 @@ docker compose exec app php artisan personal:link-registered-creators
 Set `DISCOVERY_DRIVER=scrapecreators` and `SCRAPECREATORS_API_KEY` to run creator discovery and account measurement through ScrapeCreators. Profile responses use ScrapeCreators' provider-side cache for the same three-day window as account measurement by default. Change `SCRAPECREATORS_CACHE_MAX_AGE` when testing freshness versus cost.
 
 **Creator DNA.** A public handle is enough to start: `AnalyzeCreatorHandle` reads the public profile and up to 12 recent captions, then stores a structured `creator_dna` with positioning, primary niche, sub-niches, topics, audience, language, content pillars, tone, explicit current projects and goals, observable content strengths and voice. That initial DNA completes onboarding. A background pass imports up to 30 posts, transcribes a representative sample of the creator's Reels and reads selected carousel slides with multimodal OCR. Reel and carousel jobs run as a parallel batch, then ordered slide text, narrative structure and recurring visual patterns refine the same DNA. The media results are stored per post, so later rebuilds do not pay to analyse unchanged content again. These signals fill the member's Personal memory automatically. `SyncInstagramAccount` enriches the same profile later when the member connects through OAuth, while a memory edited manually is never overwritten. Model-backed analysis has a deterministic fallback, so an unavailable enrichment never removes the caption-based DNA.
+
+The IA first synthesizes this Creator DNA from the full profile evidence, then assigns one canonical primary vertical from it. Location and isolated keywords never decide the creator vertical.
 
 **Stage 1, `DiscoverNicheContent`.** The Creator DNA becomes precise account-search phrases. ScrapeCreators finds seed creators, then Instagram suggested accounts expand each seed into a reusable creator graph. Creators are upserted by Instagram ID when available, relationships are refreshed rather than duplicated, and global query cooldowns avoid paying twice for a niche Personal already knows.
 
@@ -95,7 +97,7 @@ A lift is a ratio, and a ratio has no sense of scale: an account whose median po
 
 There is deliberately **no fallback**. An unmeasured post carries no performance evidence, and an unrelated post carries no personal relevance. When either signal is missing, the feed stops instead of filling its requested size. A short or empty feed is preferable to a page of weak or off-topic recommendations.
 
-`FeedRanker` first combines outlier score, reach and freshness. The personalized feed then classifies each publication from its full caption, tags and any stored Reel transcript or carousel reading. That classification is compared with the member's Creator DNA and the publishing account through broad verticals, narrower semantic clusters and topic overlap. A broad vertical is only a recall layer: when the profile has precise clusters, a post in the same vertical must share one before it can enter `For You`. This keeps consumer-tech reviews out of a startup/SaaS feed even though both are part of `tech-ai`. Adjacent verticals also require a shared cluster and remain in `explore_items`; generic token overlap cannot promote an unrelated neighbour. `FEED_MIN_CREATOR_AFFINITY` remains an ordering threshold inside an eligible semantic pool, not a substitute for that pool. Performance stays the main ordering weight after relevance has admitted a post. Saves and remixes boost similar creators and topics; a dismissal can suppress a subject, creator or language. The blend remains configurable through `FEED_WEIGHT_PERFORMANCE` and `FEED_WEIGHT_CREATOR_AFFINITY`; the Global feed keeps the performance-only ordering.
+`FeedRanker` first combines outlier score, reach and freshness. The personalized feed classifies each publication from its full caption, tags and any stored Reel transcript or carousel reading. During the temporary vertical-only rollout, the primary vertical is the only relevance gate: same-vertical posts enter `For You`, adjacent verticals remain in `explore_items`, and unrelated verticals stay out. Creator DNA niches, topics and avoid topics remain available for diagnostics and future ranking. Performance stays the main ordering weight after relevance has admitted a post. Saves and remixes boost similar creators and topics; a dismissal can suppress a subject, creator or language. The blend remains configurable through `FEED_WEIGHT_PERFORMANCE` and `FEED_WEIGHT_CREATOR_AFFINITY`; the Global feed keeps the performance-only ordering.
 
 Niche is read from the account itself. `CreatorNicheService` classifies a discovered creator from profile metadata, recurring hashtags and a balanced multi-post caption sample. Topics must be supported by the profile or repeated across distinct posts, so an isolated campaign prop or food mention cannot become part of the niche. The versioned result is cached on the creator and recalculated only when the analysis contract changes. Discovery previously stamped every account with the niche of whichever user found them, which described the searcher rather than the creator.
 
@@ -293,6 +295,23 @@ waiting or running without printing their payloads, use:
 ```bash
 ./queue-status.sh --details --limit=50
 ```
+
+The app also includes a read-only queue dashboard at `/admin/queues`. Configure
+the allowed account emails in `backend/.env` before using it:
+
+```dotenv
+QUEUE_DASHBOARD_EMAILS=you@example.com
+```
+
+After changing the environment, recreate the API container so Laravel reloads
+its configuration:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build app web queue onboarding-queue analysis-queue interactive-queue
+```
+
+Then open `https://YOUR_FRONTEND_HOST/admin/queues`. The page refreshes every
+five seconds and shows queue counts plus job names, without exposing payloads.
 
 ## Browsing the database locally
 

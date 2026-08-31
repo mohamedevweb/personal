@@ -344,6 +344,7 @@ class AnalyzeCreatorHandleTest extends TestCase
         $this->assertSame(['Help one million people start a business'], $profile->goals);
         $this->assertSame(['Clear calls to action', 'Practical storytelling'], $profile->content_strengths);
         $this->assertSame('personal-branding', $profile->primary_vertical);
+        $this->assertSame('personal-branding', $profile->creator_dna['primary_vertical']);
     }
 
     public function test_a_completed_handle_analysis_starts_the_personalized_feed_discovery(): void

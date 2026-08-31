@@ -163,6 +163,7 @@ class NicheDetectionServiceTest extends TestCase
             ->once()
             ->withArgs(function (string $instructions, string $input): bool {
                 $this->assertStringContainsString('stable editorial identity', $instructions);
+                $this->assertStringContainsString('synthesize the Creator DNA', $instructions);
                 $this->assertStringContainsString('[Post 30] LAST_CREATOR_DNA_POST', $input);
 
                 return true;

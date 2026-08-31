@@ -5,6 +5,7 @@ interface AuthUser {
   avatar_url: string | null
   instagram_username: string | null
   email_verified_at: string | null
+  queue_dashboard_available: boolean
 }
 
 interface AuthResponse {

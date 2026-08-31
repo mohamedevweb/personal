@@ -22,6 +22,11 @@ class UserView
             'avatar_url' => $this->avatarUrl($user),
             'instagram_username' => $user->instagram_username,
             'email_verified_at' => $user->email_verified_at,
+            'queue_dashboard_available' => in_array(
+                strtolower($user->email),
+                config('app.queue_dashboard_emails', []),
+                true,
+            ),
         ];
     }
 

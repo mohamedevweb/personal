@@ -61,6 +61,7 @@ class CreatorNicheServiceTest extends TestCase
                 $profileEvidence = strstr($input, 'Caption sample:', true);
 
                 $this->assertStringContainsString('stable editorial identity', $instructions);
+                $this->assertStringContainsString('synthesize a durable Creator DNA summary', $instructions);
                 $this->assertStringContainsString('content mechanics', $instructions);
                 $this->assertStringContainsString('business (12/12 posts)', $input);
                 $this->assertStringContainsString('dreams (12/12 posts)', $input);

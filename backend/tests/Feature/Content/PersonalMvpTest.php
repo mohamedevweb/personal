@@ -232,6 +232,7 @@ class PersonalMvpTest extends TestCase
             'niche' => 'Daily discoveries',
             'niche_topics' => [],
             'bio' => 'Je partage mes découvertes du quotidien.',
+            'primary_vertical' => null,
         ]);
 
         $this->actingAs($this->user)

@@ -69,6 +69,13 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return navigateTo('/verify-email')
   }
 
+  // Internal operational pages do not depend on the creator onboarding flow.
+  // The API still applies the administrator allowlist for these routes.
+  if (to.path.startsWith('/admin/')) {
+    if (!user.value?.queue_dashboard_available) return navigateTo('/feed')
+    return
+  }
+
   // First-login onboarding gate: the creator connects Instagram and completes
   // the import, or lets Personal read the public profile behind their handle.
   const onboarded = useState('personal-onboarded', () => false)
