@@ -78,11 +78,7 @@ class SyncInstagramAccount implements ShouldQueue
                 $account->bio ?? '',
                 collect($media)->pluck('caption')->filter()->take(30)->implode("\n"),
             ]));
-            $primaryVertical = $verticals->fromSignals([
-                $signals['primary_niche'],
-                ...$signals['sub_niches'],
-                ...$signals['topics'],
-            ]);
+            $primaryVertical = $verticals->canonical($signals['primary_vertical'] ?? null);
 
             $creatorProfile = CreatorProfile::query()->firstOrNew(['user_id' => $account->user_id]);
             $creatorProfile->fill([

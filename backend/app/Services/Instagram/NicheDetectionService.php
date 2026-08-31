@@ -19,6 +19,7 @@ use Throwable;
  *
  * @phpstan-type Signals array{
  *   primary_niche: ?string,
+ *   primary_vertical: ?string,
  *   sub_niches: list<string>,
  *   topics: list<string>,
  *   avoid_topics: list<string>,
@@ -43,7 +44,7 @@ use Throwable;
  */
 class NicheDetectionService
 {
-    public const ANALYSIS_VERSION = 5;
+    public const ANALYSIS_VERSION = 6;
 
     private const CAPTION_CHARACTERS = 500;
 
@@ -173,6 +174,10 @@ class NicheDetectionService
                     ->implode("\n");
         }
 
+        $verticalChoices = collect($this->verticals->slugs())
+            ->map(fn (string $slug): string => "{$slug} (".config("creator_catalog.verticals.{$slug}.name").')')
+            ->implode(', ');
+
         $result = $this->llm->object(
             'Build a precise Creator DNA from the stable editorial identity of an Instagram profile, not the subject '
             .'of its latest post or current campaign. Use this evidence hierarchy: bio and linked-page metadata first, '
@@ -203,13 +208,18 @@ class NicheDetectionService
             .'personality, beliefs they have not stated, mental state or anything about their life off camera. '
             .'Base every field on '
             .'available evidence, never guesses. Return an empty string or empty list when a positioning detail, project, '
-            .'goal or strength is not supported. Return confidence from 0 to 1 based on consistency across the sample.',
+            .'goal or strength is not supported. Choose exactly one primary_vertical from this closed editorial taxonomy: '
+            .$verticalChoices.'. The vertical describes the creator’s main subject, not their location, audience, format '
+            .'or one campaign. For an account that creates and promotes recurring social events, choose events even when '
+            .'those events are local. Choose local-culture only when local discovery or culture is the account’s subject. '
+            .'Return confidence from 0 to 1 based on consistency across the sample.',
             $input,
             [
                 'type' => 'object',
                 'additionalProperties' => false,
-                'required' => ['primary_niche', 'sub_niches', 'topics', 'avoid_topics', 'audience', 'positioning', 'language', 'content_pillars', 'tone', 'current_projects', 'goals', 'content_strengths', 'reasoning_patterns', 'hook_patterns', 'visual_patterns', 'voice_profile', 'confidence'],
+                'required' => ['primary_vertical', 'primary_niche', 'sub_niches', 'topics', 'avoid_topics', 'audience', 'positioning', 'language', 'content_pillars', 'tone', 'current_projects', 'goals', 'content_strengths', 'reasoning_patterns', 'hook_patterns', 'visual_patterns', 'voice_profile', 'confidence'],
                 'properties' => [
+                    'primary_vertical' => ['type' => 'string', 'enum' => $this->verticals->slugs()],
                     'primary_niche' => ['type' => 'string'],
                     'sub_niches' => ['type' => 'array', 'items' => ['type' => 'string']],
                     'topics' => ['type' => 'array', 'items' => ['type' => 'string']],
@@ -257,6 +267,7 @@ class NicheDetectionService
         }
 
         return [
+            'primary_vertical' => $this->verticals->canonical($result['primary_vertical'] ?? null),
             'primary_niche' => $niche !== '' ? $niche : null,
             'sub_niches' => $this->stringList($result['sub_niches'] ?? [], 6),
             'topics' => $this->stringList($result['topics'] ?? [], 10),
@@ -346,19 +357,11 @@ class NicheDetectionService
         array $media,
         array $evidence,
     ): array {
-        $captions = $captionList->implode("\n");
-        $vertical = $this->verticals->fromSignals([
-            $bio,
-            (string) $account->category,
-            (string) $linkPreview,
-        ]);
-
-        if ($vertical === null) {
-            $status = $this->modelIsConfigured() ? 'analysis_unavailable' : 'insufficient_evidence';
-
-            return $this->emptySignals($status, 'heuristic', $evidence);
+        if ($this->modelIsConfigured()) {
+            return $this->emptySignals('analysis_unavailable', 'heuristic', $evidence);
         }
 
+        $captions = $captionList->implode("\n");
         $bioWords = array_values(array_unique($this->meaningfulWords($bio, $account)));
         $captionOccurrences = $captionList
             ->map(fn (string $caption): array => array_values(array_unique($this->meaningfulWords($caption, $account))))
@@ -366,8 +369,8 @@ class NicheDetectionService
             ->countBy();
         $topics = $captionOccurrences
             ->sortDesc()
-            ->filter(fn (int $count, string $word): bool => $count >= 2
-                || ($count >= 1 && in_array($word, $bioWords, true)))
+            ->filter(fn (int $count, string $word): bool => $count >= 1
+                && in_array($word, $bioWords, true))
             ->keys()
             ->take(8)
             ->map(fn (string $word) => Str::headline($word))
@@ -385,16 +388,19 @@ class NicheDetectionService
             $tone[] = Str::length($captions) / max(count($media), 1) < 350 ? 'Concise' : 'Story-driven';
         }
 
-        $primaryNiche = (string) config("creator_catalog.verticals.{$vertical}.name");
         $confidence = min(0.6, 0.35 + ($bio !== '' ? 0.1 : 0.0) + (count($media) >= 3 ? 0.15 : 0.0));
 
         return [
-            'primary_niche' => $primaryNiche !== '' ? $primaryNiche : null,
+            'primary_vertical' => null,
+            'primary_niche' => null,
             'sub_niches' => [],
             'topics' => $topics,
             'avoid_topics' => [],
             'audience' => [],
-            'positioning' => $bio !== '' ? Str::limit($bio, 1000) : null,
+            'positioning' => $bio !== ''
+                && ! preg_match('/\b(mail pro|pnl maker)\b/i', $bio)
+                ? Str::limit($bio, 1000)
+                : null,
             'language' => $this->language($captions.' '.$bio),
             'content_pillars' => array_slice($topics, 0, 5),
             'tone' => array_values(array_unique($tone)),
@@ -488,6 +494,7 @@ class NicheDetectionService
     private function emptySignals(string $status, string $method, array $evidence): array
     {
         return [
+            'primary_vertical' => null,
             'primary_niche' => null,
             'sub_niches' => [],
             'topics' => [],

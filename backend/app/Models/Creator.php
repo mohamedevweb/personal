@@ -12,25 +12,17 @@ class Creator extends Model
 {
     protected $guarded = [];
 
-    /**
-     * The canonical vertical is derived, never entered: `niche` is a human label
-     * written by three different sources, and the feed compares verticals. Doing
-     * it here means every write path — discovery, the catalog importer, an
-     * inspiration pick, a registered creator — stores the same value, and no
-     * query has to re-read the label as text.
-     */
     protected static function booted(): void
     {
         static::saving(function (self $creator): void {
-            if (! $creator->isDirty(['niche', 'niche_topics', 'bio'])) {
+            if (! $creator->isDirty(['niche', 'niche_topics']) || $creator->isDirty('primary_vertical')) {
                 return;
             }
 
-            $creator->primary_vertical = app(CanonicalCreatorVerticals::class)->fromSignals([
-                $creator->niche,
-                ...($creator->niche_topics ?? []),
-                $creator->bio,
-            ]);
+            // Preserve compatibility for catalog and test writes that already
+            // use a canonical slug. Free text is never classified here.
+            $creator->primary_vertical = app(CanonicalCreatorVerticals::class)
+                ->canonical($creator->niche);
         });
     }
 

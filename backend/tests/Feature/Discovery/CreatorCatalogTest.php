@@ -39,11 +39,11 @@ class CreatorCatalogTest extends TestCase
             $this->assertTrue($group->every(fn (array $entry): bool => $entry['market'] === 'FR'));
         }
 
-        $this->assertSame('events', app(CanonicalCreatorVerticals::class)->canonical('Événementiel'));
-        $this->assertSame('languages', app(CanonicalCreatorVerticals::class)->canonical('Langues'));
+        $this->assertNull(app(CanonicalCreatorVerticals::class)->canonical('Événementiel'));
+        $this->assertNull(app(CanonicalCreatorVerticals::class)->canonical('Langues'));
         $this->assertSame('lifestyle', app(CanonicalCreatorVerticals::class)->canonical('Lifestyle'));
-        $this->assertSame('local-culture', app(CanonicalCreatorVerticals::class)->canonical('Local / Culture'));
-        $this->assertSame('travel', app(CanonicalCreatorVerticals::class)->canonical('Voyage'));
+        $this->assertNull(app(CanonicalCreatorVerticals::class)->canonical('Local / Culture'));
+        $this->assertNull(app(CanonicalCreatorVerticals::class)->canonical('Voyage'));
 
         $this->assertCount(22, $entries->where('status', 'approved'));
         $this->assertCount(0, $entries->where('status', 'pending'));

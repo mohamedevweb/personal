@@ -7,7 +7,6 @@ use App\Jobs\Discovery\AnalyzeCreatorHandle;
 use App\Jobs\Discovery\RefreshCreatorAvatar;
 use App\Models\CreatorProfile;
 use App\Services\Creator\RegisteredCreatorService;
-use App\Services\Discovery\CanonicalCreatorVerticals;
 use App\Services\Instagram\NicheDetectionService;
 use App\Services\View\ContentPostView;
 use App\Services\View\UserView;
@@ -34,7 +33,7 @@ class ProfileController extends Controller
         ]);
     }
 
-    public function update(Request $request, CanonicalCreatorVerticals $verticals, UserView $view): JsonResponse
+    public function update(Request $request, UserView $view): JsonResponse
     {
         $data = $request->validate([
             'display_name' => ['sometimes', 'nullable', 'string', 'max:120'],
@@ -57,13 +56,6 @@ class ProfileController extends Controller
 
         $profile = CreatorProfile::query()->firstOrNew(['user_id' => $request->user()->id]);
         $profile->fill($data);
-
-        if (array_intersect(array_keys($data), ['niche', 'topics'])) {
-            $profile->primary_vertical = $verticals->fromSignals([
-                $profile->niche,
-                ...($profile->topics ?? []),
-            ]);
-        }
 
         if (array_intersect(array_keys($data), [
             'niche',

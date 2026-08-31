@@ -37,7 +37,7 @@ class NicheDetectionServiceTest extends TestCase
         $this->assertSame(1, $signals['evidence']['caption_count']);
     }
 
-    public function test_offline_fallback_uses_a_canonical_vertical_instead_of_joining_raw_words(): void
+    public function test_offline_fallback_does_not_choose_a_vertical_without_the_model(): void
     {
         $account = new InstagramAccount([
             'username' => 'founder.creator',
@@ -48,7 +48,8 @@ class NicheDetectionServiceTest extends TestCase
             'caption' => 'Three lessons from building SaaS in 2026 https://example.test/post',
         ]]);
 
-        $this->assertSame('Tech & AI', $signals['primary_niche']);
+        $this->assertNull($signals['primary_vertical']);
+        $this->assertNull($signals['primary_niche']);
         $this->assertSame('partial', $signals['analysis_status']);
         $this->assertSame('heuristic', $signals['analysis_method']);
         $this->assertContains('Saas', $signals['topics']);
@@ -57,12 +58,13 @@ class NicheDetectionServiceTest extends TestCase
         $this->assertNotContains('2026', $signals['topics']);
     }
 
-    public function test_vertical_aliases_must_match_whole_words(): void
+    public function test_verticals_are_only_accepted_as_explicit_canonical_slugs(): void
     {
         $verticals = app(CanonicalCreatorVerticals::class);
 
         $this->assertNull($verticals->fromSignals(['VivaTech 2026']));
-        $this->assertSame('tech-ai', $verticals->fromSignals(['AI SaaS founder']));
+        $this->assertNull($verticals->fromSignals(['AI SaaS founder']));
+        $this->assertSame('tech-ai', $verticals->fromSignals(['tech-ai']));
     }
 
     public function test_startup_is_a_distinct_canonical_vertical_from_business(): void
@@ -86,7 +88,8 @@ class NicheDetectionServiceTest extends TestCase
 
         $signals = app(NicheDetectionService::class)->detect($account, $media);
 
-        $this->assertSame('Sport & Fitness', $signals['primary_niche']);
+        $this->assertNull($signals['primary_vertical']);
+        $this->assertNull($signals['primary_niche']);
         $this->assertContains('Football', $signals['topics']);
         $this->assertNotContains('The', $signals['topics']);
         $this->assertNotContains('And', $signals['topics']);
@@ -115,7 +118,7 @@ class NicheDetectionServiceTest extends TestCase
         $this->assertNull($signals['positioning']);
         $this->assertSame([], $signals['topics']);
         $this->assertSame([], $signals['content_pillars']);
-        $this->assertSame('insufficient_evidence', $signals['analysis_status']);
+        $this->assertSame('partial', $signals['analysis_status']);
         $this->assertSame('heuristic', $signals['analysis_method']);
     }
 
@@ -165,6 +168,7 @@ class NicheDetectionServiceTest extends TestCase
                 return true;
             })
             ->andReturn([
+                'primary_vertical' => 'business',
                 'primary_niche' => 'Entrepreneurship',
                 'sub_niches' => ['Business education'],
                 'topics' => ['Starting a business'],
@@ -184,6 +188,7 @@ class NicheDetectionServiceTest extends TestCase
             ->detect($account, $media);
 
         $this->assertSame('Entrepreneurship', $signals['primary_niche']);
+        $this->assertSame('business', $signals['primary_vertical']);
         $this->assertSame('Helps founders build sustainable companies through practical business lessons.', $signals['positioning']);
         $this->assertSame(['Founder education series'], $signals['current_projects']);
         $this->assertSame(['Help founders build sustainable businesses'], $signals['goals']);

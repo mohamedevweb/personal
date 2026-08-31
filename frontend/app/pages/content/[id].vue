@@ -153,10 +153,6 @@ onBeforeUnmount(() => {
             />
           </CarouselMedia>
         </div>
-        <!-- The source caption belongs to the post, but not to its media frame. -->
-        <p v-if="isCarousel && post.caption" class="mt-4 whitespace-pre-line break-words text-[13.5px] leading-6 text-[var(--copy)]">
-          {{ post.caption }}
-        </p>
         <!-- A handle can be thirty characters long, so it truncates rather than
              pushing the link and the view count off a phone; if the three still
              do not fit on one line, the metadata takes the next one. -->
@@ -169,14 +165,16 @@ onBeforeUnmount(() => {
               <span v-if="post.creator.vertical || creatorNiche" class="mt-1 block truncate text-[11px] font-medium text-[var(--accent-ink)]">
                 {{ post.creator.vertical ? `${$t('content.vertical')} · ${$t(`content.verticals.${post.creator.vertical}`)}` : creatorNiche }}
               </span>
-              <span v-if="post.creator.bio" class="mt-2 block whitespace-pre-line break-words text-[12.5px] leading-5 text-[var(--muted)]">
-                {{ post.creator.bio }}
-              </span>
             </span>
           </a>
           <a v-if="post.source_url" :href="post.source_url" target="_blank" rel="noopener noreferrer" class="inline-flex h-9 shrink-0 items-center gap-1.5 text-xs text-[var(--muted)] transition hover:text-[var(--ink)]">{{ $t('content.openSource') }}<AppIcon name="arrow" :size="13" class="-rotate-45" /></a>
           <p v-if="post.views > 0" class="shrink-0 text-xs text-[var(--muted)]">{{ $t('content.views', { count: compactNumber(post.views) }) }}</p>
         </div>
+        <!-- The complete caption sits below the profile and metrics, like the
+             original post, and is shown for every format including Reels. -->
+        <p v-if="post.caption" class="mt-3 whitespace-pre-line break-words text-[13.5px] leading-6 text-[var(--copy)]">
+          {{ post.caption }}
+        </p>
       </section>
 
       <section class="min-w-0">

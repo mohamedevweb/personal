@@ -162,11 +162,7 @@ class AnalyzeCreatorHandle implements ShouldQueue
             'market_confidence' => $market['confidence'],
         ]);
 
-        $dnaWriter->apply($profile, $signals, $verticals->fromSignals([
-            $signals['primary_niche'],
-            ...$signals['sub_niches'],
-            ...$signals['topics'],
-        ]));
+        $dnaWriter->apply($profile, $signals, $verticals->canonical($signals['primary_vertical'] ?? null));
 
         $profile->save();
 

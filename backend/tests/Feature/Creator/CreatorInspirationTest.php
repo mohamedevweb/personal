@@ -175,7 +175,7 @@ class CreatorInspirationTest extends TestCase
             'username' => 'new.creator',
             'curation_status' => 'discovered',
             'safety_status' => 'pending',
-            'niche' => 'tech-ai',
+            'niche' => 'unclassified',
         ]);
         Queue::assertPushed(MeasureAccountEngagement::class);
 

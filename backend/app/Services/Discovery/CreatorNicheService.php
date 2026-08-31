@@ -19,17 +19,20 @@ use Illuminate\Support\Str;
  * including its rule that a missing model degrades to a heuristic rather than
  * failing the run.
  *
- * @phpstan-type Signals array{niche: string, topics: list<string>}
+ * @phpstan-type Signals array{niche: string, topics: list<string>, primary_vertical: ?string}
  */
 class CreatorNicheService
 {
-    public const ANALYSIS_VERSION = 2;
+    public const ANALYSIS_VERSION = 3;
 
     private const CAPTION_LIMIT = 15;
 
     private const CAPTION_CHARACTERS = 500;
 
-    public function __construct(private readonly LlmJsonService $llm) {}
+    public function __construct(
+        private readonly LlmJsonService $llm,
+        private readonly CanonicalCreatorVerticals $verticals,
+    ) {}
 
     /** @return Signals */
     public function detect(DiscoveredProfile $profile): array
@@ -67,6 +70,10 @@ class CreatorNicheService
             return null;
         }
 
+        $verticalChoices = collect($this->verticals->slugs())
+            ->map(fn (string $slug): string => "{$slug} (".config("creator_catalog.verticals.{$slug}.name").')')
+            ->implode(', ');
+
         $result = $this->llm->object(
             'Classify the stable editorial identity of an Instagram account, not the subject of its latest post or '
             .'campaign. Use this evidence hierarchy: profile bio and category first, themes repeated across distinct '
@@ -76,14 +83,19 @@ class CreatorNicheService
             .'underlying subject, unless the account consistently teaches that mechanic itself. Every topic must be '
             .'supported by the bio or by at least two distinct posts. Return a durable niche label of 2 to 4 words, '
             .'3 to 8 durable lowercase topics, any recurring content mechanics separately, a one-sentence evidence '
-            .'summary, and confidence from 0 to 1. Prefer a broad defensible label such as entrepreneurship over a '
-            .'campaign-specific hybrid such as entrepreneurship giveaways.',
+            .'summary, and confidence from 0 to 1. Also choose exactly one primary_vertical from this closed taxonomy: '
+            .$verticalChoices.'. The vertical describes the account’s main subject, not its location, format, audience '
+            .'or a one-off campaign. An account that creates and promotes recurring social events belongs to events, '
+            .'even when those events are local. Use local-culture only when local discovery or culture is the actual subject. '
+            .'Prefer a broad defensible label such as entrepreneurship over a campaign-specific hybrid such as '
+            .'entrepreneurship giveaways.',
             collect($context)->map(fn ($value, $key): string => "{$key}: {$value}")->implode("\n"),
             [
                 'type' => 'object',
                 'additionalProperties' => false,
-                'required' => ['niche', 'topics', 'content_mechanics', 'evidence_summary', 'confidence'],
+                'required' => ['primary_vertical', 'niche', 'topics', 'content_mechanics', 'evidence_summary', 'confidence'],
                 'properties' => [
+                    'primary_vertical' => ['type' => 'string', 'enum' => $this->verticals->slugs()],
                     'niche' => ['type' => 'string'],
                     'topics' => ['type' => 'array', 'items' => ['type' => 'string']],
                     'content_mechanics' => ['type' => 'array', 'items' => ['type' => 'string']],
@@ -105,6 +117,7 @@ class CreatorNicheService
         return [
             'niche' => $niche,
             'topics' => $this->supportedTopics($result['topics'] ?? [], $profile, $posts, array_keys($hashtags)),
+            'primary_vertical' => $this->verticals->canonical($result['primary_vertical'] ?? null),
         ];
     }
 
@@ -140,6 +153,7 @@ class CreatorNicheService
                 ? Str::headline(Str::before($profile->username, '.'))
                 : Str::headline(implode(' ', array_slice($topics, 0, 2))),
             'topics' => $topics,
+            'primary_vertical' => null,
         ];
     }
 

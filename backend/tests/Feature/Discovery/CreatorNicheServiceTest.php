@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Discovery;
 
+use App\Services\Discovery\CanonicalCreatorVerticals;
 use App\Services\Discovery\CreatorNicheService;
 use App\Services\Discovery\DiscoveredPost;
 use App\Services\Discovery\DiscoveredProfile;
@@ -68,22 +69,91 @@ class CreatorNicheServiceTest extends TestCase
                 $this->assertStringNotContainsString('pasta (', (string) $profileEvidence);
                 $this->assertStringContainsString('[Post 12] LAST_SAMPLE_MARKER', $input);
                 $this->assertContains('content_mechanics', $schema['required']);
+                $this->assertContains('primary_vertical', $schema['required']);
 
                 return true;
             })
             ->andReturn([
                 'niche' => 'entrepreneurship giveaways',
+                'primary_vertical' => 'business',
                 'topics' => ['starting a business', 'business education', 'dream building', 'food', 'pasta'],
                 'content_mechanics' => ['giveaways', 'street interviews'],
                 'evidence_summary' => 'The bio and repeated posts consistently focus on entrepreneurship.',
                 'confidence' => 0.96,
             ]);
 
-        $signals = (new CreatorNicheService($llm))->detect($profile);
+        $signals = (new CreatorNicheService($llm, app(CanonicalCreatorVerticals::class)))->detect($profile);
 
         $this->assertSame('entrepreneurship', $signals['niche']);
+        $this->assertSame('business', $signals['primary_vertical']);
         $this->assertContains('starting a business', $signals['topics']);
         $this->assertNotContains('food', $signals['topics']);
         $this->assertNotContains('pasta', $signals['topics']);
+    }
+
+    public function test_the_model_can_classify_a_local_event_organizer_as_events(): void
+    {
+        $profile = new DiscoveredProfile(
+            username: 'soiree_comptoir_lumiere',
+            displayName: 'Comptoir Lumière',
+            avatarUrl: null,
+            followers: 30_000,
+            posts: collect([
+                new DiscoveredPost(
+                    sourceUrl: 'https://instagram.test/p/contre-soiree',
+                    username: 'soiree_comptoir_lumiere',
+                    displayName: 'Comptoir Lumière',
+                    avatarUrl: null,
+                    followers: 30_000,
+                    caption: 'La CONTRESOIREE, une soirée guidée pour créer des rencontres à Lyon.',
+                    thumbnailUrl: null,
+                    likes: 1_000,
+                    comments: 50,
+                    views: 10_000,
+                    publishedAt: CarbonImmutable::now()->subDay(),
+                    format: 'reel',
+                    hashtags: ['comptoirlumiere'],
+                    externalId: 'contre-soiree',
+                ),
+                new DiscoveredPost(
+                    sourceUrl: 'https://instagram.test/p/picnic-lumiere',
+                    username: 'soiree_comptoir_lumiere',
+                    displayName: 'Comptoir Lumière',
+                    avatarUrl: null,
+                    followers: 30_000,
+                    caption: 'Réserve ta place pour notre prochain événement convivial à Lyon.',
+                    thumbnailUrl: null,
+                    likes: 900,
+                    comments: 40,
+                    views: 9_000,
+                    publishedAt: CarbonImmutable::now()->subDays(2),
+                    format: 'reel',
+                    hashtags: ['comptoirlumiere'],
+                    externalId: 'picnic-lumiere',
+                ),
+            ]),
+            bio: 'Des événements intimistes pour créer des liens authentiques à Lyon.',
+        );
+        $llm = Mockery::mock(LlmJsonService::class);
+        $llm->shouldReceive('object')
+            ->once()
+            ->withArgs(function (string $instructions): bool {
+                $this->assertStringContainsString('belongs to events', $instructions);
+                $this->assertStringContainsString('local-culture', $instructions);
+
+                return true;
+            })
+            ->andReturn([
+                'primary_vertical' => 'events',
+                'niche' => 'Social events',
+                'topics' => ['guided social events', 'local meetups'],
+                'content_mechanics' => [],
+                'evidence_summary' => 'The profile consistently promotes recurring social events.',
+                'confidence' => 0.97,
+            ]);
+
+        $signals = (new CreatorNicheService($llm, app(CanonicalCreatorVerticals::class)))->detect($profile);
+
+        $this->assertSame('events', $signals['primary_vertical']);
     }
 }

@@ -167,6 +167,7 @@ class MeasureAccountEngagementTest extends TestCase
         $niches->shouldReceive('detect')->once()->andReturn([
             'niche' => 'entrepreneurship',
             'topics' => ['starting a business', 'business education'],
+            'primary_vertical' => 'business',
         ]);
         $this->app->instance(CreatorNicheService::class, $niches);
 

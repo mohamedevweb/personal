@@ -308,6 +308,7 @@ class AnalyzeCreatorHandleTest extends TestCase
         ]);
         $niche = Mockery::mock(NicheDetectionService::class);
         $niche->shouldReceive('detect')->once()->andReturn([
+            'primary_vertical' => 'personal-branding',
             'primary_niche' => 'Entrepreneurship',
             'sub_niches' => ['Business education'],
             'topics' => ['Starting a business', 'Funding'],
@@ -356,10 +357,7 @@ class AnalyzeCreatorHandleTest extends TestCase
 
         $this->runJob($user);
 
-        Queue::assertPushed(
-            DiscoverNicheContent::class,
-            fn (DiscoverNicheContent $job): bool => $job->userId === $user->id,
-        );
+        Queue::assertNotPushed(DiscoverNicheContent::class);
     }
 
     public function test_the_public_profile_picture_is_kept(): void

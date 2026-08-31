@@ -457,7 +457,7 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
      * Reuse a current classification, but refresh results produced by an older
      * analysis contract. Curated catalog entries keep their editorial labels.
      *
-     * @return array{niche: string, niche_topics: list<string>, niche_analysis_version: int}
+     * @return array{niche: string, niche_topics: list<string>, primary_vertical: ?string, niche_analysis_version: int}
      */
     private function niche(DiscoveredProfile $profile, CreatorNicheService $niches, ?Creator $existing): array
     {
@@ -466,6 +466,7 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
             return [
                 'niche' => $existing->niche,
                 'niche_topics' => $existing->niche_topics,
+                'primary_vertical' => $existing->primary_vertical,
                 'niche_analysis_version' => CreatorNicheService::ANALYSIS_VERSION,
             ];
         }
@@ -475,6 +476,7 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
         return [
             'niche' => $detected['niche'],
             'niche_topics' => $detected['topics'],
+            'primary_vertical' => $detected['primary_vertical'],
             'niche_analysis_version' => CreatorNicheService::ANALYSIS_VERSION,
         ];
     }

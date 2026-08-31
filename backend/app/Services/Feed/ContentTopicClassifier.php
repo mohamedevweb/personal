@@ -74,24 +74,6 @@ class ContentTopicClassifier
         }
 
         $classification['vertical'] = $creatorVertical;
-        $fallbackAlias = config("creator_catalog.verticals.{$creatorVertical}.fallback_alias");
-
-        if ($classification['primary_niche'] === null && is_string($fallbackAlias)) {
-            $labels = $this->fallbackLabels([$fallbackAlias], allowSingleWord: true);
-            $label = $labels[0] ?? null;
-
-            if ($label !== null) {
-                $classification['primary_niche'] = $label;
-                $classification['topics'] = array_values(array_unique([
-                    ...$classification['topics'],
-                    $label,
-                ]));
-                $classification['clusters'] = array_values(array_unique([
-                    ...$classification['clusters'],
-                    $label,
-                ]));
-            }
-        }
 
         return $classification;
     }

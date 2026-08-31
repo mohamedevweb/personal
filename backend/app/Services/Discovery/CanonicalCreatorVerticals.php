@@ -14,13 +14,13 @@ class CanonicalCreatorVerticals
             return null;
         }
 
-        foreach ((array) config('creator_catalog.verticals') as $slug => $vertical) {
-            if ($needle === $slug || in_array($needle, array_map(fn (string $alias): string => Str::lower($alias), $vertical['aliases'] ?? []), true)) {
-                return $slug;
-            }
-        }
+        return in_array($needle, $this->slugs(), true) ? $needle : null;
+    }
 
-        return null;
+    /** @return list<string> */
+    public function slugs(): array
+    {
+        return array_values(array_keys((array) config('creator_catalog.verticals')));
     }
 
     public function fromSignals(array $signals): ?string
@@ -31,28 +31,8 @@ class CanonicalCreatorVerticals
             }
         }
 
-        $text = Str::lower(implode(' ', array_filter($signals, 'is_string')));
-
-        $scores = [];
-
-        foreach ((array) config('creator_catalog.verticals') as $slug => $vertical) {
-            $scores[$slug] = 0.0;
-
-            foreach ($vertical['aliases'] ?? [] as $alias) {
-                $quoted = preg_quote(Str::lower($alias), '/');
-
-                if (preg_match("/(?<![\\pL\\pN]){$quoted}(?![\\pL\\pN])/u", $text) === 1) {
-                    // A phrase such as "intelligence artificielle" carries more
-                    // evidence than a generic single word. Counting all matches
-                    // also prevents the configuration order from deciding that
-                    // "tech entrepreneurship + SaaS" is only personal branding.
-                    $scores[$slug] += 1 + (substr_count(trim($alias), ' ') * 0.25);
-                }
-            }
-        }
-
-        $best = collect($scores)->sortDesc()->first();
-
-        return $best > 0 ? (string) collect($scores)->search($best, strict: true) : null;
+        // Free text is intentionally not mapped here. The analysis model owns
+        // the editorial decision; this method only validates an explicit slug.
+        return null;
     }
 }

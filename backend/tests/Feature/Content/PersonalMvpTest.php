@@ -216,23 +216,13 @@ class PersonalMvpTest extends TestCase
         $post->creator()->update([
             'niche' => 'Fitness coaching',
             'niche_topics' => ['workout', 'strength training'],
+            'primary_vertical' => 'sport-fitness',
         ]);
 
         $this->actingAs($this->user)
             ->getJson("/api/content/{$post->id}")
             ->assertOk()
             ->assertJsonPath('content.creator.vertical', 'sport-fitness');
-    }
-
-    public function test_content_posts_include_the_creators_complete_bio(): void
-    {
-        $post = ContentPost::query()->firstOrFail();
-        $post->creator()->update(['bio' => 'Building products for creators and sharing the founder journey.']);
-
-        $this->actingAs($this->user)
-            ->getJson("/api/content/{$post->id}")
-            ->assertOk()
-            ->assertJsonPath('content.creator.bio', 'Building products for creators and sharing the founder journey.');
     }
 
     public function test_content_posts_keep_a_creator_without_a_vertical_usable(): void

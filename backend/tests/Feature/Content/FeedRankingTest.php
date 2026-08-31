@@ -567,7 +567,11 @@ class FeedRankingTest extends TestCase
         // Same broad vertical, nothing else in common: barbecue against a vegan
         // meal prep profile. The post must not become a For You filler item.
         $distant = $this->creator('bbq.school', 20_000, 900);
-        $distant->update(['niche' => 'Barbecue et grillades', 'niche_topics' => ['barbecue', 'grillades', 'viande']]);
+        $distant->update([
+            'niche' => 'Barbecue et grillades',
+            'niche_topics' => ['barbecue', 'grillades', 'viande'],
+            'primary_vertical' => 'food-cooking',
+        ]);
         $post = $this->storePost($distant, 2.0, [
             'caption' => 'Ma cuisine au barbecue: boeuf marine et feu de bois',
             'tags' => ['barbecue', 'grillades'],
@@ -576,7 +580,7 @@ class FeedRankingTest extends TestCase
         $verdict = app(PostRelevance::class)->assess($this->user->creatorProfile->fresh(), $post);
 
         $this->assertNull($verdict['bucket']);
-        $this->assertSame('food-cooking', $verdict['content_vertical']);
+        $this->assertNull($verdict['content_vertical']);
         $this->assertNotContains($post->id, app(RecommendationService::class)->forUser($this->user)->pluck('id'));
     }
 
@@ -675,7 +679,11 @@ class FeedRankingTest extends TestCase
         ]);
 
         $creator = $this->creator('founder.saas', 30_000, 900);
-        $creator->update(['niche' => 'Entrepreneurship / SaaS', 'niche_topics' => ['saas', 'startup']]);
+        $creator->update([
+            'niche' => 'Entrepreneurship / SaaS',
+            'niche_topics' => ['saas', 'startup'],
+            'primary_vertical' => 'tech-ai',
+        ]);
         $post = $this->storePost($creator, 2.0, ['caption' => 'Ce que mon saas m a appris', 'tags' => ['saas']]);
 
         $this->assertSame('tech-ai', $creator->fresh()->primary_vertical);

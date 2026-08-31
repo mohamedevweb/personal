@@ -1,7 +1,6 @@
 export interface Creator {
   username: string
   display_name: string
-  bio: string | null
   avatar_url: string | null
   niche: string | null
   niche_topics: string[]

@@ -59,6 +59,7 @@ class CreatorCatalogImporter
                     'average_likes' => (int) $profile->posts->avg(fn (DiscoveredPost $post): int => $post->likes),
                     'niche' => $entry['vertical'],
                     'niche_topics' => array_values($entry['topics']),
+                    'primary_vertical' => $entry['vertical'],
                     'market' => $entry['market'],
                     'primary_language' => $signals['language'],
                     'curation_status' => 'approved',

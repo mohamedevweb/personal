@@ -16,10 +16,13 @@ class ClassifyFeedPostsTest extends TestCase
         $creator = Creator::query()->create([
             'username' => 'founder.fr',
             'display_name' => 'Founder FR',
-            'niche' => 'personal-branding',
+            'niche' => 'tech-ai',
+            'primary_vertical' => 'tech-ai',
             'followers' => 10_000,
             'average_views' => 10_000,
             'average_likes' => 1_000,
+            'curation_status' => 'approved',
+            'safety_status' => 'allowed',
         ]);
         $post = ContentPost::query()->create([
             'creator_id' => $creator->id,
@@ -82,7 +85,7 @@ class ClassifyFeedPostsTest extends TestCase
         $this->assertSame('food-cooking', data_get($post->fresh()->metadata, 'feed_classification.vertical'));
     }
 
-    public function test_it_uses_the_validated_creator_vertical_when_post_text_has_no_matching_alias(): void
+    public function test_it_uses_the_validated_creator_vertical_when_post_text_has_no_matching_subject(): void
     {
         $creator = Creator::query()->create([
             'username' => 'garyvee.test',
@@ -116,6 +119,6 @@ class ClassifyFeedPostsTest extends TestCase
         $classification = data_get(ContentPost::query()->latest('id')->first()->metadata, 'feed_classification');
 
         $this->assertSame('personal-branding', $classification['vertical']);
-        $this->assertSame('creation-de-contenu', $classification['primary_niche']);
+        $this->assertNull($classification['primary_niche']);
     }
 }

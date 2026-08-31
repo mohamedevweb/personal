@@ -69,10 +69,8 @@ class ContentPostView
                 'avatar_url' => $this->mediaUrl('media.creator', 'creator', $post->creator->id, $post->creator->avatar_url),
                 'niche' => $post->creator->niche,
                 'niche_topics' => $post->creator->niche_topics ?? [],
-                'vertical' => $this->verticals->fromSignals([
-                    $post->creator->niche,
-                    ...($post->creator->niche_topics ?? []),
-                ]),
+                'vertical' => $this->verticals->canonical($post->creator->primary_vertical)
+                    ?? $this->verticals->fromSignals([$post->creator->niche]),
                 'followers' => $post->creator->followers,
                 'average_views' => $post->creator->average_views,
             ],
