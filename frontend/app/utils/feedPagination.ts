@@ -1,4 +1,4 @@
-import type { ContentPost } from '~/types/product'
+import type { ContentPost, FeedResponse } from '~/types/product'
 
 /**
  * The feed has no cursor: each request carries the ids already on screen and the
@@ -6,6 +6,13 @@ import type { ContentPost } from '~/types/product'
  * validates against, and bounds the bind parameters on its pool query.
  */
 export const FEED_EXCLUDE_LIMIT = 500
+export const FEED_PAGE_SIZE = 24
+
+export function feedHasMore(response: Pick<FeedResponse, 'items' | 'has_more'>): boolean {
+  // Older API deployments do not send has_more. A short response is still a
+  // reliable end marker because the API returns at most the configured page size.
+  return response.has_more ?? response.items.length >= FEED_PAGE_SIZE
+}
 
 export interface FeedRotation {
   /**

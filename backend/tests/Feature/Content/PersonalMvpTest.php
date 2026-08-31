@@ -67,7 +67,7 @@ class PersonalMvpTest extends TestCase
         $seenIds = $firstIds->concat($nextIds)->unique()->values()->all();
         $this->actingAs($this->user)->getJson('/api/feed?'.http_build_query([
             'exclude' => $seenIds,
-        ]))->assertOk()->assertJsonCount(0, 'items');
+        ]))->assertOk()->assertJsonCount(0, 'items')->assertJsonPath('has_more', false);
 
         $restartedIds = collect(
             $this->actingAs($this->user)->getJson('/api/feed')->assertOk()->json('items'),
@@ -222,6 +222,33 @@ class PersonalMvpTest extends TestCase
             ->getJson("/api/content/{$post->id}")
             ->assertOk()
             ->assertJsonPath('content.creator.vertical', 'sport-fitness');
+    }
+
+    public function test_content_posts_include_the_creators_complete_bio(): void
+    {
+        $post = ContentPost::query()->firstOrFail();
+        $post->creator()->update(['bio' => 'Building products for creators and sharing the founder journey.']);
+
+        $this->actingAs($this->user)
+            ->getJson("/api/content/{$post->id}")
+            ->assertOk()
+            ->assertJsonPath('content.creator.bio', 'Building products for creators and sharing the founder journey.');
+    }
+
+    public function test_content_posts_keep_a_creator_without_a_vertical_usable(): void
+    {
+        $post = ContentPost::query()->firstOrFail();
+        $post->creator()->update([
+            'niche' => 'Daily discoveries',
+            'niche_topics' => [],
+            'bio' => 'Je partage mes découvertes du quotidien.',
+        ]);
+
+        $this->actingAs($this->user)
+            ->getJson("/api/content/{$post->id}")
+            ->assertOk()
+            ->assertJsonPath('content.creator.vertical', null)
+            ->assertJsonPath('content.creator.niche', 'Daily discoveries');
     }
 
     public function test_french_requests_localize_mock_drafts(): void

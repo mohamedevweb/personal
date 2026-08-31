@@ -193,7 +193,15 @@ class CreatorInspirationService
             throw ValidationException::withMessages(['handles' => ["@{$handle} is unavailable or private."]]);
         }
 
-        $vertical = $this->primaryVertical($user) ?? 'unclassified';
+        // A selected account is its own subject. Never copy the member's
+        // vertical onto it: the account may belong to another vertical, or to
+        // none of the canonical verticals yet. Measurement will enrich it from
+        // its own profile and posts.
+        $vertical = $this->verticals->fromSignals([
+            $profile->bio,
+            ...$profile->posts->take(12)->pluck('caption')->all(),
+            ...$profile->posts->take(12)->flatMap(fn ($post): array => $post->hashtags)->all(),
+        ]);
         $creator = Creator::query()
             ->when($profile->externalId, fn ($query) => $query->where('instagram_user_id', $profile->externalId))
             ->orWhereRaw('LOWER(username) = ?', [Str::lower($profile->username)])
@@ -217,7 +225,7 @@ class CreatorInspirationService
 
         if ($isNew) {
             $attributes += [
-                'niche' => $vertical,
+                'niche' => $vertical ?? 'unclassified',
                 'niche_topics' => [],
                 'market' => $user->creatorProfile?->market,
                 'primary_language' => 'unknown',
@@ -317,15 +325,6 @@ class CreatorInspirationService
         );
 
         return rtrim((string) config('app.url'), '/').$path;
-    }
-
-    private function primaryVertical(User $user): ?string
-    {
-        return $this->verticals->canonical($user->creatorProfile?->primary_vertical)
-            ?? $this->verticals->fromSignals([
-                $user->creatorProfile?->niche,
-                ...($user->creatorProfile?->topics ?? []),
-            ]);
     }
 
     private function profileCacheKey(string $username): string

@@ -65,6 +65,7 @@ class ContentPostView
             'creator' => [
                 'username' => $post->creator->username,
                 'display_name' => $post->creator->display_name,
+                'bio' => $post->creator->bio,
                 'avatar_url' => $this->mediaUrl('media.creator', 'creator', $post->creator->id, $post->creator->avatar_url),
                 'niche' => $post->creator->niche,
                 'niche_topics' => $post->creator->niche_topics ?? [],

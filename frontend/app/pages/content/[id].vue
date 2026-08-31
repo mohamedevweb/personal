@@ -15,6 +15,11 @@ const generating = ref(false)
 const loading = ref(true)
 const isReel = computed(() => (post.value?.format || '').toLowerCase().includes('reel'))
 const isCarousel = computed(() => (post.value?.format || '').toLowerCase().includes('carousel'))
+const creatorNiche = computed(() => {
+  const niche = post.value?.creator.niche?.trim()
+
+  return niche && niche.toLowerCase() !== 'unclassified' ? niche : null
+})
 // The draft takes the shape of the post it borrows from. A single image is a
 // carousel of one slide, which is what the server decides too.
 const format = computed<'reel' | 'carousel'>(() => (isReel.value ? 'reel' : 'carousel'))
@@ -90,18 +95,27 @@ async function createRemix() {
 onMounted(async () => {
   analysisStopped = false
 
+  // The post is the page. Moments are only the optional input for a remix, so
+  // a slow moments request must never keep an otherwise readable Reel behind
+  // the loading screen.
+  const contentRequest = apiFetch<{ content: ContentPost }>(`/api/content/${route.params.id}`)
+  const momentsRequest = apiFetch<{ moments: LifeMoment[] }>('/api/moments')
+
   try {
-    const [contentResponse, momentsResponse] = await Promise.all([
-      apiFetch<{ content: ContentPost }>(`/api/content/${route.params.id}`),
-      apiFetch<{ moments: LifeMoment[] }>('/api/moments')
-    ])
+    const contentResponse = await contentRequest
     post.value = contentResponse.content
-    moments.value = momentsResponse.moments
-    if (contentResponse.content.analysis_status === 'pending') requestAnalysis()
+    if (contentResponse.content.analysis_status === 'pending') void requestAnalysis()
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('content.loadError')))
   } finally {
     loading.value = false
+  }
+
+  try {
+    moments.value = (await momentsRequest).moments
+  } catch {
+    // The post remains usable without moments. The composer lets the creator
+    // add one locally when the optional list request is unavailable.
   }
 })
 
@@ -152,8 +166,11 @@ onBeforeUnmount(() => {
             <span class="min-w-0 flex-1">
               <span class="block truncate text-sm font-medium hover:underline">@{{ post.creator.username }}</span>
               <span class="block truncate text-xs text-[var(--faint)]">{{ $t('content.followers', { count: compactNumber(post.creator.followers) }) }} · {{ relativeDate(post.published_at, locale) }}</span>
-              <span v-if="post.creator.vertical" class="mt-1 block truncate text-[11px] font-medium text-[var(--accent-ink)]">
-                {{ $t('content.vertical') }} · {{ $t(`content.verticals.${post.creator.vertical}`) }}
+              <span v-if="post.creator.vertical || creatorNiche" class="mt-1 block truncate text-[11px] font-medium text-[var(--accent-ink)]">
+                {{ post.creator.vertical ? `${$t('content.vertical')} · ${$t(`content.verticals.${post.creator.vertical}`)}` : creatorNiche }}
+              </span>
+              <span v-if="post.creator.bio" class="mt-2 block whitespace-pre-line break-words text-[12.5px] leading-5 text-[var(--muted)]">
+                {{ post.creator.bio }}
               </span>
             </span>
           </a>

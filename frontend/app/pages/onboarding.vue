@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import type { HandleAnalysis, HandleAnalysisStage, InstagramSyncStatus } from '~/types/instagram'
+import type { MessageFunction, VueMessageType } from 'vue-i18n'
 
 definePageMeta({ layout: false })
 
 const route = useRoute()
-const { t, te, tm, locale } = useI18n()
+const { t, te, tm, rt, locale } = useI18n()
 const { user } = useAuth()
 const { status, connecting, error, connect, loadStatus, startPolling } = useInstagram()
 const { apiFetch } = usePersonalApi()
@@ -181,9 +182,10 @@ if (import.meta.client) {
 }
 
 function workingMessage(stage: HandleAnalysisStage): string {
-  const messages = tm(`onboarding.analysis.workingMessages.${stage}`) as string[] | undefined
+  const messages = tm(`onboarding.analysis.workingMessages.${stage}`) as (MessageFunction<VueMessageType> | VueMessageType)[] | undefined
   if (!Array.isArray(messages) || !messages.length) return t('onboarding.analysis.working')
-  return messages[workingMessageIndex.value % messages.length] ?? t('onboarding.analysis.working')
+  const message = messages[workingMessageIndex.value % messages.length]
+  return message === undefined ? t('onboarding.analysis.working') : rt(message)
 }
 
 const analysisSteps = computed(() => analysisStages.value.map((stage, index) => {

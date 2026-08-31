@@ -30,9 +30,11 @@ const post: ContentPost = {
   creator: {
     username: 'jun_yuh',
     display_name: 'Jun Yuh',
+    bio: 'Building products and sharing what I learn.',
     avatar_url: null,
     niche: 'tech',
     niche_topics: [],
+    vertical: null,
     followers: 5300000,
     average_views: 100000
   }

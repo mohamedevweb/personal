@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { createFeedRotation } from '../app/utils/feedPagination.ts'
+import { createFeedRotation, feedHasMore } from '../app/utils/feedPagination.ts'
 
 const batch = (...ids) => ids.map(id => ({ id }))
 
@@ -42,4 +42,9 @@ test('forgetting the rotation makes the whole catalogue eligible again', () => {
 
   assert.deepEqual(rotation.exclude(), [])
   assert.deepEqual(rotation.accept(batch(1, 2)).map(post => post.id), [1, 2])
+})
+
+test('stops loading when the API marks the current page as final', () => {
+  assert.equal(feedHasMore({ items: batch(1, 2), has_more: false }), false)
+  assert.equal(feedHasMore({ items: batch(...Array.from({ length: 24 }, (_, index) => index)) }), true)
 })

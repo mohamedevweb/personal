@@ -486,8 +486,6 @@
     "emptyBody": "Aucune publication n’est assez pertinente pour ton profil actuellement. Personal cherche de nouvelles opportunités dans ton univers.",
     "exploreTitle": "Explorer autour de ta niche",
     "exploreBody": "Ces schémas performants viennent de sujets adjacents.",
-    "refresh": "Rafraîchir mon feed",
-    "refreshing": "Actualisation…",
     "loadingMore": "Chargement…",
     "loadMore": "Charger plus"
   },
@@ -736,6 +734,7 @@
       "lifestyle": "Lifestyle",
       "local-culture": "Local et culture",
       "travel": "Voyage",
+      "startup": "Startup",
       "business": "Business"
     },
     "views": "{count} vues",

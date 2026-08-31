@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ContentPost, FeedResponse } from '~/types/product'
+import { feedHasMore, createFeedRotation } from '~/utils/feedPagination'
 
 /**
  * The feed pages itself by exclusion: every request carries the ids already on
@@ -12,7 +13,6 @@ const { t } = useI18n()
 const toast = useToast()
 const loading = ref(true)
 const loadingMore = ref(false)
-const refreshing = ref(false)
 const exhausted = ref(false)
 const extendFailed = ref(false)
 const meta = ref<FeedResponse | null>(null)
@@ -40,7 +40,7 @@ async function loadFeed(): Promise<void> {
     meta.value = response
     posts.value = rotation.accept(response.items)
     explorePosts.value = response.explore_items ?? []
-    exhausted.value = posts.value.length === 0
+    exhausted.value = posts.value.length === 0 || !feedHasMore(response)
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('feed.loadError')))
   } finally {
@@ -60,7 +60,7 @@ function sentinelInView(): boolean {
 }
 
 async function loadMore(): Promise<void> {
-  if (loadingMore.value || refreshing.value || exhausted.value || extendFailed.value) return
+  if (loadingMore.value || exhausted.value || extendFailed.value) return
   if (posts.value.length === 0) return
 
   loadingMore.value = true
@@ -70,7 +70,10 @@ async function loadMore(): Promise<void> {
     // Nothing new means there is no page left to ask for, so the scroll ends
     // here instead of requesting one the API cannot fill.
     if (fresh.length === 0) exhausted.value = true
-    else posts.value = [...posts.value, ...fresh]
+    else {
+      posts.value = [...posts.value, ...fresh]
+      exhausted.value = !feedHasMore(response)
+    }
   } catch (exception: unknown) {
     // Stopping on failure keeps a broken request from being retried on every
     // pixel of scroll; the reader gets an explicit button instead.
@@ -88,35 +91,6 @@ function retryLoadMore() {
   extendFailed.value = false
 
   return loadMore()
-}
-
-async function refresh() {
-  if (refreshing.value) return
-  refreshing.value = true
-  exhausted.value = false
-  extendFailed.value = false
-  try {
-    const response = await apiFetch<FeedResponse>(feedPath(rotation.exclude()))
-    // The rotation is deliberately kept across a refresh: it carries on from
-    // where the scroll left off instead of replaying what was just passed.
-    const fresh = rotation.accept(response.items)
-    if (fresh.length === 0) {
-      rotation.forget()
-      toast.success(t('feed.rotationComplete'))
-      await loadFeed()
-
-      return
-    }
-
-    meta.value = response
-    posts.value = fresh
-    explorePosts.value = response.explore_items ?? []
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  } catch (exception: unknown) {
-    toast.error(apiErrorMessage(exception, t('feed.loadError')))
-  } finally {
-    refreshing.value = false
-  }
 }
 
 async function save(post: ContentPost) {
@@ -161,12 +135,6 @@ onMounted(loadFeed)
           <p class="text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--faint)]">{{ $t('feed.moreEyebrow') }}</p>
           <h2 class="mt-2 font-serif text-[28px] tracking-[-.025em]">{{ $t('feed.moreTitle') }}</h2>
         </div>
-        <!-- Icon-only on a phone, so it is a circle a thumb can land on rather
-             than a pill squeezed to the width of its glyph. -->
-        <button class="inline-flex h-11 w-11 items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] text-[12.5px] text-[var(--muted)] transition hover:text-[var(--ink)] disabled:opacity-60 sm:h-9 sm:w-auto sm:px-4" :aria-label="refreshing ? $t('feed.refreshing') : $t('feed.refresh')" :disabled="refreshing" @click="refresh">
-          <AppIcon name="sparkles" :size="14" />
-          <span class="hidden sm:inline">{{ refreshing ? $t('feed.refreshing') : $t('feed.refresh') }}</span>
-        </button>
       </div>
       <div class="mt-5 grid auto-rows-fr gap-5 sm:grid-cols-2 xl:grid-cols-3">
         <ContentCard v-for="post in posts" :key="post.id" :post="post" @save="save" @remix="openRemix" />
@@ -197,7 +165,6 @@ onMounted(loadFeed)
       <p class="mx-auto mt-3 max-w-md text-sm leading-6 text-[var(--muted)]">{{ $t('feed.emptyBody') }}</p>
       <div class="mt-6 flex flex-wrap justify-center gap-2">
         <NuxtLink to="/personal" class="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-[14px] font-medium transition hover:bg-[var(--paper)]">{{ $t('feed.adjustContext') }}</NuxtLink>
-        <button class="inline-flex h-11 items-center justify-center gap-2 rounded-full b-btn-red px-5 text-[14px] font-medium transition disabled:cursor-wait disabled:opacity-60" :disabled="refreshing" @click="refresh"><AppIcon name="sparkles" :size="16" />{{ refreshing ? $t('feed.refreshing') : $t('feed.refresh') }}</button>
       </div>
     </section>
 

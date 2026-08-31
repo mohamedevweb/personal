@@ -65,6 +65,14 @@ class NicheDetectionServiceTest extends TestCase
         $this->assertSame('tech-ai', $verticals->fromSignals(['AI SaaS founder']));
     }
 
+    public function test_startup_is_a_distinct_canonical_vertical_from_business(): void
+    {
+        $verticals = app(CanonicalCreatorVerticals::class);
+
+        $this->assertSame('startup', $verticals->fromSignals(['startup']));
+        $this->assertSame('business', $verticals->fromSignals(['business']));
+    }
+
     public function test_offline_topics_ignore_generic_caption_words_for_an_athlete(): void
     {
         $account = new InstagramAccount([

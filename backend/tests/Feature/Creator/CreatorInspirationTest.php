@@ -188,6 +188,39 @@ class CreatorInspirationTest extends TestCase
             ->assertJsonPath('onboarding_complete', true);
     }
 
+    public function test_new_inspiration_without_a_canonical_vertical_stays_unclassified(): void
+    {
+        Queue::fake();
+        $this->creator('first.creator');
+        $this->creator('second.creator');
+
+        $provider = \Mockery::mock(InstagramDataProvider::class);
+        $provider->shouldReceive('getProfile')->once()->with('neutral.creator')->andReturn(
+            new DiscoveredProfile(
+                username: 'neutral.creator',
+                displayName: 'Neutral Creator',
+                avatarUrl: null,
+                followers: 51000,
+                posts: collect(),
+                bio: 'Je partage mes découvertes du quotidien.',
+                externalId: 'instagram-neutral',
+            ),
+        );
+        $manager = \Mockery::mock(InstagramDataProviderManager::class);
+        $manager->shouldReceive('provider')->once()->andReturn($provider);
+        $this->app->instance(InstagramDataProviderManager::class, $manager);
+
+        $this->actingAs($this->user)->putJson('/api/creator-inspirations', [
+            'handles' => ['first.creator', 'second.creator', 'neutral.creator'],
+        ]);
+
+        $this->assertDatabaseHas('creators', [
+            'username' => 'neutral.creator',
+            'niche' => 'unclassified',
+            'primary_vertical' => null,
+        ]);
+    }
+
     public function test_selection_requires_three_distinct_valid_handles(): void
     {
         $this->actingAs($this->user)->putJson('/api/creator-inspirations', [

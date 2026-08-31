@@ -18,6 +18,13 @@ const publicRoutes = new Set([
 const signedInRedirects = new Set(['/login', '/forgot-password'])
 
 export default defineNuxtRouteMiddleware(async (to) => {
+  // The session cookie is issued by the API subdomain. It is available to the
+  // browser's API request, but the frontend SSR request may not receive it when
+  // production uses a host-only cookie. Waiting for the client avoids rendering
+  // a false /login redirect during a hard reload; the middleware still runs
+  // before the protected page is hydrated.
+  if (import.meta.server) return
+
   const { authenticated, bootstrapDevelopmentToken, apiFetch } = usePersonalApi()
   const { user, loadUser } = useAuth()
 

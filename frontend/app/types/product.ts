@@ -1,10 +1,11 @@
 export interface Creator {
   username: string
   display_name: string
+  bio: string | null
   avatar_url: string | null
-  niche: string
+  niche: string | null
   niche_topics: string[]
-  vertical?: PersonalProfile['primary_vertical']
+  vertical: PersonalProfile['primary_vertical']
   followers: number
   average_views: number
 }
@@ -78,6 +79,7 @@ export interface ContentPost {
 
 export interface FeedResponse {
   opportunity_count: number
+  has_more?: boolean
   personalization: {
     niche: string | null
     primary_vertical: PersonalProfile['primary_vertical']
@@ -120,7 +122,7 @@ export interface PersonalProfile {
   niche: string | null
   market: 'FR' | 'GB' | 'US' | null
   market_confidence: number | null
-  primary_vertical: 'sport-fitness' | 'food-cooking' | 'personal-branding' | 'tech-ai' | 'beauty-fashion' | 'wellness' | 'events' | 'languages' | 'lifestyle' | 'local-culture' | 'travel' | null
+  primary_vertical: 'sport-fitness' | 'food-cooking' | 'personal-branding' | 'tech-ai' | 'beauty-fashion' | 'wellness' | 'events' | 'languages' | 'lifestyle' | 'local-culture' | 'travel' | 'startup' | 'business' | null
   audience_description: string | null
   positioning: string | null
   topics: string[] | null

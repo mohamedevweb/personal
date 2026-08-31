@@ -33,7 +33,8 @@ return [
         'lifestyle' => ['name' => 'Lifestyle', 'fallback_alias' => 'lifestyle', 'aliases' => ['lifestyle', 'mode de vie', 'habits', 'habitudes', 'routines', 'routine', 'discipline', 'self-development', 'self development', 'personal development', 'développement personnel', 'minimalism', 'personal growth']],
         'local-culture' => ['name' => 'Local & Culture', 'fallback_alias' => 'local culture', 'aliases' => ['local culture', 'local / culture', 'culture locale', 'local discovery', 'city guide', 'city guides', 'paris', 'lyon', 'london', 'new york', 'nyc', 'sorties', 'addresses']],
         'travel' => ['name' => 'Travel', 'fallback_alias' => 'travel', 'aliases' => ['travel', 'voyage', 'tourism', 'tourisme', 'destination', 'destinations', 'travel tips', 'adventure', 'road trip', 'backpacking']],
-        'business' => ['name' => 'Business', 'fallback_alias' => 'business', 'aliases' => ['business', 'startup', 'startups', 'founder', 'founders', 'entrepreneur', 'entrepreneurs', 'entrepreneurship', 'entrepreneuriat', 'investing', 'investment', 'business owner']],
+        'startup' => ['name' => 'Startup', 'fallback_alias' => 'startup', 'aliases' => ['startup', 'startups', 'start-up', 'start-ups']],
+        'business' => ['name' => 'Business', 'fallback_alias' => 'business', 'aliases' => ['business', 'founder', 'founders', 'entrepreneur', 'entrepreneurs', 'entrepreneurship', 'entrepreneuriat', 'investing', 'investment', 'business owner']],
     ],
 
     // Adjacent subjects may be useful, but they never fill the personalised
@@ -42,9 +43,10 @@ return [
     'adjacent_verticals' => [
         'sport-fitness' => ['wellness'],
         'food-cooking' => ['wellness'],
-        'personal-branding' => ['tech-ai', 'business'],
-        'tech-ai' => ['personal-branding', 'business'],
-        'business' => ['tech-ai', 'personal-branding'],
+        'personal-branding' => ['tech-ai', 'business', 'startup'],
+        'tech-ai' => ['personal-branding', 'business', 'startup'],
+        'business' => ['tech-ai', 'personal-branding', 'startup'],
+        'startup' => ['tech-ai', 'business', 'personal-branding'],
         'wellness' => ['sport-fitness', 'food-cooking'],
         'events' => ['local-culture', 'lifestyle'],
         'languages' => ['lifestyle'],

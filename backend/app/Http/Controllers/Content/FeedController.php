@@ -41,6 +41,7 @@ class FeedController extends Controller
 
         return response()->json([
             'opportunity_count' => $items->count(),
+            'has_more' => $items->count() >= (int) config('services.discovery.feed_size'),
             'personalization' => [
                 'niche' => $profile?->niche,
                 'primary_vertical' => $profile?->primary_vertical,

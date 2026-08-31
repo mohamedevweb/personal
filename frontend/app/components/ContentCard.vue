@@ -98,15 +98,16 @@ const visibleCaption = computed(() => (isLongCaption.value ? `${caption.value.sl
       </button>
     </div>
 
-    <!-- Captions are the only part of a post whose length we do not control, so
-         this block is held at the height of its fullest form — likes and two lines
-         of caption. Every card is then exactly as tall as every other, in its row
-         and across rows. -->
-    <div class="h-[64px] overflow-hidden px-3 pb-2 text-[12px] leading-[16px]">
+    <!-- Captions and bios come from public Instagram text, so both stay readable
+         below the post instead of being hidden behind the card's action area. -->
+    <div class="px-3 pb-3 text-[12px] leading-[16px]">
       <p v-if="post.likes_available !== false" class="truncate font-semibold">{{ $t('contentCard.likes', { count: compactNumber(post.likes) }) }}</p>
       <p class="mt-1 line-clamp-2">
         <span class="font-semibold">{{ post.creator.username }}</span>
         {{ ' ' }}{{ visibleCaption }}<NuxtLink v-if="isLongCaption" :to="`/content/${post.id}`" class="text-[var(--faint)] transition hover:text-[var(--ink)]">{{ $t('contentCard.more') }}</NuxtLink>
+      </p>
+      <p v-if="post.creator.bio" class="mt-3 whitespace-pre-line break-words border-t border-[var(--line-soft)] pt-2.5 text-[11.5px] leading-[16px] text-[var(--muted)]">
+        {{ post.creator.bio }}
       </p>
     </div>
 

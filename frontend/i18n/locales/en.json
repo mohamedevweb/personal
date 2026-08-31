@@ -486,8 +486,6 @@
     "emptyBody": "No publication is relevant enough for your profile right now. Personal is looking for new opportunities in your universe.",
     "exploreTitle": "Explore around your niche",
     "exploreBody": "These strong patterns come from adjacent subjects.",
-    "refresh": "Refresh my feed",
-    "refreshing": "Refreshing…",
     "loadingMore": "Loading more…",
     "loadMore": "Load more"
   },
@@ -736,6 +734,7 @@
       "lifestyle": "Lifestyle",
       "local-culture": "Local and culture",
       "travel": "Travel",
+      "startup": "Startup",
       "business": "Business"
     },
     "views": "{count} views",
