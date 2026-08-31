@@ -806,20 +806,6 @@
         "voice": "Écriture dans ta voix"
       }
     },
-    "generatingEyebrow": "Brouillon en préparation",
-    "generatingTitle": "Ta page est prête. Personal écrit maintenant.",
-    "generatingCopy": "Le schéma, ton moment et ta voix sont réunis en arrière-plan.",
-    "generatingSteps": {
-      "1": {
-        "title": "Lecture du schéma"
-      },
-      "2": {
-        "title": "Lien avec ton histoire"
-      },
-      "3": {
-        "title": "Écriture dans ta voix"
-      }
-    },
     "generationFailed": "Le brouillon a besoin d’un nouvel essai.",
     "generationFailedCopy": "Le service d’écriture n’a pas répondu correctement. Ton choix est conservé.",
     "retry": "Relancer la rédaction",

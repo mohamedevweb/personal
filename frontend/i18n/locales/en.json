@@ -806,20 +806,6 @@
         "voice": "Writing in your voice"
       }
     },
-    "generatingEyebrow": "Draft in progress",
-    "generatingTitle": "Your page is ready. Personal is writing now.",
-    "generatingCopy": "The pattern, your moment and your voice are being brought together in the background.",
-    "generatingSteps": {
-      "1": {
-        "title": "Reading the pattern"
-      },
-      "2": {
-        "title": "Connecting your story"
-      },
-      "3": {
-        "title": "Writing in your voice"
-      }
-    },
     "generationFailed": "This draft needs another try.",
     "generationFailedCopy": "The writing service did not respond correctly. Your selection is still saved.",
     "retry": "Try writing again",

@@ -13,7 +13,6 @@ const WORDS_PER_SECOND = 2.6
 
 const route = useRoute()
 const { apiFetch } = usePersonalApi()
-const { waitForRemix } = useRemixOpening()
 const { t } = useI18n()
 const toast = useToast()
 const { user, loadUser } = useAuth()
@@ -25,7 +24,6 @@ const copied = ref(false)
 const retrying = ref(false)
 const deleting = ref(false)
 const regeneratingBlock = ref<string | null>(null)
-const generationPolling = ref(false)
 /** A rewrite discards the draft, so the button asks once before it fires. */
 const confirmingRedraft = ref(false)
 /** Deleting has no undo, so it asks the same way. */
@@ -255,34 +253,19 @@ function guardUnload(event: BeforeUnloadEvent) {
 async function loadRemix() {
   try {
     const response = await apiFetch<{ remix: Remix }>(`/api/remixes/${route.params.id}`)
+    if (response.remix.status === 'generating') {
+      await navigateTo('/drafts')
+      return
+    }
     remix.value = response.remix
     sourceAvatarFailed.value = false
     if (response.remix.status !== 'failed') {
       pristine.value = JSON.stringify(response.remix.generated_content)
     }
-
-    if (response.remix.status === 'generating') void finishGeneration(response.remix.id)
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('remix.loadError')))
   } finally {
     loading.value = false
-  }
-}
-
-async function finishGeneration(id: number) {
-  if (generationPolling.value) return
-  generationPolling.value = true
-
-  try {
-    const generated = await waitForRemix(id)
-    if (!generated || String(route.params.id) !== String(id)) return
-
-    remix.value = generated
-    if (generated.status !== 'failed') pristine.value = JSON.stringify(generated.generated_content)
-  } catch (exception: unknown) {
-    toast.error(apiErrorMessage(exception, t('remix.loadError')))
-  } finally {
-    generationPolling.value = false
   }
 }
 
@@ -291,14 +274,11 @@ async function retryGeneration() {
   retrying.value = true
   try {
     const response = await apiFetch<{ remix: Remix }>(`/api/remixes/${remix.value.id}/retry`, { method: 'POST' })
-    remix.value = response.remix
     if (response.remix.status === 'generating') {
-      // Show the same non-blocking progress screen as a new remix. The draft
-      // remains accessible from Drafts while this page polls in the background.
-      retrying.value = false
-      void finishGeneration(response.remix.id)
+      await navigateTo('/drafts')
       return
     }
+    remix.value = response.remix
     if (response.remix.status !== 'failed') pristine.value = JSON.stringify(response.remix.generated_content)
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('remix.retryError')))
@@ -383,30 +363,6 @@ onBeforeUnmount(() => {
         <div class="h-80 animate-pulse rounded-[20px] bg-[var(--sand-soft)]" />
       </div>
     </div>
-
-    <section v-else-if="remix?.status === 'generating'" class="page-shell pb-16 pt-10 md:pt-16">
-      <div class="mx-auto max-w-2xl rounded-[24px] border border-[var(--line)] bg-[var(--surface)] p-6 shadow-[0_1px_2px_rgba(23,23,26,.04)] md:p-10" aria-live="polite" aria-busy="true">
-        <div class="flex items-center justify-between gap-4">
-          <span class="b-eyebrow">{{ $t('remix.generatingEyebrow') }}</span>
-          <AppIcon name="sparkles" :size="18" class="animate-breathe text-[var(--accent)]" />
-        </div>
-        <h1 class="mt-5 max-w-xl font-serif text-[36px] leading-[1.05] tracking-[-.035em] md:text-[48px]">{{ $t('remix.generatingTitle') }}</h1>
-        <p class="mt-4 max-w-xl text-[15px] leading-7 text-[var(--muted)]">{{ $t('remix.generatingCopy') }}</p>
-
-        <ol class="mt-8 grid gap-3 md:grid-cols-3">
-          <li v-for="step in ['1', '2', '3']" :key="step" class="rounded-[16px] border border-[var(--line-soft)] bg-[var(--paper)] p-4">
-            <span class="grid h-7 w-7 place-items-center rounded-full bg-[var(--accent-soft)] text-xs font-semibold text-[var(--accent-ink)]">{{ step }}</span>
-            <span class="mt-4 block text-[13px] font-medium">{{ $t(`remix.generatingSteps.${step}.title`) }}</span>
-            <span class="mt-3 block h-1 overflow-hidden rounded-full bg-[var(--line)]"><span class="block h-full w-1/2 animate-shimmer-sweep rounded-full bg-[var(--accent)]" /></span>
-          </li>
-        </ol>
-
-        <div class="mt-8 flex flex-wrap gap-3">
-          <NuxtLink to="/drafts" class="inline-flex h-11 items-center rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 text-sm font-medium transition hover:bg-[var(--paper)]">{{ $t('nav.drafts') }}</NuxtLink>
-          <NuxtLink v-if="remix.source_content?.id" :to="`/content/${remix.source_content.id}`" class="inline-flex h-11 items-center rounded-full px-5 text-sm text-[var(--muted)] transition hover:text-[var(--ink)]">{{ $t('remix.backToAnalysis') }}</NuxtLink>
-        </div>
-      </div>
-    </section>
 
     <section v-else-if="remix?.status === 'failed'" class="page-shell pt-16 text-center">
       <span class="mx-auto grid h-12 w-12 place-items-center rounded-[16px] bg-[var(--accent-soft)] text-[var(--accent-ink)]">
