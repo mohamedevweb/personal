@@ -134,6 +134,22 @@ php artisan personal:prune-post-metric-snapshots
 php artisan personal:prune-unsupported-markets --dry-run
 ```
 
+To backfill the structured post classifications before growing the catalog, run
+the bounded pass below. It skips posts that already have a vertical:
+
+```bash
+docker compose exec app php artisan personal:classify-feed-posts --limit=1000
+```
+
+To refresh validated creators and fetch a wider recent window for outlier
+discovery, queue the targeted pass below. It forces the creator refresh through
+the normal safety, deduplication and measurement pipeline:
+
+```bash
+docker compose exec app php artisan personal:refresh-validated-creators
+docker compose exec app php artisan personal:refresh-validated-creators --vertical=business
+```
+
 ## Curated creator catalog
 
 The first production dataset is a versioned Golden Catalog in `backend/database/catalog/instagram_creators.php`. It contains 25 human-curated French creators, five in each of the five initial Golden Catalog verticals. Discovery and feed classification also support the additional production verticals Events, Languages, Lifestyle, Local & Culture and Travel. Each entry records the exact Instagram URL, editorial sources, topics and rationale. Followers and recognition tiers are intentionally absent because they are measured rather than guessed. Entries start as `pending` during review and are changed to `approved` only after the human editorial decision. Entries removed from production stay `inactive`, so a later import cannot recreate them.

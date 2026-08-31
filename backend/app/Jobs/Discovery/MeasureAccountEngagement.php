@@ -55,6 +55,9 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
         public readonly array $usernames,
         public readonly bool $latestOnly = false,
         public readonly array $marketHints = [],
+        public readonly bool $force = false,
+        public readonly bool $recentOnly = false,
+        public readonly ?int $postsLimit = null,
     ) {}
 
     public function uniqueId(): string
@@ -133,9 +136,18 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
                 return;
             }
 
+            $postsLimit = max(1, $this->postsLimit ?? (int) config('services.discovery.profile_posts'));
             $posts = $profile->posts->isNotEmpty()
-                ? $profile->posts->take((int) config('services.discovery.profile_posts'))->values()
-                : $provider->getPosts($profile->username, (int) config('services.discovery.profile_posts'), $profile->externalId);
+                ? $profile->posts->take($postsLimit)->values()
+                : $provider->getPosts($profile->username, $postsLimit, $profile->externalId);
+
+            if ($this->recentOnly) {
+                $posts = $posts
+                    ->filter(fn (DiscoveredPost $post): bool => $post->publishedAt->greaterThanOrEqualTo(
+                        now()->subDays((int) config('services.discovery.feed_window_days')),
+                    ))
+                    ->values();
+            }
         } catch (ContentDiscoveryException $exception) {
             $creator = Creator::query()->where('username', $username)->first();
 
@@ -148,7 +160,7 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
             return;
         }
 
-        if ($profile->posts->isEmpty() && $posts->isEmpty()) {
+        if ($posts->isEmpty()) {
             $creator = Creator::query()->where('username', $profile->username)->first();
 
             if ($creator) {
@@ -196,7 +208,8 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
 
         $known = Creator::query()->whereIn('username', $usernames)->get()->keyBy('username');
 
-        $ignoreSchedule = (int) config('services.discovery.measure_cooldown_days') === 0;
+        $ignoreSchedule = $this->force
+            || (int) config('services.discovery.measure_cooldown_days') === 0;
 
         return array_slice(array_values(array_filter($usernames, function (string $username) use ($known, $ignoreSchedule): bool {
             $creator = $known->get($username);

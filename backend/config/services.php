@@ -69,6 +69,9 @@ return [
 
         // Recent posts pulled per account to average the engagement rate over.
         'profile_posts' => (int) env('DISCOVERY_PROFILE_POSTS', 12),
+        // Targeted catalog refreshes can inspect a wider recent window without
+        // changing the smaller default used by interactive discovery.
+        'refresh_profile_posts' => (int) env('DISCOVERY_REFRESH_PROFILE_POSTS', 30),
         'search_query_limit' => (int) env('DISCOVERY_SEARCH_QUERY_LIMIT', 6),
         'search_results_per_query' => (int) env('DISCOVERY_SEARCH_RESULTS_PER_QUERY', 8),
         'seed_limit' => (int) env('DISCOVERY_SEED_LIMIT', 8),
