@@ -48,6 +48,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    networks:
+      default:
+        aliases:
+          - postgres
     restart: unless-stopped
 
   # Owns the schema: the only service that runs migrations.
@@ -65,6 +69,10 @@ services:
       - "${API_PORT:-8000}:80"
     depends_on:
       - app
+    networks:
+      default:
+        aliases:
+          - web
     restart: unless-stopped
 
   # Runs imports and discovery work, and acts as a fallback for remix jobs if the
