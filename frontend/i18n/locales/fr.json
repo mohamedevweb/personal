@@ -474,8 +474,6 @@
     "remixError": "Personal n’a pas pu rédiger ceci pour l’instant. Veuillez réessayer.",
     "rotationComplete": "Tu as vu toutes les opportunités pertinentes disponibles. Personal en cherche de nouvelles dans ton univers.",
     "saveError": "Personal n’a pas pu mettre à jour tes favoris. Réessaie.",
-    "dismissed": "Ce choix affinera tes prochaines recommandations.",
-    "dismissError": "Personal n’a pas pu mettre à jour tes recommandations. Réessaie.",
     "emptyTitle": "Rien pour l’instant.",
     "emptyBody": "Aucune publication n’est assez pertinente pour ton profil actuellement. Personal cherche de nouvelles opportunités dans ton univers.",
     "exploreTitle": "Explorer autour de ta niche",
@@ -856,12 +854,6 @@
     "openProfile": "Voir le compte de {'@'}{username} sur Instagram",
     "openSource": "Voir le post original sur Instagram",
     "playReel": "Lire le Reel de {'@'}{username}",
-    "notForMe": "Pas pour moi",
-    "dismissReasons": {
-      "topic": "Ce sujet",
-      "creator": "Ce créateur",
-      "language": "Cette langue"
-    },
     "previousSlide": "Diapositive précédente",
     "nextSlide": "Diapositive suivante",
     "goToSlide": "Aller à la diapositive {slide}",

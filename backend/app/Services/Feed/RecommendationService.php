@@ -72,6 +72,39 @@ class RecommendationService
             ->sortByDesc('ranking.score')
             ->values();
 
+        // A small catalogue can have fewer breakout posts than the requested
+        // batch. Add a measured, safe second tier only when the first tier cannot
+        // fill the configured minimum. Relevance still decides whether a post is
+        // For You or Explore, so this never bypasses semantic filtering.
+        $minimum = min(
+            $limit,
+            max(0, (int) config('services.discovery.minimum_feed_size')),
+        );
+        $relevantCount = $ranked->whereIn('bucket', [PostRelevance::FOR_YOU, PostRelevance::EXPLORE])->count();
+        if ($relevantCount < $minimum) {
+            $ranked = $ranked->concat(
+                $this->fallbackCandidates($user, $limit, $inspirationIds, $excludeIds)
+                    ->reject(fn (ContentPost $post): bool => $this->interactions->excludes($post, $interactionSignals))
+                    ->map(function (ContentPost $post) use ($user, $interactionSignals): array {
+                        $relevance = $this->relevance->assess($user->creatorProfile, $post);
+
+                        return [
+                            'post' => $post,
+                            'bucket' => $relevance['bucket'],
+                            'ranking' => $this->personalizedRanking(
+                                $post,
+                                $user,
+                                $relevance['affinity'],
+                                $this->interactions->adjustment($post, $interactionSignals),
+                            ),
+                        ];
+                    }),
+            )
+                ->unique(fn (array $item): int => $item['post']->id)
+                ->sortByDesc('ranking.score')
+                ->values();
+        }
+
         $inspirationLookup = $inspirationIds->flip();
         $forYou = $ranked->where('bucket', PostRelevance::FOR_YOU)->values();
         $inspired = $forYou
@@ -96,6 +129,17 @@ class RecommendationService
                 $user->creatorProfile?->market,
                 $exploreLimit,
             );
+
+        // Adjacent, semantically shared posts are useful when the strict shelf
+        // is short. Promote only enough Explore cards to reach the floor, then
+        // remove them from Explore so a card is never rendered twice.
+        $promote = max(0, $minimum - $items->count());
+        if ($promote > 0 && $explore->isNotEmpty()) {
+            $promoted = $explore->take($promote)->values();
+            $items = $items->concat($promoted)->take($limit)->values();
+            $promotedIds = $promoted->pluck('post.id')->flip();
+            $explore = $explore->reject(fn (array $item): bool => $promotedIds->has($item['post']->id))->values();
+        }
 
         return [
             'items' => $this->render($items, $user, $savedIds),
@@ -200,6 +244,17 @@ class RecommendationService
                 ->limit($limit * self::CANDIDATE_MULTIPLIER * count(config('creator_catalog.markets')))
                 ->get(),
         )->unique('id')->values();
+    }
+
+    /** @return Collection<int, ContentPost> */
+    private function fallbackCandidates(User $user, int $limit, Collection $inspirationIds, array $excludeIds): Collection
+    {
+        return $this->pool($user, $inspirationIds, $excludeIds)
+            ->whereNotNull('measured_at')
+            ->where('outlier_score', '>=', (float) config('services.discovery.fallback_min_outlier_score'))
+            ->orderByDesc('outlier_score')
+            ->limit($limit * self::CANDIDATE_MULTIPLIER * count(config('creator_catalog.markets')))
+            ->get();
     }
 
     private function pool(User $user, Collection $inspirationIds, array $excludeIds): Builder

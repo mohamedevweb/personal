@@ -5,11 +5,13 @@ definePageMeta({ layout: false })
 
 const route = useRoute()
 const { t, te, locale } = useI18n()
+const { user } = useAuth()
 const { status, connecting, error, connect, loadStatus, startPolling, stopPolling } = useInstagram()
 const { apiFetch } = usePersonalApi()
 const toast = useToast()
 const accountHandleInput = ref('')
 const handleSaving = ref(false)
+const canUseInstagramOAuth = computed(() => user.value?.email.trim().toLowerCase() === 'hello@usepersonal.app')
 // A profile that could not be read (a private account, a provider outage) must
 // not lock a creator out of their own onboarding, so the failure screen offers
 // a way through. Nothing else lets the flow past an unfinished analysis.
@@ -326,27 +328,33 @@ onMounted(async () => {
             {{ $t('onboarding.connectCopy') }}
           </p>
 
-          <button
-            class="mt-10 inline-flex h-[54px] w-full items-center justify-center gap-3 rounded-full b-btn-red px-7 text-[15px] font-medium transition hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-60 sm:w-auto"
-            :disabled="connecting"
-            @click="connect"
+          <template v-if="canUseInstagramOAuth">
+            <button
+              class="mt-10 inline-flex h-[54px] w-full items-center justify-center gap-3 rounded-full b-btn-red px-7 text-[15px] font-medium transition hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-60 sm:w-auto"
+              :disabled="connecting"
+              @click="connect"
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24" class="h-5 w-5 fill-none stroke-current" stroke-width="1.8">
+                <rect x="3" y="3" width="18" height="18" rx="5" />
+                <circle cx="12" cy="12" r="4" />
+                <circle cx="17.5" cy="6.5" r=".8" class="fill-current stroke-0" />
+              </svg>
+              {{ connecting ? $t('onboarding.preparing') : $t('onboarding.continueWithInstagram') }}
+              <span aria-hidden="true">↗</span>
+            </button>
+
+            <div class="my-8 flex items-center gap-4 text-xs font-medium uppercase tracking-[.16em] text-[var(--faint)]">
+              <span class="h-px flex-1 bg-[var(--line)]" />
+              {{ $t('onboarding.or') }}
+              <span class="h-px flex-1 bg-[var(--line)]" />
+            </div>
+          </template>
+
+          <form
+            class="rounded-[20px] border border-[var(--line)] bg-[var(--surface)] p-5"
+            :class="canUseInstagramOAuth ? '' : 'mt-8'"
+            @submit.prevent="saveAccountHandle"
           >
-            <svg aria-hidden="true" viewBox="0 0 24 24" class="h-5 w-5 fill-none stroke-current" stroke-width="1.8">
-              <rect x="3" y="3" width="18" height="18" rx="5" />
-              <circle cx="12" cy="12" r="4" />
-              <circle cx="17.5" cy="6.5" r=".8" class="fill-current stroke-0" />
-            </svg>
-            {{ connecting ? $t('onboarding.preparing') : $t('onboarding.continueWithInstagram') }}
-            <span aria-hidden="true">↗</span>
-          </button>
-
-          <div class="my-8 flex items-center gap-4 text-xs font-medium uppercase tracking-[.16em] text-[var(--faint)]">
-            <span class="h-px flex-1 bg-[var(--line)]" />
-            {{ $t('onboarding.or') }}
-            <span class="h-px flex-1 bg-[var(--line)]" />
-          </div>
-
-          <form class="rounded-[20px] border border-[var(--line)] bg-[var(--surface)] p-5" @submit.prevent="saveAccountHandle">
             <div class="flex flex-col gap-2 sm:flex-row">
               <input
                 id="instagram-account-handle"
@@ -477,7 +485,7 @@ onMounted(async () => {
           </template>
 
           <button
-            v-if="status.account?.sync_status === 'failed'"
+            v-if="canUseInstagramOAuth && status.account?.sync_status === 'failed'"
             class="mt-8 inline-flex h-11 items-center rounded-full border border-[var(--line)] bg-[var(--surface)] px-6 text-[14px] font-medium transition hover:bg-[var(--paper)]"
             :disabled="connecting"
             @click="connect"

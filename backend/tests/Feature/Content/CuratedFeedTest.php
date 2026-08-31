@@ -57,6 +57,19 @@ class CuratedFeedTest extends TestCase
         $this->assertGreaterThanOrEqual(8, $markets->get('FR'));
     }
 
+    public function test_measured_second_tier_fills_the_configured_minimum_without_unmeasured_posts(): void
+    {
+        config(['services.discovery.minimum_feed_size' => 4]);
+        $strong = $this->posts('FR', 1, niche: 'sport-fitness', baseOutlier: 1.5);
+        $this->posts('FR', 3, niche: 'sport-fitness', baseOutlier: 1.1);
+
+        $feed = app(RecommendationService::class)->forUser($this->user);
+
+        $this->assertCount(4, $feed);
+        $this->assertContains($strong->username, $feed->pluck('creator.username'));
+        $this->assertTrue($feed->every(fn (array $item): bool => $item['outlier_score'] >= 1.0));
+    }
+
     public function test_unknown_market_receives_four_posts_per_market(): void
     {
         $this->user->creatorProfile()->update(['market' => null]);

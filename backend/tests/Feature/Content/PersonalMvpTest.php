@@ -30,6 +30,9 @@ class PersonalMvpTest extends TestCase
     {
         parent::setUp();
         $this->seed(DatabaseSeeder::class);
+        // This suite verifies paging and exhaustion. The production minimum
+        // floor is covered by the curated feed tests instead.
+        config(['services.discovery.minimum_feed_size' => 0]);
         $this->user = User::query()->where('email', 'creator@personal.local')->firstOrFail();
     }
 

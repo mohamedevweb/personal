@@ -71,8 +71,6 @@ export interface FeedResponse {
   explore_items?: ContentPost[]
 }
 
-export type DismissReason = 'topic' | 'creator' | 'language'
-
 export interface LifeMoment {
   id: number
   content: string

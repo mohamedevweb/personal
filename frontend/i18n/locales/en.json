@@ -474,8 +474,6 @@
     "remixError": "Personal could not draft this right now. Please try again.",
     "rotationComplete": "You have seen every relevant opportunity available right now. Personal is looking for new ones in your universe.",
     "saveError": "Personal could not update your library. Please try again.",
-    "dismissed": "This choice will refine your next recommendations.",
-    "dismissError": "Personal could not update your recommendations. Please try again.",
     "emptyTitle": "No content yet.",
     "emptyBody": "No publication is relevant enough for your profile right now. Personal is looking for new opportunities in your universe.",
     "exploreTitle": "Explore around your niche",
@@ -856,12 +854,6 @@
     "openProfile": "View {'@'}{username} on Instagram",
     "openSource": "View original post on Instagram",
     "playReel": "Play {'@'}{username}'s Reel",
-    "notForMe": "Not for me",
-    "dismissReasons": {
-      "topic": "This topic",
-      "creator": "This creator",
-      "language": "This language"
-    },
     "previousSlide": "Previous slide",
     "nextSlide": "Next slide",
     "goToSlide": "Go to slide {slide}",

@@ -463,12 +463,11 @@ onBeforeUnmount(() => {
           <!-- The draft comes first: on a phone you land on your own words, not
                on the post they were borrowed from. -->
           <section class="min-w-0">
-            <!-- Reel and caption keep their format marker. The carousel already
-                 reads unmistakably as an Instagram deck, so its preview starts
-                 without a redundant badge. -->
-            <div v-if="remix.format !== 'carousel'" class="w-full">
+            <!-- Caption keeps its format marker. Reel and carousel drafts are
+                 already unmistakable from their editors. -->
+            <div v-if="remix.format === 'caption'" class="w-full">
               <span class="inline-flex h-9 items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 text-[12.5px] font-medium">
-                <AppIcon :name="remix.format === 'caption' ? 'text' : remix.format" :size="15" />
+                <AppIcon name="text" :size="15" />
                 {{ $t(`remix.formats.${remix.format}`) }}
               </span>
             </div>

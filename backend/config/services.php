@@ -91,6 +91,11 @@ return [
         // describes a niche that has already moved on, however well it did.
         'feed_window_days' => (int) env('DISCOVERY_FEED_WINDOW_DAYS', 30),
         'feed_size' => (int) env('DISCOVERY_FEED_SIZE', 24),
+        // Keep the first screen useful when only a handful of breakout posts
+        // clear the primary performance threshold. The fallback remains
+        // measured, safe, approved and above the absolute engagement floor.
+        'minimum_feed_size' => (int) env('DISCOVERY_MINIMUM_FEED_SIZE', 6),
+        'fallback_min_outlier_score' => (float) env('DISCOVERY_FALLBACK_MIN_OUTLIER_SCORE', 1.0),
         // Minimum outlier score to reach the feed: a post has to beat the account
         // that published it, not merely come from a large one.
         'min_outlier_score' => (float) env('DISCOVERY_MIN_OUTLIER_SCORE', 1.2),

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ContentPost, DismissReason, FeedResponse } from '~/types/product'
+import type { ContentPost, FeedResponse } from '~/types/product'
 
 /**
  * The feed pages itself by exclusion: every request carries the ids already on
@@ -128,17 +128,6 @@ async function save(post: ContentPost) {
   }
 }
 
-async function dismiss(post: ContentPost, reason: DismissReason) {
-  try {
-    await apiFetch(`/api/content/${post.id}/dismiss`, { method: 'POST', body: { reason } })
-    posts.value = posts.value.filter(item => item.id !== post.id)
-    explorePosts.value = explorePosts.value.filter(item => item.id !== post.id)
-    toast.success(t('feed.dismissed'))
-  } catch (exception: unknown) {
-    toast.error(apiErrorMessage(exception, t('feed.dismissError')))
-  }
-}
-
 function openRemix(post: ContentPost) {
   return navigateTo(`/content/${post.id}`)
 }
@@ -180,7 +169,7 @@ onMounted(loadFeed)
         </button>
       </div>
       <div class="mt-5 grid auto-rows-fr gap-5 sm:grid-cols-2 xl:grid-cols-3">
-        <ContentCard v-for="post in posts" :key="post.id" :post="post" dismissible @save="save" @dismiss="dismiss" @remix="openRemix" />
+        <ContentCard v-for="post in posts" :key="post.id" :post="post" @save="save" @remix="openRemix" />
       </div>
 
       <div v-if="loadingMore" class="mt-5 grid auto-rows-fr gap-5 sm:grid-cols-2 xl:grid-cols-3" aria-hidden="true">
@@ -218,7 +207,7 @@ onMounted(loadFeed)
         <p class="mt-2 text-sm leading-6 text-[var(--muted)]">{{ $t('feed.exploreBody') }}</p>
       </div>
       <div class="mt-5 grid auto-rows-fr gap-5 sm:grid-cols-2 xl:grid-cols-3">
-        <ContentCard v-for="post in explorePosts" :key="post.id" :post="post" dismissible @save="save" @dismiss="dismiss" @remix="openRemix" />
+        <ContentCard v-for="post in explorePosts" :key="post.id" :post="post" @save="save" @remix="openRemix" />
       </div>
     </section>
   </main>

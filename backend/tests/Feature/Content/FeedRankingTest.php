@@ -27,6 +27,10 @@ class FeedRankingTest extends TestCase
     {
         parent::setUp();
 
+        // These tests focus on relevance boundaries. The production floor is
+        // covered separately, so keep the fixture shelf strict by default.
+        config(['services.discovery.minimum_feed_size' => 0]);
+
         $this->user = User::factory()->create();
 
         CreatorProfile::query()->create([
