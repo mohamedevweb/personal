@@ -21,7 +21,7 @@ class PostRelevance
     ) {}
 
     /** @return array<string, mixed> */
-    public function assess(?CreatorProfile $profile, ContentPost $post): array
+    public function assess(?CreatorProfile $profile, ContentPost $post, bool $allowBroaderMatch = false): array
     {
         if (! $profile) {
             return $this->verdict(self::FOR_YOU, 1.0, null, null, [], [], []);
@@ -72,6 +72,7 @@ class PostRelevance
         ));
         $primary = $profileClassification['vertical'];
         $contentVertical = $postClassification['vertical'];
+        $candidateVertical = $contentVertical ?? $creatorClassification['vertical'];
         $samePrimaryNiche = $profileClassification['primary_niche'] !== null
             && $profileClassification['primary_niche'] === $postClassification['primary_niche'];
         $hasPostEvidence = $postNiches !== [] || $postClassification['topics'] !== [];
@@ -91,10 +92,40 @@ class PostRelevance
             );
         }
 
-        // With an identified profile, an unreadable post has no subject proof.
-        // Creator metadata remains available for explanations and ordering, but
-        // it cannot turn a content-free post into a recommendation.
+        // With an identified profile, an unreadable post has no subject proof in
+        // the strict pass. The broader fallback may use the creator's canonical
+        // vertical, but never raw creator labels or affinity alone.
         if (! $hasPostEvidence) {
+            if ($allowBroaderMatch && $primary !== null && $candidateVertical === $primary) {
+                return $this->verdict(
+                    self::FOR_YOU,
+                    0.4,
+                    $primary,
+                    $contentVertical,
+                    $sharedNiches,
+                    $sharedTopics,
+                    $matchedAvoidTopics,
+                    $creatorAffinity,
+                    $profileClassification,
+                    $postClassification,
+                );
+            }
+
+            if ($allowBroaderMatch && $primary !== null && $this->adjacent($primary, $candidateVertical)) {
+                return $this->verdict(
+                    self::EXPLORE,
+                    0.25,
+                    $primary,
+                    $contentVertical,
+                    $sharedNiches,
+                    $sharedTopics,
+                    $matchedAvoidTopics,
+                    $creatorAffinity,
+                    $profileClassification,
+                    $postClassification,
+                );
+            }
+
             return $this->verdict(
                 null,
                 0.0,
@@ -118,6 +149,21 @@ class PostRelevance
                 : (count($sharedTopics) >= 2 ? 0.75 : (count($sharedTopics) === 1 ? 0.65 : 0.0)));
 
         if ($postScore <= 0.0) {
+            if ($allowBroaderMatch && $primary !== null && $this->adjacent($primary, $candidateVertical)) {
+                return $this->verdict(
+                    self::EXPLORE,
+                    0.2,
+                    $primary,
+                    $contentVertical,
+                    $sharedNiches,
+                    $sharedTopics,
+                    $matchedAvoidTopics,
+                    $creatorAffinity,
+                    $profileClassification,
+                    $postClassification,
+                );
+            }
+
             return $this->verdict(
                 null,
                 0.0,

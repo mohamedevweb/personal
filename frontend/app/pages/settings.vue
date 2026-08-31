@@ -91,7 +91,6 @@ async function resend() {
 onMounted(async () => {
   await loadStatus()
   instagramAvatarFailed.value = false
-  await loadUser().catch(() => {})
   syncAccountForm()
 })
 

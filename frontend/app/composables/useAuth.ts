@@ -9,16 +9,18 @@ interface AuthUser {
 
 interface AuthResponse {
   user: AuthUser
+  token: string
 }
 
 export function useAuth() {
-  const { apiFetch, authenticated } = usePersonalApi()
+  const { apiFetch, authenticated, token } = usePersonalApi()
   const user = useState<AuthUser | null>('personal-user', () => null)
 
   async function register(payload: { name: string, email: string, password: string, password_confirmation: string }) {
     const response = await apiFetch<AuthResponse>('/api/auth/register', { method: 'POST', body: payload })
     authenticated.value = true
     user.value = response.user
+    token.value = response.token
     return response.user
   }
 
@@ -26,6 +28,7 @@ export function useAuth() {
     const response = await apiFetch<AuthResponse>('/api/auth/login', { method: 'POST', body: payload })
     authenticated.value = true
     user.value = response.user
+    token.value = response.token
     return response.user
   }
 
@@ -43,6 +46,7 @@ export function useAuth() {
     } finally {
       authenticated.value = false
       user.value = null
+      token.value = null
       // Clear the cached onboarding gate so the next account is re-checked.
       useState('personal-onboarded', () => false).value = false
       await navigateTo('/login')

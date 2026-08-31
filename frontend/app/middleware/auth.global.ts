@@ -19,10 +19,11 @@ const signedInRedirects = new Set(['/login', '/forgot-password'])
 
 export default defineNuxtRouteMiddleware(async (to) => {
   const { authenticated, bootstrapDevelopmentToken, apiFetch } = usePersonalApi()
+  const { user, loadUser } = useAuth()
 
   if (signedInRedirects.has(to.path)) {
     try {
-      await apiFetch('/api/auth/me', {}, false, false)
+      if (!user.value) await loadUser()
       return navigateTo('/feed')
     } catch {
       // No authenticated cookie, so the sign-in page remains reachable.
@@ -36,29 +37,21 @@ export default defineNuxtRouteMiddleware(async (to) => {
     authenticated.value = true
   }
 
-  // If auth isn't set yet (plugin hasn't run), verify it
+  // If auth isn't set yet, resolve the user and let that request establish the
+  // authenticated state for the rest of the app.
   if (!authenticated.value) {
     try {
-      await apiFetch('/api/auth/me', {}, false, false)
-      authenticated.value = true
+      await loadUser()
     } catch {
       return navigateTo('/login')
     }
   }
 
-  // Email verification gate: an account has to confirm its address before any of
-  // the app is reachable. We resolve the user once and reuse the cached state.
-  const user = useState<{
-    email_verified_at: string | null
-  } | null>('personal-user', () => null)
+  // This fallback covers a development token minted by the middleware itself
+  // and routes that already marked the session as authenticated.
   if (!user.value) {
     try {
-      const response = await apiFetch<{
-        user: {
-          email_verified_at: string | null
-        }
-      }>('/api/auth/me')
-      user.value = response.user
+      await loadUser()
     } catch {
       // If we cannot resolve the user, fall through rather than trapping them.
       return

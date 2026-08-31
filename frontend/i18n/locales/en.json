@@ -583,6 +583,7 @@
       "saveError": "Personal could not update this saved post. Try again."
     },
     "handle": {
+      "placeholder": "{'@'}yourhandle",
       "none": "No Instagram account"
     },
     "nicheInsufficient": "Not enough content yet to determine your niche",

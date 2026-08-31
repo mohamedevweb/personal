@@ -113,6 +113,17 @@ Instagram CDN images and Reel videos are exposed to the frontend through signed 
 
 Docker stores that cache in the shared `instagram-media-cache` volume. The API and queue workers therefore reuse the same files, and rebuilding a container does not discard the only usable copy after an Instagram CDN URL expires.
 
+Production Docker also needs outbound IPv6. Some Instagram CDN hostnames publish only AAAA records, so a VPS with IPv6 enabled still needs IPv6 enabled on the Docker daemon and on the production Compose network. Configure the routed IPv6 subnet supplied by the VPS provider in `/etc/docker/daemon.json` before recreating the stack:
+
+```json
+{
+  "ipv6": true,
+  "fixed-cidr-v6": "YOUR_ROUTED_IPV6_PREFIX::/80"
+}
+```
+
+Keep any existing Docker daemon settings and replace the placeholder with a subnet inside the provider's routed prefix. `docker-compose.prod.yml` enables IPv6 for the production network; the local Compose network stays unchanged.
+
 Discovery search cost is capped on every axis: search queries have a cooldown (`DISCOVERY_COOLDOWN_DAYS`), recovery passes retain the legacy measurement cutoff (`DISCOVERY_MEASURE_COOLDOWN_DAYS`), and one discovery run measures at most `DISCOVERY_MEASURE_BATCH` accounts. Ongoing account refreshes use the adaptive schedule below.
 
 ### Adaptive Instagram scraping

@@ -134,6 +134,99 @@ class FeedRankingTest extends TestCase
         $this->assertSame([], $this->feedHooks());
     }
 
+    public function test_fallback_matching_allows_a_same_vertical_post_without_subject_metadata(): void
+    {
+        $this->user->creatorProfile()->update([
+            'primary_vertical' => 'business',
+            'niche' => 'startup-saas',
+            'creator_dna' => [
+                'primary_niche' => 'startup-saas',
+                'sub_niches' => [],
+                'topics' => ['product building'],
+            ],
+        ]);
+
+        $creator = $this->creator('business.creator', 30_000, 900);
+        $creator->update(['niche' => 'business', 'niche_topics' => []]);
+        $post = $this->storePost($creator, 1.5, [
+            'metadata' => ['feed_classification' => [
+                'vertical' => 'business',
+                'primary_niche' => null,
+                'sub_niches' => [],
+                'topics' => [],
+            ]],
+        ]);
+
+        $relevance = app(PostRelevance::class);
+
+        $this->assertNull($relevance->assess($this->user->creatorProfile->fresh(), $post)['bucket']);
+        $this->assertSame(
+            PostRelevance::FOR_YOU,
+            $relevance->assess($this->user->creatorProfile->fresh(), $post, true)['bucket'],
+        );
+    }
+
+    public function test_fallback_matching_surfaces_an_adjacent_vertical_in_explore(): void
+    {
+        $this->user->creatorProfile()->update([
+            'primary_vertical' => 'business',
+            'niche' => 'startup-saas',
+            'creator_dna' => [
+                'primary_niche' => 'startup-saas',
+                'sub_niches' => [],
+                'topics' => ['product building'],
+            ],
+        ]);
+
+        $creator = $this->creator('tech.creator', 30_000, 900);
+        $creator->update(['niche' => 'tech-ai', 'niche_topics' => []]);
+        $post = $this->storePost($creator, 1.5, [
+            'metadata' => ['feed_classification' => [
+                'vertical' => 'tech-ai',
+                'primary_niche' => null,
+                'sub_niches' => [],
+                'topics' => [],
+            ]],
+        ]);
+
+        config(['services.discovery.minimum_feed_size' => 1]);
+        $sections = app(RecommendationService::class)->sectionsForUser($this->user->fresh());
+
+        $this->assertContains($post->id, $sections['explore_items']->pluck('id'));
+    }
+
+    public function test_fallback_matching_allows_an_unshared_adjacent_subject_in_explore(): void
+    {
+        $this->user->creatorProfile()->update([
+            'primary_vertical' => 'business',
+            'niche' => 'startup-saas',
+            'creator_dna' => [
+                'primary_niche' => 'startup-saas',
+                'sub_niches' => [],
+                'topics' => ['product building'],
+            ],
+        ]);
+
+        $creator = $this->creator('ai.creator', 30_000, 900);
+        $creator->update(['niche' => 'tech-ai', 'niche_topics' => ['ai agents']]);
+        $post = $this->storePost($creator, 1.5, [
+            'metadata' => ['feed_classification' => [
+                'vertical' => 'tech-ai',
+                'primary_niche' => 'ai-agents',
+                'sub_niches' => [],
+                'topics' => ['ai agents'],
+            ]],
+        ]);
+
+        $relevance = app(PostRelevance::class);
+
+        $this->assertNull($relevance->assess($this->user->creatorProfile->fresh(), $post)['bucket']);
+        $this->assertSame(
+            PostRelevance::EXPLORE,
+            $relevance->assess($this->user->creatorProfile->fresh(), $post, true)['bucket'],
+        );
+    }
+
     public function test_posts_older_than_the_feed_window_are_left_out(): void
     {
         config(['services.discovery.feed_window_days' => 30]);

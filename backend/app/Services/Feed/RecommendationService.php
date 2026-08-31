@@ -65,8 +65,9 @@ class RecommendationService
 
         // A small catalogue can have fewer breakout posts than the requested
         // batch. Add a measured, safe second tier only when the first tier cannot
-        // fill the configured minimum. Relevance still decides whether a post is
-        // For You or Explore, so this never bypasses semantic filtering.
+        // fill the configured minimum. The second pass allows only same or
+        // adjacent verticals with missing subject metadata; explicit unrelated
+        // subjects and avoid topics remain blocked by PostRelevance.
         $minimum = min(
             $limit,
             max(0, (int) config('services.discovery.minimum_feed_size')),
@@ -76,7 +77,6 @@ class RecommendationService
             $fallbackRanked = $this->fallbackCandidates(
                 $user,
                 $limit,
-                $primaryVertical,
                 $excludeIds,
                 $interactionSignals,
             );
@@ -227,10 +227,20 @@ class RecommendationService
     /** @param Collection<int, ContentPost> $posts @param array<string, mixed> $interactionSignals */
     private function rankCandidates(Collection $posts, User $user, array $interactionSignals): Collection
     {
+        return $this->rankCandidatesWithMode($posts, $user, $interactionSignals);
+    }
+
+    /** @param Collection<int, ContentPost> $posts @param array<string, mixed> $interactionSignals */
+    private function rankCandidatesWithMode(
+        Collection $posts,
+        User $user,
+        array $interactionSignals,
+        bool $allowBroaderMatch = false,
+    ): Collection {
         return $posts
             ->reject(fn (ContentPost $post): bool => $this->interactions->excludes($post, $interactionSignals))
-            ->map(function (ContentPost $post) use ($user, $interactionSignals): ?array {
-                $relevance = $this->relevance->assess($user->creatorProfile, $post);
+            ->map(function (ContentPost $post) use ($user, $interactionSignals, $allowBroaderMatch): ?array {
+                $relevance = $this->relevance->assess($user->creatorProfile, $post, $allowBroaderMatch);
 
                 // This is the hard gate. A rejected post never gets a ranking
                 // score and therefore cannot be rescued by a large outlier.
@@ -261,10 +271,8 @@ class RecommendationService
      * recent enough to still be useful, and carrying enough absolute
      * engagement for any of that to mean something.
      *
-     * There is deliberately no fallback. An unmeasured post carries no evidence at
-     * all, and serving a feed of them when measurement has not run yet — or has
-     * failed — puts spam in front of creators. An honest empty state is worth more
-     * than a full page of two-like posts.
+     * This is the retrieval pool for the broader relevance pass. Posts still need
+     * measurement, safety and engagement evidence before they can be considered.
      *
      * @return Collection<int, ContentPost>
      */
@@ -302,23 +310,19 @@ class RecommendationService
     private function fallbackCandidates(
         User $user,
         int $limit,
-        ?string $primaryVertical,
         array $excludeIds,
         array $interactionSignals,
     ): Collection {
-        return $this->rankCandidates(
+        return $this->rankCandidatesWithMode(
             $this->pool($user, $excludeIds)
                 ->whereNotNull('measured_at')
                 ->where('outlier_score', '>=', (float) config('services.discovery.fallback_min_outlier_score'))
-                ->when($primaryVertical !== null, fn (Builder $query): Builder => $query->whereHas(
-                    'creator',
-                    fn (Builder $creator): Builder => $creator->where('primary_vertical', $primaryVertical),
-                ))
                 ->orderByDesc('outlier_score')
                 ->limit($limit * self::CANDIDATE_MULTIPLIER * count(config('creator_catalog.markets')))
                 ->get(),
             $user,
             $interactionSignals,
+            true,
         );
     }
 

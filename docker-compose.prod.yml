@@ -17,6 +17,16 @@ services:
       - web
     restart: unless-stopped
 
+# The VPS has working IPv6, and Instagram serves this avatar CDN hostname over
+# IPv6 only. Keep IPv6 enabled only for the production network so local Docker
+# remains compatible with hosts that do not provide IPv6.
+networks:
+  default:
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: 2a01:4f8:1c18:f681:1000::/80
+
 volumes:
   caddy-data:
   caddy-config:

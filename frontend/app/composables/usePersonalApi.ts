@@ -70,5 +70,5 @@ export function usePersonalApi() {
     }
   }
 
-  return { apiFetch, authenticated, bootstrapDevelopmentToken }
+  return { apiFetch, authenticated, bootstrapDevelopmentToken, token }
 }

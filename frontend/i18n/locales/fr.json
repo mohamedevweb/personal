@@ -583,6 +583,7 @@
       "saveError": "Personal n’a pas pu mettre à jour ce favori. Réessaie."
     },
     "handle": {
+      "placeholder": "{'@'}votrecompte",
       "none": "Aucun compte Instagram"
     },
     "nicheInsufficient": "Pas encore assez de contenu pour déterminer ta niche",

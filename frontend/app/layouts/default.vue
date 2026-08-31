@@ -1,12 +1,10 @@
 <script setup lang="ts">
 const route = useRoute()
-const { user, loadUser, logout } = useAuth()
+const { user, logout } = useAuth()
 const { mailto: supportMailto } = useSupportEmail()
 const { collapsed, toggle: toggleSidebar } = useSidebar()
 const { t } = useI18n()
 const avatarFailed = ref(false)
-
-onMounted(() => { loadUser().catch(() => {}) })
 
 watch(() => user.value?.avatar_url, () => { avatarFailed.value = false })
 
