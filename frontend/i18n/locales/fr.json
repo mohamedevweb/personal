@@ -735,7 +735,8 @@
       "languages": "Langues",
       "lifestyle": "Lifestyle",
       "local-culture": "Local et culture",
-      "travel": "Voyage"
+      "travel": "Voyage",
+      "business": "Business"
     },
     "views": "{count} vues",
     "playReel": "Lire le Reel de {'@'}{username}",
