@@ -397,7 +397,6 @@
       "failedTitle": "Personal n’a pas pu lire ce compte.",
       "retry": "Réessayer",
       "retrying": "Nouvelle tentative…",
-      "continueAnyway": "Continuer sans analyse",
       "errors": {
         "profile_not_found": "Aucun compte Instagram public ne correspond à ce handle. Vérifie l’orthographe et réessaie.",
         "private_account": "Ce compte est privé, Personal ne peut donc pas lire ses posts. Passe le compte en public ou continue sans analyse.",
@@ -405,6 +404,8 @@
       }
     },
     "connectedSuffix": "connecté",
+    "verticalMissingTitle": "Il manque encore ta verticale principale.",
+    "verticalMissingBody": "Personal n’a pas encore identifié ta verticale principale. Relance la lecture Instagram pour terminer ton onboarding.",
     "readyTitle": "Vous êtes prêt.",
     "understandingTitle": "Compréhension de votre marque…",
     "importedCopy": "Nous avons importé {count} posts récents et construit la première version de votre profil Personal.",
@@ -619,7 +620,7 @@
       "archived": "Archivé"
     },
     "emptyTitle": "Aucun brouillon pour l’instant.",
-    "emptyCopy": "Pars d’un moment ou d’un schéma fort. Ton travail restera ici pendant que tu l’affines.",
+    "emptyCopy": "Pars d’un remix. Ton travail restera ici pendant que tu l’affines.",
     "createFirst": "Créer ton premier brouillon",
     "loadError": "Personal n’a pas pu charger tes brouillons. Réessaie.",
     "delete": "Supprimer le brouillon",

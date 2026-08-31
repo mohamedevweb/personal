@@ -3,7 +3,6 @@
 namespace App\Services\Feed;
 
 use App\Models\ContentPost;
-use App\Models\CreatorProfile;
 use App\Models\User;
 use App\Services\View\ContentPostView;
 use Illuminate\Database\Eloquent\Builder;
@@ -16,7 +15,7 @@ use Illuminate\Support\Collection;
  * The ordering question is "did this post beat the account that published it",
  * not "did this post get a lot of likes". A 2M-follower account posting its usual
  * numbers is not an opportunity; a 20k account tripling its own average is. That
- * is what outlier_score carries, and why it leads the weighting.
+ * is what outlier_score carries, and why it remains a major ranking signal.
  */
 class RecommendationService
 {
@@ -27,7 +26,7 @@ class RecommendationService
      */
     private const CANDIDATE_MULTIPLIER = 8;
 
-    /** A creator can inspire a shelf without becoming the whole shelf. */
+    /** Keep a single creator from becoming the whole shelf. */
     private const MAX_POSTS_PER_CREATOR = 2;
 
     public function __construct(
@@ -52,42 +51,17 @@ class RecommendationService
     public function sectionsForUser(User $user, ?int $limit = null, array $excludeIds = []): array
     {
         $limit = max(1, $limit ?? (int) config('services.discovery.feed_size'));
-        $profile = $user->creatorProfile;
         $savedIds = $user->savedContent()->pluck('content_post_id')->flip();
 
-        // A connected or handle-based account is personal context, not a licence
-        // to serve the global catalogue while its niche is unknown. Waiting for
-        // that context keeps an unrelated high-performing account out of For You.
-        if ($this->needsPersonalContext($user, $profile)) {
-            return [
-                'items' => collect(),
-                'explore_items' => collect(),
-            ];
-        }
-
         $primaryVertical = $this->primaryVertical($user);
-        $inspirationIds = $user->inspirationCreators()->pluck('creators.id');
         $interactionSignals = $this->interactions->forUser($user);
         $visibleCreatorCounts = $this->creatorCounts($excludeIds);
 
-        $ranked = $this->candidates($user, $limit, $primaryVertical, $inspirationIds, $excludeIds)
-            ->reject(fn (ContentPost $post): bool => $this->interactions->excludes($post, $interactionSignals))
-            ->map(function (ContentPost $post) use ($user, $interactionSignals): array {
-                $relevance = $this->relevance->assess($user->creatorProfile, $post);
-
-                return [
-                    'post' => $post,
-                    'bucket' => $relevance['bucket'],
-                    'ranking' => $this->personalizedRanking(
-                        $post,
-                        $user,
-                        $relevance['affinity'],
-                        $this->interactions->adjustment($post, $interactionSignals),
-                    ),
-                ];
-            })
-            ->sortByDesc('ranking.score')
-            ->values();
+        $ranked = $this->rankCandidates(
+            $this->candidates($user, $limit, $primaryVertical, $excludeIds),
+            $user,
+            $interactionSignals,
+        );
 
         // A small catalogue can have fewer breakout posts than the requested
         // batch. Add a measured, safe second tier only when the first tier cannot
@@ -103,57 +77,28 @@ class RecommendationService
                 $user,
                 $limit,
                 $primaryVertical,
-                $inspirationIds,
                 $excludeIds,
-            )
-                ->reject(fn (ContentPost $post): bool => $this->interactions->excludes($post, $interactionSignals))
-                ->map(function (ContentPost $post) use ($user, $interactionSignals): array {
-                    $relevance = $this->relevance->assess($user->creatorProfile, $post);
-
-                    return [
-                        'post' => $post,
-                        'bucket' => $relevance['bucket'],
-                        'ranking' => $this->personalizedRanking(
-                            $post,
-                            $user,
-                            $relevance['affinity'],
-                            $this->interactions->adjustment($post, $interactionSignals),
-                        ),
-                    ];
-                });
+                $interactionSignals,
+            );
 
             $ranked = $ranked->concat($fallbackRanked)
-                ->groupBy(fn (array $item): int => $item['post']->id)
-                ->map(fn (Collection $items): array => $items->first(
-                    fn (array $item): bool => $item['bucket'] !== null,
-                ) ?? $items->first())
+                ->unique(fn (array $item): int => $item['post']->id)
                 ->sortByDesc('ranking.score')
                 ->values();
         }
 
-        $inspirationLookup = $inspirationIds->flip();
         $forYou = $ranked->where('bucket', PostRelevance::FOR_YOU)->values();
-        $inspired = $this->limitPerCreator(
-            $forYou->filter(fn (array $item): bool => $inspirationLookup->has($item['post']->creator_id)),
-            $visibleCreatorCounts,
-        )
-            ->take($limit)
-            ->values();
-        $fallback = $this->markets->allocate(
-            $this->limitPerCreator(
-                $forYou->reject(fn (array $item): bool => $inspirationLookup->has($item['post']->creator_id)),
-                $visibleCreatorCounts,
-            ),
+        $items = $this->markets->allocate(
+            $this->limitPerCreator($forYou, $visibleCreatorCounts),
             $user->creatorProfile?->market,
-            max(0, $limit - $inspired->count()),
+            $limit,
             $primaryVertical,
         );
-        $items = $inspired->concat($fallback)->take($limit)->values();
         $itemCreatorIds = collect(array_keys($visibleCreatorCounts))
             ->concat($items->pluck('post.creator_id'))
             ->flip();
         $exploreLimit = max(0, (int) config('services.discovery.personalization.explore_size'));
-        $explore = $primaryVertical === null && $exploreLimit > 0
+        $explore = $exploreLimit > 0
             ? $this->markets->allocate(
                 $this->limitPerCreator(
                     $ranked->where('bucket', PostRelevance::EXPLORE)
@@ -176,7 +121,7 @@ class RecommendationService
     {
         $limit = max(1, $limit ?? (int) config('services.discovery.feed_size'));
         $savedIds = $user->savedContent()->pluck('content_post_id')->flip();
-        $ranked = $this->pool($user, collect(), [])
+        $ranked = $this->pool($user, [])
             ->whereNotNull('measured_at')
             ->where('outlier_score', '>=', (float) config('services.discovery.min_outlier_score'))
             ->whereHas('creator', fn (Builder $creator): Builder => $creator->where('curation_status', 'approved'))
@@ -202,6 +147,8 @@ class RecommendationService
             $post = $item['post'];
             $ranking = $item['ranking'];
 
+            $relevance = $item['relevance'] ?? null;
+
             return $this->view->make($post, $user, $ranking['score'], $savedIds->has($post->id)) + [
                 'creator_fit_score' => ($ranking['creator_fit'] ?? null) === null
                     ? null
@@ -213,6 +160,23 @@ class RecommendationService
                     $post->published_at->isAfter(now()->subDay()) ? 'Trending' : null,
                     $post->published_at->diffForHumans(),
                 ])),
+                ...($relevance ? ['recommendation_debug' => [
+                    'bucket' => $item['bucket'],
+                    'profile_vertical' => $relevance['primary_vertical'],
+                    'profile_primary_niche' => $relevance['profile_primary_niche'],
+                    'profile_sub_niches' => $relevance['profile_sub_niches'],
+                    'post_vertical' => $relevance['content_vertical'],
+                    'post_primary_niche' => $relevance['post_primary_niche'],
+                    'post_sub_niches' => $relevance['post_sub_niches'],
+                    'creator_affinity' => $relevance['creator_affinity'],
+                    'post_relevance' => $relevance['post_relevance'],
+                    'shared_niches' => $relevance['shared_niches'],
+                    'shared_topics' => $relevance['shared_topics'],
+                    'matched_avoid_topics' => $relevance['matched_avoid_topics'],
+                    'outlier_score' => $post->outlier_score,
+                    'freshness' => $ranking['recency'],
+                    'final_ranking_score' => $ranking['score'],
+                ]] : []),
             ];
         })
             ->values();
@@ -260,6 +224,38 @@ class RecommendationService
             ->all();
     }
 
+    /** @param Collection<int, ContentPost> $posts @param array<string, mixed> $interactionSignals */
+    private function rankCandidates(Collection $posts, User $user, array $interactionSignals): Collection
+    {
+        return $posts
+            ->reject(fn (ContentPost $post): bool => $this->interactions->excludes($post, $interactionSignals))
+            ->map(function (ContentPost $post) use ($user, $interactionSignals): ?array {
+                $relevance = $this->relevance->assess($user->creatorProfile, $post);
+
+                // This is the hard gate. A rejected post never gets a ranking
+                // score and therefore cannot be rescued by a large outlier.
+                if ($relevance['bucket'] === null) {
+                    return null;
+                }
+
+                return [
+                    'post' => $post,
+                    'bucket' => $relevance['bucket'],
+                    'relevance' => $relevance,
+                    'ranking' => $this->personalizedRanking(
+                        $post,
+                        $user,
+                        $relevance['post_relevance'],
+                        $relevance['creator_affinity'],
+                        $this->interactions->adjustment($post, $interactionSignals),
+                    ),
+                ];
+            })
+            ->filter()
+            ->sortByDesc('ranking.score')
+            ->values();
+    }
+
     /**
      * Posts that cleared every bar: measured against their own creator, beating it,
      * recent enough to still be useful, and carrying enough absolute
@@ -276,29 +272,11 @@ class RecommendationService
         User $user,
         int $limit,
         ?string $primaryVertical,
-        Collection $inspirationIds,
         array $excludeIds,
     ): Collection {
-        $query = $this->pool($user, $inspirationIds, $excludeIds)
+        $query = $this->pool($user, $excludeIds)
             ->whereNotNull('measured_at')
             ->where('outlier_score', '>=', (float) config('services.discovery.min_outlier_score'));
-
-        $inspired = collect();
-        if ($inspirationIds->isNotEmpty()) {
-            $inspiredQuery = (clone $query)->whereIn('creator_id', $inspirationIds);
-
-            if ($primaryVertical) {
-                $inspiredQuery->whereHas(
-                    'creator',
-                    fn (Builder $creator): Builder => $creator->where('primary_vertical', $primaryVertical),
-                );
-            }
-
-            $inspired = $inspiredQuery
-                ->orderByDesc('outlier_score')
-                ->limit($limit * self::CANDIDATE_MULTIPLIER)
-                ->get();
-        }
 
         $matching = $primaryVertical
             ? (clone $query)
@@ -311,18 +289,13 @@ class RecommendationService
                 ->get()
             : collect();
 
-        if ($primaryVertical) {
-            return $inspired->concat($matching)->unique('id')->values();
-        }
+        $global = (clone $query)
+            ->orderByDesc('outlier_score')
+            // This is only a retrieval pool. PostRelevance remains the gate.
+            ->limit($limit * self::CANDIDATE_MULTIPLIER * count(config('creator_catalog.markets')))
+            ->get();
 
-        return $inspired->concat($matching)->concat(
-            $query->orderByDesc('outlier_score')
-                // The allocator applies market quotas after semantic filtering.
-                // One bounded cross-market query is enough to give each market
-                // room without issuing a matching and fallback query per market.
-                ->limit($limit * self::CANDIDATE_MULTIPLIER * count(config('creator_catalog.markets')))
-                ->get(),
-        )->unique('id')->values();
+        return $matching->concat($global)->unique('id')->values();
     }
 
     /** @return Collection<int, ContentPost> */
@@ -330,22 +303,26 @@ class RecommendationService
         User $user,
         int $limit,
         ?string $primaryVertical,
-        Collection $inspirationIds,
         array $excludeIds,
+        array $interactionSignals,
     ): Collection {
-        return $this->pool($user, $inspirationIds, $excludeIds)
-            ->whereNotNull('measured_at')
-            ->where('outlier_score', '>=', (float) config('services.discovery.fallback_min_outlier_score'))
-            ->when($primaryVertical !== null, fn (Builder $query): Builder => $query->whereHas(
-                'creator',
-                fn (Builder $creator): Builder => $creator->where('primary_vertical', $primaryVertical),
-            ))
-            ->orderByDesc('outlier_score')
-            ->limit($limit * self::CANDIDATE_MULTIPLIER * count(config('creator_catalog.markets')))
-            ->get();
+        return $this->rankCandidates(
+            $this->pool($user, $excludeIds)
+                ->whereNotNull('measured_at')
+                ->where('outlier_score', '>=', (float) config('services.discovery.fallback_min_outlier_score'))
+                ->when($primaryVertical !== null, fn (Builder $query): Builder => $query->whereHas(
+                    'creator',
+                    fn (Builder $creator): Builder => $creator->where('primary_vertical', $primaryVertical),
+                ))
+                ->orderByDesc('outlier_score')
+                ->limit($limit * self::CANDIDATE_MULTIPLIER * count(config('creator_catalog.markets')))
+                ->get(),
+            $user,
+            $interactionSignals,
+        );
     }
 
-    private function pool(User $user, Collection $inspirationIds, array $excludeIds): Builder
+    private function pool(User $user, array $excludeIds): Builder
     {
         $window = now()->subDays((int) config('services.discovery.feed_window_days'));
 
@@ -358,7 +335,7 @@ class RecommendationService
             // The absolute floors. outlier_score is a ratio, so on its own it rates a
             // post going from two likes to three as a 1.5x breakout.
             ->whereRaw('likes + comments >= ?', [(int) config('services.discovery.min_post_engagement')])
-            ->whereHas('creator', function (Builder $creator) use ($inspirationIds, $user): void {
+            ->whereHas('creator', function (Builder $creator) use ($user): void {
                 $creator->where('followers', '>=', (int) config('services.discovery.min_followers'))
                     ->whereIn('market', config('creator_catalog.markets'))
                     ->where('safety_status', 'allowed')
@@ -367,13 +344,7 @@ class RecommendationService
                     });
 
                 if (config('creator_catalog.curated_only')) {
-                    $creator->where(function (Builder $curation) use ($inspirationIds): void {
-                        $curation->where('curation_status', 'approved');
-
-                        if ($inspirationIds->isNotEmpty()) {
-                            $curation->orWhereIn('id', $inspirationIds);
-                        }
-                    });
+                    $creator->where('curation_status', 'approved');
                 }
             });
     }
@@ -394,26 +365,35 @@ class RecommendationService
     private function personalizedRanking(
         ContentPost $post,
         User $user,
+        float $postRelevance = 1.0,
         ?float $affinity = null,
         float $interactionAdjustment = 0.0,
     ): array {
         $ranking = $this->ranker->rank($post);
-        $affinity ??= $this->affinity->score($user->creatorProfile, $post->creator, $post);
-
-        if ($affinity === null) {
-            return [...$ranking, 'creator_fit' => null];
-        }
-
-        $performanceWeight = max(0.0, (float) config('services.discovery.personalization.performance_weight'));
-        $affinityWeight = max(0.0, (float) config('services.discovery.personalization.affinity_weight'));
-        $total = $performanceWeight + $affinityWeight;
+        $creatorContext = $affinity ?? 0.0;
+        $postRelevanceWeight = max(0.0, (float) config('services.discovery.personalization.post_relevance_weight', 0.50));
+        $performanceWeight = max(0.0, (float) config('services.discovery.personalization.performance_weight', 0.30));
+        $freshnessWeight = max(0.0, (float) config('services.discovery.personalization.freshness_weight', 0.15));
+        $interactionWeight = max(0.0, (float) config('services.discovery.personalization.interaction_weight', 0.05));
+        $creatorContextWeight = max(0.0, (float) config('services.discovery.personalization.creator_context_weight', 0.10));
+        $total = $postRelevanceWeight + $performanceWeight + $freshnessWeight + $interactionWeight;
+        $interaction = min(1.0, max(0.0, $interactionAdjustment / 15));
+        $effectiveRelevance = min(1.0, max(0.0,
+            ((1 - $creatorContextWeight) * $postRelevance)
+            + ($creatorContextWeight * $creatorContext),
+        ));
+        $score = $total > 0
+            ? 100 * (($effectiveRelevance * $postRelevanceWeight)
+                + ($ranking['outlier'] * $performanceWeight)
+                + ($ranking['recency'] * $freshnessWeight)
+                + ($interaction * $interactionWeight)) / $total
+            : 0.0;
 
         return [
             ...$ranking,
-            'score' => round(min(100, ($total > 0
-                ? (($ranking['score'] * $performanceWeight) + ($affinity * 100 * $affinityWeight)) / $total
-                : $ranking['score']) + $interactionAdjustment), 1),
+            'score' => round(min(100, max(0, $score)), 1),
             'creator_fit' => $affinity,
+            'post_relevance' => $postRelevance,
         ];
     }
 
@@ -426,22 +406,5 @@ class RecommendationService
         }
 
         return $this->classifier->profile($profile)['vertical'];
-    }
-
-    private function needsPersonalContext(User $user, ?CreatorProfile $profile): bool
-    {
-        if (! $user->instagramAccount && ! filled($profile?->instagram_username)) {
-            return false;
-        }
-
-        if (! $profile) {
-            return true;
-        }
-
-        $classification = $this->classifier->profile($profile);
-
-        return $classification['vertical'] === null
-            && $classification['clusters'] === []
-            && $classification['tokens'] === [];
     }
 }

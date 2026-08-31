@@ -96,7 +96,7 @@ class CuratedFeedTest extends TestCase
         $this->assertTrue($feed->every(fn (array $post): bool => $post['creator']['niche'] === 'tech-ai'));
     }
 
-    public function test_private_inspirations_lead_the_feed_and_keep_the_approved_catalog_as_fallback(): void
+    public function test_private_inspirations_do_not_change_the_v1_feed(): void
     {
         $this->diversePosts('FR', 10, niche: 'sport-fitness', baseOutlier: 5);
         $this->posts('FR', 4, 'discovered', 'tech-ai', 2);
@@ -106,10 +106,8 @@ class CuratedFeedTest extends TestCase
 
         $feed = app(RecommendationService::class)->forUser($this->user);
 
-        $this->assertSame(12, $feed->count());
-        $this->assertSame(2, $feed->take(2)->where('creator.username', $inspiration->username)->count());
-        $this->assertSame(2, $feed->where('creator.username', $inspiration->username)->count());
-        $this->assertSame(10, $feed->where('creator.username', '!=', $inspiration->username)->count());
+        $this->assertSame(10, $feed->count());
+        $this->assertSame(0, $feed->where('creator.username', $inspiration->username)->count());
     }
 
     public function test_global_feed_ignores_personal_niche_and_market_quotas_but_keeps_catalog_guards(): void

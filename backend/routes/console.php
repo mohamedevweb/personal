@@ -24,6 +24,11 @@ Schedule::call(function (): void {
 })->daily()->name('sync-instagram-accounts')->withoutOverlapping();
 
 if (config('instagram_scraping.scheduled')) {
+    Schedule::command('personal:import-discovered-creators')
+        ->dailyAt('02:00')
+        ->name('import-discovered-creators')
+        ->withoutOverlapping();
+
     Schedule::command('personal:dispatch-instagram-scrapes')
         ->dailyAt('02:30')
         ->name('dispatch-adaptive-instagram-scrapes')

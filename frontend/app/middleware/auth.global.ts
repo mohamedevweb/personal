@@ -36,6 +36,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     authenticated.value = true
   }
 
+  // If auth isn't set yet (plugin hasn't run), verify it
   if (!authenticated.value) {
     try {
       await apiFetch('/api/auth/me', {}, false, false)

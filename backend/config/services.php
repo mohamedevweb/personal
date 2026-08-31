@@ -155,10 +155,12 @@ return [
         // A post must first clear every performance and safety guard. Creator
         // affinity then reorders that qualified pool from the member's DNA.
         'personalization' => [
-            'performance_weight' => (float) env('FEED_WEIGHT_PERFORMANCE', 0.75),
-            'affinity_weight' => (float) env('FEED_WEIGHT_CREATOR_AFFINITY', 0.25),
-            'minimum_affinity' => (float) env('FEED_MIN_CREATOR_AFFINITY', 0.50),
-            'explore_minimum_affinity' => (float) env('FEED_EXPLORE_MIN_CREATOR_AFFINITY', 0.20),
+            // These weights only order posts that already passed PostRelevance.
+            'post_relevance_weight' => (float) env('FEED_WEIGHT_POST_RELEVANCE', 0.50),
+            'performance_weight' => (float) env('FEED_WEIGHT_PERFORMANCE', 0.30),
+            'freshness_weight' => (float) env('FEED_WEIGHT_FRESHNESS', 0.15),
+            'interaction_weight' => (float) env('FEED_WEIGHT_INTERACTIONS', 0.05),
+            'creator_context_weight' => (float) env('FEED_WEIGHT_CREATOR_CONTEXT', 0.10),
             'explore_size' => (int) env('FEED_EXPLORE_SIZE', 6),
         ],
         // Reach-bait tags. These are not niches — they are what accounts with no

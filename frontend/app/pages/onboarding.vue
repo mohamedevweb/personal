@@ -6,16 +6,12 @@ definePageMeta({ layout: false })
 const route = useRoute()
 const { t, te, locale } = useI18n()
 const { user } = useAuth()
-const { status, connecting, error, connect, loadStatus, startPolling, stopPolling } = useInstagram()
+const { status, connecting, error, connect, loadStatus, startPolling } = useInstagram()
 const { apiFetch } = usePersonalApi()
 const toast = useToast()
 const accountHandleInput = ref('')
 const handleSaving = ref(false)
 const canUseInstagramOAuth = computed(() => user.value?.email.trim().toLowerCase() === 'hello@usepersonal.app')
-// A profile that could not be read (a private account, a provider outage) must
-// not lock a creator out of their own onboarding, so the failure screen offers
-// a way through. Nothing else lets the flow past an unfinished analysis.
-const analysisDismissed = ref(false)
 const analysisRetrying = ref(false)
 
 // The card on the right stands in for the thing being connected: an Instagram
@@ -96,6 +92,9 @@ const activeStage = computed(() => {
 // profile behind it, so onboarding shows that reading happening — profile,
 // posts, voice, audience — and holds the next step until it is done.
 const analysis = computed(() => status.value.analysis ?? null)
+const hasPrimaryVertical = computed(() => Boolean(
+  status.value.profile?.primary_vertical || analysis.value?.primary_vertical,
+))
 
 const analysisStages = computed<HandleAnalysisStage[]>(() => analysis.value?.stages?.length
   ? analysis.value.stages
@@ -103,8 +102,13 @@ const analysisStages = computed<HandleAnalysisStage[]>(() => analysis.value?.sta
 
 // 'idle' is a profile that predates the analysis: nothing is running, so nothing
 // is worth waiting for either.
-const analysisComplete = computed(() => analysis.value?.status === 'completed' || (analysis.value?.status ?? 'idle') === 'idle')
+const analysisComplete = computed(() => (analysis.value?.status === 'completed' && hasPrimaryVertical.value)
+  || (analysis.value?.status ?? 'idle') === 'idle')
 const analysisFailed = computed(() => analysis.value?.status === 'failed')
+const analysisMissingVertical = computed(() => analysis.value?.status === 'completed' && !hasPrimaryVertical.value)
+const verticalMissing = computed(() => status.value.connected
+  && status.value.account?.sync_status === 'completed'
+  && !hasPrimaryVertical.value)
 
 const analysisIndex = computed(() => {
   if (analysis.value?.status === 'completed') return analysisStages.value.length
@@ -190,8 +194,7 @@ const analysisErrorMessage = computed(() => {
 // the step: everything Personal knows about a creator comes from it.
 const showAnalysis = computed(() => !status.value.connected
   && Boolean(status.value.instagram_username)
-  && !analysisComplete.value
-  && !analysisDismissed.value)
+  && !analysisComplete.value)
 
 const callbackError = computed(() => route.query.instagram === 'error'
   ? String(route.query.message || t('onboarding.cancelledError'))
@@ -251,7 +254,6 @@ async function submitHandle(username: string) {
   })
   status.value.instagram_username = response.instagram_username
   status.value.analysis = response.analysis
-  analysisDismissed.value = false
   startPolling()
 }
 
@@ -271,23 +273,14 @@ async function retryAnalysis() {
   }
 }
 
-// Only reachable once the reading has failed for good, so a profile Personal
-// cannot read never locks a creator out of the rest of onboarding. Their memory
-// stays empty until they fill it in from the profile page.
-function continueWithoutAnalysis() {
-  stopPolling()
-  analysisDismissed.value = true
-  void enterApp()
-}
-
 watch(() => status.value.account?.sync_status, (syncStatus) => {
-  if (status.value.connected && syncStatus === 'completed') void enterApp()
+  if (status.value.connected && syncStatus === 'completed' && hasPrimaryVertical.value) void enterApp()
 })
 
 // The analysis is the whole context Personal needs, so the moment it lands the
 // creator can enter the app without another setup step.
 watch(() => analysis.value?.status, (analysisStatus) => {
-  if (analysisStatus === 'completed' && !status.value.connected) void enterApp()
+  if (analysisStatus === 'completed' && !status.value.connected && hasPrimaryVertical.value) void enterApp()
 })
 
 function enterApp() {
@@ -390,22 +383,38 @@ onMounted(async () => {
             <span class="text-[var(--positive)]">✓</span>
           </div>
 
-          <template v-if="showAnalysis">
+          <template v-if="verticalMissing">
+            <h1 class="font-serif text-4xl leading-[1.02] tracking-[-.045em] md:text-6xl">
+              {{ $t('onboarding.verticalMissingTitle') }}
+            </h1>
+            <p class="mt-5 max-w-lg text-[16px] leading-7 text-[var(--muted)]">
+              {{ $t('onboarding.verticalMissingBody') }}
+            </p>
+            <button
+              class="mt-8 inline-flex h-11 items-center rounded-full border border-[var(--line)] bg-[var(--surface)] px-6 text-[14px] font-medium transition hover:bg-[var(--paper)]"
+              :disabled="connecting"
+              @click="connect"
+            >
+              {{ connecting ? $t('onboarding.preparing') : $t('onboarding.reconnect') }}
+            </button>
+          </template>
+
+          <template v-else-if="showAnalysis">
             <!-- The card below says what is happening step by step, so a title
                  announcing it again would only push it down the screen. Only a
                  failure gets a heading, because the card cannot explain itself. -->
-            <template v-if="analysisFailed">
+            <template v-if="analysisFailed || analysisMissingVertical">
               <h1 class="font-serif text-4xl leading-[1.02] tracking-[-0.045em] md:text-6xl">
-                {{ $t('onboarding.analysis.failedTitle') }}
+                {{ analysisMissingVertical ? $t('onboarding.verticalMissingTitle') : $t('onboarding.analysis.failedTitle') }}
               </h1>
               <p class="mt-5 max-w-lg text-[16px] leading-7 text-[var(--muted)]">
-                {{ analysisErrorMessage }}
+                {{ analysisMissingVertical ? $t('onboarding.verticalMissingBody') : analysisErrorMessage }}
               </p>
             </template>
 
             <section
               class="rounded-[24px] border border-[var(--line)] bg-[var(--surface)] p-5 md:p-6"
-              :class="analysisFailed ? 'mt-7' : ''"
+              :class="analysisFailed || analysisMissingVertical ? 'mt-7' : ''"
               aria-live="polite"
               :aria-busy="!analysisFailed"
             >
@@ -446,7 +455,7 @@ onMounted(async () => {
                 </li>
               </ol>
 
-              <div v-if="analysisFailed" class="mt-5 flex flex-wrap gap-2">
+              <div v-if="analysisFailed || analysisMissingVertical" class="mt-5 flex flex-wrap gap-2">
                 <button
                   type="button"
                   class="rounded-full bg-[var(--ink)] px-5 py-2.5 text-sm font-medium text-white transition hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-50"
@@ -454,13 +463,6 @@ onMounted(async () => {
                   @click="retryAnalysis"
                 >
                   {{ analysisRetrying ? $t('onboarding.analysis.retrying') : $t('onboarding.analysis.retry') }}
-                </button>
-                <button
-                  type="button"
-                  class="rounded-full border border-[var(--line)] bg-[var(--paper)] px-5 py-2.5 text-sm font-medium transition hover:border-[var(--muted)]"
-                  @click="continueWithoutAnalysis"
-                >
-                  {{ $t('onboarding.analysis.continueAnyway') }}
                 </button>
               </div>
             </section>

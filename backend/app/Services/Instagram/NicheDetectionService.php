@@ -21,6 +21,7 @@ use Throwable;
  *   primary_niche: ?string,
  *   sub_niches: list<string>,
  *   topics: list<string>,
+ *   avoid_topics: list<string>,
  *   audience: list<string>,
  *   positioning: ?string,
  *   language: string,
@@ -176,7 +177,8 @@ class NicheDetectionService
             'Build a precise Creator DNA from the stable editorial identity of an Instagram profile, not the subject '
             .'of its latest post or current campaign. Use this evidence hierarchy: bio and linked-page metadata first, '
             .'themes repeated across distinct captions second, and isolated mentions last. Identify the narrowest '
-            .'defensible primary niche, then adjacent sub-niches, concrete topics, intended audiences, main content '
+            .'defensible primary niche, then three to six adjacent sub-niches, concrete topics, intended audiences, main content '
+            .'pillars and a short list of subjects to avoid when they are clearly outside the creator’s universe. '
             .'pillars, language, tone and a concise voice profile. Also write one concise positioning statement that '
             .'explains what the creator consistently helps people understand, achieve or experience. Extract current '
             .'projects and goals only when the creator states them explicitly in the bio, linked page or captions. '
@@ -206,11 +208,12 @@ class NicheDetectionService
             [
                 'type' => 'object',
                 'additionalProperties' => false,
-                'required' => ['primary_niche', 'sub_niches', 'topics', 'audience', 'positioning', 'language', 'content_pillars', 'tone', 'current_projects', 'goals', 'content_strengths', 'reasoning_patterns', 'hook_patterns', 'visual_patterns', 'voice_profile', 'confidence'],
+                'required' => ['primary_niche', 'sub_niches', 'topics', 'avoid_topics', 'audience', 'positioning', 'language', 'content_pillars', 'tone', 'current_projects', 'goals', 'content_strengths', 'reasoning_patterns', 'hook_patterns', 'visual_patterns', 'voice_profile', 'confidence'],
                 'properties' => [
                     'primary_niche' => ['type' => 'string'],
                     'sub_niches' => ['type' => 'array', 'items' => ['type' => 'string']],
                     'topics' => ['type' => 'array', 'items' => ['type' => 'string']],
+                    'avoid_topics' => ['type' => 'array', 'items' => ['type' => 'string']],
                     'audience' => ['type' => 'array', 'items' => ['type' => 'string']],
                     'positioning' => ['type' => 'string'],
                     'language' => ['type' => 'string'],
@@ -257,6 +260,7 @@ class NicheDetectionService
             'primary_niche' => $niche !== '' ? $niche : null,
             'sub_niches' => $this->stringList($result['sub_niches'] ?? [], 6),
             'topics' => $this->stringList($result['topics'] ?? [], 10),
+            'avoid_topics' => $this->stringList($result['avoid_topics'] ?? [], 8),
             'audience' => $this->stringList($result['audience'] ?? [], 6),
             'positioning' => Str::limit(trim((string) ($result['positioning'] ?? '')), 1000) ?: null,
             'language' => trim((string) ($result['language'] ?? 'und')) ?: 'und',
@@ -388,6 +392,7 @@ class NicheDetectionService
             'primary_niche' => $primaryNiche !== '' ? $primaryNiche : null,
             'sub_niches' => [],
             'topics' => $topics,
+            'avoid_topics' => [],
             'audience' => [],
             'positioning' => $bio !== '' ? Str::limit($bio, 1000) : null,
             'language' => $this->language($captions.' '.$bio),
@@ -486,6 +491,7 @@ class NicheDetectionService
             'primary_niche' => null,
             'sub_niches' => [],
             'topics' => [],
+            'avoid_topics' => [],
             'audience' => [],
             'positioning' => null,
             'language' => 'und',

@@ -6,9 +6,12 @@ use App\Jobs\Discovery\AnalyzeCreatorHandle;
 use App\Models\CreatorProfile;
 use App\Models\InstagramAccount;
 use App\Models\User;
+use App\Services\Discovery\CanonicalCreatorVerticals;
 
 class OnboardingCompletionService
 {
+    public function __construct(private readonly CanonicalCreatorVerticals $verticals) {}
+
     public function completeFor(
         User $user,
         ?InstagramAccount $account,
@@ -16,6 +19,10 @@ class OnboardingCompletionService
     ): bool {
         if ($user->onboarding_completed_at) {
             return true;
+        }
+
+        if ($this->verticals->canonical($profile?->primary_vertical) === null) {
+            return false;
         }
 
         $completed = $account

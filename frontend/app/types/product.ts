@@ -53,6 +53,23 @@ export interface ContentPost {
   recommendation_score?: number | null
   /** Match between this post's creator/topics and the member's Creator DNA. */
   creator_fit_score?: number | null
+  recommendation_debug?: {
+    bucket: 'for_you' | 'explore'
+    profile_vertical: string | null
+    profile_primary_niche: string | null
+    profile_sub_niches: string[]
+    post_vertical: string | null
+    post_primary_niche: string | null
+    post_sub_niches: string[]
+    creator_affinity: number | null
+    post_relevance: number
+    shared_niches: string[]
+    shared_topics: string[]
+    matched_avoid_topics: string[]
+    outlier_score: number
+    freshness: number
+    final_ranking_score: number
+  }
   why_recommended?: string
   signals?: string[]
   is_saved: boolean
@@ -119,6 +136,7 @@ export interface PersonalProfile {
     primary_niche: string | null
     sub_niches: string[]
     topics: string[]
+    avoid_topics?: string[]
     audience: string[]
     positioning?: string | null
     language: string

@@ -397,7 +397,6 @@
       "failedTitle": "Personal could not read this account.",
       "retry": "Try again",
       "retrying": "Trying again…",
-      "continueAnyway": "Continue without the analysis",
       "errors": {
         "profile_not_found": "No public Instagram account matches that handle. Check the spelling and try again.",
         "private_account": "This account is private, so Personal cannot read its posts. Make it public, or continue without the analysis.",
@@ -405,6 +404,8 @@
       }
     },
     "connectedSuffix": "connected",
+    "verticalMissingTitle": "Your primary vertical is still missing.",
+    "verticalMissingBody": "Personal has not identified your primary vertical yet. Restart the Instagram reading to finish your onboarding.",
     "readyTitle": "You’re ready.",
     "understandingTitle": "Understanding your brand…",
     "importedCopy": "We imported {count} recent posts and built the first version of your Personal profile.",
@@ -619,7 +620,7 @@
       "archived": "Archived"
     },
     "emptyTitle": "No drafts yet.",
-    "emptyCopy": "Start from a moment or a strong pattern. Your work will stay here while you shape it.",
+    "emptyCopy": "Start from a remix. Your work will stay here while you shape it.",
     "createFirst": "Create your first draft",
     "loadError": "Personal could not load your drafts. Please try again.",
     "delete": "Delete draft",

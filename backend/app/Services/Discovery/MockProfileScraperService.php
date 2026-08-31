@@ -51,6 +51,7 @@ class MockProfileScraperService implements ProfileDiscoveryService
         $likes = 1_200 + ($postSeed % 90_000);
         $comments = (int) round($likes * (0.01 + (($postSeed % 40) / 1000)));
         $views = $likes * (5 + ($postSeed % 12));
+        $topic = Str::before($username, '.');
 
         $format = self::FORMATS[$postSeed % count(self::FORMATS)];
         $thumbnailUrl = "https://picsum.photos/seed/{$postSeed}/640/800";
@@ -61,14 +62,14 @@ class MockProfileScraperService implements ProfileDiscoveryService
             displayName: Str::headline(Str::before($username, '.')).' Creator',
             avatarUrl: "https://i.pravatar.cc/150?u={$username}",
             followers: $followers,
-            caption: "Recent post {$index} from {$username}",
+            caption: "Recent {$topic} post {$index} from {$username} #{$topic}",
             thumbnailUrl: $thumbnailUrl,
             likes: $likes,
             comments: $comments,
             views: $views,
             publishedAt: CarbonImmutable::now()->subHours(($postSeed % 240) + 2),
             format: $format,
-            hashtags: [],
+            hashtags: [$topic],
             externalId: "mock-{$username}-{$index}",
             metadata: $format === 'reel' ? ['video_duration' => 30 + ($postSeed % 60)] : [],
             mediaUrls: $format === 'carousel'

@@ -40,18 +40,9 @@ class MarketFeedAllocator
      */
     private function prioritizeVertical(Collection $ranked, ?string $primaryVertical): Collection
     {
-        $sorted = $ranked->sortByDesc('ranking.score')->values();
-
-        if ($primaryVertical === null) {
-            return $sorted;
-        }
-
-        // Same reason as the candidate query: the comparison only means anything
-        // against the canonical vertical stored on the creator.
-        return $sorted
-            ->filter(fn (array $item): bool => $item['post']->creator->primary_vertical === $primaryVertical)
-            ->concat($sorted->reject(fn (array $item): bool => $item['post']->creator->primary_vertical === $primaryVertical))
-            ->values();
+        // Relevance and score have already been decided upstream. Allocation
+        // may apply market quotas, but must not silently change score order.
+        return $ranked->sortByDesc('ranking.score')->values();
     }
 
     /** @return array<string, int> */

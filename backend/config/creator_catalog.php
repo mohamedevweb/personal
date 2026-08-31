@@ -33,6 +33,7 @@ return [
         'lifestyle' => ['name' => 'Lifestyle', 'aliases' => ['lifestyle', 'mode de vie', 'habits', 'habitudes', 'routines', 'routine', 'discipline', 'self-development', 'self development', 'personal development', 'développement personnel', 'minimalism', 'personal growth']],
         'local-culture' => ['name' => 'Local & Culture', 'aliases' => ['local culture', 'local / culture', 'culture locale', 'local discovery', 'city guide', 'city guides', 'paris', 'lyon', 'london', 'new york', 'nyc', 'sorties', 'addresses']],
         'travel' => ['name' => 'Travel', 'aliases' => ['travel', 'voyage', 'tourism', 'tourisme', 'destination', 'destinations', 'travel tips', 'adventure', 'road trip', 'backpacking']],
+        'business' => ['name' => 'Business', 'aliases' => ['business']],
     ],
 
     // Adjacent subjects may be useful, but they never fill the personalised
@@ -41,8 +42,9 @@ return [
     'adjacent_verticals' => [
         'sport-fitness' => ['wellness'],
         'food-cooking' => ['wellness'],
-        'personal-branding' => ['tech-ai'],
-        'tech-ai' => ['personal-branding'],
+        'personal-branding' => ['tech-ai', 'business'],
+        'tech-ai' => ['personal-branding', 'business'],
+        'business' => ['tech-ai', 'personal-branding'],
         'wellness' => ['sport-fitness', 'food-cooking'],
         'events' => ['local-culture', 'lifestyle'],
         'languages' => ['lifestyle'],
@@ -55,7 +57,10 @@ return [
     // startup/SaaS content must not be treated as equivalent to gadget reviews
     // merely because both happen to sit under Tech & AI.
     'semantic_clusters' => [
-        'startup-saas' => ['startup', 'startups', 'saas', 'software as a service', 'founder', 'founders', 'fondateur', 'fondateurs', 'fondatrice', 'fondatrices', 'indie hacker', 'indie hackers', 'build in public', 'entrepreneurship', 'entrepreneuriat', 'early stage', 'early-stage'],
+        'startup-saas' => ['startup', 'startups', 'saas', 'software as a service', 'founder', 'founders', 'fondateur', 'fondateurs', 'fondatrice', 'fondatrices', 'indie hacker', 'indie hackers', 'build in public', 'building in public', 'entrepreneurship', 'entrepreneuriat', 'early stage', 'early-stage', 'bootstrapping', 'solopreneurship', 'founder journey', 'founder-journey'],
+        'ai-entrepreneurship' => ['ai entrepreneurship', 'ai-entrepreneurship', 'ai entrepreneur', 'ai startup', 'ai startups', 'entrepreneurial ai'],
+        'ai-agents' => ['ai agents', 'ai-agents', 'ai agent', 'agentic ai', 'agents ia', 'agents ai'],
+        'software' => ['software', 'software tools', 'developer tools', 'outils de développement', 'outils de developpement'],
         'creator-marketing' => ['personal branding', 'marque personnelle', 'content creation', 'création de contenu', 'creation de contenu', 'creator economy', 'marketing', 'audience building', 'copywriting'],
         'consumer-tech' => ['smartphone', 'smartphones', 'gadget', 'gadgets', 'setup', 'hardware', 'high tech', 'high-tech', 'tech review', 'product review', 'produits tech'],
         'product-building' => ['product design', 'design produit', 'product management', 'développement produit', 'developpement produit', 'software development', 'développement logiciel', 'developpement logiciel', 'developer tools', 'outils de développement', 'outils de developpement'],
@@ -69,6 +74,9 @@ return [
         'lifestyle' => ['lifestyle', 'habits', 'habitudes', 'routine', 'routines', 'discipline', 'self-development', 'personal development', 'développement personnel', 'minimalism'],
         'local-culture' => ['local culture', 'local discovery', 'city guide', 'city guides', 'culture locale', 'paris', 'lyon', 'london', 'new york', 'nyc', 'sorties'],
         'travel' => ['travel', 'voyage', 'tourism', 'tourisme', 'destination', 'destinations', 'travel tips', 'adventure', 'road trip', 'backpacking'],
+        'real-estate' => ['real estate', 'immobilier', 'property investing', 'investissement immobilier', 'rental property'],
+        'crypto-trading' => ['crypto trading', 'crypto', 'cryptocurrency', 'trading crypto', 'bitcoin trading'],
+        'generic-motivation' => ['generic motivation', 'motivation quotes', 'citation motivation', 'mindset motivation'],
     ],
 
     'audit' => [

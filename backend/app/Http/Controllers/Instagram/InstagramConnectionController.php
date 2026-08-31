@@ -66,6 +66,7 @@ class InstagramConnectionController extends Controller
             ],
             'profile' => $profile ? [
                 'niche' => $profile->niche,
+                'primary_vertical' => $profile->primary_vertical,
                 'topics' => $profile->topics,
                 'tone' => $profile->tone,
                 'creator_dna' => $profile->creator_dna,
@@ -82,6 +83,7 @@ class InstagramConnectionController extends Controller
             'instagram_username',
             'analysis_status',
             'analysis_error',
+            'primary_vertical',
             'followers_count',
             'analyzed_posts_count',
             'bio',
@@ -130,8 +132,11 @@ class InstagramConnectionController extends Controller
         $outdated = data_get($profile?->creator_dna, 'analysis_method') !== 'manual'
             && (int) data_get($profile?->creator_dna, 'analysis_version', 0) < NicheDetectionService::ANALYSIS_VERSION;
         $analysisUnavailable = data_get($profile?->creator_dna, 'analysis_status') === 'analysis_unavailable';
+        $missingVertical = ! filled($profile?->primary_vertical)
+            && $profile?->analysis_status === 'completed';
         $analyze = $changed
             || in_array($profile?->analysis_status, [null, 'failed'], true)
+            || $missingVertical
             || (($outdated || $analysisUnavailable) && ! $analysisRunning);
 
         $analysis = $analyze ? ['analysis_status' => 'queued', 'analysis_error' => null] : [];
@@ -233,6 +238,7 @@ class InstagramConnectionController extends Controller
             'analyzed_posts_count' => $profile?->analyzed_posts_count,
             'bio' => $profile?->bio,
             'niche' => $profile?->niche,
+            'primary_vertical' => $profile?->primary_vertical,
             'tone' => $profile?->tone,
             'audience_description' => $profile?->audience_description,
         ];

@@ -23,6 +23,7 @@ export interface InstagramAccount {
 
 export interface CreatorProfile {
   niche: string | null
+  primary_vertical: string | null
   topics: string[] | null
   tone: string[] | null
 }
@@ -59,6 +60,7 @@ export interface HandleAnalysis {
   niche: string | null
   tone: string[] | null
   audience_description: string | null
+  primary_vertical: string | null
 }
 
 export type MediaEnrichmentStatus =

@@ -177,7 +177,10 @@ class FeedRankingTest extends TestCase
         $offNiche->update(['niche' => 'sport-fitness', 'niche_topics' => ['powerlifting', 'gym']]);
 
         $match = $this->storePost($this->creator('small.vegan', 20_000, 900), 2.0);
-        $stranger = $this->storePost($offNiche, 2.2, ['tags' => ['powerlifting', 'gym']]);
+        $stranger = $this->storePost($offNiche, 2.2, [
+            'caption' => 'A strength training workout at the gym',
+            'tags' => ['powerlifting', 'gym'],
+        ]);
 
         $otherUser = User::factory()->create();
         CreatorProfile::query()->create([
@@ -199,7 +202,7 @@ class FeedRankingTest extends TestCase
         $this->assertFalse($veganFeed->pluck('signals')->flatten()->contains('Similar creator'));
     }
 
-    public function test_a_profile_without_usable_context_does_not_get_a_random_personalized_feed(): void
+    public function test_a_first_time_account_gets_curated_content_before_personal_context_is_ready(): void
     {
         $this->user->creatorProfile()->update([
             'instagram_username' => 'le_bonbon_lyon',
@@ -226,7 +229,7 @@ class FeedRankingTest extends TestCase
             'tags' => ['developer tools'],
         ]);
 
-        $this->assertSame([], app(RecommendationService::class)->forUser($this->user)->pluck('id')->all());
+        $this->assertContains($post->id, app(RecommendationService::class)->forUser($this->user)->pluck('id'));
     }
 
     public function test_creator_dna_topics_prioritize_the_closest_creator_inside_the_same_vertical(): void
@@ -325,7 +328,7 @@ class FeedRankingTest extends TestCase
 
         $this->assertContains($forYou->id, $sections['items']->pluck('id'));
         $this->assertNotContains($leilaExplore->id, $sections['explore_items']->pluck('id'));
-        $this->assertNotContains($otherExplore->id, $sections['explore_items']->pluck('id'));
+        $this->assertContains($otherExplore->id, $sections['explore_items']->pluck('id'));
         $this->assertSame([], $sections['items']->pluck('creator.username')
             ->intersect($sections['explore_items']->pluck('creator.username'))
             ->values()
@@ -374,7 +377,8 @@ class FeedRankingTest extends TestCase
 
         $sections = app(RecommendationService::class)->sectionsForUser($this->user);
 
-        $this->assertSame([$saas->id], $sections['items']->pluck('id')->all());
+        $this->assertContains($adjacent->id, $sections['items']->pluck('id'));
+        $this->assertContains($saas->id, $sections['explore_items']->pluck('id'));
         $this->assertNotContains($consumerTech->id, $sections['items']->pluck('id'));
         $this->assertNotContains($consumerTech->id, $sections['explore_items']->pluck('id'));
         $this->assertNotContains($adjacent->id, $sections['explore_items']->pluck('id'));
@@ -386,7 +390,7 @@ class FeedRankingTest extends TestCase
             ->getJson('/api/feed')
             ->assertOk()
             ->assertJsonCount(1, 'items')
-            ->assertJsonMissing(['id' => $adjacent->id]);
+            ->assertJsonFragment(['id' => $adjacent->id]);
     }
 
     public function test_transcript_and_carousel_text_can_change_post_eligibility(): void
@@ -505,13 +509,13 @@ class FeedRankingTest extends TestCase
 
         $relevance = app(PostRelevance::class);
         $this->assertSame(PostRelevance::FOR_YOU, $relevance->assess($this->user->creatorProfile, $closePost)['bucket']);
-        $this->assertSame(PostRelevance::FOR_YOU, $relevance->assess($this->user->creatorProfile, $farPost)['bucket']);
+        $this->assertNull($relevance->assess($this->user->creatorProfile, $farPost)['bucket']);
 
         $feed = app(RecommendationService::class)->forUser($this->user);
         $ids = $feed->pluck('id')->all();
 
         $this->assertContains($closePost->id, $ids);
-        $this->assertContains($farPost->id, $ids);
+        $this->assertNotContains($farPost->id, $ids);
         $this->assertSame($closePost->id, $feed->first()['id']);
     }
 
@@ -561,7 +565,7 @@ class FeedRankingTest extends TestCase
             app(PostRelevance::class)->assess($this->user->creatorProfile->fresh(), $post)['bucket'],
         );
         $this->assertNotContains($post->id, $sections['items']->pluck('id'));
-        $this->assertNotContains($post->id, $sections['explore_items']->pluck('id'));
+        $this->assertContains($post->id, $sections['explore_items']->pluck('id'));
     }
 
     /**
@@ -619,5 +623,189 @@ class FeedRankingTest extends TestCase
         $items = app(RecommendationService::class)->forUser($this->user);
 
         $this->assertSame([$match->id], $items->pluck('id')->all());
+    }
+
+    public function test_same_vertical_with_a_different_primary_niche_is_rejected(): void
+    {
+        $this->user->creatorProfile()->update([
+            'primary_vertical' => 'business',
+            'niche' => 'saas',
+            'topics' => ['product building'],
+            'creator_dna' => [
+                'primary_niche' => 'saas',
+                'sub_niches' => ['building-in-public'],
+                'topics' => ['product building'],
+                'avoid_topics' => [],
+            ],
+        ]);
+
+        $creator = $this->creator('property.creator', 30_000, 900);
+        $creator->update(['niche' => 'business', 'niche_topics' => ['real estate']]);
+        $post = $this->storePost($creator, 10.0, [
+            'metadata' => ['feed_classification' => [
+                'vertical' => 'business',
+                'primary_niche' => 'real-estate',
+                'sub_niches' => [],
+                'topics' => ['real-estate'],
+            ]],
+        ]);
+
+        $verdict = app(PostRelevance::class)->assess($this->user->creatorProfile->fresh(), $post);
+
+        $this->assertNull($verdict['bucket']);
+    }
+
+    public function test_one_shared_sub_niche_is_enough_for_for_you(): void
+    {
+        $this->user->creatorProfile()->update([
+            'primary_vertical' => 'business',
+            'niche' => 'saas',
+            'creator_dna' => [
+                'primary_niche' => 'saas',
+                'sub_niches' => ['bootstrapping', 'building-in-public', 'solopreneurship'],
+                'topics' => ['product building', 'growth'],
+            ],
+        ]);
+
+        $creator = $this->creator('bootstrapped.creator', 30_000, 900);
+        $creator->update(['niche' => 'business', 'niche_topics' => ['bootstrapping']]);
+        $post = $this->storePost($creator, 2.0, [
+            'metadata' => ['feed_classification' => [
+                'vertical' => 'business',
+                'primary_niche' => 'entrepreneurship',
+                'sub_niches' => ['bootstrapping'],
+                'topics' => ['bootstrapping'],
+            ]],
+        ]);
+
+        $this->assertSame(
+            PostRelevance::FOR_YOU,
+            app(PostRelevance::class)->assess($this->user->creatorProfile->fresh(), $post)['bucket'],
+        );
+    }
+
+    public function test_adjacent_vertical_requires_a_shared_concept_and_goes_to_explore(): void
+    {
+        $this->user->creatorProfile()->update([
+            'primary_vertical' => 'business',
+            'niche' => 'saas',
+            'creator_dna' => [
+                'primary_niche' => 'saas',
+                'sub_niches' => ['ai-entrepreneurship'],
+                'topics' => ['product building'],
+            ],
+        ]);
+
+        $creator = $this->creator('ai.tools', 30_000, 900);
+        $creator->update(['niche' => 'tech-ai', 'niche_topics' => ['ai agents']]);
+        $post = $this->storePost($creator, 2.0, [
+            'metadata' => ['feed_classification' => [
+                'vertical' => 'tech-ai',
+                'primary_niche' => 'ai-agents',
+                'sub_niches' => ['ai-entrepreneurship'],
+                'topics' => ['ai agents'],
+            ]],
+        ]);
+
+        $this->assertSame(
+            PostRelevance::EXPLORE,
+            app(PostRelevance::class)->assess($this->user->creatorProfile->fresh(), $post)['bucket'],
+        );
+    }
+
+    public function test_an_avoid_topic_is_a_hard_relevance_boundary(): void
+    {
+        $this->user->creatorProfile()->update([
+            'primary_vertical' => 'business',
+            'niche' => 'saas',
+            'creator_dna' => [
+                'primary_niche' => 'saas',
+                'sub_niches' => [],
+                'topics' => ['product building'],
+                'avoid_topics' => ['crypto-trading'],
+            ],
+        ]);
+
+        $creator = $this->creator('crypto.creator', 30_000, 900);
+        $creator->update(['niche' => 'business', 'niche_topics' => ['crypto trading']]);
+        $post = $this->storePost($creator, 10.0, [
+            'metadata' => ['feed_classification' => [
+                'vertical' => 'business',
+                'primary_niche' => 'crypto-trading',
+                'sub_niches' => [],
+                'topics' => ['crypto-trading'],
+            ]],
+        ]);
+
+        $verdict = app(PostRelevance::class)->assess($this->user->creatorProfile->fresh(), $post);
+
+        $this->assertNull($verdict['bucket']);
+        $this->assertSame(['crypto-trading'], $verdict['matched_avoid_topics']);
+    }
+
+    public function test_creator_fit_cannot_rescue_a_post_with_an_unrelated_subject(): void
+    {
+        $this->user->creatorProfile()->update([
+            'primary_vertical' => 'business',
+            'niche' => 'saas',
+            'creator_dna' => [
+                'primary_niche' => 'saas',
+                'sub_niches' => ['building-in-public'],
+                'topics' => ['product building'],
+            ],
+        ]);
+
+        $creator = $this->creator('saas.travels', 30_000, 900);
+        $creator->update(['niche' => 'business', 'niche_topics' => ['saas', 'building-in-public']]);
+        $post = $this->storePost($creator, 10.0, [
+            'metadata' => ['feed_classification' => [
+                'vertical' => 'travel',
+                'primary_niche' => 'travel',
+                'sub_niches' => [],
+                'topics' => ['travel'],
+            ]],
+        ]);
+
+        $verdict = app(PostRelevance::class)->assess($this->user->creatorProfile->fresh(), $post);
+
+        $this->assertNull($verdict['bucket']);
+        $this->assertGreaterThan(0, $verdict['creator_affinity']);
+    }
+
+    public function test_ranking_only_compares_posts_after_the_relevance_gate(): void
+    {
+        $this->user->creatorProfile()->update([
+            'primary_vertical' => 'business',
+            'niche' => 'saas',
+            'creator_dna' => [
+                'primary_niche' => 'saas',
+                'sub_niches' => ['bootstrapping'],
+                'topics' => ['product building'],
+            ],
+        ]);
+
+        $relevantCreator = $this->creator('saas.breakout', 30_000, 900);
+        $relevant = $this->storePost($relevantCreator, 2.5, [
+            'metadata' => ['feed_classification' => [
+                'vertical' => 'business',
+                'primary_niche' => 'saas',
+                'sub_niches' => ['bootstrapping'],
+                'topics' => ['product building'],
+            ]],
+        ]);
+        $irrelevantCreator = $this->creator('property.breakout', 30_000, 900);
+        $irrelevant = $this->storePost($irrelevantCreator, 10.0, [
+            'metadata' => ['feed_classification' => [
+                'vertical' => 'business',
+                'primary_niche' => 'real-estate',
+                'sub_niches' => [],
+                'topics' => ['real-estate'],
+            ]],
+        ]);
+
+        $feed = app(RecommendationService::class)->forUser($this->user->fresh());
+
+        $this->assertContains($relevant->id, $feed->pluck('id'));
+        $this->assertNotContains($irrelevant->id, $feed->pluck('id'));
     }
 }

@@ -3,6 +3,7 @@
 namespace Tests\Feature\Instagram;
 
 use App\Jobs\Instagram\SyncInstagramAccount;
+use App\Models\CreatorProfile;
 use App\Models\InstagramAccount;
 use App\Models\InstagramOauthState;
 use App\Models\User;
@@ -120,6 +121,10 @@ class InstagramOAuthTest extends TestCase
     public function test_status_never_exposes_the_access_token(): void
     {
         $user = User::factory()->create();
+        CreatorProfile::query()->create([
+            'user_id' => $user->id,
+            'primary_vertical' => 'tech-ai',
+        ]);
         InstagramAccount::query()->create([
             'user_id' => $user->id,
             'instagram_user_id' => '123',
@@ -138,6 +143,26 @@ class InstagramOAuthTest extends TestCase
             ->assertJsonMissing(['access_token' => 'must-never-leak']);
         $this->assertStringNotContainsString('must-never-leak', $response->getContent());
         $this->assertNotNull($user->fresh()->onboarding_completed_at);
+    }
+
+    public function test_completed_sync_does_not_complete_onboarding_without_a_primary_vertical(): void
+    {
+        $user = User::factory()->create();
+        InstagramAccount::query()->create([
+            'user_id' => $user->id,
+            'instagram_user_id' => '123',
+            'username' => 'unclassified_creator',
+            'access_token' => 'secret',
+            'sync_status' => 'completed',
+            'connected_at' => now(),
+        ]);
+
+        $this->actingAs($user)
+            ->getJson('/api/integrations/instagram/status')
+            ->assertOk()
+            ->assertJsonPath('onboarding_complete', false);
+
+        $this->assertNull($user->fresh()->onboarding_completed_at);
     }
 
     public function test_progress_returns_only_the_fields_needed_by_polling(): void
@@ -179,7 +204,10 @@ class InstagramOAuthTest extends TestCase
             ->assertJsonPath('instagram_username', 'manual.creator')
             ->assertJsonPath('onboarding_complete', false);
 
-        $user->creatorProfile()->update(['analysis_status' => 'completed']);
+        $user->creatorProfile()->update([
+            'analysis_status' => 'completed',
+            'primary_vertical' => 'personal-branding',
+        ]);
 
         $this->actingAs($user)->getJson('/api/integrations/instagram/status')
             ->assertOk()
@@ -195,6 +223,7 @@ class InstagramOAuthTest extends TestCase
             'instagram_username' => 'manual.creator',
             'analysis_status' => 'queued',
             'dna_analyzed_at' => now()->subDay(),
+            'primary_vertical' => 'personal-branding',
             'creator_dna' => [
                 'analysis_method' => 'llm',
                 'analysis_version' => 4,
