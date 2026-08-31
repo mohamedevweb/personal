@@ -50,8 +50,8 @@ return [
         'wellness' => ['sport-fitness', 'food-cooking'],
         'events' => ['local-culture', 'lifestyle'],
         'languages' => ['lifestyle'],
-        'lifestyle' => ['wellness', 'personal-branding', 'languages'],
-        'local-culture' => ['events', 'travel'],
+        'lifestyle' => ['wellness', 'personal-branding', 'languages', 'local-culture'],
+        'local-culture' => ['events', 'travel', 'lifestyle'],
         'travel' => ['local-culture', 'events'],
     ],
 

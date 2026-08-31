@@ -200,6 +200,35 @@ class FeedRankingTest extends TestCase
         $this->assertContains($post->id, app(RecommendationService::class)->forUser($this->user)->pluck('id'));
     }
 
+    public function test_creator_primary_vertical_keeps_travel_and_lifestyle_out_of_local_culture_for_you(): void
+    {
+        $this->user->creatorProfile()->update(['primary_vertical' => 'local-culture']);
+
+        $travelCreator = $this->creator('travel.guide', 30_000, 900);
+        $travelCreator->update(['primary_vertical' => 'travel', 'niche' => 'City guides']);
+        $travelPost = $this->storePost($travelCreator, 2.0, [
+            'metadata' => ['feed_classification' => ['vertical' => 'local-culture']],
+        ]);
+
+        $lifestyleCreator = $this->creator('lifestyle.creator', 30_000, 900);
+        $lifestyleCreator->update(['primary_vertical' => 'lifestyle', 'niche' => 'Lifestyle']);
+        $lifestylePost = $this->storePost($lifestyleCreator, 2.0, [
+            'metadata' => ['feed_classification' => ['vertical' => 'local-culture']],
+        ]);
+
+        $relevance = app(PostRelevance::class);
+
+        $this->assertSame(PostRelevance::EXPLORE, $relevance->assess($this->user->creatorProfile->fresh(), $travelPost)['bucket']);
+        $this->assertSame(PostRelevance::EXPLORE, $relevance->assess($this->user->creatorProfile->fresh(), $lifestylePost)['bucket']);
+
+        $sections = app(RecommendationService::class)->sectionsForUser($this->user->fresh());
+
+        $this->assertNotContains($travelPost->id, $sections['items']->pluck('id'));
+        $this->assertNotContains($lifestylePost->id, $sections['items']->pluck('id'));
+        $this->assertContains($travelPost->id, $sections['explore_items']->pluck('id'));
+        $this->assertContains($lifestylePost->id, $sections['explore_items']->pluck('id'));
+    }
+
     public function test_fallback_matching_surfaces_an_adjacent_vertical_in_explore(): void
     {
         $this->user->creatorProfile()->update([
@@ -588,8 +617,8 @@ class FeedRankingTest extends TestCase
         $this->assertContains($rival->id, $feed->pluck('id'));
     }
 
-    /** A broad vertical never overrides a precise topic mismatch. */
-    public function test_a_post_in_the_members_vertical_is_rejected_without_a_shared_cluster(): void
+    /** A same-vertical post remains eligible without a shared topic. */
+    public function test_a_post_in_the_members_vertical_is_allowed_without_a_shared_cluster(): void
     {
         config(['services.discovery.personalization.minimum_affinity' => 0.99]);
         $this->user->creatorProfile()->update([
@@ -601,8 +630,8 @@ class FeedRankingTest extends TestCase
             ],
         ]);
 
-        // Same broad vertical, nothing else in common: barbecue against a vegan
-        // meal prep profile. The post must not become a For You filler item.
+        // Same vertical, nothing else in common: barbecue against a vegan meal
+        // prep profile. The temporary rule still allows the post.
         $distant = $this->creator('bbq.school', 20_000, 900);
         $distant->update([
             'niche' => 'Barbecue et grillades',
@@ -616,9 +645,9 @@ class FeedRankingTest extends TestCase
 
         $verdict = app(PostRelevance::class)->assess($this->user->creatorProfile->fresh(), $post);
 
-        $this->assertNull($verdict['bucket']);
+        $this->assertSame(PostRelevance::FOR_YOU, $verdict['bucket']);
         $this->assertNull($verdict['content_vertical']);
-        $this->assertNotContains($post->id, app(RecommendationService::class)->forUser($this->user)->pluck('id'));
+        $this->assertContains($post->id, app(RecommendationService::class)->forUser($this->user)->pluck('id'));
     }
 
     /** Same vertical keeps both posts eligible regardless of their niches. */
@@ -762,7 +791,11 @@ class FeedRankingTest extends TestCase
         // The same thing again, with a post nothing can be read from: only the
         // account says what it is, and it says the wrong vertical.
         $silent = $this->creator('silent.gym', 500_000, 900);
-        $silent->update(['niche' => 'strength coaching', 'niche_topics' => ['musculation']]);
+        $silent->update([
+            'niche' => 'strength coaching',
+            'niche_topics' => ['musculation'],
+            'primary_vertical' => 'sport-fitness',
+        ]);
         $this->storePost($silent, 6.0, ['caption' => 'Jour 12', 'tags' => []]);
 
         $items = app(RecommendationService::class)->forUser($this->user);
@@ -913,7 +946,7 @@ class FeedRankingTest extends TestCase
 
         $verdict = app(PostRelevance::class)->assess($this->user->creatorProfile->fresh(), $post);
 
-        $this->assertNull($verdict['bucket']);
+        $this->assertSame(PostRelevance::FOR_YOU, $verdict['bucket']);
         $this->assertGreaterThan(0, $verdict['creator_affinity']);
     }
 
@@ -930,6 +963,7 @@ class FeedRankingTest extends TestCase
         ]);
 
         $relevantCreator = $this->creator('saas.breakout', 30_000, 900);
+        $relevantCreator->update(['primary_vertical' => 'business']);
         $relevant = $this->storePost($relevantCreator, 2.5, [
             'metadata' => ['feed_classification' => [
                 'vertical' => 'business',
@@ -939,6 +973,7 @@ class FeedRankingTest extends TestCase
             ]],
         ]);
         $irrelevantCreator = $this->creator('property.breakout', 30_000, 900);
+        $irrelevantCreator->update(['primary_vertical' => 'business']);
         $irrelevant = $this->storePost($irrelevantCreator, 10.0, [
             'metadata' => ['feed_classification' => [
                 'vertical' => 'business',

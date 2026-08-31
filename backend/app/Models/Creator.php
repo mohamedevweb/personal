@@ -19,10 +19,17 @@ class Creator extends Model
                 return;
             }
 
-            // Preserve compatibility for catalog and test writes that already
-            // use a canonical slug. Free text is never classified here.
-            $creator->primary_vertical = app(CanonicalCreatorVerticals::class)
-                ->canonical($creator->niche);
+            // Preserve an AI or catalog decision when a free-text niche is
+            // refreshed. Exact canonical slugs remain a compatibility path for
+            // imports and explicit test fixtures.
+            $verticals = app(CanonicalCreatorVerticals::class);
+            $canonicalNiche = $verticals->canonical($creator->niche);
+
+            if ($canonicalNiche !== null) {
+                $creator->primary_vertical = $canonicalNiche;
+            } elseif (! filled($creator->getOriginal('primary_vertical'))) {
+                $creator->primary_vertical = null;
+            }
         });
     }
 

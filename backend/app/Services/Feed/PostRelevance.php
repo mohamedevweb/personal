@@ -46,7 +46,10 @@ class PostRelevance
         ));
         $primary = $profileClassification['vertical'];
         $contentVertical = $postClassification['vertical'];
-        $candidateVertical = $contentVertical ?? $creatorClassification['vertical'];
+        // The publishing creator's canonical vertical is authoritative. A post
+        // can carry an old or campaign-specific content classification, but it
+        // must not move a travel or lifestyle creator into a local-culture For You shelf.
+        $candidateVertical = $creatorClassification['vertical'];
 
         // Temporary rollout rule: the canonical primary vertical is the only
         // relevance gate. DNA niches, topics and avoid topics remain available
