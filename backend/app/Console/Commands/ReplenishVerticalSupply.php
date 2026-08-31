@@ -69,11 +69,15 @@ class ReplenishVerticalSupply extends Command
                 $queued++;
             }
 
+            $action = $cooldownActive && ! $this->option('force')
+                ? 'cooldown'
+                : ($this->option('dry-run') ? 'dry-run' : 'queued');
+
             $rows[] = [
                 $profile->primary_vertical,
                 $supply['posts'],
                 $supply['creators'],
-                $cooldownActive ? 'cooldown' : ($this->option('dry-run') ? 'dry-run' : 'queued'),
+                $action,
             ];
         }
 

@@ -36,7 +36,7 @@ class ReplenishVerticalSupplyTest extends TestCase
         $this->profile('events');
         $travel = $this->profile('travel');
 
-        $this->artisan('personal:replenish-vertical-supply', ['--vertical' => 'events'])
+        $this->artisan('personal:replenish-vertical-supply', ['--vertical' => 'events', '--force' => true])
             ->assertSuccessful();
 
         Bus::assertDispatched(

@@ -213,12 +213,12 @@
           "a": "That's the whole point. Personal learns your tone from your own posts and shows you what it understood before writing a line. Every draft starts from your stories, and you correct it in plain language."
         },
         "personalization": {
-          "q": "How does Personal personalize my recommendations?",
-          "a": "It starts with your Instagram, not a generic persona. Personal reads your profile, recent posts, captions, tone, topics and audience, then combines that understanding with your life Moments and the signals you give it. Saves, remixes and dismissals help tune what appears next. You can edit what Personal remembers at any time."
+          "q": "How does Personal make my feed feel personal?",
+          "a": "Personal builds a picture of your niche, audience, voice and interests from your Instagram and your life Moments. It uses that context to find ideas that fit you, then learns from what you save, remix or dismiss. You can edit what Personal remembers at any time."
         },
         "niche": {
-          "q": "What will I see in my niche feed?",
-          "a": "A focused stream of recent posts from creators in your world. Personal looks for posts that outperform their creator's usual baseline, then filters them by your primary vertical and market. It is not a popularity chart, and it does not fill the feed with generic viral content. If there are not enough relevant posts, it stays short until better ones are found."
+          "q": "What is the niche feed?",
+          "a": "It is a focused stream of recent posts from creators in your space. Personal surfaces posts that are outperforming for their own audience, not just posts from the biggest accounts, then keeps them relevant to your niche and market. It stays intentionally small instead of padding the feed with generic viral content."
         },
         "different": {
           "q": "Another AI content generator?",

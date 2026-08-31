@@ -206,27 +206,27 @@
     "faq": {
       "eyebrow": "FAQ",
       "title": "Les questions que les créateurs posent en premier.",
-      "lede": "Pour le reste, écrivez-nous. On accompagne chaque créateur à la main en ce moment.",
+      "lede": "Pour le reste, écris-nous. On accompagne chaque créateur à la main en ce moment.",
       "items": {
         "sound": {
           "q": "Est-ce que ça va me ressembler ?",
-          "a": "C'est tout l'enjeu. Personal apprend votre ton à partir de vos propres posts et vous montre ce qu'il a compris avant d'écrire une ligne. Chaque brouillon part de vos histoires, et vous le corrigez en langage courant."
+          "a": "C'est tout l'enjeu. Personal apprend ton ton à partir de tes propres posts et te montre ce qu'il a compris avant d'écrire une ligne. Chaque brouillon part de tes histoires, et tu le corriges en langage courant."
         },
         "personalization": {
-          "q": "Comment Personal personnalise-t-il mes recommandations ?",
-          "a": "Tout part de ton Instagram, pas d'un profil générique. Personal lit ton profil, tes posts récents, tes légendes, ton ton, tes sujets et ton audience, puis croise cette compréhension avec tes Moments et les signaux que tu lui donnes. Tes favoris, tes remixes et tes masquages affinent ce qui apparaît ensuite. Tu peux modifier ce que Personal retient à tout moment."
+          "q": "Comment Personal personnalise-t-il mon feed ?",
+          "a": "Personal construit une image de ta niche, de ton audience, de ta voix et de tes sujets à partir de ton Instagram et de tes Moments. Il s'en sert pour trouver des idées qui te correspondent, puis apprend de ce que tu ajoutes à tes favoris, remixes ou masques. Tu peux modifier ce que Personal retient à tout moment."
         },
         "niche": {
-          "q": "Que vais-je voir dans mon feed de niche ?",
-          "a": "Un fil ciblé de posts récents publiés par des créateurs de ton univers. Personal repère les posts qui dépassent la performance habituelle de leur créateur, puis les filtre selon ta verticale principale et ton marché. Ce n'est pas un classement de popularité, et le fil ne se remplit pas de contenus viraux sans rapport. S'il n'y a pas assez de posts pertinents, il reste court jusqu'à l'arrivée de meilleures opportunités."
+          "q": "Qu'est-ce que le feed de niche ?",
+          "a": "C'est un fil ciblé de posts récents publiés par des créateurs de ta niche. Personal met en avant les posts qui dépassent la performance habituelle de leur propre compte, pas seulement ceux des plus gros comptes, puis les garde pertinents pour ta niche et ton marché. Le fil reste volontairement court plutôt que de se remplir de contenus viraux sans rapport."
         },
         "different": {
           "q": "Encore un générateur de contenu IA ?",
-          "a": "Non. Un générateur invente à partir de rien. Personal part de deux choses qui existent déjà : ce qui marche dans votre niche cette semaine, et ce qui vous est vraiment arrivé."
+          "a": "Non. Un générateur invente à partir de rien. Personal part de deux choses qui existent déjà : ce qui marche dans ta niche cette semaine, et ce qui t'est vraiment arrivé."
         },
         "post": {
           "q": "Est-ce que Personal publie à ma place ?",
-          "a": "Jamais. Personal écrit, vous décidez. Vos Moments restent les vôtres, ne sont jamais montrés à d'autres créateurs, et vous pouvez les supprimer à tout moment."
+          "a": "Jamais. Personal écrit, tu décides. Tes Moments restent les tiens, ne sont jamais montrés à d'autres créateurs, et tu peux les supprimer à tout moment."
         },
         "cost": {
           "q": "Combien ça coûte ?",
