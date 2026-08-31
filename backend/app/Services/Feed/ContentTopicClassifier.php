@@ -55,6 +55,10 @@ class ContentTopicClassifier
             ...($dna['topics'] ?? $profile->topics ?? []),
             ...($dna['content_pillars'] ?? []),
             ...($dna['audience'] ?? []),
+            // The connected account bio is useful context even while the deeper
+            // Creator DNA is unavailable or still being built.
+            $profile->display_name,
+            $profile->bio,
             $profile->positioning,
             $profile->audience_description,
         ];

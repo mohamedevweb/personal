@@ -5,6 +5,7 @@ namespace Tests\Feature\Content;
 use App\Models\ContentPost;
 use App\Models\Creator;
 use App\Models\CreatorProfile;
+use App\Models\InstagramAccount;
 use App\Models\Remix;
 use App\Models\SavedContent;
 use App\Models\User;
@@ -198,6 +199,36 @@ class FeedRankingTest extends TestCase
         $this->assertFalse($veganFeed->pluck('signals')->flatten()->contains('Similar creator'));
     }
 
+    public function test_a_profile_without_usable_context_does_not_get_a_random_personalized_feed(): void
+    {
+        $this->user->creatorProfile()->update([
+            'instagram_username' => 'le_bonbon_lyon',
+            'niche' => null,
+            'topics' => [],
+            'primary_vertical' => null,
+            'creator_dna' => null,
+        ]);
+        InstagramAccount::query()->create([
+            'user_id' => $this->user->id,
+            'instagram_user_id' => 'bonbon-lyon',
+            'username' => 'le_bonbon_lyon',
+            'access_token' => 'secret',
+            'connected_at' => now(),
+        ]);
+
+        $tech = $this->creator('swerikcodes', 250_000, 900);
+        $tech->update([
+            'niche' => 'tech-ai',
+            'niche_topics' => ['developer tools', 'software development'],
+        ]);
+        $post = $this->storePost($tech, 2.0, [
+            'caption' => 'The developer tool I use to build faster',
+            'tags' => ['developer tools'],
+        ]);
+
+        $this->assertSame([], app(RecommendationService::class)->forUser($this->user)->pluck('id')->all());
+    }
+
     public function test_creator_dna_topics_prioritize_the_closest_creator_inside_the_same_vertical(): void
     {
         $this->user->creatorProfile()->update([
@@ -294,14 +325,14 @@ class FeedRankingTest extends TestCase
 
         $this->assertContains($forYou->id, $sections['items']->pluck('id'));
         $this->assertNotContains($leilaExplore->id, $sections['explore_items']->pluck('id'));
-        $this->assertContains($otherExplore->id, $sections['explore_items']->pluck('id'));
+        $this->assertNotContains($otherExplore->id, $sections['explore_items']->pluck('id'));
         $this->assertSame([], $sections['items']->pluck('creator.username')
             ->intersect($sections['explore_items']->pluck('creator.username'))
             ->values()
             ->all());
     }
 
-    public function test_startup_profile_gets_only_startup_content_and_adjacent_ideas_are_separate(): void
+    public function test_startup_profile_gets_only_startup_content(): void
     {
         $this->user->creatorProfile()->update([
             'niche' => 'Early-stage tech entrepreneurship',
@@ -346,7 +377,7 @@ class FeedRankingTest extends TestCase
         $this->assertSame([$saas->id], $sections['items']->pluck('id')->all());
         $this->assertNotContains($consumerTech->id, $sections['items']->pluck('id'));
         $this->assertNotContains($consumerTech->id, $sections['explore_items']->pluck('id'));
-        $this->assertContains($adjacent->id, $sections['explore_items']->pluck('id'));
+        $this->assertNotContains($adjacent->id, $sections['explore_items']->pluck('id'));
         $this->assertTrue($sections['items']->every(
             fn (array $item): bool => ! in_array($item['creator']['niche'], ['sport-fitness', 'food-cooking', 'wellness'], true),
         ));
@@ -355,7 +386,7 @@ class FeedRankingTest extends TestCase
             ->getJson('/api/feed')
             ->assertOk()
             ->assertJsonCount(1, 'items')
-            ->assertJsonFragment(['id' => $adjacent->id]);
+            ->assertJsonMissing(['id' => $adjacent->id]);
     }
 
     public function test_transcript_and_carousel_text_can_change_post_eligibility(): void
@@ -506,9 +537,10 @@ class FeedRankingTest extends TestCase
         $this->assertNotContains($post->id, app(RecommendationService::class)->forUser($this->user)->pluck('id'));
     }
 
-    /** Case D — an adjacent vertical that shares a cluster belongs to Explore. */
-    public function test_an_adjacent_vertical_sharing_a_cluster_lands_in_explore(): void
+    /** Adjacent verticals stay out once the member has a primary vertical. */
+    public function test_an_adjacent_vertical_sharing_a_cluster_stays_out_of_the_feed(): void
     {
+        config(['services.discovery.minimum_feed_size' => 1]);
         $this->user->creatorProfile()->update([
             'niche' => 'Personal branding for founders',
             'topics' => ['startup', 'audience building'],
@@ -528,8 +560,8 @@ class FeedRankingTest extends TestCase
             PostRelevance::EXPLORE,
             app(PostRelevance::class)->assess($this->user->creatorProfile->fresh(), $post)['bucket'],
         );
-        $this->assertContains($post->id, $sections['explore_items']->pluck('id'));
         $this->assertNotContains($post->id, $sections['items']->pluck('id'));
+        $this->assertNotContains($post->id, $sections['explore_items']->pluck('id'));
     }
 
     /**

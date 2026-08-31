@@ -23,8 +23,21 @@ const mediaUrls = computed(() => {
   const urls = post.value?.media_urls?.filter(Boolean) || []
   return urls.length > 0 ? urls : post.value?.thumbnail_url ? [post.value.thumbnail_url] : []
 })
+const ANALYSIS_INITIAL_DELAY = 5000
+const ANALYSIS_MAX_DELAY = 30_000
+const ANALYSIS_MAX_ATTEMPTS = 24
 let analysisTimer: ReturnType<typeof setTimeout> | undefined
 let analysisAttempts = 0
+let analysisStopped = false
+
+function scheduleAnalysisPoll(delay: number) {
+  clearTimeout(analysisTimer)
+  analysisTimer = setTimeout(pollAnalysis, delay)
+}
+
+function nextAnalysisDelay() {
+  return Math.min(ANALYSIS_INITIAL_DELAY * (2 ** Math.min(analysisAttempts, 2)), ANALYSIS_MAX_DELAY)
+}
 
 function onMomentCreated(moment: LifeMoment) {
   moments.value.unshift(moment)
@@ -32,16 +45,22 @@ function onMomentCreated(moment: LifeMoment) {
 }
 
 async function pollAnalysis() {
+  if (analysisStopped) return
+
   try {
     const response = await apiFetch<{ content: ContentPost }>(`/api/content/${route.params.id}`)
+    if (analysisStopped) return
+
     post.value = response.content
     analysisAttempts++
-    if (response.content.analysis_status === 'pending' && analysisAttempts < 90) {
-      analysisTimer = setTimeout(pollAnalysis, 2000)
+    if (response.content.analysis_status === 'pending' && analysisAttempts < ANALYSIS_MAX_ATTEMPTS) {
+      scheduleAnalysisPoll(nextAnalysisDelay())
     }
   } catch {
+    if (analysisStopped) return
+
     analysisAttempts++
-    if (analysisAttempts < 45) analysisTimer = setTimeout(pollAnalysis, 4000)
+    if (analysisAttempts < ANALYSIS_MAX_ATTEMPTS) scheduleAnalysisPoll(ANALYSIS_MAX_DELAY)
   }
 }
 
@@ -49,7 +68,7 @@ async function requestAnalysis() {
   try {
     await apiFetch(`/api/content/${route.params.id}/analysis`, { method: 'POST' })
     analysisAttempts = 0
-    analysisTimer = setTimeout(pollAnalysis, 1200)
+    scheduleAnalysisPoll(ANALYSIS_INITIAL_DELAY)
   } catch {
     // The immediate heuristic remains useful when background analysis is unavailable.
   }
@@ -69,6 +88,8 @@ async function createRemix() {
 }
 
 onMounted(async () => {
+  analysisStopped = false
+
   try {
     const [contentResponse, momentsResponse] = await Promise.all([
       apiFetch<{ content: ContentPost }>(`/api/content/${route.params.id}`),
@@ -84,7 +105,10 @@ onMounted(async () => {
   }
 })
 
-onBeforeUnmount(() => clearTimeout(analysisTimer))
+onBeforeUnmount(() => {
+  analysisStopped = true
+  clearTimeout(analysisTimer)
+})
 </script>
 
 <template>

@@ -73,6 +73,7 @@ const profileAnalysisRunning = computed(() => [
   'mapping_audience',
   'transcribing_reels'
 ].includes(profile.value?.analysis_status || ''))
+const analysisInProgress = computed(() => profileAnalysisRunning.value || mediaEnrichmentRunning.value)
 const analysisMessage = computed(() => {
   if (profileAnalysisRunning.value) return t('personal.analysis.inProgress')
   if (mediaEnrichmentRunning.value) return t('personal.analysis.mediaInProgress')
@@ -178,7 +179,10 @@ onMounted(loadProfile)
           <div>
             <p class="text-sm font-medium">{{ $t('personal.instagramAccount') }}</p>
             <p class="text-xs text-[var(--faint)]">{{ $t('personal.liveContext', { count: instagram.media_count || 0 }) }}</p>
-            <p v-if="analysisMessage" class="mt-1 text-xs text-[var(--accent-ink)]">{{ analysisMessage }}</p>
+            <p v-if="analysisMessage" class="mt-1 flex items-center gap-2 text-xs text-[var(--accent-ink)]" role="status" aria-live="polite">
+              <span v-if="analysisInProgress" class="h-3 w-3 shrink-0 animate-spin rounded-full border-2 border-[var(--accent-line)] border-t-[var(--accent-ink)]" aria-hidden="true" />
+              <span>{{ analysisMessage }}</span>
+            </p>
           </div>
         </template>
 
@@ -193,7 +197,10 @@ onMounted(loadProfile)
           <div v-else class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[var(--paper)] text-xs">IG</div>
           <div class="min-w-0">
             <p class="truncate text-sm font-medium">{{ handle ? '@' + handle : $t('personal.handle.none') }}</p>
-            <p v-if="analysisMessage" class="mt-1 text-xs text-[var(--accent-ink)]">{{ analysisMessage }}</p>
+            <p v-if="analysisMessage" class="mt-1 flex items-center gap-2 text-xs text-[var(--accent-ink)]" role="status" aria-live="polite">
+              <span v-if="analysisInProgress" class="h-3 w-3 shrink-0 animate-spin rounded-full border-2 border-[var(--accent-line)] border-t-[var(--accent-ink)]" aria-hidden="true" />
+              <span>{{ analysisMessage }}</span>
+            </p>
           </div>
         </template>
 

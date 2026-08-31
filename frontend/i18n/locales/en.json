@@ -579,8 +579,8 @@
     },
     "nicheInsufficient": "Not enough content yet to determine your niche",
     "analysis": {
-      "inProgress": "Personal is reading your profile.",
-      "mediaInProgress": "Personal is refining your profile from your Reels and carousels in the background.",
+      "inProgress": "Personal is running an in-depth profile analysis in the background.",
+      "mediaInProgress": "Personal is deepening the analysis with your Reels and carousels in the background.",
       "unavailable": "Personal could not analyze this profile right now. Please try again.",
       "insufficient": "Instagram does not provide enough signals yet. You can complete these details manually."
     },

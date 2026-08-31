@@ -3,6 +3,7 @@
 namespace App\Services\Feed;
 
 use App\Models\ContentPost;
+use App\Models\CreatorProfile;
 use App\Models\User;
 use App\Services\View\ContentPostView;
 use Illuminate\Database\Eloquent\Builder;
@@ -51,7 +52,19 @@ class RecommendationService
     public function sectionsForUser(User $user, ?int $limit = null, array $excludeIds = []): array
     {
         $limit = max(1, $limit ?? (int) config('services.discovery.feed_size'));
+        $profile = $user->creatorProfile;
         $savedIds = $user->savedContent()->pluck('content_post_id')->flip();
+
+        // A connected or handle-based account is personal context, not a licence
+        // to serve the global catalogue while its niche is unknown. Waiting for
+        // that context keeps an unrelated high-performing account out of For You.
+        if ($this->needsPersonalContext($user, $profile)) {
+            return [
+                'items' => collect(),
+                'explore_items' => collect(),
+            ];
+        }
+
         $primaryVertical = $this->primaryVertical($user);
         $inspirationIds = $user->inspirationCreators()->pluck('creators.id');
         $interactionSignals = $this->interactions->forUser($user);
@@ -86,7 +99,13 @@ class RecommendationService
         );
         $forYouCount = $ranked->where('bucket', PostRelevance::FOR_YOU)->count();
         if ($forYouCount < $minimum) {
-            $fallbackRanked = $this->fallbackCandidates($user, $limit, $inspirationIds, $excludeIds)
+            $fallbackRanked = $this->fallbackCandidates(
+                $user,
+                $limit,
+                $primaryVertical,
+                $inspirationIds,
+                $excludeIds,
+            )
                 ->reject(fn (ContentPost $post): bool => $this->interactions->excludes($post, $interactionSignals))
                 ->map(function (ContentPost $post) use ($user, $interactionSignals): array {
                     $relevance = $this->relevance->assess($user->creatorProfile, $post);
@@ -134,9 +153,8 @@ class RecommendationService
             ->concat($items->pluck('post.creator_id'))
             ->flip();
         $exploreLimit = max(0, (int) config('services.discovery.personalization.explore_size'));
-        $explore = $exploreLimit === 0
-            ? collect()
-            : $this->markets->allocate(
+        $explore = $primaryVertical === null && $exploreLimit > 0
+            ? $this->markets->allocate(
                 $this->limitPerCreator(
                     $ranked->where('bucket', PostRelevance::EXPLORE)
                         ->reject(fn (array $item): bool => $itemCreatorIds->has($item['post']->creator_id))
@@ -144,20 +162,8 @@ class RecommendationService
                 ),
                 $user->creatorProfile?->market,
                 $exploreLimit,
-            );
-
-        // Adjacent, semantically shared posts are useful when the strict shelf
-        // is short. Promote only enough Explore cards to reach the floor, then
-        // remove them from Explore so a card is never rendered twice.
-        $promote = max(0, $minimum - $items->count());
-        if ($promote > 0 && $explore->isNotEmpty()) {
-            $promoted = $explore->take($promote)->values();
-            $items = $items->concat($promoted)->take($limit)->values();
-            $promotedCreatorIds = $promoted->pluck('post.creator_id')->flip();
-            $explore = $explore
-                ->reject(fn (array $item): bool => $promotedCreatorIds->has($item['post']->creator_id))
-                ->values();
-        }
+            )
+            : collect();
 
         return [
             'items' => $this->render($items, $user, $savedIds),
@@ -277,13 +283,22 @@ class RecommendationService
             ->whereNotNull('measured_at')
             ->where('outlier_score', '>=', (float) config('services.discovery.min_outlier_score'));
 
-        $inspired = $inspirationIds->isEmpty()
-            ? collect()
-            : (clone $query)
-                ->whereIn('creator_id', $inspirationIds)
+        $inspired = collect();
+        if ($inspirationIds->isNotEmpty()) {
+            $inspiredQuery = (clone $query)->whereIn('creator_id', $inspirationIds);
+
+            if ($primaryVertical) {
+                $inspiredQuery->whereHas(
+                    'creator',
+                    fn (Builder $creator): Builder => $creator->where('primary_vertical', $primaryVertical),
+                );
+            }
+
+            $inspired = $inspiredQuery
                 ->orderByDesc('outlier_score')
                 ->limit($limit * self::CANDIDATE_MULTIPLIER)
                 ->get();
+        }
 
         $matching = $primaryVertical
             ? (clone $query)
@@ -296,6 +311,10 @@ class RecommendationService
                 ->get()
             : collect();
 
+        if ($primaryVertical) {
+            return $inspired->concat($matching)->unique('id')->values();
+        }
+
         return $inspired->concat($matching)->concat(
             $query->orderByDesc('outlier_score')
                 // The allocator applies market quotas after semantic filtering.
@@ -307,11 +326,20 @@ class RecommendationService
     }
 
     /** @return Collection<int, ContentPost> */
-    private function fallbackCandidates(User $user, int $limit, Collection $inspirationIds, array $excludeIds): Collection
-    {
+    private function fallbackCandidates(
+        User $user,
+        int $limit,
+        ?string $primaryVertical,
+        Collection $inspirationIds,
+        array $excludeIds,
+    ): Collection {
         return $this->pool($user, $inspirationIds, $excludeIds)
             ->whereNotNull('measured_at')
             ->where('outlier_score', '>=', (float) config('services.discovery.fallback_min_outlier_score'))
+            ->when($primaryVertical !== null, fn (Builder $query): Builder => $query->whereHas(
+                'creator',
+                fn (Builder $creator): Builder => $creator->where('primary_vertical', $primaryVertical),
+            ))
             ->orderByDesc('outlier_score')
             ->limit($limit * self::CANDIDATE_MULTIPLIER * count(config('creator_catalog.markets')))
             ->get();
@@ -398,5 +426,22 @@ class RecommendationService
         }
 
         return $this->classifier->profile($profile)['vertical'];
+    }
+
+    private function needsPersonalContext(User $user, ?CreatorProfile $profile): bool
+    {
+        if (! $user->instagramAccount && ! filled($profile?->instagram_username)) {
+            return false;
+        }
+
+        if (! $profile) {
+            return true;
+        }
+
+        $classification = $this->classifier->profile($profile);
+
+        return $classification['vertical'] === null
+            && $classification['clusters'] === []
+            && $classification['tokens'] === [];
     }
 }
