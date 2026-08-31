@@ -92,8 +92,16 @@ button, a { -webkit-tap-highlight-color: transparent; }
   50% { opacity: 1; transform: scale(1); }
 }
 
+/* A light sweeping across a progress fill — keeps a bar that only jumps in
+   discrete steps from reading as stalled while a step is still working. */
+@keyframes shimmer-sweep {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(320%); }
+}
+
 .animate-rise { animation: rise .55s cubic-bezier(.22, 1, .36, 1) both; }
 .animate-breathe { animation: breathe 1.8s ease-in-out infinite; }
+.animate-shimmer-sweep { animation: shimmer-sweep 1.6s ease-in-out infinite; }
 
 /* ---------------------------------------------------------------------------
    Brand layer — the names used by the Branding board in Figma and by the launch
@@ -394,7 +402,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
 @media (prefers-reduced-motion: reduce) {
   .b-live::after,
   .b-caret,
-  .animate-breathe { animation: none; }
+  .animate-breathe,
+  .animate-shimmer-sweep { animation: none; }
   [class*="b-drift"] { animation: none !important; }
 }
 

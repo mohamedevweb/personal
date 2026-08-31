@@ -261,7 +261,7 @@ onMounted(loadProfile)
 
 <style scoped>
 .memory-label { @apply text-[10px] font-semibold uppercase tracking-[.16em] text-[var(--faint)]; }
-.memory-copy { @apply mt-3 text-[17px] leading-7 text-[var(--copy)]; }
+.memory-copy { @apply mt-3 text-[15px] leading-6 text-[var(--copy)]; }
 .memory-input { @apply mt-3 w-full rounded-[12px] border border-[var(--line)] bg-[var(--paper)] px-3 py-2.5 text-[15px] outline-none transition focus:border-[var(--muted)]; }
 
 /* iOS zooms the page in whenever a focused field is set under 16px, and never

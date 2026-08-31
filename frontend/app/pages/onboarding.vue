@@ -4,7 +4,7 @@ import type { HandleAnalysis, HandleAnalysisStage, InstagramSyncStatus } from '~
 definePageMeta({ layout: false })
 
 const route = useRoute()
-const { t, te, locale } = useI18n()
+const { t, te, tm, locale } = useI18n()
 const { user } = useAuth()
 const { status, connecting, error, connect, loadStatus, startPolling } = useInstagram()
 const { apiFetch } = usePersonalApi()
@@ -166,8 +166,29 @@ function analysisDetail(stage: HandleAnalysisStage): string | null {
   return found.audience_description || found.niche || null
 }
 
+// A step with nothing to report yet would otherwise sit on the same
+// "Working…" line for however long it takes, which is exactly where a wait
+// starts to feel stuck. Cycling through a few lines of real-sounding status
+// keeps the eye busy without claiming progress the backend hasn't made.
+const workingMessageIndex = ref(0)
+
+if (import.meta.client) {
+  watchEffect((onCleanup) => {
+    if (!showAnalysis.value || analysisFailed.value) return
+    const timer = setInterval(() => { workingMessageIndex.value++ }, 2200)
+    onCleanup(() => clearInterval(timer))
+  })
+}
+
+function workingMessage(stage: HandleAnalysisStage): string {
+  const messages = tm(`onboarding.analysis.workingMessages.${stage}`) as string[] | undefined
+  if (!Array.isArray(messages) || !messages.length) return t('onboarding.analysis.working')
+  return messages[workingMessageIndex.value % messages.length] ?? t('onboarding.analysis.working')
+}
+
 const analysisSteps = computed(() => analysisStages.value.map((stage, index) => {
   const detail = analysisDetail(stage)
+  const active = index === analysisIndex.value && !analysisFailed.value
 
   return {
     key: stage,
@@ -176,7 +197,8 @@ const analysisSteps = computed(() => analysisStages.value.map((stage, index) => 
     // A failure loses the step it died on, so what was already found is what
     // says a step finished — otherwise a read profile would lose its tick.
     done: analysisFailed.value ? detail !== null : index < analysisIndex.value,
-    active: index === analysisIndex.value && !analysisFailed.value
+    active,
+    working: active ? workingMessage(stage) : null
   }
 }))
 
@@ -425,10 +447,14 @@ onMounted(async () => {
                 </span>
               </div>
 
-              <div class="mt-3 h-1 overflow-hidden rounded-full bg-[var(--line)]">
+              <div class="relative mt-3 h-1 overflow-hidden rounded-full bg-[var(--line)]">
                 <div
                   class="h-full rounded-full bg-[var(--accent)] transition-all duration-700"
                   :style="{ width: `${(analysisDoneCount / analysisSteps.length) * 100}%` }"
+                />
+                <div
+                  v-if="!analysisFailed && analysisDoneCount < analysisSteps.length"
+                  class="animate-shimmer-sweep absolute inset-y-0 left-0 w-1/3 rounded-full bg-gradient-to-r from-transparent via-white/70 to-transparent"
                 />
               </div>
 
@@ -450,7 +476,7 @@ onMounted(async () => {
                       {{ step.label }}
                     </span>
                     <span v-if="step.detail" class="mt-1 block truncate text-[12.5px] text-[var(--muted)]">{{ step.detail }}</span>
-                    <span v-else-if="step.active" class="mt-1 block text-[12.5px] text-[var(--faint)]">{{ $t('onboarding.analysis.working') }}</span>
+                    <span v-else-if="step.active" :key="step.working ?? ''" class="animate-rise mt-1 block text-[12.5px] text-[var(--faint)]">{{ step.working }}</span>
                   </span>
                 </li>
               </ol>

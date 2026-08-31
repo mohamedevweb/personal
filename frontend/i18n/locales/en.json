@@ -388,6 +388,13 @@
         "mapping_audience": "Identifying your audience and your niche",
         "transcribing_reels": "Analysing your Reels and carousels"
       },
+      "workingMessages": {
+        "reading_profile": ["Working…", "Opening your profile…", "Checking your follower count…", "Reading your bio…"],
+        "importing_posts": ["Working…", "Pulling your latest posts…", "Reading captions one by one…", "Almost done…"],
+        "reading_voice": ["Working…", "Reading your captions…", "Picking up your tone…", "Spotting your recurring phrases…"],
+        "mapping_audience": ["Working…", "Cross-referencing your niche…", "Comparing you to similar creators…", "Narrowing it down…"],
+        "transcribing_reels": ["Working…", "Watching your Reels…", "Reading your carousels…", "Almost there…"]
+      },
       "details": {
         "profile": "{'@'}{handle} · {followers} followers",
         "posts": "{count} of {target} posts read"

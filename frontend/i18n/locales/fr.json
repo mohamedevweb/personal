@@ -388,6 +388,13 @@
         "mapping_audience": "Identification de ton audience et de ta niche",
         "transcribing_reels": "Analyse de tes Reels et de tes carrousels"
       },
+      "workingMessages": {
+        "reading_profile": ["En cours…", "Ouverture de ton profil…", "Vérification de tes abonnés…", "Lecture de ta bio…"],
+        "importing_posts": ["En cours…", "Récupération de tes derniers posts…", "Lecture des légendes une à une…", "Presque fini…"],
+        "reading_voice": ["En cours…", "Lecture de tes légendes…", "Analyse de ton ton…", "Repérage de tes expressions récurrentes…"],
+        "mapping_audience": ["En cours…", "Recoupement de ta niche…", "Comparaison avec des créateurs similaires…", "On y est presque…"],
+        "transcribing_reels": ["En cours…", "Visionnage de tes Reels…", "Lecture de tes carrousels…", "Presque fini…"]
+      },
       "details": {
         "profile": "{'@'}{handle} · {followers} abonnés",
         "posts": "{count} posts lus sur {target}"
