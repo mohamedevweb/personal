@@ -14,7 +14,7 @@ x-backend: &backend
   env_file: ./backend/.env
   environment: &backend-env
     DB_CONNECTION: pgsql
-    DB_HOST: postgres
+    DB_HOST: personal-postgres-1
     DB_PORT: 5432
     DB_DATABASE: ${DB_DATABASE:-personal}
     DB_USERNAME: ${DB_USERNAME:-personal}

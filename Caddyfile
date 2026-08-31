@@ -1,0 +1,4 @@
+api.usepersonal.app {
+    encode zstd gzip
+    reverse_proxy personal-web-1:80
+}
