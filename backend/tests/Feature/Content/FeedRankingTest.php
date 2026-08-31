@@ -226,6 +226,81 @@ class FeedRankingTest extends TestCase
         $this->assertFalse($feed->pluck('id')->contains($strongerButGeneric->id));
     }
 
+    public function test_one_creator_cannot_fill_the_personalized_feed(): void
+    {
+        $dominant = $this->creator('dominant.vegan', 200_000, 900);
+
+        foreach ([3.0, 2.9, 2.8, 2.7, 2.6] as $outlier) {
+            $this->storePost($dominant, $outlier);
+        }
+
+        $alternativeOne = $this->storePost($this->creator('plant.one', 30_000, 900), 2.0);
+        $alternativeTwo = $this->storePost($this->creator('plant.two', 30_000, 900), 1.9);
+
+        $feed = app(RecommendationService::class)->forUser($this->user, 6);
+
+        $this->assertSame(2, $feed->where('creator.username', $dominant->username)->count());
+        $this->assertContains($alternativeOne->id, $feed->pluck('id'));
+        $this->assertContains($alternativeTwo->id, $feed->pluck('id'));
+    }
+
+    public function test_the_creator_limit_survives_feed_pagination(): void
+    {
+        $dominant = $this->creator('dominant.pages', 200_000, 900);
+
+        foreach ([3.0, 2.9, 2.8, 2.7] as $outlier) {
+            $this->storePost($dominant, $outlier);
+        }
+
+        $alternative = $this->storePost($this->creator('plant.alternative', 30_000, 900), 2.0);
+        $first = app(RecommendationService::class)->forUser($this->user, 2);
+        $next = app(RecommendationService::class)->forUser($this->user, 6, $first->pluck('id')->all());
+
+        $this->assertSame(2, $first->where('creator.username', $dominant->username)->count());
+        $this->assertSame(0, $next->where('creator.username', $dominant->username)->count());
+        $this->assertContains($alternative->id, $next->pluck('id'));
+    }
+
+    public function test_a_creator_cannot_appear_in_for_you_and_explore(): void
+    {
+        $this->user->creatorProfile()->update([
+            'niche' => 'Personal branding for founders',
+            'topics' => ['startup', 'audience building', 'copywriting'],
+            'primary_vertical' => 'personal-branding',
+        ]);
+
+        $leila = $this->creator('leilahormozi', 1_600_000, 900);
+        $leila->update([
+            'niche' => 'personal-branding',
+            'niche_topics' => ['founders', 'audience building'],
+        ]);
+        $forYou = $this->storePost($leila, 2.4, [
+            'caption' => 'Personal branding and audience building for founders',
+            'tags' => ['personal branding', 'audience building'],
+        ]);
+        $leilaExplore = $this->storePost($leila, 2.3, [
+            'caption' => 'How I build my SaaS startup in public',
+            'tags' => ['saas', 'startup'],
+        ]);
+
+        $neighbour = $this->creator('another.saas', 80_000, 900);
+        $neighbour->update(['niche' => 'tech-ai', 'niche_topics' => ['saas', 'startup']]);
+        $otherExplore = $this->storePost($neighbour, 2.0, [
+            'caption' => 'Lessons from building a SaaS startup',
+            'tags' => ['saas', 'startup'],
+        ]);
+
+        $sections = app(RecommendationService::class)->sectionsForUser($this->user->fresh());
+
+        $this->assertContains($forYou->id, $sections['items']->pluck('id'));
+        $this->assertNotContains($leilaExplore->id, $sections['explore_items']->pluck('id'));
+        $this->assertContains($otherExplore->id, $sections['explore_items']->pluck('id'));
+        $this->assertSame([], $sections['items']->pluck('creator.username')
+            ->intersect($sections['explore_items']->pluck('creator.username'))
+            ->values()
+            ->all());
+    }
+
     public function test_startup_profile_gets_only_startup_content_and_adjacent_ideas_are_separate(): void
     {
         $this->user->creatorProfile()->update([

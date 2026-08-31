@@ -164,9 +164,22 @@ export interface Remix {
     }[]
     hook?: string
     script?: string
+    source_breakdown?: {
+      hook: string
+      development: string
+      cta: string
+    }
     visual?: string
     ending?: string
     cta?: string
+    tone?: string
+    filming?: string
+    visuals?: {
+      type: 'face_camera' | 'b_roll' | 'cutaway'
+      timing: string
+      shot: string
+      source_link: string
+    }[]
     caption?: string
   }
   status: 'generating' | 'failed' | 'draft' | 'ready' | 'archived'

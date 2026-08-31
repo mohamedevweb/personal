@@ -4,11 +4,15 @@ namespace Tests\Feature\Content;
 
 use App\Jobs\Content\AnalyzeCarouselContentPost;
 use App\Jobs\Content\AnalyzeContentPost;
+use App\Jobs\Content\GenerateRemix;
 use App\Jobs\Content\TranscribeContentPost;
 use App\Models\ContentPost;
 use App\Models\Creator;
+use App\Models\Remix;
 use App\Models\User;
 use App\Services\Content\ContentDraftBlueprint;
+use App\Services\Content\ContentGenerationService;
+use App\Services\Discovery\ContentPostMediaRefresh;
 use App\Services\Discovery\PostInsightService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
@@ -123,6 +127,38 @@ class SourceMediaAnalysisTest extends TestCase
 
         $this->assertStringNotContainsString('<source_script>', $brief);
         $this->assertStringNotContainsString('<source_slides>', $brief);
+    }
+
+    public function test_a_reel_remix_reads_the_source_script_before_generation(): void
+    {
+        Bus::fake();
+        $user = $this->member();
+        $post = $this->contentPost([
+            'format' => 'reel',
+            'video_url' => 'https://cdn.example.test/source.mp4',
+            'media_refreshed_at' => now(),
+            'transcript_status' => 'pending',
+        ]);
+        $remix = Remix::query()->create([
+            'user_id' => $user->id,
+            'source_content_id' => $post->id,
+            'format' => 'reel',
+            'generated_content' => [],
+            'status' => 'generating',
+        ]);
+        $generator = \Mockery::mock(ContentGenerationService::class);
+        $generator->shouldReceive('generate')->once()->andReturn(['hook' => 'A hook']);
+        $media = \Mockery::mock(ContentPostMediaRefresh::class);
+        $media->shouldReceive('ensure')->once()->with(\Mockery::on(fn (ContentPost $candidate): bool => $candidate->is($post)));
+
+        (new GenerateRemix($remix->id, 'en'))->handle(
+            $generator,
+            app(PostInsightService::class),
+            $media,
+        );
+
+        Bus::assertDispatched(TranscribeContentPost::class, fn (TranscribeContentPost $job): bool => $job->contentPostId === $post->id);
+        $this->assertDatabaseHas('remixes', ['id' => $remix->id, 'status' => 'draft']);
     }
 
     private function member(): User

@@ -107,7 +107,7 @@ function deleteSlide(index: number) {
   remix.value?.generated_content.slides?.splice(index, 1)
 }
 
-async function regenerateBlock(block: 'hook' | 'script' | 'visual' | 'ending' | 'cta' | 'caption' | 'slide', slideIndex?: number) {
+async function regenerateBlock(block: 'hook' | 'script' | 'visual' | 'ending' | 'cta' | 'tone' | 'filming' | 'caption' | 'slide', slideIndex?: number) {
   if (!remix.value || regeneratingBlock.value) return
   const identity = slideIndex === undefined ? block : `${block}:${slideIndex}`
   regeneratingBlock.value = identity
@@ -174,8 +174,24 @@ function plainText(): string {
     ].filter(Boolean).join('\n')).join('\n\n')
   }
   if (remix.value?.format === 'reel') {
-    return [draft.hook, draft.script, draft.visual && `[${t('remix.shotIdea')}] ${draft.visual}`, draft.ending, draft.cta]
-      .filter(Boolean).join('\n\n')
+    const shotList = (draft.visuals || []).map((visual, index) => [
+      `${t('remix.shot')} ${index + 1} · ${t(`remix.visualTypes.${visual.type}`)}`,
+      visual.timing,
+      visual.shot,
+      `${t('remix.sourceLink')}: ${visual.source_link}`,
+    ].filter(Boolean).join('\n'))
+
+    return [
+      draft.hook,
+      draft.script,
+      draft.ending,
+      draft.cta,
+      draft.tone && `${t('remix.tone')}: ${draft.tone}`,
+      draft.filming && `${t('remix.filming')}: ${draft.filming}`,
+      ...(shotList.length ? [shotList.join('\n\n')] : []),
+      // Drafts created before the detailed shot list keep their old direction.
+      draft.visual && `[${t('remix.shotIdea')}] ${draft.visual}`,
+    ].filter(Boolean).join('\n\n')
   }
   return draft.caption || ''
 }
@@ -675,14 +691,6 @@ onBeforeUnmount(() => {
                   </span>
                 </div>
                 <div class="beat">
-                  <!-- Not spoken, so it carries no timecode. -->
-                  <span class="beat-stamp beat-stamp-quiet"><AppIcon name="eye" :size="14" /></span>
-                  <span class="beat-body">
-                    <span class="flex items-center justify-between gap-3"><span class="remix-label">{{ $t('remix.onScreen') }}</span><button type="button" class="block-rewrite" :disabled="!!regeneratingBlock" @click.prevent="regenerateBlock('visual')"><AppIcon name="refresh" :size="13" :class="regeneratingBlock === 'visual' && 'animate-spin'" />{{ $t('remix.rewriteBlock') }}</button></span>
-                    <textarea v-model="remix.generated_content.visual" v-autosize rows="2" :aria-label="$t('remix.onScreen')" :placeholder="$t('remix.visualPlaceholder')" class="editor-textarea text-[var(--copy)]" />
-                  </span>
-                </div>
-                <div class="beat">
                   <span class="beat-stamp">{{ timing.ranges.ending }}</span>
                   <span class="beat-body">
                     <span class="flex items-center justify-between gap-3"><span class="remix-label">{{ $t('remix.ending') }}</span><button type="button" class="block-rewrite" :disabled="!!regeneratingBlock" @click.prevent="regenerateBlock('ending')"><AppIcon name="refresh" :size="13" :class="regeneratingBlock === 'ending' && 'animate-spin'" />{{ $t('remix.rewriteBlock') }}</button></span>
@@ -695,6 +703,60 @@ onBeforeUnmount(() => {
                     <span class="flex items-center justify-between gap-3"><span class="remix-label">{{ $t('remix.cta') }}</span><button type="button" class="block-rewrite" :disabled="!!regeneratingBlock" @click.prevent="regenerateBlock('cta')"><AppIcon name="refresh" :size="13" :class="regeneratingBlock === 'cta' && 'animate-spin'" />{{ $t('remix.rewriteBlock') }}</button></span>
                     <textarea v-model="remix.generated_content.cta" v-autosize rows="1" :aria-label="$t('remix.cta')" :placeholder="$t('remix.ctaPlaceholder')" class="editor-textarea" />
                   </span>
+                </div>
+                <!-- Keep old drafts editable while new Reel drafts use the
+                     detailed, source-linked direction below. -->
+                <div v-if="remix.generated_content.visual && !remix.generated_content.visuals?.length" class="beat">
+                  <span class="beat-stamp beat-stamp-quiet"><AppIcon name="eye" :size="14" /></span>
+                  <span class="beat-body">
+                    <span class="flex items-center justify-between gap-3"><span class="remix-label">{{ $t('remix.onScreen') }}</span><button type="button" class="block-rewrite" :disabled="!!regeneratingBlock" @click.prevent="regenerateBlock('visual')"><AppIcon name="refresh" :size="13" :class="regeneratingBlock === 'visual' && 'animate-spin'" />{{ $t('remix.rewriteBlock') }}</button></span>
+                    <textarea v-model="remix.generated_content.visual" v-autosize rows="2" :aria-label="$t('remix.onScreen')" :placeholder="$t('remix.visualPlaceholder')" class="editor-textarea text-[var(--copy)]" />
+                  </span>
+                </div>
+              </div>
+
+              <div v-if="remix.generated_content.tone || remix.generated_content.filming || remix.generated_content.visuals?.length" class="mt-4 overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">
+                <div class="border-b border-[var(--line-soft)] bg-[var(--paper)] px-5 py-4 sm:px-6">
+                  <p class="remix-label">{{ $t('remix.direction') }}</p>
+                  <p class="mt-1.5 text-[13px] leading-5 text-[var(--muted)]">{{ $t('remix.directionCopy') }}</p>
+                </div>
+
+                <div v-if="remix.generated_content.tone" class="direction-row">
+                  <div class="direction-icon"><AppIcon name="chat" :size="15" /></div>
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center justify-between gap-3"><p class="remix-label">{{ $t('remix.tone') }}</p><button type="button" class="block-rewrite" :disabled="!!regeneratingBlock" @click.prevent="regenerateBlock('tone')"><AppIcon name="refresh" :size="13" :class="regeneratingBlock === 'tone' && 'animate-spin'" />{{ $t('remix.rewriteBlock') }}</button></div>
+                    <textarea v-model="remix.generated_content.tone" v-autosize rows="2" :aria-label="$t('remix.tone')" :placeholder="$t('remix.tonePlaceholder')" class="editor-textarea" />
+                  </div>
+                </div>
+
+                <div v-if="remix.generated_content.filming" class="direction-row">
+                  <div class="direction-icon"><AppIcon name="reel" :size="15" /></div>
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center justify-between gap-3"><p class="remix-label">{{ $t('remix.filming') }}</p><button type="button" class="block-rewrite" :disabled="!!regeneratingBlock" @click.prevent="regenerateBlock('filming')"><AppIcon name="refresh" :size="13" :class="regeneratingBlock === 'filming' && 'animate-spin'" />{{ $t('remix.rewriteBlock') }}</button></div>
+                    <textarea v-model="remix.generated_content.filming" v-autosize rows="3" :aria-label="$t('remix.filming')" :placeholder="$t('remix.filmingPlaceholder')" class="editor-textarea" />
+                  </div>
+                </div>
+
+                <div v-if="remix.generated_content.visuals?.length" class="border-t border-[var(--line-soft)] px-5 py-5 sm:px-6">
+                  <div class="flex items-center justify-between gap-3"><p class="remix-label">{{ $t('remix.visuals') }}</p><span class="text-[11px] text-[var(--faint)]">{{ $t('remix.visualsSourceLinked') }}</span></div>
+                  <div class="mt-3 space-y-3">
+                    <article v-for="(visual, index) in remix.generated_content.visuals" :key="index" class="rounded-[14px] border border-[var(--line-soft)] bg-[var(--paper)] p-4">
+                      <div class="flex items-center gap-2">
+                        <span class="grid h-7 w-7 shrink-0 place-items-center rounded-[9px] bg-[var(--accent-soft)] text-[var(--accent-ink)] text-[11px] font-semibold">{{ index + 1 }}</span>
+                        <select v-model="visual.type" :aria-label="$t('remix.visualType')" class="min-w-0 rounded-full border border-[var(--line)] bg-[var(--surface)] px-2.5 py-1.5 text-[12px] text-[var(--copy)] outline-none focus:border-[var(--accent)]">
+                          <option value="face_camera">{{ $t('remix.visualTypes.face_camera') }}</option>
+                          <option value="b_roll">{{ $t('remix.visualTypes.b_roll') }}</option>
+                          <option value="cutaway">{{ $t('remix.visualTypes.cutaway') }}</option>
+                        </select>
+                        <span class="ml-auto text-[11px] text-[var(--faint)]">{{ visual.timing }}</span>
+                      </div>
+                      <textarea v-model="visual.shot" v-autosize rows="2" :aria-label="$t('remix.shotInstruction')" :placeholder="$t('remix.shotPlaceholder')" class="editor-textarea mt-3" />
+                      <div class="mt-3 border-t border-[var(--line)] pt-3">
+                        <p class="remix-label">{{ $t('remix.sourceLink') }}</p>
+                        <textarea v-model="visual.source_link" v-autosize rows="2" :aria-label="$t('remix.sourceLink')" :placeholder="$t('remix.sourceLinkPlaceholder')" class="editor-textarea text-[var(--muted)]" />
+                      </div>
+                    </article>
+                  </div>
                 </div>
               </div>
             </div>
@@ -790,6 +852,27 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
+            <div v-if="remix.format === 'reel' && remix.generated_content.source_breakdown" class="overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">
+              <div class="border-b border-[var(--line-soft)] bg-[var(--paper)] px-5 py-4">
+                <p class="remix-label">{{ $t('remix.sourceBreakdown') }}</p>
+                <p class="mt-1.5 text-[13px] leading-5 text-[var(--muted)]">{{ $t('remix.sourceBreakdownCopy') }}</p>
+              </div>
+              <div class="divide-y divide-[var(--line-soft)] px-5">
+                <div class="py-4">
+                  <p class="remix-label">{{ $t('remix.hook') }}</p>
+                  <p class="mt-2 text-[13.5px] leading-5 text-[var(--muted)]">{{ remix.generated_content.source_breakdown.hook }}</p>
+                </div>
+                <div class="py-4">
+                  <p class="remix-label">{{ $t('remix.body') }}</p>
+                  <p class="mt-2 text-[13.5px] leading-5 text-[var(--muted)]">{{ remix.generated_content.source_breakdown.development }}</p>
+                </div>
+                <div class="py-4">
+                  <p class="remix-label">{{ $t('remix.cta') }}</p>
+                  <p class="mt-2 text-[13.5px] leading-5 text-[var(--muted)]">{{ remix.generated_content.source_breakdown.cta }}</p>
+                </div>
+              </div>
+            </div>
+
             <div class="overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">
               <div class="p-5">
                 <p class="remix-label">{{ $t('remix.yourContext') }}</p>
@@ -845,6 +928,8 @@ onBeforeUnmount(() => {
 /* The beat that carries no timecode: same reason as the label above. */
 .beat-stamp-quiet { @apply text-[var(--faint)]; }
 .beat-body { @apply block; }
+.direction-row { @apply flex gap-3 border-b border-[var(--line-soft)] px-5 py-5 last:border-0 sm:px-6; }
+.direction-icon { @apply grid h-8 w-8 shrink-0 place-items-center rounded-[10px] bg-[var(--accent-soft)] text-[var(--accent-ink)]; }
 .editor-textarea { @apply mt-2 w-full resize-none bg-transparent text-[15.5px] leading-7 outline-none placeholder:text-[var(--faint)]; }
 /* The direction for the picture, inside a frame that cannot grow: it scrolls
    rather than pushing the words it belongs to out of the slide. */

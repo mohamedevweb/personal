@@ -183,11 +183,42 @@ class ContentDraftBlueprint
                 ],
             ]],
             'reel' => [
+                'source_breakdown' => [
+                    'type' => 'object',
+                    'description' => 'Explain the exact source Reel beat this draft keeps in each part. Use concrete evidence from the source hook, transcript, hook analysis, structure analysis, or CTA if one is present. Never give generic content advice.',
+                    'properties' => [
+                        'hook' => ['type' => 'string', 'description' => 'What the source Reel does in its opening, and how this draft adapts that move.'],
+                        'development' => ['type' => 'string', 'description' => 'What the source Reel does as it develops its idea, and how this draft follows that progression.'],
+                        'cta' => ['type' => 'string', 'description' => 'What the source Reel does at the close or in its call to action. Say when there is no explicit source CTA, then explain the adapted choice.'],
+                    ],
+                    'required' => ['hook', 'development', 'cta'],
+                    'additionalProperties' => false,
+                ],
                 'hook' => ['type' => 'string', 'description' => 'The spoken opening line.'],
                 'script' => ['type' => 'string', 'description' => 'The main spoken body, excluding the hook, ending, and call to action.'],
-                'visual' => ['type' => 'string', 'description' => 'What to film and when to cut.'],
                 'ending' => ['type' => 'string', 'description' => 'The spoken closing beat or takeaway that lands the story.'],
                 'cta' => ['type' => 'string', 'description' => 'A concise spoken call to action, distinct from the ending.'],
+                'tone' => ['type' => 'string', 'description' => 'The recommended tone for this version, with a short reason tied to the source Reel and the creator voice.'],
+                'filming' => ['type' => 'string', 'description' => 'A practical filming method for this version, explicitly adapted from the source Reel structure.'],
+                'visuals' => [
+                    'type' => 'array',
+                    'description' => 'A shot list tied to specific beats of the source Reel. Include face camera, B-roll, or cutaway shots when they serve the source structure. Do not give a generic shot list.',
+                    'items' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'type' => [
+                                'type' => 'string',
+                                'enum' => ['face_camera', 'b_roll', 'cutaway'],
+                                'description' => 'The visual category of the shot.',
+                            ],
+                            'timing' => ['type' => 'string', 'description' => 'The beat or approximate time when this shot appears.'],
+                            'shot' => ['type' => 'string', 'description' => 'Exactly what the creator should film.'],
+                            'source_link' => ['type' => 'string', 'description' => 'The concrete source Reel beat or visual logic this shot adapts.'],
+                        ],
+                        'required' => ['type', 'timing', 'shot', 'source_link'],
+                        'additionalProperties' => false,
+                    ],
+                ],
             ],
             default => ['caption' => ['type' => 'string', 'description' => 'The full caption, paragraphs separated by blank lines.']],
         };
@@ -244,7 +275,13 @@ class ContentDraftBlueprint
                 'For every slide, "image" tells the creator which picture to put there: one sentence, something they can shoot or capture alone, and how it is framed. Describe the picture they should make, never the picture the source used.',
                 'When the source slides were not readable, follow the structure described above and keep the same discipline slide to slide.',
             ]),
-            'reel' => 'Write a talking-head Instagram reel: a spoken hook of one sentence, a main body, a distinct closing beat that lands the story, a concise call to action, and a shot idea that suits the creator filming alone. The complete spoken draft should last roughly 45 to 60 seconds.',
+            'reel' => implode("\n", [
+                'Write a talking-head Instagram Reel grounded in the actual source Reel above.',
+                'First identify the source Reel structure in source_breakdown. Each source_breakdown field must name the concrete source evidence it is adapting, such as the wording or move in the hook, the sequence of beats in the transcript or structure analysis, and the source closing or the fact that no explicit CTA exists.',
+                'Then write a spoken hook of one sentence, a development, a distinct closing beat, and a concise call to action. Label the development as script in the JSON, but write it as the body of the Reel.',
+                'Recommend a tone, a practical filming method, and a short shot list. Every visual must be one of face_camera, b_roll, or cutaway, and source_link must explain which source beat makes that shot useful. Include the visual changes that make the source structure work, not a generic list of Reel shots.',
+                'The complete spoken draft should last roughly 45 to 60 seconds and suit a creator filming alone.',
+            ]),
             default => 'Write a single Instagram caption of three to five short paragraphs, opening on the hook line.',
         };
     }

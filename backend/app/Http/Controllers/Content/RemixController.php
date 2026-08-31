@@ -119,7 +119,7 @@ class RemixController extends Controller
     ): JsonResponse {
         $this->ensureOwner($request, $remix);
         $data = $request->validate([
-            'block' => ['required', 'string', 'in:hook,script,visual,ending,cta,caption,slide'],
+            'block' => ['required', 'string', 'in:hook,script,visual,ending,cta,tone,filming,caption,slide'],
             'slide_index' => ['nullable', 'required_if:block,slide', 'integer', 'min:0'],
         ]);
         abort_unless(in_array($remix->status, ['draft', 'ready'], true), Response::HTTP_CONFLICT);

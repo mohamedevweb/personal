@@ -61,11 +61,22 @@ class MockContentGenerationService implements ContentGenerationService
                 ['That is the idea I am building now, and it changed how I think about personal branding.', 'You looking into the camera, the closing line under your face.'],
             ])],
             'reel' => $base + [
+                'source_breakdown' => [
+                    'hook' => 'The source opens with a first-person tension that makes the viewer wait for the explanation. This version keeps that immediate admission and changes the subject to your own experience.',
+                    'development' => 'The source moves from the initial problem to the realization that resolves it. This version follows the same progression from production friction to the story worth telling.',
+                    'cta' => 'The source closes on a useful takeaway before inviting a response. This version keeps that order and asks the audience to share a changed assumption.',
+                ],
                 'hook' => $idea,
                 'script' => "I kept assuming the hard part of content was production. It wasn't. The real problem was deciding what was worth saying. After talking to creators, I saw the same pattern: the best ideas happen when a proven format meets a story only you can tell. That insight changed the product I am building.",
-                'visual' => 'Talking head at your desk. Cut to notes and product screens when the realization lands.',
                 'ending' => 'The hardest part was never production. It was choosing the story only I could tell.',
                 'cta' => 'What is one assumption you changed after talking to customers?',
+                'tone' => 'Direct and reflective, because the source earns attention through a candid admission before delivering its lesson, while your voice makes the lesson concrete.',
+                'filming' => 'Film the opening and closing as a steady talking head at your desk. Use one deliberate cut in the middle when the story moves from the problem to the realization, following the source transition instead of adding constant edits.',
+                'visuals' => [
+                    ['type' => 'face_camera', 'timing' => '0:00 to 0:05, the admission', 'shot' => 'Look straight into the lens at your desk and deliver the hook without an intro.', 'source_link' => 'The source starts with a direct first-person hook, so the version keeps the viewer on your face for the stop-scroll moment.'],
+                    ['type' => 'b_roll', 'timing' => 'During the problem and evidence', 'shot' => 'Cut to your notes from creator conversations and the product screen you changed.', 'source_link' => 'The source develops its tension with concrete context, so these shots make the middle beat visible rather than leaving it as abstract narration.'],
+                    ['type' => 'cutaway', 'timing' => 'At the realization', 'shot' => 'Show your hand moving one note into a new column, then return to the lens.', 'source_link' => 'The source turns on a clear realization, so this cutaway marks the same turning point before the spoken takeaway.'],
+                ],
             ],
             default => $base + [
                 'caption' => $idea."\n\nI thought creators needed another way to produce content faster. What I kept hearing was different: the hardest part happens before the blank page.\n\nThe useful content was already there, in customer conversations, mistakes, pivots and small wins. The missing piece was knowing which story to tell, and why now.\n\nThat realization changed what I decided to build.",
@@ -110,11 +121,22 @@ class MockContentGenerationService implements ContentGenerationService
                 ["C'est ce que je construis maintenant. Cette idée a changé ma vision du personal branding.", 'Toi face caméra, la phrase de fin sous ton visage.'],
             ])],
             'reel' => $base + [
+                'source_breakdown' => [
+                    'hook' => 'Le Reel source commence par une tension racontée à la première personne. Cette version garde cette confession immédiate, mais la relie à ton expérience.',
+                    'development' => "Le Reel source passe du problème initial à la prise de conscience qui le résout. Cette version suit le même mouvement, de la difficulté de produire à l'histoire qui mérite d'être racontée.",
+                    'cta' => "Le Reel source termine par une idée utile avant d'ouvrir la conversation. Cette version garde cet ordre et invite ton audience à partager une croyance qu'elle a changée.",
+                ],
                 'hook' => $idea,
                 'script' => "Je pensais que la partie difficile était la production. Ce n'était pas le cas. Le vrai problème était de décider ce qui méritait d'être raconté. En parlant avec des créateurs, j'ai vu le même schéma. Les meilleures idées apparaissent quand un format éprouvé rencontre une histoire que toi seul peux raconter. Cette découverte a changé le produit que je construis.",
-                'visual' => 'Filme-toi face caméra à ton bureau. Coupe vers tes notes et les écrans du produit au moment de la prise de conscience.',
                 'ending' => "Le plus difficile n'était pas de produire. C'était de choisir l'histoire que moi seul pouvais raconter.",
                 'cta' => 'Quelle croyance as-tu changée après avoir parlé à tes clients ?',
+                'tone' => 'Direct et réflexif. Le Reel source accroche par une confession, puis gagne en force avec une leçon concrète, ce qui correspond à ta voix pédagogique.',
+                'filming' => "Filme l'ouverture et la conclusion face caméra, à ton bureau. Fais une coupe volontaire au milieu, au moment où le récit passe du problème à la prise de conscience, comme le changement de séquence du Reel source.",
+                'visuals' => [
+                    ['type' => 'face_camera', 'timing' => '0:00 à 0:05, la confession', 'shot' => "Regarde l'objectif à ton bureau et dis l'accroche sans introduction.", 'source_link' => "Le Reel source commence par une accroche directe à la première personne. Ta version garde ton visage à l'image pour le moment d'arrêt."],
+                    ['type' => 'b_roll', 'timing' => 'Pendant le problème et le contexte', 'shot' => 'Montre tes notes de conversations avec des créateurs et l’écran du produit que tu as fait évoluer.', 'source_link' => 'Le Reel source développe sa tension avec un contexte concret. Ces plans rendent ton développement visible au lieu de le laisser abstrait.'],
+                    ['type' => 'cutaway', 'timing' => 'Au moment de la prise de conscience', 'shot' => 'Montre ta main qui déplace une note dans une nouvelle colonne, puis reviens face caméra.', 'source_link' => 'Le Reel source bascule sur une prise de conscience claire. Ce plan de coupe signale le même tournant avant ta conclusion.'],
+                ],
             ],
             default => $base + [
                 'caption' => $idea."\n\nJe pensais que les créateurs avaient besoin d'un nouvel outil pour produire plus vite. Mais leurs retours disaient autre chose. La partie la plus difficile arrive avant la page blanche.\n\nLa matière utile était déjà là, dans les conversations clients, les erreurs, les pivots et les petites victoires. Il manquait seulement la bonne histoire à raconter au bon moment.\n\nCette prise de conscience a changé ce que j'ai décidé de construire.",

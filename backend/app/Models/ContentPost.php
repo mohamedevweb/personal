@@ -22,6 +22,7 @@ class ContentPost extends Model
             'shares' => 'integer',
             'metadata' => 'array',
             'media_urls' => 'array',
+            'media_refreshed_at' => 'datetime',
             'carousel_analysis' => 'array',
             'carousel_analyzed_at' => 'datetime',
             'carousel_analysis_started_at' => 'datetime',

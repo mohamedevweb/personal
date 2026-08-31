@@ -49,15 +49,18 @@ class GenerateRemix implements ShouldQueue
         // Refresh the stale-generation clock once the worker actually starts.
         // A queued remix and a provider request are two distinct wait states.
         $remix->touch();
-        $insights->present($remix->sourceContent);
 
-        if ($remix->format === 'carousel') {
+        if (in_array($remix->format, ['carousel', 'reel'], true)) {
             $this->readSource($remix->sourceContent, $media);
             // Reading the source is a third wait state, and it can take as long
             // as the drafting itself. Without this the poll would call the
             // draft stale while it is still being worked on.
             $remix->touch();
         }
+
+        // Present the source only after its media has been read, so a direct
+        // Reel remix carries the current transcript into the source context.
+        $insights->present($remix->sourceContent);
 
         try {
             $generatedContent = $generator->generate(
@@ -82,15 +85,23 @@ class GenerateRemix implements ShouldQueue
     }
 
     /**
-     * A carousel draft is written against the slides of the source, so they
-     * have to have been read. Opening the analysis page normally does it; a
-     * post analyzed from its caption alone never had it done, and this is the
-     * last place to notice. The reading job skips itself when it is already
-     * done, and a source that stays unreadable still gets a draft.
+     * A Reel draft needs the source transcript and a carousel draft needs the
+     * source slides. Opening the analysis page normally does this first; a post
+     * remixed directly from the feed may not have been read yet, so generation
+     * completes the missing source read before asking for the draft.
      */
     private function readSource(ContentPost $source, ContentPostMediaRefresh $media): void
     {
         $media->ensure($source);
+
+        if (mb_strtolower((string) $source->format) === 'reel') {
+            if ($source->transcript_status !== TranscribeContentPost::DONE) {
+                Bus::dispatchSync(new TranscribeContentPost($source->id));
+                $source->refresh();
+            }
+
+            return;
+        }
 
         if ($source->carousel_analysis_status !== AnalyzeCarouselContentPost::DONE) {
             Bus::dispatchSync(new AnalyzeCarouselContentPost($source->id));

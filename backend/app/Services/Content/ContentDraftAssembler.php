@@ -66,7 +66,9 @@ class ContentDraftAssembler
     {
         if ($format !== 'carousel') {
             return array_intersect_key($generated, array_flip(match ($format) {
-                'reel' => ['hook', 'script', 'visual', 'ending', 'cta'],
+                // Keep the old visual field readable for drafts generated before
+                // the detailed Reel direction was introduced.
+                'reel' => ['source_breakdown', 'hook', 'script', 'visual', 'ending', 'cta', 'tone', 'filming', 'visuals'],
                 default => ['caption'],
             }));
         }

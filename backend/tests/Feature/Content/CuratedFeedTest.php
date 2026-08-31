@@ -33,7 +33,7 @@ class CuratedFeedTest extends TestCase
     public function test_feed_respects_eight_two_two_market_quota_and_excludes_non_approved_creators(): void
     {
         foreach (['FR' => 10, 'GB' => 5, 'US' => 5] as $market => $count) {
-            $this->posts($market, $count);
+            $this->diversePosts($market, $count);
         }
         $this->posts('FR', 1, 'discovered');
 
@@ -46,8 +46,8 @@ class CuratedFeedTest extends TestCase
 
     public function test_missing_market_quota_is_backfilled_by_best_other_approved_posts(): void
     {
-        $this->posts('FR', 12);
-        $this->posts('GB', 5);
+        $this->diversePosts('FR', 12);
+        $this->diversePosts('GB', 5);
         $this->posts('US', 1);
 
         $markets = app(RecommendationService::class)->forUser($this->user)
@@ -62,7 +62,7 @@ class CuratedFeedTest extends TestCase
     {
         config(['services.discovery.minimum_feed_size' => 4]);
         $strong = $this->posts('FR', 1, niche: 'sport-fitness', baseOutlier: 1.5);
-        $this->posts('FR', 3, niche: 'sport-fitness', baseOutlier: 1.1);
+        $this->diversePosts('FR', 3, niche: 'sport-fitness', baseOutlier: 1.1);
 
         $feed = app(RecommendationService::class)->forUser($this->user);
 
@@ -75,7 +75,7 @@ class CuratedFeedTest extends TestCase
     {
         $this->user->creatorProfile()->update(['market' => null]);
         foreach (['FR', 'GB', 'US'] as $market) {
-            $this->posts($market, 6);
+            $this->diversePosts($market, 6);
         }
 
         $markets = app(RecommendationService::class)->forUser($this->user)
@@ -88,7 +88,7 @@ class CuratedFeedTest extends TestCase
     {
         $this->user->creatorProfile()->update(['primary_vertical' => 'tech-ai']);
         $this->posts('FR', 12, niche: 'sport-fitness', baseOutlier: 5);
-        $this->posts('FR', 8, niche: 'tech-ai', baseOutlier: 1.5);
+        $this->diversePosts('FR', 8, niche: 'tech-ai', baseOutlier: 1.5);
 
         $feed = app(RecommendationService::class)->forUser($this->user);
 
@@ -98,7 +98,7 @@ class CuratedFeedTest extends TestCase
 
     public function test_private_inspirations_lead_the_feed_and_keep_the_approved_catalog_as_fallback(): void
     {
-        $this->posts('FR', 12, niche: 'sport-fitness', baseOutlier: 5);
+        $this->diversePosts('FR', 10, niche: 'sport-fitness', baseOutlier: 5);
         $this->posts('FR', 4, 'discovered', 'tech-ai', 2);
         $inspiration = Creator::query()->where('curation_status', 'discovered')->firstOrFail();
         $inspiration->update(['safety_status' => 'allowed']);
@@ -136,7 +136,7 @@ class CuratedFeedTest extends TestCase
     {
         $self = $this->posts('FR', 4, niche: 'tech-ai', baseOutlier: 8);
         $self->update(['user_id' => $this->user->id]);
-        $this->posts('FR', 12, niche: 'sport-fitness', baseOutlier: 3);
+        $this->diversePosts('FR', 12, niche: 'sport-fitness', baseOutlier: 3);
 
         foreach ([
             app(RecommendationService::class)->forUser($this->user),
@@ -144,6 +144,18 @@ class CuratedFeedTest extends TestCase
         ] as $feed) {
             $this->assertSame(12, $feed->count());
             $this->assertFalse($feed->pluck('creator.username')->contains($self->username));
+        }
+    }
+
+    private function diversePosts(
+        string $market,
+        int $count,
+        string $status = 'approved',
+        string $niche = 'sport-fitness',
+        float $baseOutlier = 3,
+    ): void {
+        for ($remaining = $count; $remaining > 0; $remaining -= 2) {
+            $this->posts($market, min(2, $remaining), $status, $niche, $baseOutlier);
         }
     }
 

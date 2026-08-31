@@ -144,11 +144,23 @@ class OpenAiContentGenerationTest extends TestCase
         $service = $this->serviceReturning([
             'why_it_works' => ['The story lands before asking the audience to act'],
             'your_version' => 'I stopped guessing what to post.',
+            'source_breakdown' => [
+                'hook' => 'The source opens with a first-person admission.',
+                'development' => 'The source moves from problem to realization.',
+                'cta' => 'The source asks for a response after the takeaway.',
+            ],
             'hook' => 'I stopped guessing what to post.',
             'script' => 'A customer conversation showed me what was missing.',
-            'visual' => 'Talking head, then cut to the notes.',
             'ending' => 'The useful story was already there.',
             'cta' => 'What story are you overlooking?',
+            'tone' => 'Direct and reflective, tied to the source admission.',
+            'filming' => 'Open and close face camera, then cut to the notes at the source realization.',
+            'visuals' => [[
+                'type' => 'face_camera',
+                'timing' => '0:00 to 0:05',
+                'shot' => 'Look into the lens.',
+                'source_link' => 'The source opens on a direct admission.',
+            ]],
         ]);
 
         [$user, $post] = $this->draftFixtures();
@@ -157,10 +169,15 @@ class OpenAiContentGenerationTest extends TestCase
 
         $this->assertSame('The useful story was already there.', $result['ending']);
         $this->assertSame('What story are you overlooking?', $result['cta']);
+        $this->assertSame('The source moves from problem to realization.', $result['source_breakdown']['development']);
+        $this->assertSame('Direct and reflective, tied to the source admission.', $result['tone']);
+        $this->assertSame('face_camera', $result['visuals'][0]['type']);
         $this->assertSame(
-            ['why_it_works', 'your_version', 'hook', 'script', 'visual', 'ending', 'cta'],
+            ['why_it_works', 'your_version', 'source_breakdown', 'hook', 'script', 'ending', 'cta', 'tone', 'filming', 'visuals'],
             $this->sentBodies[0]['text']['format']['schema']['required'],
         );
+        $this->assertStringContainsString('source_breakdown', $this->sentBodies[0]['input']);
+        $this->assertStringContainsString('source_link', $this->sentBodies[0]['input']);
     }
 
     public function test_a_refusal_surfaces_as_a_readable_failure(): void

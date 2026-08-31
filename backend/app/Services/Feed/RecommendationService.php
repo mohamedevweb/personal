@@ -26,6 +26,9 @@ class RecommendationService
      */
     private const CANDIDATE_MULTIPLIER = 8;
 
+    /** A creator can inspire a shelf without becoming the whole shelf. */
+    private const MAX_POSTS_PER_CREATOR = 2;
+
     public function __construct(
         private readonly ContentPostView $view,
         private readonly FeedRanker $ranker,
@@ -52,6 +55,7 @@ class RecommendationService
         $primaryVertical = $this->primaryVertical($user);
         $inspirationIds = $user->inspirationCreators()->pluck('creators.id');
         $interactionSignals = $this->interactions->forUser($user);
+        $visibleCreatorCounts = $this->creatorCounts($excludeIds);
 
         $ranked = $this->candidates($user, $limit, $primaryVertical, $inspirationIds, $excludeIds)
             ->reject(fn (ContentPost $post): bool => $this->interactions->excludes($post, $interactionSignals))
@@ -110,25 +114,34 @@ class RecommendationService
 
         $inspirationLookup = $inspirationIds->flip();
         $forYou = $ranked->where('bucket', PostRelevance::FOR_YOU)->values();
-        $inspired = $forYou
-            ->filter(fn (array $item): bool => $inspirationLookup->has($item['post']->creator_id))
-            ->groupBy('post.creator_id')
-            ->flatMap(fn (Collection $posts): Collection => $posts->take(2))
-            ->sortByDesc('ranking.score')
+        $inspired = $this->limitPerCreator(
+            $forYou->filter(fn (array $item): bool => $inspirationLookup->has($item['post']->creator_id)),
+            $visibleCreatorCounts,
+        )
             ->take($limit)
             ->values();
         $fallback = $this->markets->allocate(
-            $forYou->reject(fn (array $item): bool => $inspirationLookup->has($item['post']->creator_id)),
+            $this->limitPerCreator(
+                $forYou->reject(fn (array $item): bool => $inspirationLookup->has($item['post']->creator_id)),
+                $visibleCreatorCounts,
+            ),
             $user->creatorProfile?->market,
             max(0, $limit - $inspired->count()),
             $primaryVertical,
         );
         $items = $inspired->concat($fallback)->take($limit)->values();
+        $itemCreatorIds = collect(array_keys($visibleCreatorCounts))
+            ->concat($items->pluck('post.creator_id'))
+            ->flip();
         $exploreLimit = max(0, (int) config('services.discovery.personalization.explore_size'));
         $explore = $exploreLimit === 0
             ? collect()
             : $this->markets->allocate(
-                $ranked->where('bucket', PostRelevance::EXPLORE)->values(),
+                $this->limitPerCreator(
+                    $ranked->where('bucket', PostRelevance::EXPLORE)
+                        ->reject(fn (array $item): bool => $itemCreatorIds->has($item['post']->creator_id))
+                        ->values(),
+                ),
                 $user->creatorProfile?->market,
                 $exploreLimit,
             );
@@ -140,8 +153,10 @@ class RecommendationService
         if ($promote > 0 && $explore->isNotEmpty()) {
             $promoted = $explore->take($promote)->values();
             $items = $items->concat($promoted)->take($limit)->values();
-            $promotedIds = $promoted->pluck('post.id')->flip();
-            $explore = $explore->reject(fn (array $item): bool => $promotedIds->has($item['post']->id))->values();
+            $promotedCreatorIds = $promoted->pluck('post.creator_id')->flip();
+            $explore = $explore
+                ->reject(fn (array $item): bool => $promotedCreatorIds->has($item['post']->creator_id))
+                ->values();
         }
 
         return [
@@ -195,6 +210,48 @@ class RecommendationService
             ];
         })
             ->values();
+    }
+
+    /**
+     * Keep the strongest posts from each creator and leave the shelf short when
+     * the relevant catalogue lacks variety. Repeating one account is not a
+     * substitute for discovering more relevant creators.
+     *
+     * @param  Collection<int, array{post: ContentPost, ranking: array<string, float|null>}>  $ranked
+     * @return Collection<int, array{post: ContentPost, ranking: array<string, float|null>}>
+     */
+    private function limitPerCreator(Collection $ranked, array $existingCounts = []): Collection
+    {
+        $counts = $existingCounts;
+
+        return $ranked->filter(function (array $item) use (&$counts): bool {
+            $creatorId = $item['post']->creator_id;
+            $count = $counts[$creatorId] ?? 0;
+
+            if ($count >= self::MAX_POSTS_PER_CREATOR) {
+                return false;
+            }
+
+            $counts[$creatorId] = $count + 1;
+
+            return true;
+        })->values();
+    }
+
+    /** @return array<int, int> */
+    private function creatorCounts(array $postIds): array
+    {
+        if ($postIds === []) {
+            return [];
+        }
+
+        return ContentPost::query()
+            ->whereIn('id', $postIds)
+            ->selectRaw('creator_id, count(*) as aggregate')
+            ->groupBy('creator_id')
+            ->pluck('aggregate', 'creator_id')
+            ->map(fn (mixed $count): int => (int) $count)
+            ->all();
     }
 
     /**
