@@ -23,17 +23,17 @@ return [
     ],
 
     'verticals' => [
-        'sport-fitness' => ['name' => 'Sport & Fitness', 'aliases' => ['sport', 'fitness', 'football', 'soccer', 'athlete', 'athlète', 'musculation', 'running', 'coaching sportif', 'nutrition sportive', 'workout', 'strength training']],
-        'food-cooking' => ['name' => 'Food & Cooking', 'aliases' => ['food', 'cuisine', 'recettes', 'alimentation saine', 'patisserie', 'pâtisserie', 'healthy food', 'cooking', 'baking']],
-        'personal-branding' => ['name' => 'Personal Branding', 'aliases' => ['marque personnelle', 'création de contenu', 'creation de contenu', 'marketing', 'creator economy', 'entrepreneuriat', 'entrepreneurship', 'content creation']],
-        'tech-ai' => ['name' => 'Tech & AI', 'aliases' => ['tech', 'technologie', 'ia', 'ai', 'intelligence artificielle', 'développement', 'developpement', 'development', 'saas', 'productivité', 'productivity']],
-        'wellness' => ['name' => 'Wellness', 'aliases' => ['bien-être', 'bien etre', 'wellbeing', 'santé mentale', 'sante mentale', 'mental health', 'mindfulness', 'méditation', 'meditation', 'sommeil', 'sleep', 'récupération', 'recovery', 'santé globale']],
-        'events' => ['name' => 'Events', 'aliases' => ['events', 'event', 'événementiel', 'evenementiel', 'wedding', 'weddings', 'mariage', 'mariages', 'event planning', 'wedding planner', 'conference', 'conference planning', 'concert', 'festival']],
-        'languages' => ['name' => 'Languages', 'aliases' => ['languages', 'langues', 'language learning', 'french learning', 'english learning', 'apprendre le français', 'apprentissage des langues', 'grammar', 'pronunciation', 'ielts']],
-        'lifestyle' => ['name' => 'Lifestyle', 'aliases' => ['lifestyle', 'mode de vie', 'habits', 'habitudes', 'routines', 'routine', 'discipline', 'self-development', 'self development', 'personal development', 'développement personnel', 'minimalism', 'personal growth']],
-        'local-culture' => ['name' => 'Local & Culture', 'aliases' => ['local culture', 'local / culture', 'culture locale', 'local discovery', 'city guide', 'city guides', 'paris', 'lyon', 'london', 'new york', 'nyc', 'sorties', 'addresses']],
-        'travel' => ['name' => 'Travel', 'aliases' => ['travel', 'voyage', 'tourism', 'tourisme', 'destination', 'destinations', 'travel tips', 'adventure', 'road trip', 'backpacking']],
-        'business' => ['name' => 'Business', 'aliases' => ['business']],
+        'sport-fitness' => ['name' => 'Sport & Fitness', 'fallback_alias' => 'fitness', 'aliases' => ['sport', 'fitness', 'football', 'soccer', 'athlete', 'athlète', 'musculation', 'running', 'coaching sportif', 'nutrition sportive', 'workout', 'strength training']],
+        'food-cooking' => ['name' => 'Food & Cooking', 'fallback_alias' => 'food', 'aliases' => ['food', 'cuisine', 'recettes', 'recipe', 'recipes', 'alimentation saine', 'patisserie', 'pâtisserie', 'healthy food', 'cooking', 'baking']],
+        'personal-branding' => ['name' => 'Personal Branding', 'fallback_alias' => 'création de contenu', 'aliases' => ['marque personnelle', 'création de contenu', 'creation de contenu', 'marketing', 'creator economy', 'entrepreneuriat', 'entrepreneurship', 'content creation', 'motivation', 'mindset', 'inspiration', 'success', 'leadership', 'founder', 'founders']],
+        'tech-ai' => ['name' => 'Tech & AI', 'fallback_alias' => 'tech', 'aliases' => ['tech', 'technologie', 'ia', 'ai', 'intelligence artificielle', 'développement', 'developpement', 'development', 'saas', 'productivité', 'productivity']],
+        'wellness' => ['name' => 'Wellness', 'fallback_alias' => 'bien-être', 'aliases' => ['bien-être', 'bien etre', 'wellbeing', 'santé mentale', 'sante mentale', 'mental health', 'mindfulness', 'méditation', 'meditation', 'sommeil', 'sleep', 'récupération', 'recovery', 'santé globale']],
+        'events' => ['name' => 'Events', 'fallback_alias' => 'events', 'aliases' => ['events', 'event', 'événementiel', 'evenementiel', 'wedding', 'weddings', 'mariage', 'mariages', 'event planning', 'wedding planner', 'conference', 'conference planning', 'concert', 'festival']],
+        'languages' => ['name' => 'Languages', 'fallback_alias' => 'languages', 'aliases' => ['languages', 'langues', 'language learning', 'french learning', 'english learning', 'apprendre le français', 'apprentissage des langues', 'grammar', 'pronunciation', 'ielts']],
+        'lifestyle' => ['name' => 'Lifestyle', 'fallback_alias' => 'lifestyle', 'aliases' => ['lifestyle', 'mode de vie', 'habits', 'habitudes', 'routines', 'routine', 'discipline', 'self-development', 'self development', 'personal development', 'développement personnel', 'minimalism', 'personal growth']],
+        'local-culture' => ['name' => 'Local & Culture', 'fallback_alias' => 'local culture', 'aliases' => ['local culture', 'local / culture', 'culture locale', 'local discovery', 'city guide', 'city guides', 'paris', 'lyon', 'london', 'new york', 'nyc', 'sorties', 'addresses']],
+        'travel' => ['name' => 'Travel', 'fallback_alias' => 'travel', 'aliases' => ['travel', 'voyage', 'tourism', 'tourisme', 'destination', 'destinations', 'travel tips', 'adventure', 'road trip', 'backpacking']],
+        'business' => ['name' => 'Business', 'fallback_alias' => 'business', 'aliases' => ['business', 'startup', 'startups', 'founder', 'founders', 'entrepreneur', 'entrepreneurs', 'entrepreneurship', 'entrepreneuriat', 'investing', 'investment', 'business owner']],
     ],
 
     // Adjacent subjects may be useful, but they never fill the personalised

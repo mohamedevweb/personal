@@ -81,4 +81,41 @@ class ClassifyFeedPostsTest extends TestCase
 
         $this->assertSame('food-cooking', data_get($post->fresh()->metadata, 'feed_classification.vertical'));
     }
+
+    public function test_it_uses_the_validated_creator_vertical_when_post_text_has_no_matching_alias(): void
+    {
+        $creator = Creator::query()->create([
+            'username' => 'garyvee.test',
+            'display_name' => 'Gary Vee Test',
+            'niche' => 'personal-branding',
+            'primary_vertical' => 'personal-branding',
+            'followers' => 10_000,
+            'average_views' => 10_000,
+            'average_likes' => 1_000,
+            'curation_status' => 'approved',
+            'safety_status' => 'allowed',
+        ]);
+        ContentPost::query()->create([
+            'creator_id' => $creator->id,
+            'source_url' => 'https://www.instagram.com/p/creator-fallback/',
+            'platform' => 'instagram',
+            'format' => 'image',
+            'hook' => 'Stop being scared',
+            'caption' => 'Stop being scared. No one cares if you miss.',
+            'views' => 20_000,
+            'likes' => 1_000,
+            'comments' => 50,
+            'published_at' => now(),
+            'metadata' => [],
+        ]);
+
+        $this->artisan('personal:classify-feed-posts')
+            ->expectsOutput('Classification pass: 1 checked, 1 classified, 0 unclassified.')
+            ->assertSuccessful();
+
+        $classification = data_get(ContentPost::query()->latest('id')->first()->metadata, 'feed_classification');
+
+        $this->assertSame('personal-branding', $classification['vertical']);
+        $this->assertSame('creation-de-contenu', $classification['primary_niche']);
+    }
 }

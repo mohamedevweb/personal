@@ -28,11 +28,11 @@ class ContentTopicClassifier
         $stored = data_get($post->metadata, 'feed_classification');
 
         if (is_array($stored)) {
-            return $this->structured($stored, $this->postSignals($post));
+            return $this->withCreatorFallback($post, $this->structured($stored, $this->postSignals($post)));
         }
 
         $signals = $this->postSignals($post);
-        $classification = $this->structured([], $signals);
+        $classification = $this->withCreatorFallback($post, $this->structured([], $signals));
 
         // Hashtags and imported tags are explicit post subjects. They are a
         // safe fallback for subjects outside the local taxonomy, unlike
@@ -49,6 +49,46 @@ class ContentTopicClassifier
                 $classification['clusters'] = array_values(array_unique([
                     ...$classification['clusters'],
                     $tagLabels[0],
+                ]));
+            }
+        }
+
+        return $classification;
+    }
+
+    /** @param array<string, mixed> $classification @return array<string, mixed> */
+    private function withCreatorFallback(ContentPost $post, array $classification): array
+    {
+        if ($classification['vertical'] !== null) {
+            return $classification;
+        }
+
+        $creator = $post->relationLoaded('creator') ? $post->creator : $post->creator()->first();
+        $creatorVertical = $this->verticals->canonical($creator?->primary_vertical);
+
+        if ($creator === null
+            || $creatorVertical === null
+            || $creator->curation_status !== 'approved'
+            || $creator->safety_status === 'blocked') {
+            return $classification;
+        }
+
+        $classification['vertical'] = $creatorVertical;
+        $fallbackAlias = config("creator_catalog.verticals.{$creatorVertical}.fallback_alias");
+
+        if ($classification['primary_niche'] === null && is_string($fallbackAlias)) {
+            $labels = $this->fallbackLabels([$fallbackAlias], allowSingleWord: true);
+            $label = $labels[0] ?? null;
+
+            if ($label !== null) {
+                $classification['primary_niche'] = $label;
+                $classification['topics'] = array_values(array_unique([
+                    ...$classification['topics'],
+                    $label,
+                ]));
+                $classification['clusters'] = array_values(array_unique([
+                    ...$classification['clusters'],
+                    $label,
                 ]));
             }
         }

@@ -19,6 +19,7 @@ class ClassifyFeedPosts extends Command
     {
         $limit = max(1, (int) $this->option('limit'));
         $query = ContentPost::query()
+            ->with('creator')
             ->where(function ($query): void {
                 $query->whereNull('safety_status')->orWhere('safety_status', '!=', 'blocked');
             })
