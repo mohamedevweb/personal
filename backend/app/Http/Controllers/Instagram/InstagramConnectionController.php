@@ -32,6 +32,7 @@ class InstagramConnectionController extends Controller
             ->withCount(['media as imported_media_count'])
             ->first();
         $onboardingComplete = $onboarding->completeFor($request->user(), $account, $profile);
+        $primaryVertical = $onboarding->primaryVerticalFor($request->user(), $profile);
 
         if (! $account) {
             return response()->json([
@@ -39,7 +40,7 @@ class InstagramConnectionController extends Controller
                 'instagram_username' => $profile?->instagram_username,
                 'inspiration_count' => $inspirationCount,
                 'onboarding_complete' => $onboardingComplete,
-                'analysis' => $this->analysis($profile),
+                'analysis' => $this->analysis($profile, $primaryVertical),
                 'media_enrichment' => $this->mediaEnrichment($profile),
             ]);
         }
@@ -49,7 +50,7 @@ class InstagramConnectionController extends Controller
             'instagram_username' => $account->username,
             'inspiration_count' => $inspirationCount,
             'onboarding_complete' => $onboardingComplete,
-            'analysis' => $this->analysis($profile),
+            'analysis' => $this->analysis($profile, $primaryVertical),
             'media_enrichment' => $this->mediaEnrichment($profile),
             'account' => [
                 'username' => $account->username,
@@ -66,7 +67,7 @@ class InstagramConnectionController extends Controller
             ],
             'profile' => $profile ? [
                 'niche' => $profile->niche,
-                'primary_vertical' => $profile->primary_vertical,
+                'primary_vertical' => $primaryVertical,
                 'topics' => $profile->topics,
                 'tone' => $profile->tone,
                 'creator_dna' => $profile->creator_dna,
@@ -90,6 +91,7 @@ class InstagramConnectionController extends Controller
             'niche',
             'tone',
             'audience_description',
+            'creator_dna',
             'dna_analyzed_at',
             'media_enrichment_status',
             'media_enrichment_error',
@@ -102,10 +104,11 @@ class InstagramConnectionController extends Controller
             'sync_status',
             'sync_error',
         ]);
+        $primaryVertical = $onboarding->primaryVerticalFor($request->user(), $profile);
 
         return response()->json([
             'onboarding_complete' => $onboarding->completeFor($request->user(), $account, $profile),
-            'analysis' => $this->analysis($profile),
+            'analysis' => $this->analysis($profile, $primaryVertical),
             'media_enrichment' => $this->mediaEnrichment($profile),
             'account' => $account ? [
                 'sync_status' => $account->sync_status,
@@ -226,7 +229,7 @@ class InstagramConnectionController extends Controller
      *
      * @return array<string, mixed>
      */
-    private function analysis(?CreatorProfile $profile): array
+    private function analysis(?CreatorProfile $profile, ?string $primaryVertical = null): array
     {
         return [
             'status' => $profile?->analysis_status ?? 'idle',
@@ -238,7 +241,7 @@ class InstagramConnectionController extends Controller
             'analyzed_posts_count' => $profile?->analyzed_posts_count,
             'bio' => $profile?->bio,
             'niche' => $profile?->niche,
-            'primary_vertical' => $profile?->primary_vertical,
+            'primary_vertical' => $primaryVertical ?? $profile?->primary_vertical,
             'tone' => $profile?->tone,
             'audience_description' => $profile?->audience_description,
         ];

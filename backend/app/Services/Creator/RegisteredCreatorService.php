@@ -29,7 +29,10 @@ class RegisteredCreatorService
         $matched = Creator::query()
             ->where(function ($query) use ($account): void {
                 $query->where('instagram_user_id', $account->instagram_user_id)
-                    ->orWhereRaw('LOWER(username) = ?', [Str::lower($account->username)]);
+                    ->orWhereRaw(
+                        "LOWER(REPLACE(username, '@', '')) = ?",
+                        [$this->normalizedUsername($account->username)],
+                    );
             })
             ->first();
 
@@ -88,30 +91,41 @@ class RegisteredCreatorService
      * Older rows may only have the canonical value in `niche`, so accept that
      * compatibility shape without treating arbitrary free text as a vertical.
      */
-    public function existingPrimaryVertical(
+    public function primaryVerticalFor(?Creator $creator): ?string
+    {
+        if (! $creator) {
+            return null;
+        }
+
+        return $this->verticals->fromSignals([
+            $creator->primary_vertical,
+            $creator->niche,
+            ...($creator->niche_topics ?? []),
+            data_get($creator->metadata, 'primary_vertical'),
+            data_get($creator->metadata, 'vertical'),
+        ]);
+    }
+
+    public function existingCreator(
         string $username,
         ?string $instagramUserId = null,
         ?int $userId = null,
-    ): ?string {
-        $matched = null;
+    ): ?Creator {
+        $creator = null;
 
         if (filled($instagramUserId)) {
-            $matched = Creator::query()
+            $creator = Creator::query()
                 ->where('instagram_user_id', $instagramUserId)
                 ->first();
         }
 
-        $matched ??= Creator::query()
-            ->whereRaw('LOWER(username) = ?', [Str::lower($username)])
+        $creator ??= Creator::query()
+            ->whereRaw("LOWER(REPLACE(username, '@', '')) = ?", [$this->normalizedUsername($username)])
             ->first();
 
-        $matched ??= $userId === null
+        return $creator ?? ($userId === null
             ? null
-            : Creator::query()->where('user_id', $userId)->first();
-
-        return $this->verticals->canonical(
-            $matched?->primary_vertical ?: $matched?->niche,
-        );
+            : Creator::query()->where('user_id', $userId)->first());
     }
 
     /**
@@ -124,7 +138,7 @@ class RegisteredCreatorService
     public function syncScraped(DiscoveredProfile $scraped, CreatorProfile $profile, Collection $posts): Creator
     {
         $creator = Creator::query()->where('user_id', $profile->user_id)->first()
-            ?? Creator::query()->whereRaw('LOWER(username) = ?', [Str::lower($scraped->username)])->first()
+            ?? Creator::query()->whereRaw("LOWER(REPLACE(username, '@', '')) = ?", [$this->normalizedUsername($scraped->username)])->first()
             ?? new Creator;
 
         $isNew = ! $creator->exists;
@@ -180,6 +194,11 @@ class RegisteredCreatorService
         $this->storePosts($creator, $posts);
 
         return $creator;
+    }
+
+    private function normalizedUsername(string $username): string
+    {
+        return Str::lower(ltrim(trim($username), '@'));
     }
 
     public function syncPosts(InstagramAccount $account, Creator $creator): void

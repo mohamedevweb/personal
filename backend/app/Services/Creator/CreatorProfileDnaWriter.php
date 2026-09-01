@@ -2,6 +2,7 @@
 
 namespace App\Services\Creator;
 
+use App\Models\Creator;
 use App\Models\CreatorProfile;
 
 /**
@@ -11,11 +12,23 @@ use App\Models\CreatorProfile;
 class CreatorProfileDnaWriter
 {
     /** @param array<string, mixed> $signals */
-    public function apply(CreatorProfile $profile, array $signals, ?string $primaryVertical): void
-    {
+    public function apply(
+        CreatorProfile $profile,
+        array $signals,
+        ?string $primaryVertical,
+        ?Creator $existingCreator = null,
+    ): void {
         if (data_get($profile->creator_dna, 'analysis_method') === 'manual') {
             return;
         }
+
+        $signals['primary_niche'] = filled($signals['primary_niche'] ?? null)
+            ? $signals['primary_niche']
+            : $existingCreator?->niche;
+        $signals['topics'] = ! empty($signals['topics'] ?? [])
+            ? $signals['topics']
+            : ($existingCreator?->niche_topics ?? []);
+        $signals['primary_vertical'] = $primaryVertical;
 
         $profile->fill([
             'niche' => $signals['primary_niche'] ?? null,

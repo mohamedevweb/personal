@@ -10,7 +10,10 @@ use App\Services\Discovery\CanonicalCreatorVerticals;
 
 class OnboardingCompletionService
 {
-    public function __construct(private readonly CanonicalCreatorVerticals $verticals) {}
+    public function __construct(
+        private readonly CanonicalCreatorVerticals $verticals,
+        private readonly RegisteredCreatorService $creators,
+    ) {}
 
     public function completeFor(
         User $user,
@@ -21,9 +24,13 @@ class OnboardingCompletionService
             return true;
         }
 
-        if ($this->verticals->canonical($profile?->primary_vertical) === null) {
+        $primaryVertical = $this->primaryVerticalFor($user, $profile);
+
+        if ($primaryVertical === null) {
             return false;
         }
+
+        $this->repairProfileVertical($profile, $primaryVertical);
 
         $completed = $account
             ? $account->sync_status === 'completed'
@@ -34,6 +41,38 @@ class OnboardingCompletionService
         }
 
         return $completed;
+    }
+
+    public function primaryVerticalFor(User $user, ?CreatorProfile $profile): ?string
+    {
+        $profileVertical = $this->verticals->canonical($profile?->primary_vertical);
+
+        if ($profileVertical !== null) {
+            return $profileVertical;
+        }
+
+        if (! filled($profile?->instagram_username)) {
+            return null;
+        }
+
+        return $this->creators->primaryVerticalFor(
+            $this->creators->existingCreator($profile->instagram_username, userId: $user->id),
+        );
+    }
+
+    private function repairProfileVertical(?CreatorProfile $profile, string $primaryVertical): void
+    {
+        if (! $profile || $this->verticals->canonical($profile->primary_vertical) !== null) {
+            return;
+        }
+
+        $profile->forceFill([
+            'primary_vertical' => $primaryVertical,
+            'creator_dna' => [
+                ...($profile->creator_dna ?? []),
+                'primary_vertical' => $primaryVertical,
+            ],
+        ])->save();
     }
 
     private function publicProfileIsComplete(?CreatorProfile $profile): bool

@@ -80,12 +80,13 @@ class SyncInstagramAccount implements ShouldQueue
                 collect($media)->pluck('caption')->filter()->take(30)->implode("\n"),
             ]));
             $creatorProfile = CreatorProfile::query()->firstOrNew(['user_id' => $account->user_id]);
+            $existingCreator = $registeredCreators->existingCreator(
+                $account->username,
+                $account->instagram_user_id,
+                $account->user_id,
+            );
             $primaryVertical = $verticals->canonical($signals['primary_vertical'] ?? null)
-                ?? $registeredCreators->existingPrimaryVertical(
-                    $account->username,
-                    $account->instagram_user_id,
-                    $account->user_id,
-                )
+                ?? $registeredCreators->primaryVerticalFor($existingCreator)
                 ?? $verticals->canonical($creatorProfile->primary_vertical);
             $creatorProfile->fill([
                 'instagram_username' => $account->username,
@@ -95,7 +96,7 @@ class SyncInstagramAccount implements ShouldQueue
                 'market_confidence' => $market['confidence'],
             ]);
 
-            $dnaWriter->apply($creatorProfile, $signals, $primaryVertical);
+            $dnaWriter->apply($creatorProfile, $signals, $primaryVertical, $existingCreator);
             $creatorProfile->forceFill([
                 'analysis_status' => 'completed',
                 'analysis_error' => null,

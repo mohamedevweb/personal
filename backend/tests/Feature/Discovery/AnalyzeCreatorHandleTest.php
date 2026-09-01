@@ -326,6 +326,70 @@ class AnalyzeCreatorHandleTest extends TestCase
         $this->assertSame('completed', $profile->analysis_status);
     }
 
+    public function test_an_existing_creator_with_a_legacy_handle_and_topic_supplies_a_missing_vertical(): void
+    {
+        Queue::fake();
+        $user = User::factory()->create();
+        CreatorProfile::query()->create([
+            'user_id' => $user->id,
+            'instagram_username' => 'founder.creator',
+            'analysis_status' => 'queued',
+        ]);
+        Creator::withoutEvents(function (): void {
+            Creator::query()->create([
+                'username' => '@founder.creator',
+                'display_name' => 'Founder Creator',
+                'niche' => 'Entrepreneurship / SaaS',
+                'niche_topics' => ['business', 'founders'],
+                'primary_vertical' => null,
+                'followers' => 10000,
+                'average_views' => 5000,
+                'average_likes' => 250,
+            ]);
+        });
+
+        $this->runJob($user);
+
+        $profile = $user->creatorProfile()->firstOrFail();
+        $this->assertSame('business', $profile->primary_vertical);
+        $this->assertSame('business', $profile->creator_dna['primary_vertical']);
+        $this->assertSame('Entrepreneurship / SaaS', $profile->niche);
+    }
+
+    public function test_status_repairs_a_completed_profile_from_an_existing_creator(): void
+    {
+        Queue::fake();
+        $user = User::factory()->create();
+        CreatorProfile::query()->create([
+            'user_id' => $user->id,
+            'instagram_username' => 'founder.creator',
+            'analysis_status' => 'completed',
+            'niche' => 'Entrepreneurship / SaaS',
+            'creator_dna' => ['analysis_status' => 'analysis_unavailable'],
+            'dna_analyzed_at' => now(),
+        ]);
+        Creator::withoutEvents(function (): void {
+            Creator::query()->create([
+                'username' => '@founder.creator',
+                'display_name' => 'Founder Creator',
+                'niche' => 'Legacy business creator',
+                'niche_topics' => ['business', 'founders'],
+                'primary_vertical' => null,
+                'followers' => 0,
+                'average_views' => 0,
+                'average_likes' => 0,
+            ]);
+        });
+
+        $this->actingAs($user)
+            ->getJson('/api/integrations/instagram/status')
+            ->assertOk()
+            ->assertJsonPath('onboarding_complete', true)
+            ->assertJsonPath('analysis.primary_vertical', 'business');
+
+        $this->assertSame('business', $user->creatorProfile()->firstOrFail()->primary_vertical);
+    }
+
     public function test_the_public_analysis_fills_every_supported_memory_field(): void
     {
         Queue::fake();
