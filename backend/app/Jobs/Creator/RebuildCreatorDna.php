@@ -101,7 +101,11 @@ class RebuildCreatorDna implements ShouldBeUnique, ShouldQueue
 
         $before = $profile->niche;
 
-        $dnaWriter->apply($profile, $signals, $verticals->canonical($signals['primary_vertical'] ?? null));
+        $primaryVertical = $verticals->canonical($signals['primary_vertical'] ?? null)
+            ?? $verticals->canonical($creator->primary_vertical)
+            ?? $verticals->canonical($profile->primary_vertical);
+
+        $dnaWriter->apply($profile, $signals, $primaryVertical);
         $profile->forceFill([
             'media_enrichment_status' => 'completed',
             'media_enrichment_error' => null,

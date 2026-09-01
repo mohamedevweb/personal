@@ -132,7 +132,6 @@ onMounted(loadFeed)
     <section v-else-if="posts.length" class="mt-2">
       <div class="flex items-end justify-between gap-4 border-b border-[var(--line)] pb-4">
         <div>
-          <p class="text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--faint)]">{{ $t('feed.moreEyebrow') }}</p>
           <h2 class="mt-2 font-serif text-[28px] tracking-[-.025em]">{{ $t('feed.moreTitle') }}</h2>
         </div>
       </div>

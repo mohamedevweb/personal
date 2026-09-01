@@ -162,7 +162,15 @@ class AnalyzeCreatorHandle implements ShouldQueue
             'market_confidence' => $market['confidence'],
         ]);
 
-        $dnaWriter->apply($profile, $signals, $verticals->canonical($signals['primary_vertical'] ?? null));
+        $primaryVertical = $verticals->canonical($signals['primary_vertical'] ?? null)
+            ?? $registeredCreators->existingPrimaryVertical(
+                $scraped->username,
+                $scraped->externalId,
+                $profile->user_id,
+            )
+            ?? $verticals->canonical($profile->primary_vertical);
+
+        $dnaWriter->apply($profile, $signals, $primaryVertical);
 
         $profile->save();
 

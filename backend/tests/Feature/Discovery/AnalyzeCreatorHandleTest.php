@@ -4,6 +4,7 @@ namespace Tests\Feature\Discovery;
 
 use App\Jobs\Discovery\AnalyzeCreatorHandle;
 use App\Jobs\Discovery\DiscoverNicheContent;
+use App\Models\Creator;
 use App\Models\CreatorProfile;
 use App\Models\InstagramAccount;
 use App\Models\User;
@@ -296,6 +297,33 @@ class AnalyzeCreatorHandleTest extends TestCase
         $this->assertSame('Sample bio for founder.creator', $profile->bio);
         $this->assertNotNull($profile->creator_dna);
         $this->assertNotNull($profile->dna_analyzed_at);
+    }
+
+    public function test_an_existing_creator_identity_supplies_a_missing_vertical(): void
+    {
+        Queue::fake();
+        $user = User::factory()->create();
+        CreatorProfile::query()->create([
+            'user_id' => $user->id,
+            'instagram_username' => 'founder.creator',
+            'analysis_status' => 'queued',
+        ]);
+        Creator::query()->create([
+            'username' => 'founder.creator',
+            'display_name' => 'Founder Creator',
+            'niche' => 'Tech & AI',
+            'primary_vertical' => 'tech-ai',
+            'followers' => 10000,
+            'average_views' => 5000,
+            'average_likes' => 250,
+        ]);
+
+        $this->runJob($user);
+
+        $profile = $user->creatorProfile()->firstOrFail();
+        $this->assertSame('tech-ai', $profile->primary_vertical);
+        $this->assertSame('tech-ai', $profile->creator_dna['primary_vertical']);
+        $this->assertSame('completed', $profile->analysis_status);
     }
 
     public function test_the_public_analysis_fills_every_supported_memory_field(): void

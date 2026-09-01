@@ -152,6 +152,67 @@ class SyncInstagramAccountTest extends TestCase
         $this->assertSame('completed', $account->refresh()->sync_status);
     }
 
+    public function test_sync_reuses_the_existing_creator_vertical_when_analysis_has_none(): void
+    {
+        config()->set('services.instagram.graph_url', 'https://graph.instagram.com');
+        config()->set('services.instagram.api_version', 'v25.0');
+
+        $user = User::factory()->create();
+        CreatorProfile::query()->create(['user_id' => $user->id]);
+        Creator::query()->create([
+            'instagram_user_id' => '123',
+            'username' => 'founder_creator',
+            'display_name' => 'Founder Creator',
+            'niche' => 'Tech & AI',
+            'primary_vertical' => 'tech-ai',
+            'followers' => 10000,
+            'average_views' => 5000,
+            'average_likes' => 250,
+        ]);
+        $account = InstagramAccount::query()->create([
+            'user_id' => $user->id,
+            'instagram_user_id' => '123',
+            'username' => 'founder_creator',
+            'access_token' => 'server-side-secret',
+            'token_expires_at' => now()->addMonth(),
+            'connected_at' => now(),
+        ]);
+
+        Http::fake(function ($request) {
+            if (str_contains($request->url(), '/me/media')) {
+                return Http::response(['data' => [[
+                    'id' => 'media-1',
+                    'caption' => 'Building SaaS for creators.',
+                    'media_type' => 'IMAGE',
+                    'media_product_type' => 'FEED',
+                    'permalink' => 'https://instagram.com/p/example',
+                    'timestamp' => '2026-08-15T10:00:00+0000',
+                ]]]);
+            }
+
+            if (str_contains($request->url(), '/media-1/insights')) {
+                return Http::response(['data' => []]);
+            }
+
+            return Http::response([
+                'id' => '123',
+                'username' => 'founder_creator',
+                'name' => 'Founder Creator',
+                'biography' => 'Building SaaS for creators.',
+                'account_type' => 'BUSINESS',
+                'followers_count' => 10000,
+                'media_count' => 1,
+            ]);
+        });
+
+        (new SyncInstagramAccount($account->id))
+            ->handle(app(InstagramAuthService::class), app(InstagramApiService::class), app(NicheDetectionService::class));
+
+        $profile = $user->creatorProfile()->firstOrFail();
+        $this->assertSame('tech-ai', $profile->primary_vertical);
+        $this->assertSame('tech-ai', $profile->creator_dna['primary_vertical']);
+    }
+
     public function test_sync_does_not_discover_from_insufficient_evidence_or_keep_placeholder_context(): void
     {
         Bus::fake();

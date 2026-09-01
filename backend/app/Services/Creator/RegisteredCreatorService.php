@@ -7,6 +7,7 @@ use App\Models\Creator;
 use App\Models\CreatorProfile;
 use App\Models\InstagramAccount;
 use App\Models\InstagramMedia;
+use App\Services\Discovery\CanonicalCreatorVerticals;
 use App\Services\Discovery\ContentSafetyDecision;
 use App\Services\Discovery\DiscoveredPost;
 use App\Services\Discovery\DiscoveredProfile;
@@ -19,6 +20,7 @@ class RegisteredCreatorService
 {
     public function __construct(
         private readonly OutlierScore $performance,
+        private readonly CanonicalCreatorVerticals $verticals,
     ) {}
 
     public function sync(InstagramAccount $account, CreatorProfile $profile): Creator
@@ -79,6 +81,37 @@ class RegisteredCreatorService
         $this->syncPosts($account, $creator);
 
         return $creator;
+    }
+
+    /**
+     * Existing catalog and discovery rows are useful onboarding evidence too.
+     * Older rows may only have the canonical value in `niche`, so accept that
+     * compatibility shape without treating arbitrary free text as a vertical.
+     */
+    public function existingPrimaryVertical(
+        string $username,
+        ?string $instagramUserId = null,
+        ?int $userId = null,
+    ): ?string {
+        $matched = null;
+
+        if (filled($instagramUserId)) {
+            $matched = Creator::query()
+                ->where('instagram_user_id', $instagramUserId)
+                ->first();
+        }
+
+        $matched ??= Creator::query()
+            ->whereRaw('LOWER(username) = ?', [Str::lower($username)])
+            ->first();
+
+        $matched ??= $userId === null
+            ? null
+            : Creator::query()->where('user_id', $userId)->first();
+
+        return $this->verticals->canonical(
+            $matched?->primary_vertical ?: $matched?->niche,
+        );
     }
 
     /**

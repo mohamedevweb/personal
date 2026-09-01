@@ -29,7 +29,10 @@ class CreatorProfileDnaWriter
             'current_projects' => $signals['current_projects'] ?? [],
             'goals' => $signals['goals'] ?? [],
             'content_strengths' => $signals['content_strengths'] ?? [],
-            'creator_dna' => $signals,
+            'creator_dna' => [
+                ...$signals,
+                'primary_vertical' => $primaryVertical,
+            ],
             'primary_vertical' => $primaryVertical,
             'dna_analyzed_at' => now(),
             'discovery_queries' => null,
