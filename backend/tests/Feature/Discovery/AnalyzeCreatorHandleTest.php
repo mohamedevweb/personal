@@ -79,6 +79,33 @@ class AnalyzeCreatorHandleTest extends TestCase
         Queue::assertPushed(AnalyzeCreatorHandle::class, 1);
     }
 
+    public function test_a_completed_handle_can_be_reanalyzed_without_reopening_onboarding(): void
+    {
+        Queue::fake();
+        $user = User::factory()->create();
+        CreatorProfile::query()->create([
+            'user_id' => $user->id,
+            'instagram_username' => 'hormozi',
+            'analysis_status' => 'completed',
+            'primary_vertical' => 'business',
+            'niche' => 'business education',
+            'creator_dna' => [
+                'analysis_method' => 'heuristic',
+                'analysis_status' => 'partial',
+                'analysis_version' => NicheDetectionService::ANALYSIS_VERSION,
+            ],
+        ]);
+
+        $this->actingAs($user)
+            ->postJson('/api/integrations/instagram/handle/reanalyze')
+            ->assertStatus(202)
+            ->assertJsonPath('status', 'queued');
+
+        Queue::assertPushed(AnalyzeCreatorHandle::class, fn (AnalyzeCreatorHandle $job): bool => $job->userId === $user->id && $job->username === 'hormozi'
+        );
+        $this->assertSame('queued', $user->creatorProfile()->firstOrFail()->analysis_status);
+    }
+
     public function test_opening_memory_reanalyzes_an_outdated_public_creator_dna(): void
     {
         Queue::fake();

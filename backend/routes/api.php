@@ -76,6 +76,8 @@ Route::middleware(['auth:sanctum', 'verified'])->prefix('integrations/instagram'
     Route::get('/progress', [InstagramConnectionController::class, 'progress']);
     // Saving a handle now scrapes the public profile behind it, so it is bounded
     // like the other endpoints that reach a provider.
+    Route::post('/handle/reanalyze', [InstagramConnectionController::class, 'reanalyzeHandle'])
+        ->middleware('throttle:discovery');
     Route::put('/handle', [InstagramConnectionController::class, 'storeHandle'])
         ->middleware('throttle:discovery');
     Route::post('/sync', [InstagramConnectionController::class, 'sync']);

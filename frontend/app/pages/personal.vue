@@ -36,6 +36,7 @@ const posts = ref<ContentPost[]>([])
 const postsLoading = ref(true)
 const editing = ref(false)
 const saving = ref(false)
+const reanalyzing = ref(false)
 const draft = reactive<PersonalProfileDraft>({
   niche: null,
   audience_description: null,
@@ -117,6 +118,21 @@ async function saveProfile() {
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('personal.saveError')))
   } finally { saving.value = false }
+}
+
+async function reanalyzeWithAi() {
+  if (reanalyzing.value) return
+
+  reanalyzing.value = true
+  try {
+    await apiFetch('/api/integrations/instagram/handle/reanalyze', { method: 'POST' })
+    await loadInstagramStatus()
+    startInstagramPolling()
+  } catch (exception: unknown) {
+    toast.error(apiErrorMessage(exception, t('personal.reanalyzeError')))
+  } finally {
+    reanalyzing.value = false
+  }
 }
 
 async function loadProfile() {
@@ -209,7 +225,12 @@ onMounted(loadProfile)
         <div class="flex w-full shrink-0 items-center gap-2 sm:ml-auto sm:w-auto sm:justify-end">
           <button v-if="editing" type="button" class="inline-flex h-11 items-center justify-center rounded-full px-4 text-sm text-[var(--muted)] transition hover:text-[var(--ink)]" @click="editing = false">{{ $t('personal.cancel') }}</button>
           <button v-if="editing" type="submit" class="inline-flex h-11 flex-1 items-center justify-center rounded-full b-btn-red px-5 text-[14px] font-medium transition disabled:opacity-60 sm:flex-none" :disabled="saving">{{ saving ? $t('personal.saving') : $t('personal.saveMemory') }}</button>
-          <button v-else type="button" class="inline-flex h-11 w-full items-center justify-center rounded-full b-btn-red px-5 text-[14px] font-medium transition sm:w-fit" @click="beginEdit">{{ $t('personal.editMemory') }}</button>
+          <template v-else>
+            <button type="button" class="inline-flex h-11 w-full items-center justify-center rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 text-[14px] font-medium transition hover:border-[var(--muted)] disabled:cursor-wait disabled:opacity-60 sm:w-fit" :disabled="reanalyzing || analysisInProgress" @click="reanalyzeWithAi">
+              {{ reanalyzing ? $t('personal.reanalyzing') : $t('personal.reanalyze') }}
+            </button>
+            <button type="button" class="inline-flex h-11 w-full items-center justify-center rounded-full b-btn-red px-5 text-[14px] font-medium transition sm:w-fit" @click="beginEdit">{{ $t('personal.editMemory') }}</button>
+          </template>
         </div>
       </div>
 

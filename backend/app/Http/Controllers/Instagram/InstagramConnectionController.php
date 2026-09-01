@@ -204,6 +204,28 @@ class InstagramConnectionController extends Controller
         ]);
     }
 
+    public function reanalyzeHandle(Request $request): JsonResponse
+    {
+        $profile = $request->user()->creatorProfile()->first();
+        abort_unless($profile?->instagram_username, Response::HTTP_NOT_FOUND);
+
+        $profile->forceFill([
+            'analysis_status' => 'queued',
+            'analysis_error' => null,
+            'analysis_started_at' => null,
+            'analysis_stage_started_at' => null,
+            'analysis_completed_at' => null,
+            'analysis_timings' => null,
+        ])->save();
+
+        AnalyzeCreatorHandle::dispatch($request->user()->id, $profile->instagram_username);
+
+        return response()->json([
+            'status' => 'queued',
+            'analysis' => $this->analysis($profile),
+        ], Response::HTTP_ACCEPTED);
+    }
+
     public function sync(Request $request): JsonResponse
     {
         $account = $request->user()->instagramAccount()->firstOrFail();
