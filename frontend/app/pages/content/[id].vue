@@ -126,7 +126,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <main v-if="post" class="page-shell pb-16 pt-2">
+  <main v-if="post" class="page-shell pb-16 pt-6 md:pt-8">
     <NuxtLink to="/feed" class="text-sm text-[var(--muted)]">{{ $t('content.backToFeed') }}</NuxtLink>
     <div class="mt-6 grid gap-10 lg:grid-cols-[.88fr_1.12fr]">
       <section class="min-w-0 lg:sticky lg:top-8 lg:self-start">
@@ -264,7 +264,7 @@ onBeforeUnmount(() => {
     </div>
   </main>
 
-  <main v-else-if="loading" class="page-shell pb-16 pt-2">
+  <main v-else-if="loading" class="page-shell pb-16 pt-6 md:pt-8">
     <div class="h-5 w-32 animate-pulse rounded-full bg-[var(--sand-soft)]" />
     <div class="mt-6 grid gap-10 lg:grid-cols-[.88fr_1.12fr]">
       <div class="aspect-[4/5] animate-pulse rounded-[18px] bg-[var(--sand-soft)]" />

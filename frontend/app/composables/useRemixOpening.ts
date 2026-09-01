@@ -5,9 +5,9 @@ type RemixOpeningResult = 'opened' | 'failed' | 'cancelled'
 
 export function useRemixOpening() {
   async function openWhenReady(created: PendingRemix): Promise<RemixOpeningResult> {
-    // A generating draft is already visible in Drafts, which polls it without
-    // replacing the current page with a full-screen progress panel.
-    await navigateTo(created.status === 'generating' ? '/drafts' : `/remix/${created.id}`)
+    // The remix page owns the generation state and keeps the creator in the
+    // flow they just started, instead of sending them through Drafts first.
+    await navigateTo(`/remix/${created.id}`)
     return 'opened'
   }
 

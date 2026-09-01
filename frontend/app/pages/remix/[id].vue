@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Remix } from '~/types/product'
 import { creatorProfileUrl } from '~/types/product'
+import { waitForGeneratedRemix } from '~/utils/remixGeneration'
 
 /* Instagram's own ceilings, so the counters on this screen mean something once
    the draft leaves it. */
@@ -37,6 +38,8 @@ const activeSlide = ref(0)
 const pristine = ref('')
 let confirmTimer: ReturnType<typeof setTimeout> | undefined
 let deleteTimer: ReturnType<typeof setTimeout> | undefined
+const pollTimers = new Set<ReturnType<typeof setTimeout>>()
+let loadRun = 0
 
 const slideInputs = ref<HTMLTextAreaElement[]>([])
 
@@ -250,22 +253,37 @@ function guardUnload(event: BeforeUnloadEvent) {
   event.returnValue = ''
 }
 
+function pauseBeforeRemixPoll(): Promise<void> {
+  return new Promise(resolve => {
+    const timer = setTimeout(() => {
+      pollTimers.delete(timer)
+      resolve()
+    }, 1200)
+    pollTimers.add(timer)
+  })
+}
+
 async function loadRemix() {
+  const currentRun = ++loadRun
+  loading.value = true
+
   try {
-    const response = await apiFetch<{ remix: Remix }>(`/api/remixes/${route.params.id}`)
-    if (response.remix.status === 'generating') {
-      await navigateTo('/drafts')
-      return
-    }
-    remix.value = response.remix
+    const resolved = await waitForGeneratedRemix(
+      async () => (await apiFetch<{ remix: Remix }>(`/api/remixes/${route.params.id}`)).remix,
+      pauseBeforeRemixPoll,
+      () => currentRun === loadRun,
+    )
+    if (!resolved || currentRun !== loadRun) return
+
+    remix.value = resolved
     sourceAvatarFailed.value = false
-    if (response.remix.status !== 'failed') {
-      pristine.value = JSON.stringify(response.remix.generated_content)
+    if (resolved.status !== 'failed') {
+      pristine.value = JSON.stringify(resolved.generated_content)
     }
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('remix.loadError')))
   } finally {
-    loading.value = false
+    if (currentRun === loadRun) loading.value = false
   }
 }
 
@@ -275,7 +293,7 @@ async function retryGeneration() {
   try {
     const response = await apiFetch<{ remix: Remix }>(`/api/remixes/${remix.value.id}/retry`, { method: 'POST' })
     if (response.remix.status === 'generating') {
-      await navigateTo('/drafts')
+      await loadRemix()
       return
     }
     remix.value = response.remix
@@ -345,15 +363,18 @@ watch(() => route.params.id, async (id, previousId) => {
 })
 
 onBeforeUnmount(() => {
+  loadRun++
   window.removeEventListener('beforeunload', guardUnload)
   clearTimeout(confirmTimer)
   clearTimeout(deleteTimer)
+  pollTimers.forEach(timer => clearTimeout(timer))
+  pollTimers.clear()
 })
 </script>
 
 <template>
   <main class="pb-24">
-    <div v-if="loading" class="page-shell pb-16 pt-2">
+    <div v-if="loading" class="page-shell pb-16 pt-6 md:pt-8">
       <div class="h-5 w-32 animate-pulse rounded-full bg-[var(--sand-soft)]" />
       <div class="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_312px]">
         <div class="space-y-5">
@@ -392,7 +413,7 @@ onBeforeUnmount(() => {
     <div v-else-if="remix" :inert="retrying || deleting" :aria-busy="retrying || deleting">
       <!-- Everything that changes the draft's state opens the page, like the
            back link on the analysis screen, and scrolls away with the draft. -->
-      <div class="page-shell pt-2">
+      <div class="page-shell pt-6 md:pt-8">
         <!-- Saving is manual, so the two buttons that write the draft stay
              outside the horizontal scroller on a phone. -->
         <div class="flex items-start gap-3">
