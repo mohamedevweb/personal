@@ -38,7 +38,7 @@ class CreatorCatalog
         $targetTotal = (int) config('creator_catalog.target_total');
 
         if (count($entries) !== $targetTotal) {
-            throw new InvalidArgumentException("Creator catalog must contain exactly {$targetTotal} entries.");
+            throw new InvalidArgumentException("Creator catalog must contain exactly {$targetTotal} entries, including its pending reserves.");
         }
 
         $handles = array_map(fn (array $entry): string => strtolower(ltrim((string) ($entry['handle'] ?? ''), '@')), $entries);
@@ -47,12 +47,12 @@ class CreatorCatalog
             throw new InvalidArgumentException('Creator catalog handles must be present and unique.');
         }
 
-        // The catalog has a fixed editorial quota per canonical vertical.
+        // The catalog has a minimum editorial quota per canonical vertical.
         $verticals = array_values((array) config('creator_catalog.manifest_verticals', array_keys((array) config('creator_catalog.verticals'))));
         $markets = (array) config('creator_catalog.markets');
 
-        if ($targetTotal !== count($verticals) * (int) config('creator_catalog.target_per_vertical')) {
-            throw new InvalidArgumentException('Creator catalog totals must match the configured vertical quotas.');
+        if ($targetTotal < count($verticals) * (int) config('creator_catalog.target_per_vertical')) {
+            throw new InvalidArgumentException('Creator catalog total must cover every configured vertical quota.');
         }
 
         foreach ($entries as $entry) {
@@ -82,8 +82,8 @@ class CreatorCatalog
         foreach ($verticals as $vertical) {
             $group = array_values(array_filter($entries, fn (array $entry): bool => $entry['vertical'] === $vertical));
             $expected = (int) config('creator_catalog.target_per_vertical');
-            if (count($group) !== $expected) {
-                throw new InvalidArgumentException("Creator catalog [{$vertical}] requires {$expected} entries.");
+            if (count($group) < $expected) {
+                throw new InvalidArgumentException("Creator catalog [{$vertical}] requires at least {$expected} entries.");
             }
         }
     }

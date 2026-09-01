@@ -167,7 +167,9 @@ docker compose exec app php artisan personal:refresh-validated-creators --vertic
 
 ## Curated creator catalog
 
-The first production dataset is a versioned Golden Catalog in `backend/database/catalog/instagram_creators.php`. It targets 120 curated creators, ten in each of the twelve canonical verticals, across the FR, GB and US markets. Each entry records the exact Instagram URL, editorial sources, topics, market and rationale. Followers and recognition tiers are intentionally absent because they are measured rather than guessed. Entries start as `pending` during review and are changed to `approved` only after the human editorial decision. Entries removed from production stay `inactive`, so a later import cannot recreate them.
+The first production dataset is a versioned Golden Catalog in `backend/database/catalog/instagram_creators.php`. It targets at least 120 curated creators, ten in each of the twelve canonical verticals, across the FR, GB and US markets, with additional pending reserves kept alongside the base quota. Each entry records the exact Instagram URL, editorial sources, topics, market and rationale. Followers and recognition tiers are intentionally absent because they are measured rather than guessed. Entries start as `pending` during review and are changed to `approved` only after the human editorial decision. Entries removed from production stay `inactive`, so a later import cannot recreate them.
+
+User-submitted style references live in `backend/database/catalog/editorial_references.php`. They help guide future curation but are never imported into the visible feed until their profile and recent content pass the same audit.
 
 Run the read-only audit first. It makes one profile request per creator. A separate posts request is made only when the profile response contains fewer than six publications. It then writes JSON and CSV reports under `backend/storage/app/private/catalog-reports` on the host and `/var/www/html/storage/app/private/catalog-reports` inside Docker:
 
@@ -194,6 +196,15 @@ docker compose exec app php artisan personal:audit-creator-catalog \
 
 ```bash
 docker compose exec app php artisan personal:import-creator-catalog
+```
+
+After the measurement jobs have completed, inspect the coverage of every
+vertical with the same filters used by the feed. The report shows approved
+catalog creators, recent eligible posts, Reels, carousels and the remaining gap:
+
+```bash
+docker compose exec app php artisan personal:catalog-health
+docker compose exec app php artisan personal:catalog-health --vertical=events
 ```
 
 Removing an entry from the manifest, or switching it to `inactive`, only stops the next import. The rows already in the database keep their `approved` curation status until the reconciliation command retires them, so an editorial retirement always takes two steps. Preview it first:

@@ -8,7 +8,9 @@ return [
     'curation_statuses' => ['discovered', 'approved', 'inactive'],
     'recognition_tiers' => ['expert', 'established', 'leader'],
     'manifest_version' => 'golden-v2',
-    'target_total' => 120,
+    // The catalog keeps a minimum of ten candidates per vertical and may
+    // contain additional pending reserves supplied during editorial review.
+    'target_total' => 127,
     'target_per_vertical' => 10,
 
     // The curated catalog covers every canonical vertical. New entries stay

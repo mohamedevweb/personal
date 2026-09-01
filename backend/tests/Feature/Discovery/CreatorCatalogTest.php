@@ -30,12 +30,12 @@ class CreatorCatalogTest extends TestCase
     {
         $entries = collect(app(CreatorCatalog::class)->entries());
 
-        $this->assertCount(120, $entries);
-        $this->assertCount(120, $entries->pluck('handle')->map(fn (string $handle): string => strtolower($handle))->unique());
+        $this->assertCount(127, $entries);
+        $this->assertCount(127, $entries->pluck('handle')->map(fn (string $handle): string => strtolower($handle))->unique());
 
         foreach (config('creator_catalog.manifest_verticals') as $vertical) {
             $group = $entries->where('vertical', $vertical);
-            $this->assertCount(10, $group);
+            $this->assertGreaterThanOrEqual(10, $group->count());
             $this->assertTrue($group->every(fn (array $entry): bool => in_array($entry['market'], ['FR', 'GB', 'US'], true)));
         }
 
@@ -46,7 +46,12 @@ class CreatorCatalogTest extends TestCase
         $this->assertNull(app(CanonicalCreatorVerticals::class)->canonical('Voyage'));
 
         $this->assertCount(22, $entries->where('status', 'approved'));
-        $this->assertCount(95, $entries->where('status', 'pending'));
+        $this->assertCount(102, $entries->where('status', 'pending'));
+
+        $this->assertEqualsCanonicalizing(
+            ['matthieu.stefani', 'gregisenberg', 'aliabdaal', 'justinwelsh', 'sahilbloom', 'growthnotes', 'theoperator'],
+            $entries->pluck('handle')->intersect(['matthieu.stefani', 'gregisenberg', 'aliabdaal', 'justinwelsh', 'sahilbloom', 'growthnotes', 'theoperator'])->all(),
+        );
 
         // Beauty & Fashion was retired as a vertical, so its creators leave the
         // manifest with it. The three retired sport creators stay behind as
