@@ -672,6 +672,26 @@ class PersonalMvpTest extends TestCase
             ->assertJsonPath('remix.status', 'generating');
     }
 
+    public function test_remix_status_returns_only_generation_metadata(): void
+    {
+        $post = ContentPost::query()->firstOrFail();
+        $remix = Remix::query()->create([
+            'user_id' => $this->user->id,
+            'source_content_id' => $post->id,
+            'format' => 'reel',
+            'generated_content' => [],
+            'status' => 'generating',
+        ]);
+
+        $this->actingAs($this->user)
+            ->getJson("/api/remixes/{$remix->id}/status")
+            ->assertOk()
+            ->assertJsonStructure(['status', 'updated_at'])
+            ->assertJsonPath('status', 'generating')
+            ->assertJsonMissingPath('generated_content')
+            ->assertJsonMissingPath('source_content');
+    }
+
     public function test_copying_a_draft_is_counted_for_its_owner(): void
     {
         $post = ContentPost::query()->firstOrFail();

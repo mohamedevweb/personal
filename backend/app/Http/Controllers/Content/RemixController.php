@@ -59,6 +59,17 @@ class RemixController extends Controller
         ]);
     }
 
+    public function status(Request $request, Remix $remix, RemixDraftService $drafts): JsonResponse
+    {
+        $this->ensureOwner($request, $remix);
+        $remix = $drafts->failIfStale($remix);
+
+        return response()->json([
+            'status' => $remix->status,
+            'updated_at' => $remix->updated_at,
+        ]);
+    }
+
     public function update(Request $request, Remix $remix): JsonResponse
     {
         $this->ensureOwner($request, $remix);

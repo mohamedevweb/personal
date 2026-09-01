@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Remix } from '~/types/product'
+import type { Remix, RemixStatusResponse } from '~/types/product'
 import { creatorProfileUrl } from '~/types/product'
 import { waitForGeneratedRemix } from '~/utils/remixGeneration'
 
@@ -46,7 +46,12 @@ const slideInputs = ref<HTMLTextAreaElement[]>([])
 const slides = computed(() => remix.value?.generated_content.slides ?? [])
 const caption = computed(() => remix.value?.generated_content.caption ?? '')
 const isReady = computed(() => remix.value?.status === 'ready')
+const isGenerating = computed(() => remix.value?.status === 'generating')
 const sourceCreatorInitial = computed(() => remix.value?.source_content?.creator.username.charAt(0).toUpperCase() || '')
+const generationSteps = computed(() => (['pattern', 'story', 'voice'] as const).map(key => ({
+  key,
+  label: t(`remix.generation.steps.${key}`),
+})))
 
 /* --- The preview is the editor, so it needs who is posting ---------------- */
 
@@ -253,14 +258,54 @@ function guardUnload(event: BeforeUnloadEvent) {
   event.returnValue = ''
 }
 
-function pauseBeforeRemixPoll(): Promise<void> {
+function pauseBeforeRemixPoll(attempt: number): Promise<void> {
+  // Generation normally finishes quickly, but a slow queue should not turn
+  // the status endpoint into a request every second.
+  const delay = Math.min(3000 * (2 ** (attempt - 1)), 20_000)
+
   return new Promise(resolve => {
     const timer = setTimeout(() => {
       pollTimers.delete(timer)
       resolve()
-    }, 1200)
+    }, delay)
     pollTimers.add(timer)
   })
+}
+
+function applyRemix(next: Remix) {
+  remix.value = next
+  sourceAvatarFailed.value = false
+  if (next.status !== 'failed' && next.status !== 'generating') {
+    pristine.value = JSON.stringify(next.generated_content)
+  }
+}
+
+async function pollRemixStatus(currentRun: number) {
+  try {
+    // The initial full response already told us that generation is running, so
+    // wait before the first status-only request and avoid an immediate duplicate.
+    await pauseBeforeRemixPoll(1)
+    if (currentRun !== loadRun || !isGenerating.value) return
+
+    const status = await waitForGeneratedRemix(
+      async () => apiFetch<RemixStatusResponse>(`/api/remixes/${route.params.id}/status`),
+      pauseBeforeRemixPoll,
+      () => currentRun === loadRun && isGenerating.value,
+    )
+    if (!status || currentRun !== loadRun || status.status === 'generating') return
+
+    const response = await apiFetch<{ remix: Remix }>(`/api/remixes/${route.params.id}`)
+    if (currentRun === loadRun) applyRemix(response.remix)
+  } catch {
+    // A temporary status failure should not interrupt the creator's flow. Keep
+    // a slow retry alive so the page recovers without a manual refresh.
+    if (currentRun !== loadRun || !isGenerating.value) return
+    const timer = setTimeout(() => {
+      pollTimers.delete(timer)
+      void pollRemixStatus(currentRun)
+    }, 20_000)
+    pollTimers.add(timer)
+  }
 }
 
 async function loadRemix() {
@@ -268,18 +313,11 @@ async function loadRemix() {
   loading.value = true
 
   try {
-    const resolved = await waitForGeneratedRemix(
-      async () => (await apiFetch<{ remix: Remix }>(`/api/remixes/${route.params.id}`)).remix,
-      pauseBeforeRemixPoll,
-      () => currentRun === loadRun,
-    )
-    if (!resolved || currentRun !== loadRun) return
+    const response = await apiFetch<{ remix: Remix }>(`/api/remixes/${route.params.id}`)
+    if (currentRun !== loadRun) return
 
-    remix.value = resolved
-    sourceAvatarFailed.value = false
-    if (resolved.status !== 'failed') {
-      pristine.value = JSON.stringify(resolved.generated_content)
-    }
+    applyRemix(response.remix)
+    if (response.remix.status === 'generating') void pollRemixStatus(currentRun)
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('remix.loadError')))
   } finally {
@@ -293,11 +331,14 @@ async function retryGeneration() {
   try {
     const response = await apiFetch<{ remix: Remix }>(`/api/remixes/${remix.value.id}/retry`, { method: 'POST' })
     if (response.remix.status === 'generating') {
-      await loadRemix()
+      remix.value.status = 'generating'
+      remix.value.generated_content = response.remix.generated_content
+      pristine.value = ''
+      const currentRun = ++loadRun
+      void pollRemixStatus(currentRun)
       return
     }
-    remix.value = response.remix
-    if (response.remix.status !== 'failed') pristine.value = JSON.stringify(response.remix.generated_content)
+    applyRemix(response.remix)
   } catch (exception: unknown) {
     toast.error(apiErrorMessage(exception, t('remix.retryError')))
   } finally {
@@ -409,6 +450,81 @@ onBeforeUnmount(() => {
         </button>
       </div>
     </section>
+
+    <div v-else-if="remix?.status === 'generating'" aria-busy="true">
+      <div class="page-shell pt-6 md:pt-8">
+        <div class="flex items-center justify-between gap-4">
+          <NuxtLink
+            :to="`/content/${remix.source_content?.id}`"
+            :aria-label="$t('remix.backToAnalysis')"
+            class="shrink-0 text-sm text-[var(--muted)] transition hover:text-[var(--ink)]"
+          >
+            <span class="sm:hidden" aria-hidden="true">←</span>
+            <span class="hidden sm:inline">{{ $t('remix.backToAnalysis') }}</span>
+          </NuxtLink>
+          <span class="status-chip status-draft">
+            <span class="status-dot animate-pulse" />{{ $t('remix.generation.previewWriting') }}
+          </span>
+        </div>
+      </div>
+
+      <div class="page-shell pb-16 pt-6">
+        <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_312px] lg:gap-8 xl:grid-cols-[minmax(0,1fr)_360px] xl:gap-7">
+          <section class="min-w-0">
+            <div class="overflow-hidden rounded-[20px] border border-[var(--line)] bg-[var(--surface)] shadow-[0_1px_2px_rgba(23,23,26,.04)]">
+              <div class="p-6 sm:p-8">
+                <span class="grid h-11 w-11 place-items-center rounded-[14px] bg-[var(--accent-soft)] text-[var(--accent-ink)]">
+                  <AppIcon name="sparkles" :size="20" class="animate-pulse" />
+                </span>
+                <p class="remix-label mt-7">{{ $t('remix.generation.eyebrow') }}</p>
+                <h1 class="mt-3 max-w-[18ch] font-serif text-[32px] leading-[1.08] tracking-[-.03em] sm:text-[40px]">
+                  {{ $t('remix.generation.title') }}
+                </h1>
+                <p class="mt-4 max-w-[52ch] text-[14px] leading-6 text-[var(--muted)]">
+                  {{ $t('remix.generation.copy') }}
+                </p>
+              </div>
+
+              <div class="border-t border-[var(--line-soft)] px-6 py-5 sm:px-8">
+                <div class="grid gap-3 sm:grid-cols-3">
+                  <div v-for="(step, index) in generationSteps" :key="step.key" class="flex items-center gap-2.5 text-[12.5px] text-[var(--muted)]">
+                    <span class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[var(--paper)] text-[var(--faint)]">
+                      <span v-if="index < 2" class="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+                      <span v-else class="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--accent)]" />
+                    </span>
+                    {{ step.label }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <aside class="min-w-0 space-y-3 lg:sticky lg:top-8 lg:self-start">
+            <div class="overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">
+              <div class="p-5">
+                <p class="remix-label">{{ $t('remix.generation.patternLabel') }}</p>
+                <p class="mt-3 font-serif text-[21px] leading-[1.28] tracking-[-.01em]">
+                  {{ remix.source_content?.hook || $t('remix.generation.patternFallback') }}
+                </p>
+              </div>
+              <div class="border-t border-[var(--line-soft)] p-5">
+                <p class="remix-label">{{ $t('remix.generation.materialLabel') }}</p>
+                <p class="mt-2.5 text-[14px] leading-6 text-[var(--muted)]">
+                  {{ remix.life_moment?.content || $t('remix.generation.profileFallback') }}
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-4">
+              <span class="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] bg-[var(--ink)] text-[var(--paper)]">
+                <AppIcon :name="remix.format === 'caption' ? 'text' : remix.format" :size="17" />
+              </span>
+              <span class="text-[13.5px] font-medium">{{ $t(`remix.formats.${remix.format}`) }}</span>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
 
     <div v-else-if="remix" :inert="retrying || deleting" :aria-busy="retrying || deleting">
       <!-- Everything that changes the draft's state opens the page, like the

@@ -101,6 +101,8 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function (): void {
     Route::get('/saved', SavedContentController::class);
     Route::get('/remixes', [RemixController::class, 'index']);
     Route::get('/remixes/{remix}', [RemixController::class, 'show']);
+    Route::get('/remixes/{remix}/status', [RemixController::class, 'status'])
+        ->middleware('throttle:api');
     Route::patch('/remixes/{remix}', [RemixController::class, 'update']);
     Route::delete('/remixes/{remix}', [RemixController::class, 'destroy']);
     Route::post('/remixes/{remix}/copied', [RemixController::class, 'copied']);
