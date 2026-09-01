@@ -386,6 +386,8 @@
     "savingHandle": "Saving…",
     "handleError": "Enter a valid Instagram handle.",
     "handleSaveError": "Personal could not save your Instagram handle. Please try again.",
+    "changeHandle": "Change handle",
+    "backToAnalysis": "Back to reading",
     "handleSuffix": "provided",
     "analysis": {
       "progress": "{done} of {total}",

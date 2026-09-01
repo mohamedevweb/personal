@@ -386,6 +386,8 @@
     "savingHandle": "Enregistrement…",
     "handleError": "Saisis un handle Instagram valide.",
     "handleSaveError": "Personal n’a pas pu enregistrer ton handle Instagram. Réessaie.",
+    "changeHandle": "Changer de handle",
+    "backToAnalysis": "Retour à la lecture",
     "handleSuffix": "renseigné",
     "analysis": {
       "progress": "{done} sur {total}",

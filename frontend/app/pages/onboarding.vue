@@ -7,11 +7,13 @@ definePageMeta({ layout: false })
 const route = useRoute()
 const { t, te, tm, rt, locale } = useI18n()
 const { user } = useAuth()
-const { status, connecting, error, connect, loadStatus, startPolling } = useInstagram()
+const { status, connecting, error, analysisRunning, connect, loadStatus, startPolling, stopPolling } = useInstagram()
 const { apiFetch } = usePersonalApi()
 const toast = useToast()
 const accountHandleInput = ref('')
 const handleSaving = ref(false)
+const editingHandle = ref(false)
+const resumeAnalysisAfterEdit = ref(false)
 const canUseInstagramOAuth = computed(() => user.value?.email.trim().toLowerCase() === 'hello@usepersonal.app')
 const analysisRetrying = ref(false)
 
@@ -278,7 +280,25 @@ async function submitHandle(username: string) {
   })
   status.value.instagram_username = response.instagram_username
   status.value.analysis = response.analysis
+  editingHandle.value = false
   startPolling()
+}
+
+function editHandle() {
+  accountHandleInput.value = status.value.instagram_username ? `@${status.value.instagram_username}` : ''
+  resumeAnalysisAfterEdit.value = analysisRunning.value
+  editingHandle.value = true
+  stopPolling()
+
+  nextTick(() => document.getElementById('instagram-account-handle')?.focus())
+}
+
+function cancelHandleEdit() {
+  editingHandle.value = false
+  accountHandleInput.value = ''
+
+  if (resumeAnalysisAfterEdit.value) startPolling()
+  resumeAnalysisAfterEdit.value = false
 }
 
 // Sending the same handle again is what re-runs a reading that failed.
@@ -339,7 +359,7 @@ onMounted(async () => {
 
     <section class="mx-auto grid min-h-[calc(100dvh-5rem)] max-w-6xl items-start gap-14 px-6 py-14 md:grid-cols-[1fr_0.74fr] md:px-10 md:py-20">
       <div class="max-w-xl animate-rise">
-        <template v-if="!status.connected && !status.instagram_username">
+        <template v-if="!status.connected && (!status.instagram_username || editingHandle)">
           <h1 class="font-serif text-5xl leading-[1.02] tracking-[-0.045em] md:text-7xl" v-html="$t('onboarding.connectTitle')" />
           <p class="mt-7 max-w-lg text-[17px] leading-7 text-[var(--muted)]">
             {{ $t('onboarding.connectCopy') }}
@@ -384,13 +404,23 @@ onMounted(async () => {
                 :placeholder="$t('onboarding.handlePlaceholder')"
                 :aria-label="$t('onboarding.handleLabel')"
               >
-              <button
-                type="submit"
-                class="rounded-full bg-[var(--ink)] px-5 py-3 text-sm font-medium text-white transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40"
-                :disabled="!parsedAccountHandle || handleSaving"
-              >
-                {{ handleSaving ? $t('onboarding.savingHandle') : $t('onboarding.saveHandle') }}
-              </button>
+              <div class="flex gap-2">
+                <button
+                  v-if="status.instagram_username"
+                  type="button"
+                  class="rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 py-3 text-sm font-medium transition hover:bg-[var(--paper)]"
+                  @click="cancelHandleEdit"
+                >
+                  {{ $t('onboarding.backToAnalysis') }}
+                </button>
+                <button
+                  type="submit"
+                  class="rounded-full bg-[var(--ink)] px-5 py-3 text-sm font-medium text-white transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40"
+                  :disabled="!parsedAccountHandle || handleSaving"
+                >
+                  {{ handleSaving ? $t('onboarding.savingHandle') : $t('onboarding.saveHandle') }}
+                </button>
+              </div>
             </div>
           </form>
         </template>
@@ -491,6 +521,13 @@ onMounted(async () => {
                   @click="retryAnalysis"
                 >
                   {{ analysisRetrying ? $t('onboarding.analysis.retrying') : $t('onboarding.analysis.retry') }}
+                </button>
+                <button
+                  type="button"
+                  class="rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 py-2.5 text-sm font-medium transition hover:bg-[var(--paper)]"
+                  @click="editHandle"
+                >
+                  {{ $t('onboarding.changeHandle') }}
                 </button>
               </div>
             </section>
