@@ -3,6 +3,7 @@
 namespace App\Services\View;
 
 use App\Models\ContentPost;
+use App\Models\Creator;
 use App\Models\User;
 use App\Services\Discovery\CanonicalCreatorVerticals;
 use App\Services\Discovery\OutlierScore;
@@ -71,6 +72,7 @@ class ContentPostView
                 'niche_topics' => $post->creator->niche_topics ?? [],
                 'vertical' => $this->verticals->canonical($post->creator->primary_vertical)
                     ?? $this->verticals->fromSignals([$post->creator->niche]),
+                'country_code' => $this->countryCode($post->creator),
                 'followers' => $post->creator->followers,
                 'average_views' => $post->creator->average_views,
             ],
@@ -115,6 +117,15 @@ class ContentPostView
             'views' => $against['views'] === null ? null : (int) round($against['views']),
             'engagement' => $against['engagement'] === null ? null : (int) round($against['engagement']),
         ];
+    }
+
+    private function countryCode(Creator $creator): ?string
+    {
+        $country = data_get($creator->metadata, 'country_code') ?: $creator->market;
+
+        return is_string($country) && preg_match('/^[a-z]{2}$/i', trim($country))
+            ? strtoupper(trim($country))
+            : null;
     }
 
     private function mediaUrl(string $route, string $parameter, int $id, ?string $sourceUrl): ?string

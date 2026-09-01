@@ -5,6 +5,7 @@ export interface Creator {
   niche: string | null
   niche_topics: string[]
   vertical: PersonalProfile['primary_vertical']
+  country_code?: string | null
   followers: number
   average_views: number
 }

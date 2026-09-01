@@ -222,7 +222,8 @@ class PersonalMvpTest extends TestCase
         $this->actingAs($this->user)
             ->getJson("/api/content/{$post->id}")
             ->assertOk()
-            ->assertJsonPath('content.creator.vertical', 'sport-fitness');
+            ->assertJsonPath('content.creator.vertical', 'sport-fitness')
+            ->assertJsonPath('content.creator.country_code', 'US');
     }
 
     public function test_content_posts_keep_a_creator_without_a_vertical_usable(): void

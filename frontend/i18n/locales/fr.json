@@ -782,6 +782,11 @@
       "startup": "Startup",
       "business": "Business"
     },
+    "countries": {
+      "FR": "France",
+      "GB": "Royaume-Uni",
+      "US": "États-Unis"
+    },
     "views": "{count} vues",
     "playReel": "Lire le Reel de {'@'}{username}",
     "openSource": "Voir le post original",

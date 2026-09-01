@@ -5,7 +5,7 @@ import { compactNumber, creatorProfileUrl, relativeDate } from '~/types/product'
 const route = useRoute()
 const { apiFetch } = usePersonalApi()
 const { openWhenReady } = useRemixOpening()
-const { locale, t } = useI18n()
+const { locale, t, te } = useI18n()
 const toast = useToast()
 const post = ref<ContentPost | null>(null)
 const moments = ref<LifeMoment[]>([])
@@ -20,6 +20,15 @@ const creatorNiche = computed(() => {
   const niche = post.value?.creator.niche?.trim()
 
   return niche && niche.toLowerCase() !== 'unclassified' ? niche : null
+})
+const creatorCountry = computed(() => {
+  const code = post.value?.creator.country_code?.toUpperCase()
+
+  if (!code) return null
+
+  const key = `content.countries.${code}`
+
+  return te(key) ? t(key) : code
 })
 // The draft takes the shape of the post it borrows from. A single image is a
 // carousel of one slide, which is what the server decides too.
@@ -166,7 +175,7 @@ onBeforeUnmount(() => {
               <span class="block truncate text-sm font-medium hover:underline">@{{ post.creator.username }}</span>
               <span class="block truncate text-xs text-[var(--faint)]">{{ $t('content.followers', { count: compactNumber(post.creator.followers) }) }} · {{ relativeDate(post.published_at, locale) }}</span>
               <span v-if="post.creator.vertical || creatorNiche" class="mt-1 block truncate text-[11px] font-medium text-[var(--accent-ink)]">
-                {{ post.creator.vertical ? `${$t('content.vertical')} · ${$t(`content.verticals.${post.creator.vertical}`)}` : creatorNiche }}
+                {{ post.creator.vertical ? `${$t('content.vertical')} · ${$t(`content.verticals.${post.creator.vertical}`)}${creatorCountry ? ` · ${creatorCountry}` : ''}` : creatorNiche }}
               </span>
             </span>
           </a>
