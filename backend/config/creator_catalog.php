@@ -90,7 +90,7 @@ return [
     ],
 
     'audit' => [
-        'min_followers' => (int) env('CATALOG_MIN_FOLLOWERS', 25000),
+        'min_followers' => (int) env('CATALOG_MIN_FOLLOWERS', 5000),
         'active_within_days' => (int) env('CATALOG_ACTIVE_WITHIN_DAYS', 30),
         'posts_window_days' => (int) env('CATALOG_POSTS_WINDOW_DAYS', 90),
         'min_posts' => (int) env('CATALOG_MIN_POSTS', 6),
