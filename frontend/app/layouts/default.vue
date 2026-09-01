@@ -183,7 +183,7 @@ const pageTitle = computed(() => {
 
       <!-- The tab bar and the home indicator both stand in front of the page, so
            the scroll has to end above the two of them. -->
-      <div class="pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-0 md:pt-8"><slot /></div>
+      <div class="pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-0 md:pt-0"><slot /></div>
     </div>
 
     <!-- The bar floats over the page as a pill rather than sitting on the edge:
