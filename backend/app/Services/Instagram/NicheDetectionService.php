@@ -362,7 +362,18 @@ class NicheDetectionService
         array $evidence,
     ): array {
         if ($this->modelIsConfigured()) {
-            return $this->emptySignals('analysis_unavailable', 'heuristic', $evidence);
+            $signals = $this->emptySignals('analysis_unavailable', 'heuristic', $evidence);
+            $vertical = $this->explicitProfileVertical($account, $bio, $linkPreview);
+
+            if ($vertical !== null) {
+                $signals['primary_vertical'] = $vertical;
+                $signals['primary_niche'] = 'business education';
+                $signals['topics'] = ['Business', 'Entrepreneurship'];
+                $signals['content_pillars'] = ['Business education'];
+                $signals['positioning'] = Str::limit($bio, 1000) ?: null;
+            }
+
+            return $signals;
         }
 
         $captions = $captionList->implode("\n");
@@ -492,6 +503,23 @@ class NicheDetectionService
     private function modelIsConfigured(): bool
     {
         return (bool) config('services.openai.api_key') || (bool) config('services.anthropic.api_key');
+    }
+
+    private function explicitProfileVertical(
+        InstagramAccount $account,
+        string $bio,
+        ?string $linkPreview,
+    ): ?string {
+        $profileText = Str::lower(implode(' ', array_filter([
+            $account->category,
+            $bio,
+            $linkPreview,
+        ])));
+
+        $hasFounderSignal = preg_match('/\b(co[- ]?founder|founder|entrepreneur)\b/u', $profileText) === 1;
+        $hasBusinessSignal = preg_match('/\b(business(?:es)?|scaling|acquisition|entrepreneur)\b/u', $profileText) === 1;
+
+        return $hasFounderSignal && $hasBusinessSignal ? 'business' : null;
     }
 
     /** @return Signals */

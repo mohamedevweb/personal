@@ -144,6 +144,30 @@ class NicheDetectionServiceTest extends TestCase
         $this->assertSame('analysis_unavailable', $signals['analysis_status']);
     }
 
+    public function test_a_failed_configured_model_keeps_an_explicit_business_profile_signal(): void
+    {
+        config()->set('services.openai.api_key', 'configured-key');
+        $llm = Mockery::mock(LlmJsonService::class);
+        $llm->shouldReceive('object')->once()->andReturnNull();
+        $account = new InstagramAccount([
+            'username' => 'hormozi',
+            'category' => 'Entrepreneur',
+            'bio' => 'Founder Acquisition.com, Co-Founder Skool.com. I talk about scaling businesses.',
+        ]);
+
+        $signals = (new NicheDetectionService($llm, app(CanonicalCreatorVerticals::class)))
+            ->detect($account, [
+                ['caption' => 'Business lessons for founders.'],
+                ['caption' => 'Scaling businesses requires clear offers.'],
+                ['caption' => 'Entrepreneurship is built through action.'],
+            ]);
+
+        $this->assertSame('business', $signals['primary_vertical']);
+        $this->assertSame('business education', $signals['primary_niche']);
+        $this->assertSame('analysis_unavailable', $signals['analysis_status']);
+        $this->assertSame('heuristic', $signals['analysis_method']);
+    }
+
     public function test_llm_analysis_receives_each_recent_caption_instead_of_one_truncated_block(): void
     {
         $account = new InstagramAccount([

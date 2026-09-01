@@ -431,10 +431,17 @@ onMounted(async () => {
             <span class="text-sm font-medium">Instagram {{ $t('onboarding.connectedSuffix') }}</span>
             <span class="text-[var(--positive)]">✓</span>
           </div>
-          <div v-else-if="status.instagram_username" class="mb-8 inline-flex items-center gap-3 rounded-full border border-[var(--line)] bg-[var(--surface)] py-2 pl-2 pr-4">
+          <div v-else-if="status.instagram_username" class="mb-8 inline-flex flex-wrap items-center gap-3 rounded-full border border-[var(--line)] bg-[var(--surface)] py-2 pl-2 pr-2">
             <span class="grid h-8 w-8 place-items-center rounded-full bg-[var(--paper)] text-xs">IG</span>
             <span class="text-sm font-medium">@{{ status.instagram_username }} {{ $t('onboarding.handleSuffix') }}</span>
             <span class="text-[var(--positive)]">✓</span>
+            <button
+              type="button"
+              class="rounded-full border border-[var(--line)] bg-[var(--surface)] px-3 py-1.5 text-xs font-medium transition hover:bg-[var(--paper)]"
+              @click="editHandle"
+            >
+              {{ $t('onboarding.changeHandle') }}
+            </button>
           </div>
 
           <template v-if="verticalMissing">
@@ -521,13 +528,6 @@ onMounted(async () => {
                   @click="retryAnalysis"
                 >
                   {{ analysisRetrying ? $t('onboarding.analysis.retrying') : $t('onboarding.analysis.retry') }}
-                </button>
-                <button
-                  type="button"
-                  class="rounded-full border border-[var(--line)] bg-[var(--surface)] px-5 py-2.5 text-sm font-medium transition hover:bg-[var(--paper)]"
-                  @click="editHandle"
-                >
-                  {{ $t('onboarding.changeHandle') }}
                 </button>
               </div>
             </section>
