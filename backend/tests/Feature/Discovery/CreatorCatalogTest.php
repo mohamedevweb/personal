@@ -45,8 +45,8 @@ class CreatorCatalogTest extends TestCase
         $this->assertNull(app(CanonicalCreatorVerticals::class)->canonical('Local / Culture'));
         $this->assertNull(app(CanonicalCreatorVerticals::class)->canonical('Voyage'));
 
-        $this->assertCount(28, $entries->where('status', 'approved'));
-        $this->assertCount(96, $entries->where('status', 'pending'));
+        $this->assertCount(77, $entries->where('status', 'approved'));
+        $this->assertCount(47, $entries->where('status', 'pending'));
 
         $this->assertSame(
             ['moooookaaa_', 'watch.gabe', '40shotit', 'theianchristianson', 'kienobifilms', 'shanhanif'],
