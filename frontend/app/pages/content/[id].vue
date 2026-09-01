@@ -9,6 +9,7 @@ const { locale, t } = useI18n()
 const toast = useToast()
 const post = ref<ContentPost | null>(null)
 const moments = ref<LifeMoment[]>([])
+const momentsLoading = ref(true)
 const selectedMoment = ref<number | null>(null)
 const composerOpen = ref(false)
 const generating = ref(false)
@@ -116,6 +117,8 @@ onMounted(async () => {
   } catch {
     // The post remains usable without moments. The composer lets the creator
     // add one locally when the optional list request is unavailable.
+  } finally {
+    momentsLoading.value = false
   }
 })
 
@@ -126,10 +129,10 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <main v-if="post" class="page-shell pb-16 pt-6 md:pt-8">
+  <main class="page-shell pb-16 pt-6 md:pt-8" :aria-busy="loading || momentsLoading">
     <NuxtLink to="/feed" class="text-sm text-[var(--muted)]">{{ $t('content.backToFeed') }}</NuxtLink>
     <div class="mt-6 grid gap-10 lg:grid-cols-[.88fr_1.12fr]">
-      <section class="min-w-0 lg:sticky lg:top-8 lg:self-start">
+      <section v-if="post" class="min-w-0 lg:sticky lg:top-8 lg:self-start">
         <div class="relative aspect-[4/5] overflow-hidden rounded-[18px] bg-[var(--sand)]">
           <ReelPlayer
             v-if="isReel && post.video_url"
@@ -177,7 +180,23 @@ onBeforeUnmount(() => {
         </p>
       </section>
 
-      <section class="min-w-0">
+      <section v-else class="min-w-0 lg:sticky lg:top-8 lg:self-start" aria-hidden="true">
+        <div class="aspect-[4/5] animate-pulse rounded-[18px] bg-[var(--sand-soft)]" />
+        <div class="mt-4 flex items-center gap-3">
+          <span class="h-9 w-9 animate-pulse rounded-full bg-[var(--sand-soft)]" />
+          <div class="min-w-0 flex-1 space-y-2">
+            <span class="block h-3 w-32 animate-pulse rounded-full bg-[var(--sand-soft)]" />
+            <span class="block h-2.5 w-48 max-w-full animate-pulse rounded-full bg-[var(--sand-soft)]" />
+          </div>
+        </div>
+        <div class="mt-5 space-y-3">
+          <span class="block h-3.5 w-11/12 animate-pulse rounded-full bg-[var(--sand-soft)]" />
+          <span class="block h-3.5 w-full animate-pulse rounded-full bg-[var(--sand-soft)]" />
+          <span class="block h-3.5 w-4/5 animate-pulse rounded-full bg-[var(--sand-soft)]" />
+        </div>
+      </section>
+
+      <section v-if="post" class="min-w-0">
         <!-- Making your own version is what the page is for, so the card that
              does it opens the column; the measurement and the reading of the
              post sit underneath it as the reasons to bother. -->
@@ -201,7 +220,13 @@ onBeforeUnmount(() => {
           <div class="border-t border-[var(--line-soft)] px-6 py-5">
             <MomentComposer :open="composerOpen" @close="composerOpen = false" @created="onMomentCreated" />
 
-            <div v-if="moments.length && !composerOpen" class="max-h-52 space-y-1.5 overflow-y-auto pr-1">
+            <div v-if="momentsLoading && !composerOpen" class="space-y-2" aria-hidden="true">
+              <div v-for="index in 2" :key="index" class="flex items-center gap-3 rounded-[12px] border border-[var(--line)] px-3 py-3">
+                <span class="h-5 w-5 shrink-0 animate-pulse rounded-full bg-[var(--sand-soft)]" />
+                <span class="h-3 w-3/4 animate-pulse rounded-full bg-[var(--sand-soft)]" />
+              </div>
+            </div>
+            <div v-else-if="moments.length && !composerOpen" class="max-h-52 space-y-1.5 overflow-y-auto pr-1">
               <button
                 v-for="moment in moments"
                 :key="moment.id"
@@ -219,7 +244,7 @@ onBeforeUnmount(() => {
             <!-- Material keeps arriving, so the composer stays reachable once
                  the list is no longer empty. -->
             <button
-              v-if="moments.length && !composerOpen"
+              v-if="!momentsLoading && moments.length && !composerOpen"
               type="button"
               class="mt-2 flex w-full items-center gap-3 rounded-[12px] border border-dashed border-[var(--line)] px-3 py-2 text-left text-[13.5px] text-[var(--muted)] transition hover:border-[var(--muted)] hover:text-[var(--ink)]"
               @click="composerOpen = true"
@@ -227,7 +252,7 @@ onBeforeUnmount(() => {
               <span class="grid h-5 w-5 shrink-0 place-items-center rounded-full border border-[var(--line)]"><AppIcon name="plus" :size="12" :stroke-width="2.2" /></span>
               {{ $t('content.addMoment') }}
             </button>
-            <button v-if="!moments.length && !composerOpen" type="button" class="flex w-full items-center gap-3 rounded-[12px] border border-dashed border-[var(--line)] bg-[var(--paper)] p-3 text-left transition hover:border-[var(--muted)]" @click="composerOpen = true">
+            <button v-if="!momentsLoading && !moments.length && !composerOpen" type="button" class="flex w-full items-center gap-3 rounded-[12px] border border-dashed border-[var(--line)] bg-[var(--paper)] p-3 text-left transition hover:border-[var(--muted)]" @click="composerOpen = true">
               <span class="grid h-8 w-8 shrink-0 place-items-center rounded-[9px] bg-[var(--accent-soft)] text-[var(--accent-ink)]"><AppIcon name="plus" :size="14" /></span>
               <span><span class="block text-[13px] font-medium">{{ $t('content.firstMomentTitle') }}</span><span class="mt-0.5 block text-[11.5px] text-[var(--muted)]">{{ $t('content.firstMomentCopy') }}</span></span>
             </button>
@@ -261,17 +286,33 @@ onBeforeUnmount(() => {
           </div>
         </div>
       </section>
-    </div>
-  </main>
 
-  <main v-else-if="loading" class="page-shell pb-16 pt-6 md:pt-8">
-    <div class="h-5 w-32 animate-pulse rounded-full bg-[var(--sand-soft)]" />
-    <div class="mt-6 grid gap-10 lg:grid-cols-[.88fr_1.12fr]">
-      <div class="aspect-[4/5] animate-pulse rounded-[18px] bg-[var(--sand-soft)]" />
-      <div class="space-y-5">
-        <div class="h-64 animate-pulse rounded-[18px] bg-[var(--sand-soft)]" />
-        <div class="h-20 animate-pulse rounded-[18px] bg-[var(--sand-soft)]" />
-      </div>
+      <section v-else class="min-w-0" aria-hidden="true">
+        <div class="overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">
+          <div class="border-b border-[var(--line-soft)] px-6 py-5">
+            <span class="block h-7 w-48 animate-pulse rounded-full bg-[var(--sand-soft)]" />
+            <span class="mt-3 block h-3.5 w-4/5 animate-pulse rounded-full bg-[var(--sand-soft)]" />
+          </div>
+          <div class="flex items-center gap-3 bg-[var(--accent-soft)] px-5 py-4">
+            <span class="h-9 w-9 animate-pulse rounded-[10px] bg-[var(--sand-soft)]" />
+            <span class="h-3.5 w-24 animate-pulse rounded-full bg-[var(--sand-soft)]" />
+          </div>
+          <div class="border-t border-[var(--line-soft)] px-6 py-5">
+            <span class="block h-3 w-32 animate-pulse rounded-full bg-[var(--sand-soft)]" />
+            <div class="mt-4 space-y-2">
+              <div v-for="index in 2" :key="index" class="flex items-center gap-3 rounded-[12px] border border-[var(--line)] px-3 py-3">
+                <span class="h-5 w-5 shrink-0 animate-pulse rounded-full bg-[var(--sand-soft)]" />
+                <span class="h-3 w-3/4 animate-pulse rounded-full bg-[var(--sand-soft)]" />
+              </div>
+            </div>
+            <span class="mt-3 block h-10 animate-pulse rounded-[12px] bg-[var(--sand-soft)]" />
+          </div>
+          <div class="border-t border-[var(--line-soft)] px-6 py-5">
+            <span class="block h-12 animate-pulse rounded-full bg-[var(--sand-soft)]" />
+          </div>
+        </div>
+        <div class="mt-8 h-64 animate-pulse rounded-[18px] bg-[var(--sand-soft)]" />
+      </section>
     </div>
   </main>
 </template>

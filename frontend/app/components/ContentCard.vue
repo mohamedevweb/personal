@@ -68,7 +68,7 @@ const visibleCaption = computed(() => (isLongCaption.value ? `${caption.value.sl
         :label="$t('contentCard.playReel', { username: post.creator.username })"
       />
       <CarouselMedia v-else :urls="mediaUrls" :alt="post.hook" :to="`/content/${post.id}`">
-        <AppIcon v-if="mediaKind === 'carousel'" :name="mediaKind" :size="22" :stroke-width="1.9" class="pointer-events-none absolute right-3 top-3 text-white drop-shadow-[0_1px_3px_rgba(0,0,0,.55)]" />
+        <AppIcon v-if="mediaKind !== 'image'" :name="mediaKind" :size="22" :stroke-width="1.9" class="pointer-events-none absolute right-3 top-3 text-white drop-shadow-[0_1px_3px_rgba(0,0,0,.55)]" />
       </CarouselMedia>
     </div>
 

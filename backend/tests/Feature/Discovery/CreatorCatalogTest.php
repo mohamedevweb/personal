@@ -26,17 +26,17 @@ class CreatorCatalogTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_manifest_has_exact_golden_catalog_quotas_and_sources(): void
+    public function test_manifest_has_exact_catalog_quotas_and_sources(): void
     {
         $entries = collect(app(CreatorCatalog::class)->entries());
 
-        $this->assertCount(25, $entries);
-        $this->assertCount(25, $entries->pluck('handle')->map(fn (string $handle): string => strtolower($handle))->unique());
+        $this->assertCount(120, $entries);
+        $this->assertCount(120, $entries->pluck('handle')->map(fn (string $handle): string => strtolower($handle))->unique());
 
         foreach (config('creator_catalog.manifest_verticals') as $vertical) {
             $group = $entries->where('vertical', $vertical);
-            $this->assertCount(5, $group);
-            $this->assertTrue($group->every(fn (array $entry): bool => $entry['market'] === 'FR'));
+            $this->assertCount(10, $group);
+            $this->assertTrue($group->every(fn (array $entry): bool => in_array($entry['market'], ['FR', 'GB', 'US'], true)));
         }
 
         $this->assertNull(app(CanonicalCreatorVerticals::class)->canonical('Événementiel'));
@@ -46,7 +46,7 @@ class CreatorCatalogTest extends TestCase
         $this->assertNull(app(CanonicalCreatorVerticals::class)->canonical('Voyage'));
 
         $this->assertCount(22, $entries->where('status', 'approved'));
-        $this->assertCount(0, $entries->where('status', 'pending'));
+        $this->assertCount(95, $entries->where('status', 'pending'));
 
         // Beauty & Fashion was retired as a vertical, so its creators leave the
         // manifest with it. The three retired sport creators stay behind as
@@ -74,6 +74,15 @@ class CreatorCatalogTest extends TestCase
         }));
     }
 
+    public function test_catalog_accepts_supported_mixed_markets(): void
+    {
+        $entries = app(CreatorCatalog::class)->entries();
+        $entries[5]['market'] = 'GB';
+
+        app(CreatorCatalog::class)->validate($entries);
+        $this->assertSame('GB', $entries[5]['market']);
+    }
+
     public function test_market_detection_distinguishes_fr_gb_us_br_and_unknown(): void
     {
         $detector = app(CreatorMarketDetector::class);
@@ -98,6 +107,12 @@ class CreatorCatalogTest extends TestCase
         ];
         $eligibility = app(CreatorCatalogEligibility::class);
         $accepted = $eligibility->evaluate($this->profile(), $entry);
+
+        $this->assertSame(6, $accepted['eligible_posts']);
+        $this->assertSame(6, $accepted['measured_posts']);
+        $this->assertSame(3, $accepted['recent_reels']);
+        $this->assertSame(3, $accepted['recent_carousels']);
+        $this->assertSame(['reel' => 3, 'carousel' => 3], $accepted['format_mix']);
 
         $this->assertTrue($accepted['accepted']);
 
@@ -383,7 +398,7 @@ class CreatorCatalogTest extends TestCase
             comments: $index <= $metricPosts ? 100 : 0,
             views: $index <= $metricPosts ? 10000 : 0,
             publishedAt: CarbonImmutable::now()->subDays($daysAgo + $index),
-            format: 'reel',
+            format: $index % 2 === 0 ? 'carousel' : 'reel',
             hashtags: ['fitness'],
             externalId: "post-{$index}",
             metadata: ['providers' => ['scrapecreators' => ['provider' => 'scrapecreators']]],

@@ -7,19 +7,25 @@ return [
     'statuses' => ['pending', 'approved', 'inactive'],
     'curation_statuses' => ['discovered', 'approved', 'inactive'],
     'recognition_tiers' => ['expert', 'established', 'leader'],
-    'manifest_version' => 'golden-fr-v1',
-    'target_total' => 25,
-    'target_per_vertical' => 5,
+    'manifest_version' => 'golden-v2',
+    'target_total' => 120,
+    'target_per_vertical' => 10,
 
-    // The versioned Golden Catalog still contains the original five French
-    // verticals. Discovery and feed classification also support the broader
-    // verticals below, which are populated by the production seed batches.
+    // The curated catalog covers every canonical vertical. New entries stay
+    // pending until their public profile and recent content pass the audit.
     'manifest_verticals' => [
         'sport-fitness',
         'food-cooking',
         'personal-branding',
         'tech-ai',
         'wellness',
+        'events',
+        'languages',
+        'lifestyle',
+        'local-culture',
+        'travel',
+        'startup',
+        'business',
     ],
 
     'verticals' => [
@@ -88,6 +94,12 @@ return [
         'min_posts' => (int) env('CATALOG_MIN_POSTS', 6),
         'min_metric_coverage' => (float) env('CATALOG_MIN_METRIC_COVERAGE', 0.70),
         'min_median_engagement' => (int) env('CATALOG_MIN_MEDIAN_ENGAGEMENT', 500),
+    ],
+
+    'coverage' => [
+        'target_posts_per_vertical' => (int) env('CATALOG_TARGET_POSTS_PER_VERTICAL', 60),
+        'target_reels_per_vertical' => (int) env('CATALOG_TARGET_REELS_PER_VERTICAL', 30),
+        'target_carousels_per_vertical' => (int) env('CATALOG_TARGET_CAROUSELS_PER_VERTICAL', 30),
     ],
 
     'retention_days' => (int) env('DISCOVERY_CONTENT_RETENTION_DAYS', 90),

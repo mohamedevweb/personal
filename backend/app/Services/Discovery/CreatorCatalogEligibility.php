@@ -18,6 +18,8 @@ class CreatorCatalogEligibility
             ->values();
         $measured = $posts->filter(fn (DiscoveredPost $post): bool => $post->views > 0 || $post->engagement() > 0);
         $coverage = $posts->isEmpty() ? 0.0 : $measured->count() / $posts->count();
+        $reels = $posts->filter(fn (DiscoveredPost $post): bool => $post->format === 'reel')->count();
+        $carousels = $posts->filter(fn (DiscoveredPost $post): bool => $post->format === 'carousel')->count();
         $engagements = $posts->map(fn (DiscoveredPost $post): int => $post->engagement())->sort()->values();
         $median = $this->median($engagements->all());
         $latest = $posts->max(fn (DiscoveredPost $post): CarbonInterface => $post->publishedAt);
@@ -84,6 +86,11 @@ class CreatorCatalogEligibility
             'recent_posts' => $posts->count(),
             'latest_post_at' => $latest?->toIso8601String(),
             'metric_coverage' => round($coverage, 4),
+            'eligible_posts' => $posts->count(),
+            'measured_posts' => $measured->count(),
+            'recent_reels' => $reels,
+            'recent_carousels' => $carousels,
+            'format_mix' => ['reel' => $reels, 'carousel' => $carousels],
             'median_engagement' => $median,
             'instagram_user_id' => $profile->externalId,
             'display_name' => $profile->displayName,

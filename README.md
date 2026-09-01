@@ -167,7 +167,7 @@ docker compose exec app php artisan personal:refresh-validated-creators --vertic
 
 ## Curated creator catalog
 
-The first production dataset is a versioned Golden Catalog in `backend/database/catalog/instagram_creators.php`. It contains 25 human-curated French creators, five in each of the five initial Golden Catalog verticals. Discovery and feed classification also support the additional production verticals Events, Languages, Lifestyle, Local & Culture, Travel and Startup. Each entry records the exact Instagram URL, editorial sources, topics and rationale. Followers and recognition tiers are intentionally absent because they are measured rather than guessed. Entries start as `pending` during review and are changed to `approved` only after the human editorial decision. Entries removed from production stay `inactive`, so a later import cannot recreate them.
+The first production dataset is a versioned Golden Catalog in `backend/database/catalog/instagram_creators.php`. It targets 120 curated creators, ten in each of the twelve canonical verticals, across the FR, GB and US markets. Each entry records the exact Instagram URL, editorial sources, topics, market and rationale. Followers and recognition tiers are intentionally absent because they are measured rather than guessed. Entries start as `pending` during review and are changed to `approved` only after the human editorial decision. Entries removed from production stay `inactive`, so a later import cannot recreate them.
 
 Run the read-only audit first. It makes one profile request per creator. A separate posts request is made only when the profile response contains fewer than six publications. It then writes JSON and CSV reports under `backend/storage/app/private/catalog-reports` on the host and `/var/www/html/storage/app/private/catalog-reports` inside Docker:
 
@@ -190,7 +190,7 @@ docker compose exec app php artisan personal:audit-creator-catalog \
   --retry-report=/var/www/html/storage/app/private/catalog-reports/creator-catalog-audit-YYYYMMDD-HHMMSS.json
 ```
 
-`market_unverified` and `market_signal_mismatch` are warnings because the human-validated FR market in the manifest is authoritative. A legacy `recognition_tier_mismatch` is also a warning and proposes the measured tier. Review successful rows, then change only accepted manifest entries to `approved`. Import is idempotent, applies the manifest's market and canonical vertical, calculates recognition tier from the retrieved follower count, preserves provider provenance, synchronizes subtopics and queues measurement in batches of 10:
+`market_unverified` and `market_signal_mismatch` are warnings because the human-validated market in the manifest is authoritative. The audit also reports recent Reels, recent carousels, measured posts and structurally eligible posts so each vertical can be balanced toward 30 Reels and 30 carousels. A legacy `recognition_tier_mismatch` is also a warning and proposes the measured tier. Review successful rows, then change only accepted manifest entries to `approved`. Import is idempotent, applies the manifest's market and canonical vertical, calculates recognition tier from the retrieved follower count, preserves provider provenance, synchronizes subtopics and queues measurement in batches of 10:
 
 ```bash
 docker compose exec app php artisan personal:import-creator-catalog
@@ -204,7 +204,7 @@ docker compose exec app php artisan personal:retire-catalog-creators --dry-run
 
 It deactivates every catalog seed the manifest no longer approves and deletes their posts, then removes the creator once nothing is left attached. Posts a member saved or remixed are kept and stopped instead, unless `--including-protected` is passed. Deleting the posts rather than only deactivating the creator is deliberate: `curation_status` filters the personalised feed only while `DISCOVERY_CURATED_CATALOG_ONLY` is on, so a retirement that relied on it alone would silently depend on that flag.
 
-After the queue has measured the approved seeds and the feed is useful, set `DISCOVERY_CURATED_CATALOG_ONLY=true` and restart the app, queue and scheduler containers. The feed then excludes every non-approved creator and stops automatic search-based insertion. Market quotas fall back to the best remaining approved French content while this first catalog is FR-only.
+After the queue has measured the approved seeds and the feed is useful, set `DISCOVERY_CURATED_CATALOG_ONLY=true` and restart the app, queue and scheduler containers. The feed then excludes every non-approved creator and stops automatic search-based insertion. Market and language matching keep the mixed catalog coherent for each member.
 
 Related-account expansion is review-only and never writes creators or posts. Candidates are ranked by recent activity, metric coverage and median engagement, with niche proximity inherited from the approved seed that surfaced them:
 
@@ -212,7 +212,7 @@ Related-account expansion is review-only and never writes creators or posts. Can
 docker compose exec app php artisan personal:discover-creator-candidates
 ```
 
-Use that report to expand deliberately from 25 to 60 and then 120 creators. Add selected candidates to the manifest as `pending`, audit them, approve them and import again. Discovery never promotes candidates automatically.
+Use that report to expand deliberately to ten creators and about 60 eligible recent posts per vertical. Add selected candidates to the manifest as `pending`, audit them, approve them and import again. Discovery never promotes candidates automatically.
 
 An approved CSV can also be imported in explicit batches. The command reads the selected rows, measures each account from its recent publications, runs the normal content safety policy, and stores only the latest safe post. FR is an authoritative market hint. Combined UK/US rows still rely on the measured profile to choose GB or US.
 

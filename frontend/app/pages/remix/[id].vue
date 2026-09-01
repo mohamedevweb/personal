@@ -48,10 +48,6 @@ const caption = computed(() => remix.value?.generated_content.caption ?? '')
 const isReady = computed(() => remix.value?.status === 'ready')
 const isGenerating = computed(() => remix.value?.status === 'generating')
 const sourceCreatorInitial = computed(() => remix.value?.source_content?.creator.username.charAt(0).toUpperCase() || '')
-const generationSteps = computed(() => (['pattern', 'story', 'voice'] as const).map(key => ({
-  key,
-  label: t(`remix.generation.steps.${key}`),
-})))
 
 /* --- The preview is the editor, so it needs who is posting ---------------- */
 
@@ -471,46 +467,107 @@ onBeforeUnmount(() => {
       <div class="page-shell pb-16 pt-6">
         <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_312px] lg:gap-8 xl:grid-cols-[minmax(0,1fr)_360px] xl:gap-7">
           <section class="min-w-0">
-            <div class="overflow-hidden rounded-[20px] border border-[var(--line)] bg-[var(--surface)] shadow-[0_1px_2px_rgba(23,23,26,.04)]">
-              <div class="p-6 sm:p-8">
-                <span class="grid h-11 w-11 place-items-center rounded-[14px] bg-[var(--accent-soft)] text-[var(--accent-ink)]">
-                  <AppIcon name="sparkles" :size="20" class="animate-pulse" />
-                </span>
-                <p class="remix-label mt-7">{{ $t('remix.generation.eyebrow') }}</p>
-                <h1 class="mt-3 max-w-[18ch] font-serif text-[32px] leading-[1.08] tracking-[-.03em] sm:text-[40px]">
-                  {{ $t('remix.generation.title') }}
-                </h1>
-                <p class="mt-4 max-w-[52ch] text-[14px] leading-6 text-[var(--muted)]">
-                  {{ $t('remix.generation.copy') }}
-                </p>
+            <!-- The remix is still private work in progress: reserve the final
+                 editor's shape without showing invented copy or a second loader. -->
+            <div v-if="remix.format === 'carousel'" class="overflow-hidden rounded-[20px] border border-[var(--line)] bg-[var(--surface)] shadow-[0_1px_2px_rgba(23,23,26,.04)]">
+              <div class="flex items-center gap-3 px-4 py-3">
+                <span class="h-8 w-8 animate-pulse rounded-full bg-[var(--sand-soft)]" />
+                <span class="h-3 w-28 animate-pulse rounded-full bg-[var(--sand-soft)]" />
               </div>
-
-              <div class="border-t border-[var(--line-soft)] px-6 py-5 sm:px-8">
-                <div class="grid gap-3 sm:grid-cols-3">
-                  <div v-for="(step, index) in generationSteps" :key="step.key" class="flex items-center gap-2.5 text-[12.5px] text-[var(--muted)]">
-                    <span class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[var(--paper)] text-[var(--faint)]">
-                      <span v-if="index < 2" class="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
-                      <span v-else class="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--accent)]" />
-                    </span>
-                    {{ step.label }}
-                  </div>
+              <div class="relative aspect-[4/5] animate-pulse bg-[var(--sand-soft)] p-5 xl:aspect-auto xl:h-[585px]">
+                <span class="absolute left-5 top-5 h-2.5 w-20 rounded-full bg-white/40" />
+                <div class="flex h-full flex-col items-center justify-center gap-3">
+                  <span class="h-5 w-3/4 rounded-full bg-white/45" />
+                  <span class="h-5 w-1/2 rounded-full bg-white/45" />
                 </div>
+                <span class="absolute bottom-5 left-5 h-2.5 w-28 rounded-full bg-white/35" />
+              </div>
+              <div class="flex items-center gap-4 border-t border-[var(--line-soft)] px-4 py-3">
+                <span v-for="index in 4" :key="index" class="h-5 w-5 animate-pulse rounded-full bg-[var(--sand-soft)]" />
+              </div>
+            </div>
+
+            <div v-else-if="remix.format === 'reel'" class="overflow-hidden rounded-[20px] border border-[var(--line)] bg-[var(--surface)] shadow-[0_1px_2px_rgba(23,23,26,.04)]">
+              <div v-for="index in 4" :key="index" class="grid gap-4 border-b border-[var(--line-soft)] px-5 py-6 last:border-0 sm:grid-cols-[76px_minmax(0,1fr)] sm:px-6">
+                <span class="h-3 w-14 animate-pulse rounded-full bg-[var(--sand-soft)]" />
+                <div class="space-y-3">
+                  <span class="block h-2.5 w-20 animate-pulse rounded-full bg-[var(--sand-soft)]" />
+                  <span class="block h-4 w-full animate-pulse rounded-full bg-[var(--sand-soft)]" />
+                  <span class="block h-4 w-4/5 animate-pulse rounded-full bg-[var(--sand-soft)]" />
+                </div>
+              </div>
+            </div>
+
+            <div v-else class="overflow-hidden rounded-[20px] border border-[var(--line)] bg-[var(--surface)] shadow-[0_1px_2px_rgba(23,23,26,.04)]">
+              <div class="border-b border-[var(--line-soft)] bg-[var(--paper)] px-6 py-5">
+                <span class="block h-2.5 w-36 animate-pulse rounded-full bg-[var(--sand-soft)]" />
+              </div>
+              <div class="space-y-4 px-6 py-6">
+                <span class="block h-4 w-full animate-pulse rounded-full bg-[var(--sand-soft)]" />
+                <span class="block h-4 w-11/12 animate-pulse rounded-full bg-[var(--sand-soft)]" />
+                <span class="block h-4 w-4/5 animate-pulse rounded-full bg-[var(--sand-soft)]" />
+                <span class="block h-4 w-2/3 animate-pulse rounded-full bg-[var(--sand-soft)]" />
               </div>
             </div>
           </section>
 
           <aside class="min-w-0 space-y-3 lg:sticky lg:top-8 lg:self-start">
             <div class="overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">
+              <a
+                v-if="remix.source_content?.creator"
+                :href="creatorProfileUrl(remix.source_content.creator.username)"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex items-center gap-3 border-b border-[var(--line-soft)] p-4 transition hover:bg-[var(--paper)]"
+              >
+                <img
+                  v-if="remix.source_content.creator.avatar_url && !sourceAvatarFailed"
+                  :src="remix.source_content.creator.avatar_url"
+                  alt=""
+                  class="h-10 w-10 shrink-0 rounded-full bg-[var(--sand)] object-cover"
+                  @error="sourceAvatarFailed = true"
+                >
+                <span v-else class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[var(--sand)] text-xs font-semibold uppercase text-[var(--muted)]">
+                  {{ sourceCreatorInitial }}
+                </span>
+                <span class="min-w-0 flex-1">
+                  <span class="remix-label block">{{ $t('remix.borrowedFrom') }}</span>
+                  <span class="mt-1 block truncate text-[13.5px]">@{{ remix.source_content.creator.username }}</span>
+                </span>
+                <AppIcon name="arrow" :size="15" class="shrink-0 -rotate-45 text-[var(--faint)]" />
+              </a>
+
+              <a
+                v-if="remix.source_content?.source_url"
+                :href="remix.source_content.source_url"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex items-center justify-between border-b border-[var(--line-soft)] px-5 py-3 text-[12.5px] text-[var(--muted)] transition hover:bg-[var(--paper)] hover:text-[var(--ink)]"
+              >
+                {{ $t('remix.openSource') }}
+                <AppIcon name="arrow" :size="14" class="-rotate-45" />
+              </a>
+
               <div class="p-5">
-                <p class="remix-label">{{ $t('remix.generation.patternLabel') }}</p>
-                <p class="mt-3 font-serif text-[21px] leading-[1.28] tracking-[-.01em]">
-                  {{ remix.source_content?.hook || $t('remix.generation.patternFallback') }}
-                </p>
+                <p class="remix-label">{{ $t('remix.originalPattern') }}</p>
+                <p class="mt-3 font-serif text-[21px] leading-[1.28] tracking-[-.01em]">“{{ remix.source_content?.hook || $t('remix.generation.patternFallback') }}”</p>
               </div>
-              <div class="border-t border-[var(--line-soft)] p-5">
-                <p class="remix-label">{{ $t('remix.generation.materialLabel') }}</p>
-                <p class="mt-2.5 text-[14px] leading-6 text-[var(--muted)]">
-                  {{ remix.life_moment?.content || $t('remix.generation.profileFallback') }}
+
+              <div v-if="remix.source_content?.why_it_works?.length" class="border-t border-[var(--line-soft)] px-5 py-4">
+                <p class="remix-label">{{ $t('remix.whyItWorks') }}</p>
+                <ul class="mt-1 divide-y divide-[var(--line-soft)]">
+                  <li v-for="reason in remix.source_content.why_it_works" :key="reason" class="flex gap-2.5 py-3 text-[13.5px] leading-5 text-[var(--muted)]">
+                    <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" />{{ reason }}
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div v-if="remix.life_moment" class="overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface)]">
+              <div class="p-5">
+                <p class="remix-label">{{ $t('remix.yourContext') }}</p>
+                <p class="mt-2.5 flex gap-2.5 text-[14px] leading-6 text-[var(--copy)]">
+                  <span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" />{{ remix.life_moment.content }}
                 </p>
               </div>
             </div>

@@ -157,6 +157,12 @@ class AuditCreatorCatalog extends Command
                 'total' => $vertical->count(),
                 'tiers' => $vertical->countBy('detected_tier')->all(),
             ])->all(),
+            'accepted_format_coverage' => $accepted->groupBy('vertical')->map(fn ($vertical): array => [
+                'eligible_posts' => (int) $vertical->sum('eligible_posts'),
+                'measured_posts' => (int) $vertical->sum('measured_posts'),
+                'recent_reels' => (int) $vertical->sum('recent_reels'),
+                'recent_carousels' => (int) $vertical->sum('recent_carousels'),
+            ])->all(),
         ];
     }
 

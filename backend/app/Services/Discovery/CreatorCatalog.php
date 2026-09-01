@@ -47,10 +47,13 @@ class CreatorCatalog
             throw new InvalidArgumentException('Creator catalog handles must be present and unique.');
         }
 
-        // The Golden Catalog has a fixed editorial quota. Discovery can expose
-        // additional canonical verticals without changing that manifest.
+        // The catalog has a fixed editorial quota per canonical vertical.
         $verticals = array_values((array) config('creator_catalog.manifest_verticals', array_keys((array) config('creator_catalog.verticals'))));
         $markets = (array) config('creator_catalog.markets');
+
+        if ($targetTotal !== count($verticals) * (int) config('creator_catalog.target_per_vertical')) {
+            throw new InvalidArgumentException('Creator catalog totals must match the configured vertical quotas.');
+        }
 
         foreach ($entries as $entry) {
             foreach (['handle', 'instagram_url', 'market', 'vertical', 'topics', 'rationale', 'source_urls', 'editorially_verified_at', 'status'] as $key) {
@@ -71,7 +74,7 @@ class CreatorCatalog
                 throw new InvalidArgumentException("Creator catalog entry [{$entry['handle']}] must use its exact Instagram URL.");
             }
 
-            if (! in_array($entry['vertical'], $verticals, true) || ! in_array($entry['market'], $markets, true) || $entry['market'] !== 'FR' || ! in_array($entry['status'], config('creator_catalog.statuses'), true)) {
+            if (! in_array($entry['vertical'], $verticals, true) || ! in_array($entry['market'], $markets, true) || ! in_array($entry['status'], config('creator_catalog.statuses'), true)) {
                 throw new InvalidArgumentException("Creator catalog entry [{$entry['handle']}] contains an unsupported classification.");
             }
         }
