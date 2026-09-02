@@ -10,6 +10,7 @@ class PersonalVerifyEmail extends VerifyEmail
     public function toMail($notifiable): MailMessage
     {
         return (new MailMessage)
+            ->from((string) config('mail.from.address'), __('mail.sender_name'))
             ->subject(__('mail.verify.subject'))
             ->view([
                 'html' => 'emails.personal-transactional',

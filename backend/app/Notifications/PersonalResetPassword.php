@@ -15,6 +15,7 @@ class PersonalResetPassword extends ResetPassword
         ], '', '&', PHP_QUERY_RFC3986);
 
         return (new MailMessage)
+            ->from((string) config('mail.from.address'), __('mail.sender_name'))
             ->subject(__('mail.reset.subject'))
             ->view([
                 'html' => 'emails.personal-transactional',

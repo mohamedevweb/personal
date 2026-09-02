@@ -1,6 +1,15 @@
 <?php
 
 return [
+    'sender_name' => 'Mohamed de Personal',
+    'welcome' => [
+        'subject' => 'Bienvenue sur Personal',
+        'preheader' => 'Ton espace pour transformer tes idées en contenu qui te ressemble.',
+        'title' => 'Bienvenue sur Personal.',
+        'copy' => 'Bonjour :name, j’ai créé Personal pour t’aider à transformer tes idées, tes moments et tes inspirations en contenu qui te ressemble. Je suis heureux de t’accueillir ici. Commence par découvrir ton espace et trouvons ensemble ta prochaine idée à publier.',
+        'action' => 'Ouvrir Personal',
+        'notice' => 'Tu as une question ou une idée ? Réponds simplement à cet email. Je lis chaque message.',
+    ],
     'verify' => [
         'subject' => 'Confirme ton adresse Personal',
         'preheader' => 'Confirme ton adresse pour entrer dans ton espace Personal.',

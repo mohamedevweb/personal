@@ -4,6 +4,7 @@ namespace Tests\Feature\Auth;
 
 use App\Models\User;
 use App\Notifications\PersonalVerifyEmail;
+use App\Notifications\PersonalWelcome;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
@@ -28,6 +29,7 @@ class AccountManagementTest extends TestCase
         $this->withToken($token)->getJson('/api/feed')->assertForbidden();
 
         Notification::assertSentTo(User::query()->firstWhere('email', 'ada@personal.test'), PersonalVerifyEmail::class);
+        Notification::assertSentTo(User::query()->firstWhere('email', 'ada@personal.test'), PersonalWelcome::class);
     }
 
     public function test_a_verified_account_reaches_product_endpoints(): void

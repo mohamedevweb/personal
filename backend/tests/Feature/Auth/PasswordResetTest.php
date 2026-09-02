@@ -5,6 +5,7 @@ namespace Tests\Feature\Auth;
 use App\Models\User;
 use App\Notifications\PersonalResetPassword;
 use App\Notifications\PersonalVerifyEmail;
+use App\Notifications\PersonalWelcome;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
@@ -111,5 +112,48 @@ class PasswordResetTest extends TestCase
         $resetHtml = view($resetMessage->view['html'], $resetMessage->viewData)->render();
 
         $this->assertStringNotContainsString('Récupération du compte', $resetHtml);
+    }
+
+    public function test_transactional_email_sender_name_matches_the_locale(): void
+    {
+        $user = User::factory()->unverified()->create();
+
+        app()->setLocale('en');
+        $englishMessage = (new PersonalVerifyEmail)->toMail($user);
+
+        $this->assertSame([
+            config('mail.from.address'),
+            'Mohamed from Personal',
+        ], $englishMessage->from);
+
+        app()->setLocale('fr');
+        $frenchMessage = (new PersonalResetPassword('reset-token'))->toMail($user);
+
+        $this->assertSame([
+            config('mail.from.address'),
+            'Mohamed de Personal',
+        ], $frenchMessage->from);
+    }
+
+    public function test_a_new_creator_receives_a_welcome_email_in_their_language(): void
+    {
+        Notification::fake();
+
+        $this->withHeader('Accept-Language', 'fr')->postJson('/api/auth/register', [
+            'name' => 'Ada Lovelace',
+            'email' => 'ada@personal.test',
+            'password' => 'correct-horse-battery',
+            'password_confirmation' => 'correct-horse-battery',
+        ])->assertCreated();
+
+        $user = User::query()->firstWhere('email', 'ada@personal.test');
+
+        Notification::assertSentTo($user, PersonalWelcome::class, function (PersonalWelcome $notification) use ($user): bool {
+            $message = $notification->toMail($user);
+
+            return $message->subject === 'Bienvenue sur Personal'
+                && $message->viewData['actionUrl'] === 'http://localhost:3000'
+                && str_contains($message->viewData['copy'], 'Bonjour Ada Lovelace');
+        });
     }
 }

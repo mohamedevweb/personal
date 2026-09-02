@@ -1,6 +1,15 @@
 <?php
 
 return [
+    'sender_name' => 'Mohamed from Personal',
+    'welcome' => [
+        'subject' => 'Welcome to Personal',
+        'preheader' => 'A personal space to turn your ideas into content that sounds like you.',
+        'title' => 'Welcome to Personal.',
+        'copy' => 'Hi :name, I created Personal to help you turn your ideas, moments, and inspiration into content that feels like you. I’m glad you’re here. Start by exploring your space and let’s find your next idea to publish.',
+        'action' => 'Open Personal',
+        'notice' => 'If you have a question or an idea, reply to this email. I read every message.',
+    ],
     'verify' => [
         'subject' => 'Confirm your Personal email',
         'preheader' => 'Confirm your address to enter your Personal workspace.',

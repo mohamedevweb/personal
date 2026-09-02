@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Notifications\PersonalWelcome;
 use App\Services\View\UserView;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
@@ -31,6 +32,8 @@ class AuthController extends Controller
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
         ]);
+
+        $user->notify(new PersonalWelcome);
 
         // Sends the email-verification notification: the account exists but stays
         // gated until the creator confirms the address.
