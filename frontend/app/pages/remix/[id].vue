@@ -553,13 +553,11 @@ onBeforeUnmount(() => {
                 <p class="mt-3 font-serif text-[21px] leading-[1.28] tracking-[-.01em]">“{{ remix.source_content?.hook || $t('remix.generation.patternFallback') }}”</p>
               </div>
 
-              <div v-if="remix.source_content?.why_it_works?.length" class="border-t border-[var(--line-soft)] px-5 py-4">
+              <div v-if="remix.source_content?.why_it_works" class="border-t border-[var(--line-soft)] px-5 py-4">
                 <p class="remix-label">{{ $t('remix.whyItWorks') }}</p>
-                <ul class="mt-1 divide-y divide-[var(--line-soft)]">
-                  <li v-for="reason in remix.source_content.why_it_works" :key="reason" class="flex gap-2.5 py-3 text-[13.5px] leading-5 text-[var(--muted)]">
-                    <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" />{{ reason }}
-                  </li>
-                </ul>
+                <p class="mt-2.5 flex gap-2.5 text-[13.5px] leading-5 text-[var(--muted)]">
+                  <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" />{{ remix.source_content.why_it_works }}
+                </p>
               </div>
             </div>
 
