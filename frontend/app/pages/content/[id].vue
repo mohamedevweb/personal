@@ -175,7 +175,7 @@ onBeforeUnmount(() => {
               <span class="block truncate text-sm font-medium hover:underline">@{{ post.creator.username }}</span>
               <span class="block truncate text-xs text-[var(--faint)]">{{ $t('content.followers', { count: compactNumber(post.creator.followers) }) }} · {{ relativeDate(post.published_at, locale) }}</span>
               <span v-if="post.creator.vertical || creatorNiche" class="mt-1 block truncate text-[11px] font-medium text-[var(--accent-ink)]">
-                {{ post.creator.vertical ? `${$t('content.vertical')} · ${$t(`content.verticals.${post.creator.vertical}`)}${creatorCountry ? ` · ${creatorCountry}` : ''}` : creatorNiche }}
+                {{ post.creator.vertical ? `${$t(`content.verticals.${post.creator.vertical}`)}${creatorCountry ? ` · ${creatorCountry}` : ''}` : creatorNiche }}
               </span>
             </span>
           </a>
