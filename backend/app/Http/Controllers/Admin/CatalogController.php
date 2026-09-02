@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Jobs\Discovery\AdminCatalogImport;
 use App\Models\AdminCatalogImport as AdminCatalogImportRecord;
+use App\Models\ContentPost;
 use App\Models\Creator;
+use App\Services\Discovery\CanonicalCreatorVerticals;
 use App\Services\View\ContentPostView;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,29 +21,104 @@ class CatalogController extends Controller
         $this->authorizeCatalog($request);
         $data = $request->validate([
             'q' => ['sometimes', 'string', 'max:100'],
-            'limit' => ['sometimes', 'integer', 'min:1', 'max:100'],
+            'limit' => ['sometimes', 'integer', 'min:1', 'max:500'],
         ]);
         $query = trim((string) ($data['q'] ?? ''));
 
         $creators = Creator::query()
-            ->where('curation_status', '!=', 'inactive')
-            ->where('safety_status', '!=', 'blocked')
+            ->withCount('posts')
             ->when($query !== '', fn ($builder) => $builder->where(function ($builder) use ($query): void {
                 $builder->where('username', 'like', '%'.$query.'%')
                     ->orWhere('display_name', 'like', '%'.$query.'%');
             }))
             ->orderBy('username')
-            ->limit((int) ($data['limit'] ?? 100))
-            ->get(['id', 'username', 'display_name', 'followers', 'primary_vertical', 'market']);
+            ->limit((int) ($data['limit'] ?? 500))
+            ->get(['id', 'username', 'display_name', 'followers', 'average_views', 'primary_vertical', 'market', 'curation_status', 'safety_status']);
 
-        return response()->json(['items' => $creators->map(fn (Creator $creator): array => [
-            'id' => $creator->id,
-            'username' => $creator->username,
-            'display_name' => $creator->display_name,
-            'followers' => $creator->followers,
-            'vertical' => $creator->primary_vertical,
-            'country_code' => $creator->market,
-        ])->values()]);
+        return response()->json(['items' => $creators->map(fn (Creator $creator): array => $this->renderCreator($creator))->values()]);
+    }
+
+    public function updateCreator(Request $request, Creator $creator): JsonResponse
+    {
+        $this->authorizeCatalog($request);
+        $verticals = array_keys((array) config('creator_catalog.verticals'));
+        $data = $request->validate([
+            'vertical' => ['nullable', Rule::in($verticals)],
+        ]);
+
+        $creator->update([
+            'primary_vertical' => array_key_exists('vertical', $data)
+                ? $data['vertical']
+                : $creator->primary_vertical,
+        ]);
+
+        return response()->json(['creator' => $this->renderCreator($creator->fresh() ?? $creator)]);
+    }
+
+    public function posts(Request $request, CanonicalCreatorVerticals $verticals, ContentPostView $postView): JsonResponse
+    {
+        $this->authorizeCatalog($request);
+        $data = $request->validate([
+            'q' => ['sometimes', 'string', 'max:100'],
+            'vertical' => ['sometimes', 'nullable', Rule::in($verticals->slugs())],
+            'creator_id' => ['sometimes', 'integer', Rule::exists('creators', 'id')],
+            'limit' => ['sometimes', 'integer', 'min:1', 'max:500'],
+        ]);
+        $query = trim((string) ($data['q'] ?? ''));
+        $posts = ContentPost::query()
+            ->with('creator')
+            ->when($query !== '', fn ($builder) => $builder->where(function ($builder) use ($query): void {
+                $builder->where('hook', 'like', '%'.$query.'%')
+                    ->orWhere('caption', 'like', '%'.$query.'%')
+                    ->orWhere('source_url', 'like', '%'.$query.'%')
+                    ->orWhereHas('creator', function ($creator) use ($query): void {
+                        $creator->where('username', 'like', '%'.$query.'%')
+                            ->orWhere('display_name', 'like', '%'.$query.'%');
+                    });
+            }))
+            ->when(array_key_exists('creator_id', $data), fn ($builder) => $builder->where('creator_id', $data['creator_id']))
+            ->when(array_key_exists('vertical', $data), function ($builder) use ($data): void {
+                $vertical = $data['vertical'] ?? null;
+
+                if ($vertical === null) {
+                    $builder->where(function ($builder): void {
+                        $builder->whereNull('metadata')
+                            ->orWhereNull('metadata->feed_classification->vertical');
+                    });
+
+                    return;
+                }
+
+                $builder->where('metadata->feed_classification->vertical', $vertical);
+            })
+            ->latest('published_at')
+            ->latest('id')
+            ->limit((int) ($data['limit'] ?? 500))
+            ->get();
+
+        return response()->json(['items' => $posts->map(fn (ContentPost $post): array => $this->renderPost($post, $request, $postView, $verticals))->values()]);
+    }
+
+    public function updatePost(Request $request, ContentPost $post, CanonicalCreatorVerticals $verticals, ContentPostView $postView): JsonResponse
+    {
+        $this->authorizeCatalog($request);
+        $data = $request->validate([
+            'vertical' => ['required', Rule::in($verticals->slugs())],
+        ]);
+        $metadata = is_array($post->metadata) ? $post->metadata : [];
+        $classification = is_array($metadata['feed_classification'] ?? null) ? $metadata['feed_classification'] : [];
+        $metadata['feed_classification'] = array_replace($classification, ['vertical' => $data['vertical']]);
+        $post->update(['metadata' => $metadata]);
+
+        return response()->json(['post' => $this->renderPost($post->fresh('creator'), $request, $postView, $verticals)]);
+    }
+
+    public function destroyPost(Request $request, ContentPost $post): Response
+    {
+        $this->authorizeCatalog($request);
+        $post->delete();
+
+        return response()->noContent();
     }
 
     public function index(Request $request, ContentPostView $posts): JsonResponse
@@ -106,6 +183,52 @@ class CatalogController extends Controller
     private function authorizeCatalog(Request $request): void
     {
         abort_unless(in_array(strtolower((string) $request->user()->email), config('app.catalog_admin_emails', []), true), Response::HTTP_NOT_FOUND);
+    }
+
+    /** @return array<string, mixed> */
+    private function renderCreator(Creator $creator): array
+    {
+        return [
+            'id' => $creator->id,
+            'username' => $creator->username,
+            'display_name' => $creator->display_name,
+            'followers' => $creator->followers,
+            'average_views' => $creator->average_views,
+            'vertical' => $creator->primary_vertical,
+            'country_code' => $creator->market,
+            'posts_count' => (int) ($creator->posts_count ?? $creator->posts()->count()),
+            'curation_status' => $creator->curation_status,
+            'safety_status' => $creator->safety_status,
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private function renderPost(ContentPost $post, Request $request, ContentPostView $postView, CanonicalCreatorVerticals $verticals): array
+    {
+        $creator = $post->creator;
+        $storedVertical = data_get($post->metadata, 'feed_classification.vertical');
+        $postData = $postView->make($post, $request->user(), null, false);
+
+        return [
+            'id' => $post->id,
+            'vertical' => $verticals->canonical(is_string($storedVertical) ? $storedVertical : null),
+            'published_at' => $post->published_at,
+            'source_url' => $post->source_url,
+            'format' => $post->format,
+            'hook' => $post->hook,
+            'thumbnail_url' => $postData['thumbnail_url'],
+            'views' => $post->views,
+            'likes' => $post->likes,
+            'comments' => $post->comments,
+            'engagement_rate' => $post->engagement_rate,
+            'outlier_score' => $post->outlier_score,
+            'creator' => [
+                'id' => $creator->id,
+                'username' => $creator->username,
+                'display_name' => $creator->display_name,
+                'vertical' => $creator->primary_vertical,
+            ],
+        ];
     }
 
     /** @return array{username?: string} */

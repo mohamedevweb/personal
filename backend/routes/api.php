@@ -119,6 +119,10 @@ Route::middleware(['auth:sanctum', 'verified', 'throttle:api'])->group(function 
 
 Route::middleware(['auth:sanctum', 'verified', 'throttle:discovery'])->prefix('admin/catalog')->group(function (): void {
     Route::get('/creators', [CatalogController::class, 'creators']);
+    Route::patch('/creators/{creator}', [CatalogController::class, 'updateCreator']);
+    Route::get('/posts', [CatalogController::class, 'posts']);
+    Route::patch('/posts/{post}', [CatalogController::class, 'updatePost']);
+    Route::delete('/posts/{post}', [CatalogController::class, 'destroyPost']);
     Route::get('/imports', [CatalogController::class, 'index']);
     Route::get('/imports/{import}', [CatalogController::class, 'show']);
     Route::post('/imports', [CatalogController::class, 'store']);

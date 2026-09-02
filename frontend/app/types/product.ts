@@ -32,6 +32,30 @@ export interface AdminCatalogCreator {
   average_views?: number
   vertical?: CatalogVertical | null
   country_code?: 'FR' | 'GB' | 'US' | null
+  posts_count?: number
+  curation_status?: string
+  safety_status?: string
+}
+
+export interface AdminCatalogPost {
+  id: number
+  vertical: CatalogVertical | null
+  published_at: string
+  source_url: string | null
+  format: string
+  hook: string
+  thumbnail_url: string | null
+  views: number
+  likes: number
+  comments: number
+  engagement_rate: number
+  outlier_score: number
+  creator: {
+    id: number
+    username: string
+    display_name: string
+    vertical: CatalogVertical | null
+  }
 }
 
 export interface AdminCatalogImport {
