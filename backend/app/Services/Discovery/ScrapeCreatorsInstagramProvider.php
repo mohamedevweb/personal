@@ -44,6 +44,14 @@ class ScrapeCreatorsInstagramProvider implements InstagramDataProvider
             ->values();
     }
 
+    public function getPost(string $sourceUrl, ?string $expectedUsername = null): ?DiscoveredPost
+    {
+        $payload = $this->get('/v1/instagram/post', ['url' => $sourceUrl], allowNotFound: true);
+        $row = $this->postRow($payload);
+
+        return $row === null ? null : $this->normalizePost($row, $expectedUsername ?? '', null);
+    }
+
     public function searchAccounts(string $query, int $limit): Collection
     {
         $payload = $this->get('/v1/instagram/search/profiles', ['query' => $query]);

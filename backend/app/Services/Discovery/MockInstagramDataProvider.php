@@ -21,6 +21,16 @@ class MockInstagramDataProvider implements InstagramDataProvider
         return $this->profiles->profiles([$username], $limit)->first()?->posts ?? collect();
     }
 
+    public function getPost(string $sourceUrl, ?string $expectedUsername = null): ?DiscoveredPost
+    {
+        if (! $expectedUsername) {
+            return null;
+        }
+
+        return $this->getPosts($expectedUsername, (int) config('services.discovery.profile_posts'))
+            ->first(fn (DiscoveredPost $post): bool => $post->sourceUrl === $sourceUrl);
+    }
+
     public function searchAccounts(string $query, int $limit): Collection
     {
         return $this->discovery->discover([$query], $limit)

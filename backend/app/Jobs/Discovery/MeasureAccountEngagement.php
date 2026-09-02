@@ -50,6 +50,7 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
     /**
      * @param  list<string>  $usernames  Accounts to measure, bare handles.
      * @param  array<string, string>  $marketHints  Authoritative market hints keyed by lowercase handle.
+     * @param  array<string, string>  $verticalHints  Editorial verticals keyed by lowercase handle.
      */
     public function __construct(
         public readonly array $usernames,
@@ -58,6 +59,7 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
         public readonly bool $force = false,
         public readonly bool $recentOnly = false,
         public readonly ?int $postsLimit = null,
+        public readonly array $verticalHints = [],
     ) {}
 
     public function uniqueId(): string
@@ -66,6 +68,54 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
         sort($usernames);
 
         return sha1(implode('|', $usernames));
+    }
+
+    public function measureUsername(
+        string $username,
+        InstagramDataProvider $provider,
+        CreatorNicheService $niches,
+        CreatorNicheCatalog $catalog,
+        OutlierScore $performance,
+        ContentSafetyPolicy $safety,
+        ?CreatorScrapeSchedule $schedule = null,
+        ?PostMetricsLifecycle $lifecycle = null,
+        ?CreatorMarketDetector $markets = null,
+    ): ?Creator {
+        return $this->refreshUsername(
+            $username,
+            $provider,
+            $niches,
+            $catalog,
+            $performance,
+            $safety,
+            $schedule ?? app(CreatorScrapeSchedule::class),
+            $lifecycle ?? app(PostMetricsLifecycle::class),
+            $markets ?? app(CreatorMarketDetector::class),
+        );
+    }
+
+    public function importPost(
+        Creator $creator,
+        DiscoveredPost $post,
+        ContentSafetyPolicy $safety,
+        PostMetricsLifecycle $lifecycle,
+        OutlierScore $performance,
+    ): ContentPost {
+        $decision = $safety->post($post);
+
+        if (! $decision->isAllowed()) {
+            throw new ContentDiscoveryException('This Instagram post could not be added because it did not pass the content safety check.');
+        }
+
+        $content = $this->storePost($creator, $post, $decision, $lifecycle, now());
+        $creator->refresh();
+        $this->score($creator, $creator->performance_baselines ?? [], $performance);
+
+        $content->refresh();
+        $lifecycle->reschedule($content, now());
+        CacheContentMedia::dispatch($content->id);
+
+        return $content;
     }
 
     public function handle(
@@ -122,7 +172,7 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
         CreatorScrapeSchedule $schedule,
         PostMetricsLifecycle $lifecycle,
         CreatorMarketDetector $markets,
-    ): void {
+    ): ?Creator {
         try {
             $profile = $provider->getProfile($username, fresh: true);
 
@@ -133,7 +183,7 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
                     $schedule->recordFailure($creator, now());
                 }
 
-                return;
+                return null;
             }
 
             $postsLimit = max(1, $this->postsLimit ?? (int) config('services.discovery.profile_posts'));
@@ -157,7 +207,7 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
 
             Log::warning('Account engagement measurement skipped.', ['account' => $username, 'exception' => $exception]);
 
-            return;
+            return null;
         }
 
         if ($posts->isEmpty()) {
@@ -167,7 +217,7 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
                 $schedule->recordSuccess($creator, now());
             }
 
-            return;
+            return null;
         }
 
         $creator = $this->measure(new DiscoveredProfile(
@@ -180,7 +230,7 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
             externalId: $profile->externalId,
             isPrivate: $profile->isPrivate,
             metadata: $profile->metadata,
-        ), $niches, $catalog, $performance, $safety, $lifecycle, $markets, $this->marketHint($username));
+        ), $niches, $catalog, $performance, $safety, $lifecycle, $markets, $this->marketHint($username), $this->verticalHint($username));
 
         if ($creator) {
             if ($creator->safety_status === ContentSafetyDecision::PENDING || ! $creator->last_measured_at) {
@@ -189,6 +239,8 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
                 $schedule->recordSuccess($creator, now());
             }
         }
+
+        return $creator;
     }
 
     /**
@@ -234,6 +286,7 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
         PostMetricsLifecycle $lifecycle,
         CreatorMarketDetector $markets,
         ?string $marketHint,
+        ?string $verticalHint,
     ): ?Creator {
         if ($profile->posts->isEmpty()) {
             return null;
@@ -329,6 +382,18 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
             $attributes['niche'] = $profile->username;
         }
 
+        if ($verticalHint !== null) {
+            $attributes['primary_vertical'] = $verticalHint;
+            $attributes['metadata'] = array_replace_recursive($attributes['metadata'], [
+                'catalog_import' => [
+                    'vertical_override' => $verticalHint,
+                    'market_override' => $market['market'],
+                ],
+            ]);
+            $attributes['curation_status'] = 'approved';
+            $attributes['is_catalog_seed'] = true;
+        }
+
         $creator = $existing ?: new Creator;
         $creator->fill($attributes)->save();
 
@@ -380,6 +445,13 @@ class MeasureAccountEngagement implements ShouldBeUnique, ShouldQueue
         $hint = $this->marketHints[mb_strtolower($username)] ?? null;
 
         return is_string($hint) ? strtoupper($hint) : null;
+    }
+
+    private function verticalHint(string $username): ?string
+    {
+        $hint = $this->verticalHints[mb_strtolower($username)] ?? null;
+
+        return is_string($hint) ? strtolower($hint) : null;
     }
 
     /** @param array{market: ?string, language: string} $market */

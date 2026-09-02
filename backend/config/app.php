@@ -56,6 +56,11 @@ return [
         explode(',', (string) env('QUEUE_DASHBOARD_EMAILS', '')),
     ))),
 
+    'catalog_admin_emails' => array_values(array_filter(array_map(
+        static fn (string $email): string => strtolower(trim($email)),
+        explode(',', (string) env('CATALOG_ADMIN_EMAILS', 'mohamedchettah0208@gmail.com')),
+    ))),
+
     /*
     |--------------------------------------------------------------------------
     | Application Debug Mode

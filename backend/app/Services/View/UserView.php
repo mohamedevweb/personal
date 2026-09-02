@@ -27,6 +27,11 @@ class UserView
                 config('app.queue_dashboard_emails', []),
                 true,
             ),
+            'catalog_admin_available' => in_array(
+                strtolower($user->email),
+                config('app.catalog_admin_emails', []),
+                true,
+            ),
         ];
     }
 

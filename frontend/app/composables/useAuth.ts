@@ -6,6 +6,7 @@ interface AuthUser {
   instagram_username: string | null
   email_verified_at: string | null
   queue_dashboard_available: boolean
+  catalog_admin_available: boolean
 }
 
 interface AuthResponse {

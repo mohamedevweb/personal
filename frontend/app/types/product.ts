@@ -10,6 +10,46 @@ export interface Creator {
   average_views: number
 }
 
+export type CatalogVertical =
+  | 'sport-fitness'
+  | 'food-cooking'
+  | 'personal-branding'
+  | 'tech-ai'
+  | 'wellness'
+  | 'events'
+  | 'languages'
+  | 'lifestyle'
+  | 'local-culture'
+  | 'travel'
+  | 'startup'
+  | 'business'
+
+export interface AdminCatalogCreator {
+  id: number
+  username: string
+  display_name: string
+  followers: number
+  average_views?: number
+  vertical?: CatalogVertical | null
+  country_code?: 'FR' | 'GB' | 'US' | null
+}
+
+export interface AdminCatalogImport {
+  id: number
+  type: 'creator' | 'post'
+  url: string
+  creator_username: string | null
+  vertical: CatalogVertical
+  country_code: 'FR' | 'GB' | 'US'
+  status: 'queued' | 'running' | 'completed' | 'failed'
+  error: string | null
+  started_at: string | null
+  completed_at: string | null
+  created_at: string
+  creator: AdminCatalogCreator | null
+  content_post: ContentPost | null
+}
+
 /**
  * What the performance ratio was measured against, so the app can show its work.
  * `format` is null when the account has posted too few of that format to have a

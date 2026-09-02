@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\CatalogController;
 use App\Http\Controllers\Admin\QueueDashboardController;
 use App\Http\Controllers\Auth\AccountController;
 use App\Http\Controllers\Auth\AuthController;
@@ -114,6 +115,13 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function (): void {
 // Operational metadata is private and deliberately separate from creator data.
 Route::middleware(['auth:sanctum', 'verified', 'throttle:api'])->group(function (): void {
     Route::get('/admin/queues', QueueDashboardController::class);
+});
+
+Route::middleware(['auth:sanctum', 'verified', 'throttle:discovery'])->prefix('admin/catalog')->group(function (): void {
+    Route::get('/creators', [CatalogController::class, 'creators']);
+    Route::get('/imports', [CatalogController::class, 'index']);
+    Route::get('/imports/{import}', [CatalogController::class, 'show']);
+    Route::post('/imports', [CatalogController::class, 'store']);
 });
 
 Route::middleware(['auth:sanctum', 'verified', 'throttle:discovery'])->group(function (): void {

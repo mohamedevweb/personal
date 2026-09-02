@@ -72,7 +72,11 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // Internal operational pages do not depend on the creator onboarding flow.
   // The API still applies the administrator allowlist for these routes.
   if (to.path.startsWith('/admin/')) {
-    if (!user.value?.queue_dashboard_available) return navigateTo('/feed')
+    const allowed = to.path.startsWith('/admin/catalog')
+      ? user.value?.catalog_admin_available
+      : user.value?.queue_dashboard_available
+
+    if (!allowed) return navigateTo('/feed')
     return
   }
 

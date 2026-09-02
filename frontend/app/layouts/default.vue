@@ -37,6 +37,7 @@ const groups = [
 const mobileNav = computed(() => [
   ...groups.flatMap(group => group.items),
   ...(user.value?.queue_dashboard_available ? [{ label: 'nav.queues', to: '/admin/queues', icon: 'trend' }] : []),
+  ...(user.value?.catalog_admin_available ? [{ label: 'nav.catalog', to: '/admin/catalog', icon: 'plus' }] : []),
   { label: 'nav.settings', to: '/settings', icon: 'settings' }
 ])
 
@@ -58,7 +59,8 @@ const titles: Record<string, string> = {
   '/personal': 'nav.personal',
   '/saved': 'nav.saved',
   '/settings': 'nav.settings',
-  '/admin/queues': 'nav.queues'
+  '/admin/queues': 'nav.queues',
+  '/admin/catalog': 'nav.catalog'
 }
 
 const pageTitle = computed(() => {
@@ -123,6 +125,17 @@ const pageTitle = computed(() => {
         >
           <AppIcon name="trend" :size="17" :class="route.path === '/admin/queues' ? 'text-[var(--accent)]' : ''" />
           <span v-if="!collapsed">{{ $t('nav.queues') }}</span>
+        </NuxtLink>
+
+        <NuxtLink
+          v-if="user?.catalog_admin_available"
+          to="/admin/catalog"
+          :aria-label="collapsed ? $t('nav.catalog') : undefined"
+          :title="collapsed ? $t('nav.catalog') : undefined"
+          :class="[rowClass, rowTone(route.path === '/admin/catalog')]"
+        >
+          <AppIcon name="plus" :size="17" :class="route.path === '/admin/catalog' ? 'text-[var(--accent)]' : ''" />
+          <span v-if="!collapsed">{{ $t('nav.catalog') }}</span>
         </NuxtLink>
 
         <a

@@ -11,6 +11,8 @@ interface InstagramDataProvider
     /** @return Collection<int, DiscoveredPost> */
     public function getPosts(string $username, int $limit, ?string $externalId = null): Collection;
 
+    public function getPost(string $sourceUrl, ?string $expectedUsername = null): ?DiscoveredPost;
+
     /** @return Collection<int, DiscoveredProfile> */
     public function searchAccounts(string $query, int $limit): Collection;
 

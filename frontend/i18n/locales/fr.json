@@ -33,6 +33,7 @@
     "saved": "Favoris",
     "settings": "Réglages",
     "queues": "Files d’attente",
+    "catalog": "Catalogue",
     "groups": {
       "discover": "Découvrir",
       "studio": "Studio"
@@ -75,7 +76,7 @@
   "landing": {
     "head": {
       "title": "Personal, des contenus que vous seul pouviez publier",
-      "description": "Personal trouve les posts qui surperforment dans votre niche, les relie à ce que vous avez vraiment vécu, et les écrit dans votre voix."
+      "description": "Personal trouve les posts qui surperforment dans votre domaine, les relie à ce que vous avez vraiment vécu, et les écrit dans votre voix."
     },
     "nav": {
       "label": "Sections de la page",
@@ -92,7 +93,7 @@
     "hero": {
       "titleLineOne": "Vous êtes <span class=\"b-lit\">créateur</span>.",
       "titleLineTwo": "Pas une machine à contenu.",
-      "subtitle": "Personal trouve ce qui marche dans votre niche et le réécrit avec votre vie. Votre voix, votre semaine, une minute.",
+      "subtitle": "Personal trouve ce qui marche dans votre domaine et le réécrit avec votre vie. Votre voix, votre semaine, une minute.",
       "getAccess": "Commencer",
       "reassuranceOne": "Gratuit en accès anticipé",
       "reassuranceTwo": "Personal ne publie jamais à votre place"
@@ -100,7 +101,7 @@
     "proof": {
       "scanned": "Vos 30 derniers posts, lus une fois",
       "outliers": "Des outliers, pas des top posts",
-      "niches": "Votre niche, pas internet",
+      "niches": "Votre domaine, pas internet",
       "voice": "Votre voix, apprise de vos posts",
       "minutes": "Du brouillon au post en une minute"
     },
@@ -108,7 +109,7 @@
       "label": "Outlier détecté",
       "value": "8,4",
       "unit": "×",
-      "copy": "Pas le plus gros post d'Instagram. Celui qui bat le compte qui l'a publié, dans votre niche, à votre taille, pendant qu'il monte encore.",
+      "copy": "Pas le plus gros post d'Instagram. Celui qui bat le compte qui l'a publié, dans votre domaine, à votre taille, pendant qu'il monte encore.",
       "chart": {
         "title": "Un compte · 14 derniers posts",
         "window": "Indexé sur sa propre moyenne",
@@ -128,7 +129,7 @@
         },
         "discover": {
           "title": "Trouver",
-          "body": "Chaque matin, les posts qui battent la moyenne de leur propre créateur, filtrés à votre niche et à votre taille.",
+          "body": "Chaque matin, les posts qui battent la moyenne de leur propre créateur, filtrés à votre domaine et à votre taille.",
           "caption": "Actualisé chaque matin"
         },
         "connect": {
@@ -214,15 +215,15 @@
         },
         "personalization": {
           "q": "Comment Personal personnalise-t-il mon feed ?",
-          "a": "Personal construit une image de ta niche, de ton audience, de ta voix et de tes sujets à partir de ton Instagram et de tes Moments. Il s'en sert pour trouver des idées qui te correspondent, puis apprend de ce que tu ajoutes à tes favoris, remixes ou masques. Tu peux modifier ce que Personal retient à tout moment."
+          "a": "Personal construit une image de ton domaine, de ton audience, de ta voix et de tes sujets à partir de ton Instagram et de tes Moments. Il s'en sert pour trouver des idées qui te correspondent, puis apprend de ce que tu ajoutes à tes favoris, remixes ou masques. Tu peux modifier ce que Personal retient à tout moment."
         },
         "niche": {
-          "q": "Qu'est-ce que le feed de niche ?",
-          "a": "C'est un fil ciblé de posts récents publiés par des créateurs de ta niche. Personal met en avant les posts qui dépassent la performance habituelle de leur propre compte, pas seulement ceux des plus gros comptes, puis les garde pertinents pour ta niche et ton marché. Le fil reste volontairement court plutôt que de se remplir de contenus viraux sans rapport."
+          "q": "Qu'est-ce que le feed de ton domaine ?",
+          "a": "C'est un fil ciblé de posts récents publiés par des créateurs de ton domaine. Personal met en avant les posts qui dépassent la performance habituelle de leur propre compte, pas seulement ceux des plus gros comptes, puis les garde pertinents pour ton domaine et ton marché. Le fil reste volontairement court plutôt que de se remplir de contenus viraux sans rapport."
         },
         "different": {
           "q": "Encore un générateur de contenu IA ?",
-          "a": "Non. Un générateur invente à partir de rien. Personal part de deux choses qui existent déjà : ce qui marche dans ta niche cette semaine, et ce qui t'est vraiment arrivé."
+          "a": "Non. Un générateur invente à partir de rien. Personal part de deux choses qui existent déjà : ce qui marche dans ton domaine cette semaine, et ce qui t'est vraiment arrivé."
         },
         "post": {
           "q": "Est-ce que Personal publie à ma place ?",
@@ -327,7 +328,7 @@
         "eyebrow": "Engagement ce mois-ci",
         "metric": "8,4×",
         "period": "Mai",
-        "label": "Votre courbe d’engagement depuis que Personal observe votre niche."
+        "label": "Votre courbe d’engagement depuis que Personal observe votre domaine."
       }
     }
   },
@@ -372,7 +373,7 @@
   "onboarding": {
     "eyebrow": "D’abord, apprenons à te connaître",
     "connectTitle": "Connecte ton<br>Instagram.",
-    "connectCopy": "Personal utilise ton compte Instagram pour comprendre ton contenu, ta niche et ce qui marche déjà pour toi.",
+    "connectCopy": "Personal utilise ton compte Instagram pour comprendre ton contenu, ton domaine et ce qui marche déjà pour toi.",
     "preparing": "Préparation d’Instagram…",
     "continueWithInstagram": "Continuer avec Instagram",
     "flow": {
@@ -396,14 +397,14 @@
         "reading_profile": "Récupération de ton profil, ta bio et tes abonnés",
         "importing_posts": "Lecture de tes 12 derniers posts",
         "reading_voice": "Analyse de tes légendes et de ton ton",
-        "mapping_audience": "Identification de ton audience et de ta niche",
+        "mapping_audience": "Identification de ton audience et de ton domaine",
         "transcribing_reels": "Analyse de tes Reels et de tes carrousels"
       },
       "workingMessages": {
         "reading_profile": ["En cours…", "Ouverture de ton profil…", "Vérification de tes abonnés…", "Lecture de ta bio…"],
         "importing_posts": ["En cours…", "Récupération de tes derniers posts…", "Lecture des légendes une à une…", "Presque fini…"],
         "reading_voice": ["En cours…", "Lecture de tes légendes…", "Analyse de ton ton…", "Repérage de tes expressions récurrentes…"],
-        "mapping_audience": ["En cours…", "Recoupement de ta niche…", "Comparaison avec des créateurs similaires…", "On y est presque…"],
+        "mapping_audience": ["En cours…", "Recoupement de ton domaine…", "Comparaison avec des créateurs similaires…", "On y est presque…"],
         "transcribing_reels": ["En cours…", "Visionnage de tes Reels…", "Lecture de tes carrousels…", "Presque fini…"]
       },
       "details": {
@@ -434,7 +435,7 @@
     "stages": {
       "connecting": "Connexion d’Instagram",
       "importing_content": "Import de votre contenu",
-      "understanding_niche": "Compréhension de votre niche",
+      "understanding_niche": "Compréhension de votre domaine",
       "learning_style": "Apprentissage de votre style",
       "finding_patterns": "Recherche de schémas"
     },
@@ -494,7 +495,7 @@
     "saveError": "Personal n’a pas pu mettre à jour tes favoris. Réessaie.",
     "emptyTitle": "Rien pour l’instant.",
     "emptyBody": "Aucune publication n’est assez pertinente pour ton profil actuellement. Personal cherche de nouvelles opportunités dans ton univers.",
-    "exploreTitle": "Explorer autour de ta niche",
+    "exploreTitle": "Explorer autour de ton domaine",
     "loadingMore": "Chargement…",
     "loadMore": "Charger plus"
   },
@@ -569,7 +570,7 @@
     "instagramAccount": "Compte Instagram connecté",
     "positioning": "Positionnement",
     "audience": "Audience",
-    "yourNiche": "Votre niche",
+    "yourNiche": "Votre domaine",
     "notProvided": "À compléter",
     "listHint": "Séparez par des virgules",
     "template": {
@@ -596,7 +597,7 @@
       "placeholder": "{'@'}votrecompte",
       "none": "Aucun compte Instagram"
     },
-    "nicheInsufficient": "Pas encore assez de contenu pour déterminer ta niche",
+    "nicheInsufficient": "Pas encore assez de contenu pour déterminer ton domaine",
     "analysis": {
       "inProgress": "Personal analyse ton profil en profondeur en arrière-plan.",
       "mediaInProgress": "Personal approfondit ton analyse avec tes Reels et tes carrousels en arrière-plan.",
@@ -677,6 +678,64 @@
       "ready": "En attente",
       "delayed": "Différé",
       "reserved": "En cours"
+    }
+  },
+  "catalog": {
+    "eyebrow": "Catalogue éditorial",
+    "title": "Importer des créateurs et des posts",
+    "copy": "Ajoute un compte Instagram public ou un post, puis conserve ses signaux de performance dans le catalogue.",
+    "kind": "Qu’ajoutes-tu ?",
+    "creator": "Créateur",
+    "post": "Post",
+    "url": "URL Instagram",
+    "urlPlaceholder": "https://www.instagram.com/createur/",
+    "vertical": "Verticale",
+    "country": "Pays",
+    "creatorSelect": "Créateur",
+    "creatorPlaceholder": "Rechercher un créateur existant",
+    "noCreator": "Aucun créateur correspondant.",
+    "submit": "Ajouter au catalogue",
+    "submitting": "Ajout en cours…",
+    "queued": "En attente",
+    "running": "Analyse en cours",
+    "completed": "Terminé",
+    "failed": "Échec",
+    "history": "Imports récents",
+    "empty": "Aucun import pour l’instant.",
+    "loadError": "Personal n’a pas pu charger les imports du catalogue.",
+    "submitError": "Personal n’a pas pu lancer cet import.",
+    "metrics": {
+      "followers": "Abonnés",
+      "averageViews": "Vues moyennes",
+      "views": "Vues",
+      "likes": "Likes",
+      "comments": "Commentaires",
+      "outlier": "Outlier",
+      "engagement": "Engagement"
+    },
+    "typeLabel": "Import {type}",
+    "submitted": "Import lancé. Les métriques apparaîtront quand l’analyse sera terminée.",
+    "statusPending": "Personal analyse cet import en arrière-plan.",
+    "statusFailed": "Cet import n’a pas pu être terminé.",
+    "openInstagram": "Ouvrir sur Instagram",
+    "verticals": {
+      "sport-fitness": "Sport et fitness",
+      "food-cooking": "Cuisine et alimentation",
+      "personal-branding": "Personal branding",
+      "tech-ai": "Tech et IA",
+      "wellness": "Bien-être",
+      "events": "Événements",
+      "languages": "Langues",
+      "lifestyle": "Lifestyle",
+      "local-culture": "Local et culture",
+      "travel": "Voyage",
+      "startup": "Startup",
+      "business": "Business"
+    },
+    "countries": {
+      "FR": "France",
+      "GB": "Royaume-Uni",
+      "US": "États-Unis"
     }
   },
   "settings": {
@@ -1014,7 +1073,7 @@
             },
             "profile": {
               "term": "Profil créateur",
-              "detail": "Votre niche, la description de votre audience, votre positionnement, votre ton, vos sujets, vos projets en cours, vos objectifs et vos points forts, que vous les saisissiez vous-même ou qu’ils soient déduits de vos publications puis soumis à votre validation."
+              "detail": "Votre domaine, la description de votre audience, votre positionnement, votre ton, vos sujets, vos projets en cours, vos objectifs et vos points forts, que vous les saisissiez vous-même ou qu’ils soient déduits de vos publications puis soumis à votre validation."
             },
             "moments": {
               "term": "Moments de vie",
@@ -1077,7 +1136,7 @@
             },
             "personalisation": {
               "term": "Personnaliser les recommandations, exécution du contrat",
-              "detail": "Confronter les formats qui fonctionnent réellement dans votre niche à votre positionnement et à vos moments de vie, pour ne proposer que ce qui vous ressemble."
+              "detail": "Confronter les formats qui fonctionnent réellement dans votre domaine à votre positionnement et à vos moments de vie, pour ne proposer que ce qui vous ressemble."
             },
             "connection": {
               "term": "Connecter Instagram, consentement",
@@ -1113,7 +1172,7 @@
         "discovery": {
           "title": "Les publications d’autres créateurs",
           "p": {
-            "what": "Le fil « For You » s’appuie sur des publications publiques d’autres comptes Instagram de votre niche. Nous les collectons via Scrape Creators à partir de profils et de résultats de recherche Instagram publics.",
+            "what": "Le fil « For You » s’appuie sur des publications publiques d’autres comptes Instagram de votre domaine. Nous les collectons via Scrape Creators à partir de profils et de résultats de recherche Instagram publics.",
             "fields": "Nous conservons ce qui rend une publication comparable : nom d’utilisateur public, nom affiché, photo de profil, biographie, nombre d’abonnés et engagement moyen du compte, et pour chaque publication son accroche, le texte de son post, sa miniature, sa date et ses compteurs publics.",
             "basis": "La base légale est notre intérêt légitime à produire une analyse de tendances à partir d’informations rendues publiques par leurs auteurs. Nous n’accédons à aucun compte privé, à aucun message et à aucune donnée qui ne soit pas déjà visible de tous. Ces informations servent uniquement à l’analyse de performance : elles ne servent jamais à contacter ces créateurs, ni à republier leurs contenus.",
             "rights": "Si vous êtes créateur et ne souhaitez pas que vos publications soient analysées par Personal, écrivez à privacy{'@'}usepersonal.app : nous supprimons votre compte et vos publications de notre base et empêchons leur réapparition."
@@ -1395,12 +1454,12 @@
         "service": {
           "title": "Ce que fait le service",
           "p": {
-            "intro": "Personal est un outil d’écriture pour créateurs Instagram. Il lit ce qui fonctionne déjà dans votre niche, retient les moments de votre vie que vous notez et propose des brouillons qui vous ressemblent. Concrètement, un compte vous donne :"
+            "intro": "Personal est un outil d’écriture pour créateurs Instagram. Il lit ce qui fonctionne déjà dans votre domaine, retient les moments de votre vie que vous notez et propose des brouillons qui vous ressemblent. Concrètement, un compte vous donne :"
           },
           "items": {
             "feed": {
               "term": "Un fil Pour vous",
-              "detail": "Les publications publiques des créateurs de votre niche, classées sur ce qui performe réellement plutôt que sur la fraîcheur."
+              "detail": "Les publications publiques des créateurs de votre domaine, classées sur ce qui performe réellement plutôt que sur la fraîcheur."
             },
             "moments": {
               "term": "Les Moments",
@@ -1522,7 +1581,7 @@
         "discovery": {
           "title": "Les publications des autres créateurs",
           "p": {
-            "what": "Le fil montre des publications publiques d’autres comptes Instagram de votre niche, collectées depuis des pages publiques à des fins d’analyse. Elles sont là pour comprendre ce qui fonctionne, pas pour être copiées.",
+            "what": "Le fil montre des publications publiques d’autres comptes Instagram de votre domaine, collectées depuis des pages publiques à des fins d’analyse. Elles sont là pour comprendre ce qui fonctionne, pas pour être copiées.",
             "rule": "Reproduire mot pour mot la publication d’un autre créateur relève de votre responsabilité, pas de la nôtre, et peut porter atteinte à ses droits. Le remix existe précisément pour que ce que vous publiez sorte de votre propre matière.",
             "takedown": "Si vous êtes créateur et ne souhaitez pas que vos publications soient analysées par Personal, écrivez à legal{'@'}usepersonal.app : nous retirons votre compte et vos publications de notre base et empêchons leur réapparition."
           }
