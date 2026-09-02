@@ -79,7 +79,7 @@ services:
   # dedicated worker is unavailable.
   queue:
     <<: *backend
-    command: ["php", "artisan", "queue:work", "--queue=remix,interactive,default", "--tries=3", "--timeout=150", "--sleep=1", "--max-time=3600"]
+    command: ["php", "artisan", "queue:work", "--queue=discovery,remix,interactive,default", "--tries=3", "--timeout=150", "--sleep=1", "--max-time=3600"]
     depends_on:
       postgres:
         condition: service_healthy
