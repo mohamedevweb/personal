@@ -214,6 +214,7 @@ export interface PersonalProfile {
     hook_patterns?: string[]
     visual_patterns?: string[]
     voice_profile?: string | null
+    analysis_locale?: 'en' | 'fr'
     analysis_version?: number
     analysis_status?: 'complete' | 'partial' | 'insufficient_evidence' | 'analysis_unavailable'
     analysis_method?: 'llm' | 'heuristic' | 'manual' | 'none'

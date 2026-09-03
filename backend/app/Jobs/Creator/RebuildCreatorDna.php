@@ -36,6 +36,7 @@ class RebuildCreatorDna implements ShouldBeUnique, ShouldQueue
 
     public function __construct(
         public readonly int $userId,
+        public readonly string $locale = 'en',
     ) {
         $this->onQueue('analysis');
     }
@@ -87,7 +88,7 @@ class RebuildCreatorDna implements ShouldBeUnique, ShouldQueue
             return;
         }
 
-        $signals = $niche->detect($this->account($creator), $media);
+        $signals = $niche->detect($this->account($creator), $media, $this->locale);
 
         // A failed model call falls back to word frequency, which is thinner than
         // the DNA onboarding already produced. Keeping the better one is the point

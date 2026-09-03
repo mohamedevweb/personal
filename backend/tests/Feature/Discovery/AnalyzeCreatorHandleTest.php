@@ -4,6 +4,7 @@ namespace Tests\Feature\Discovery;
 
 use App\Jobs\Discovery\AnalyzeCreatorHandle;
 use App\Jobs\Discovery\DiscoverNicheContent;
+use App\Jobs\Instagram\SyncInstagramAccount;
 use App\Models\Creator;
 use App\Models\CreatorProfile;
 use App\Models\InstagramAccount;
@@ -37,11 +38,13 @@ class AnalyzeCreatorHandleTest extends TestCase
         $user = User::factory()->create();
 
         $this->actingAs($user)
+            ->withHeader('Accept-Language', 'fr-FR,fr;q=0.9')
             ->putJson('/api/integrations/instagram/handle', ['username' => '@founder.creator'])
             ->assertOk()
             ->assertJsonPath('instagram_username', 'founder.creator');
 
-        Queue::assertPushed(AnalyzeCreatorHandle::class, fn (AnalyzeCreatorHandle $job): bool => $job->userId === $user->id);
+        Queue::assertPushed(AnalyzeCreatorHandle::class, fn (AnalyzeCreatorHandle $job): bool => $job->userId === $user->id
+            && $job->locale === 'fr');
         Queue::assertPushed(AnalyzeCreatorHandle::class, fn (AnalyzeCreatorHandle $job): bool => $job->queue === 'onboarding');
     }
 
@@ -97,11 +100,14 @@ class AnalyzeCreatorHandleTest extends TestCase
         ]);
 
         $this->actingAs($user)
+            ->withHeader('Accept-Language', 'fr')
             ->postJson('/api/integrations/instagram/handle/reanalyze')
             ->assertStatus(202)
             ->assertJsonPath('status', 'queued');
 
-        Queue::assertPushed(AnalyzeCreatorHandle::class, fn (AnalyzeCreatorHandle $job): bool => $job->userId === $user->id && $job->username === 'hormozi'
+        Queue::assertPushed(AnalyzeCreatorHandle::class, fn (AnalyzeCreatorHandle $job): bool => $job->userId === $user->id
+            && $job->username === 'hormozi'
+            && $job->locale === 'fr'
         );
         $this->assertSame('queued', $user->creatorProfile()->firstOrFail()->analysis_status);
     }
@@ -130,6 +136,32 @@ class AnalyzeCreatorHandleTest extends TestCase
             fn (AnalyzeCreatorHandle $job): bool => $job->userId === $user->id
                 && $job->username === 'founder.creator',
         );
+    }
+
+    public function test_reanalyzing_a_connected_account_uses_the_requested_language(): void
+    {
+        Queue::fake();
+        $user = User::factory()->create();
+        CreatorProfile::query()->create([
+            'user_id' => $user->id,
+            'instagram_username' => 'founder.creator',
+            'analysis_status' => 'completed',
+        ]);
+        $account = InstagramAccount::query()->create([
+            'user_id' => $user->id,
+            'instagram_user_id' => '123',
+            'username' => 'founder.creator',
+            'access_token' => 'server-side-secret',
+            'connected_at' => now(),
+        ]);
+
+        $this->actingAs($user)
+            ->withHeader('Accept-Language', 'fr')
+            ->postJson('/api/integrations/instagram/handle/reanalyze')
+            ->assertAccepted();
+
+        Queue::assertPushed(SyncInstagramAccount::class, fn (SyncInstagramAccount $job): bool => $job->instagramAccountId === $account->id && $job->locale === 'fr');
+        Queue::assertNotPushed(AnalyzeCreatorHandle::class);
     }
 
     public function test_onboarding_is_told_the_reading_has_started(): void

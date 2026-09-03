@@ -18,7 +18,7 @@ class InstagramConnectionController extends Controller
 {
     public function authorize(Request $request, InstagramAuthService $auth): JsonResponse
     {
-        return response()->json(['authorization_url' => $auth->authorizationUrl($request->user())]);
+        return response()->json(['authorization_url' => $auth->authorizationUrl($request->user(), app()->getLocale())]);
     }
 
     public function status(
@@ -195,7 +195,7 @@ class InstagramConnectionController extends Controller
         // Reading the public profile is what makes the app personal, so it starts
         // here rather than waiting for the creator to find the memory page.
         if ($analyze) {
-            AnalyzeCreatorHandle::dispatch($request->user()->id, $username);
+            AnalyzeCreatorHandle::dispatch($request->user()->id, $username, app()->getLocale());
         }
 
         return response()->json([
@@ -218,7 +218,18 @@ class InstagramConnectionController extends Controller
             'analysis_timings' => null,
         ])->save();
 
-        AnalyzeCreatorHandle::dispatch($request->user()->id, $profile->instagram_username);
+        $account = $request->user()->instagramAccount()->first();
+
+        if ($account) {
+            $account->update(['sync_status' => 'understanding_niche', 'sync_error' => null]);
+            SyncInstagramAccount::dispatch($account->id, app()->getLocale());
+        } else {
+            AnalyzeCreatorHandle::dispatch(
+                $request->user()->id,
+                $profile->instagram_username,
+                app()->getLocale(),
+            );
+        }
 
         return response()->json([
             'status' => 'queued',
@@ -230,7 +241,7 @@ class InstagramConnectionController extends Controller
     {
         $account = $request->user()->instagramAccount()->firstOrFail();
         $account->update(['sync_status' => 'importing_content', 'sync_error' => null]);
-        SyncInstagramAccount::dispatch($account->id);
+        SyncInstagramAccount::dispatch($account->id, app()->getLocale());
 
         return response()->json(['status' => 'queued'], Response::HTTP_ACCEPTED);
     }

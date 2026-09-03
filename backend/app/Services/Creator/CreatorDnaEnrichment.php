@@ -62,9 +62,10 @@ class CreatorDnaEnrichment
         ])->save();
 
         $jobs = [...$transcriptions, ...$carouselAnalyses];
+        $locale = (string) data_get($profile->creator_dna, 'analysis_locale', 'en');
 
         if ($jobs === []) {
-            RebuildCreatorDna::dispatch($profile->user_id);
+            RebuildCreatorDna::dispatch($profile->user_id, $locale);
 
             return true;
         }
@@ -73,8 +74,8 @@ class CreatorDnaEnrichment
         Bus::batch($jobs)
             ->name("creator-dna-media:{$userId}")
             ->allowFailures()
-            ->finally(function (Batch $batch) use ($userId): void {
-                RebuildCreatorDna::dispatch($userId);
+            ->finally(function (Batch $batch) use ($userId, $locale): void {
+                RebuildCreatorDna::dispatch($userId, $locale);
             })
             ->onQueue('analysis')
             ->dispatch();

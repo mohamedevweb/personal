@@ -35,7 +35,10 @@ class SyncInstagramAccount implements ShouldQueue
     /** @var list<int> */
     public array $backoff = [30, 120, 600];
 
-    public function __construct(public readonly int $instagramAccountId) {}
+    public function __construct(
+        public readonly int $instagramAccountId,
+        public readonly string $locale = 'en',
+    ) {}
 
     public function handle(
         InstagramAuthService $auth,
@@ -73,7 +76,7 @@ class SyncInstagramAccount implements ShouldQueue
             }
 
             $account->update(['sync_status' => 'learning_style']);
-            $signals = $niche->detect($account, $media);
+            $signals = $niche->detect($account, $media, $this->locale);
             $market = $markets->detect(implode("\n", [
                 $account->display_name ?? '',
                 $account->bio ?? '',

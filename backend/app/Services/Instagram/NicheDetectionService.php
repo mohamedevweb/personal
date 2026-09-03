@@ -35,6 +35,7 @@ use Throwable;
  *   hook_patterns: list<string>,
  *   visual_patterns: list<string>,
  *   voice_profile: ?string,
+ *   analysis_locale: string,
  *   analysis_version: int,
  *   analysis_status: string,
  *   analysis_method: string,
@@ -44,7 +45,7 @@ use Throwable;
  */
 class NicheDetectionService
 {
-    public const ANALYSIS_VERSION = 6;
+    public const ANALYSIS_VERSION = 7;
 
     private const CAPTION_CHARACTERS = 500;
 
@@ -63,8 +64,9 @@ class NicheDetectionService
      * @param  list<array<string, mixed>>  $media
      * @return Signals
      */
-    public function detect(InstagramAccount $account, array $media): array
+    public function detect(InstagramAccount $account, array $media, string $locale = 'en'): array
     {
+        $locale = $this->supportedLocale($locale);
         $captionList = collect($media)
             ->pluck('caption')
             ->filter(fn (mixed $caption): bool => is_string($caption))
@@ -98,7 +100,7 @@ class NicheDetectionService
         ];
 
         if (! $this->hasEnoughEvidence($bio, $captionList->all(), $linkPreview, $carousels)) {
-            return $this->emptySignals('insufficient_evidence', 'none', $evidence);
+            return $this->emptySignals('insufficient_evidence', 'none', $evidence, $locale);
         }
 
         $signals = $this->viaLlm(
@@ -108,6 +110,7 @@ class NicheDetectionService
             $linkPreview,
             $transcripts,
             $carousels,
+            $locale,
         );
 
         if ($signals !== null) {
@@ -117,13 +120,14 @@ class NicheDetectionService
                 ...$signals,
                 'analysis_status' => $confidence >= 0.65 ? 'complete' : 'partial',
                 'analysis_method' => 'llm',
+                'analysis_locale' => $locale,
                 'analysis_version' => self::ANALYSIS_VERSION,
                 'confidence' => $confidence,
                 'evidence' => $evidence,
             ];
         }
 
-        return $this->heuristic($account, $bio, $captionList, $linkPreview, $media, $evidence);
+        return $this->heuristic($account, $bio, $captionList, $linkPreview, $media, $evidence, $locale);
     }
 
     /**
@@ -138,6 +142,7 @@ class NicheDetectionService
         ?string $linkPreview,
         Collection $transcripts,
         Collection $carousels,
+        string $locale,
     ): ?array {
         $context = array_filter([
             'Display name' => $this->cleanText((string) $account->display_name),
@@ -216,7 +221,11 @@ class NicheDetectionService
             .$verticalChoices.'. The vertical describes the creator’s main subject, not their location, audience, format '
             .'or one campaign. For an account that creates and promotes recurring social events, choose events even when '
             .'those events are local. Choose local-culture only when local discovery or culture is the account’s subject. '
-            .'Return confidence from 0 to 1 based on consistency across the sample.',
+            .'Return confidence from 0 to 1 based on consistency across the sample. '
+            .'Write every descriptive field in '.$this->languageName($locale).', including the niche, topics, audience, '
+            .'positioning, tone, projects, goals, strengths, patterns and voice profile. Keep primary_vertical as its '
+            .'canonical slug. The language field must identify the language used by the creator in the supplied evidence, '
+            .'not the language requested for this analysis.',
             $input,
             [
                 'type' => 'object',
@@ -360,16 +369,21 @@ class NicheDetectionService
         ?string $linkPreview,
         array $media,
         array $evidence,
+        string $locale,
     ): array {
         if ($this->modelIsConfigured()) {
-            $signals = $this->emptySignals('analysis_unavailable', 'heuristic', $evidence);
+            $signals = $this->emptySignals('analysis_unavailable', 'heuristic', $evidence, $locale);
             $vertical = $this->explicitProfileVertical($account, $bio, $linkPreview);
 
             if ($vertical !== null) {
                 $signals['primary_vertical'] = $vertical;
-                $signals['primary_niche'] = 'business education';
-                $signals['topics'] = ['Business', 'Entrepreneurship'];
-                $signals['content_pillars'] = ['Business education'];
+                $signals['primary_niche'] = $locale === 'fr' ? 'éducation entrepreneuriale' : 'business education';
+                $signals['topics'] = $locale === 'fr'
+                    ? ['Entreprise', 'Entrepreneuriat']
+                    : ['Business', 'Entrepreneurship'];
+                $signals['content_pillars'] = $locale === 'fr'
+                    ? ['Éducation entrepreneuriale']
+                    : ['Business education'];
                 $signals['positioning'] = Str::limit($bio, 1000) ?: null;
             }
 
@@ -394,13 +408,18 @@ class NicheDetectionService
 
         $tone = [];
         if (preg_match('/\b(i|my|me|we|our)\b/i', $captions)) {
-            $tone[] = 'Personal';
+            $tone[] = $locale === 'fr' ? 'Personnel' : 'Personal';
         }
         if (preg_match('/\b(how|why|lessons?|learn(?:ed|ing)?|steps?|tips?)\b/i', $captions)) {
-            $tone[] = 'Educational';
+            $tone[] = $locale === 'fr' ? 'Pédagogique' : 'Educational';
         }
         if ($captions !== '') {
-            $tone[] = Str::length($captions) / max(count($media), 1) < 350 ? 'Concise' : 'Story-driven';
+            $tone[] = match (true) {
+                $locale === 'fr' && Str::length($captions) / max(count($media), 1) < 350 => 'Concis',
+                $locale === 'fr' => 'Narratif',
+                Str::length($captions) / max(count($media), 1) < 350 => 'Concise',
+                default => 'Story-driven',
+            };
         }
 
         $confidence = min(0.6, 0.35 + ($bio !== '' ? 0.1 : 0.0) + (count($media) >= 3 ? 0.15 : 0.0));
@@ -421,13 +440,14 @@ class NicheDetectionService
             'tone' => array_values(array_unique($tone)),
             'current_projects' => [],
             'goals' => [],
-            'content_strengths' => $this->heuristicContentStrengths($tone),
+            'content_strengths' => $this->heuristicContentStrengths($tone, $locale),
             'reasoning_patterns' => [],
             'hook_patterns' => [],
             'visual_patterns' => [],
-            'voice_profile' => $this->heuristicVoiceProfile($captions, $media, $tone),
+            'voice_profile' => $this->heuristicVoiceProfile($captions, $media, $tone, $locale),
             'analysis_status' => 'partial',
             'analysis_method' => 'heuristic',
+            'analysis_locale' => $locale,
             'analysis_version' => self::ANALYSIS_VERSION,
             'confidence' => $confidence,
             'evidence' => $evidence,
@@ -523,7 +543,7 @@ class NicheDetectionService
     }
 
     /** @return Signals */
-    private function emptySignals(string $status, string $method, array $evidence): array
+    private function emptySignals(string $status, string $method, array $evidence, string $locale): array
     {
         return [
             'primary_vertical' => null,
@@ -545,6 +565,7 @@ class NicheDetectionService
             'voice_profile' => null,
             'analysis_status' => $status,
             'analysis_method' => $method,
+            'analysis_locale' => $locale,
             'analysis_version' => self::ANALYSIS_VERSION,
             'confidence' => 0.0,
             'evidence' => $evidence,
@@ -560,7 +581,7 @@ class NicheDetectionService
     }
 
     /** @param list<array<string, mixed>> $media */
-    private function heuristicVoiceProfile(string $captions, array $media, array $tone): ?string
+    private function heuristicVoiceProfile(string $captions, array $media, array $tone, string $locale): ?string
     {
         if ($captions === '') {
             return null;
@@ -568,33 +589,58 @@ class NicheDetectionService
 
         $observations = [];
         if (preg_match('/\b(i|my|me|we|our)\b/i', $captions)) {
-            $observations[] = 'Writes in the first person and speaks from direct experience.';
+            $observations[] = $locale === 'fr'
+                ? 'Écrit à la première personne et s’appuie sur son expérience directe.'
+                : 'Writes in the first person and speaks from direct experience.';
         }
 
         $averageLength = Str::length($captions) / max(count($media), 1);
-        $observations[] = $averageLength < 350
-            ? 'Uses concise captions and reaches the point quickly.'
-            : 'Develops ideas through longer, story-led captions.';
+        $observations[] = match (true) {
+            $locale === 'fr' && $averageLength < 350 => 'Utilise des légendes concises et va rapidement à l’essentiel.',
+            $locale === 'fr' => 'Développe ses idées dans des légendes plus longues et narratives.',
+            $averageLength < 350 => 'Uses concise captions and reaches the point quickly.',
+            default => 'Develops ideas through longer, story-led captions.',
+        };
 
-        if (in_array('Educational', $tone, true)) {
-            $observations[] = 'Frames ideas as practical lessons for the audience.';
+        if (in_array($locale === 'fr' ? 'Pédagogique' : 'Educational', $tone, true)) {
+            $observations[] = $locale === 'fr'
+                ? 'Présente ses idées comme des enseignements pratiques pour son audience.'
+                : 'Frames ideas as practical lessons for the audience.';
         }
 
         return implode(' ', $observations);
     }
 
     /** @param list<string> $tone @return list<string> */
-    private function heuristicContentStrengths(array $tone): array
+    private function heuristicContentStrengths(array $tone, string $locale): array
     {
-        $strengths = collect($tone)->map(fn (string $signal): ?string => match ($signal) {
-            'Personal' => 'First-person storytelling',
-            'Educational' => 'Practical education',
-            'Concise' => 'Concise delivery',
-            'Story-driven' => 'Story-led content',
-            default => null,
-        });
+        $strengths = collect($tone)->map(fn (string $signal): ?string => $locale === 'fr'
+            ? match ($signal) {
+                'Personnel' => 'Récit à la première personne',
+                'Pédagogique' => 'Pédagogie pratique',
+                'Concis' => 'Expression concise',
+                'Narratif' => 'Contenu narratif',
+                default => null,
+            }
+            : match ($signal) {
+                'Personal' => 'First-person storytelling',
+                'Educational' => 'Practical education',
+                'Concise' => 'Concise delivery',
+                'Story-driven' => 'Story-led content',
+                default => null,
+            });
 
         return $strengths->filter()->values()->all();
+    }
+
+    private function supportedLocale(string $locale): string
+    {
+        return Str::lower(Str::before($locale, '-')) === 'fr' ? 'fr' : 'en';
+    }
+
+    private function languageName(string $locale): string
+    {
+        return $locale === 'fr' ? 'natural French' : 'natural English';
     }
 
     /**

@@ -54,6 +54,7 @@ class AnalyzeCreatorHandle implements ShouldQueue
     public function __construct(
         public readonly int $userId,
         public readonly ?string $username = null,
+        public readonly string $locale = 'en',
     ) {
         $this->onQueue('onboarding');
     }
@@ -139,7 +140,7 @@ class AnalyzeCreatorHandle implements ShouldQueue
             ->map(fn (DiscoveredPost $post): array => ['caption' => $post->caption])
             ->all();
 
-        $signals = $niche->detect($account, $media);
+        $signals = $niche->detect($account, $media, $this->locale);
 
         if (! $this->isCurrent($profile, $username)) {
             return;

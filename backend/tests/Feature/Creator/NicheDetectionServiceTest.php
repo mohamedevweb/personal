@@ -221,4 +221,69 @@ class NicheDetectionServiceTest extends TestCase
         $this->assertSame('complete', $signals['analysis_status']);
         $this->assertSame(30, $signals['evidence']['caption_count']);
     }
+
+    public function test_french_analysis_keeps_the_creators_content_language_separate(): void
+    {
+        config()->set('services.openai.api_key', 'configured-key');
+        $llm = Mockery::mock(LlmJsonService::class);
+        $llm->shouldReceive('object')
+            ->once()
+            ->withArgs(function (string $instructions): bool {
+                $this->assertStringContainsString('Write every descriptive field in natural French', $instructions);
+                $this->assertStringContainsString('language used by the creator', $instructions);
+
+                return true;
+            })
+            ->andReturn([
+                'primary_vertical' => 'business',
+                'primary_niche' => 'Entrepreneuriat',
+                'sub_niches' => ['Éducation entrepreneuriale'],
+                'topics' => ['Création d’entreprise'],
+                'audience' => ['Entrepreneurs en devenir'],
+                'positioning' => 'Aide les entrepreneurs à bâtir une entreprise durable.',
+                'language' => 'en',
+                'content_pillars' => ['Conseils pratiques'],
+                'tone' => ['Pédagogique'],
+                'current_projects' => [],
+                'goals' => [],
+                'content_strengths' => ['Explications concrètes'],
+                'voice_profile' => 'Utilise des phrases courtes et des conclusions pratiques.',
+                'confidence' => 0.9,
+            ]);
+        $account = new InstagramAccount([
+            'username' => 'founder.creator',
+            'bio' => 'I help founders build sustainable businesses.',
+        ]);
+
+        $signals = (new NicheDetectionService($llm, app(CanonicalCreatorVerticals::class)))
+            ->detect($account, [
+                ['caption' => 'Three practical lessons for founders.'],
+                ['caption' => 'How to build a durable company.'],
+                ['caption' => 'A better way to start your business.'],
+            ], 'fr-FR');
+
+        $this->assertSame('fr', $signals['analysis_locale']);
+        $this->assertSame('en', $signals['language']);
+        $this->assertSame('Aide les entrepreneurs à bâtir une entreprise durable.', $signals['positioning']);
+        $this->assertSame(['Pédagogique'], $signals['tone']);
+    }
+
+    public function test_french_offline_analysis_localizes_generated_observations(): void
+    {
+        $account = new InstagramAccount([
+            'username' => 'founder.creator',
+            'bio' => 'I help founders build sustainable businesses.',
+        ]);
+
+        $signals = app(NicheDetectionService::class)->detect($account, [
+            ['caption' => 'I share short lessons about building a business.'],
+            ['caption' => 'My practical tips help founders start.'],
+            ['caption' => 'How I learned to build better companies.'],
+        ], 'fr');
+
+        $this->assertSame('fr', $signals['analysis_locale']);
+        $this->assertContains('Pédagogique', $signals['tone']);
+        $this->assertContains('Pédagogie pratique', $signals['content_strengths']);
+        $this->assertStringContainsString('légendes concises', $signals['voice_profile']);
+    }
 }

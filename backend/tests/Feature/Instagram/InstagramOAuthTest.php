@@ -39,7 +39,9 @@ class InstagramOAuthTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->getJson('/api/integrations/instagram/authorize');
+        $response = $this->actingAs($user)
+            ->withHeader('Accept-Language', 'fr')
+            ->getJson('/api/integrations/instagram/authorize');
 
         $response->assertOk();
         parse_str(parse_url($response->json('authorization_url'), PHP_URL_QUERY), $query);
@@ -47,6 +49,7 @@ class InstagramOAuthTest extends TestCase
         $this->assertSame('instagram-app-id', $query['client_id']);
         $this->assertSame('code', $query['response_type']);
         $this->assertSame('instagram_business_basic,instagram_business_manage_insights', $query['scope']);
+        $this->assertStringEndsWith('.fr', $query['state']);
         $this->assertDatabaseHas('instagram_oauth_states', [
             'user_id' => $user->id,
             'state_hash' => hash('sha256', $query['state']),
@@ -58,7 +61,7 @@ class InstagramOAuthTest extends TestCase
     {
         Queue::fake();
         $user = User::factory()->create();
-        $state = 'one-time-state';
+        $state = 'one-time-state.fr';
         InstagramOauthState::query()->create([
             'user_id' => $user->id,
             'state_hash' => hash('sha256', $state),
@@ -97,7 +100,8 @@ class InstagramOAuthTest extends TestCase
         $this->assertSame('long-lived-secret', $account->access_token);
         $this->assertNotSame('long-lived-secret', DB::table('instagram_accounts')->value('access_token'));
         $this->assertNotNull(InstagramOauthState::query()->first()->consumed_at);
-        Queue::assertPushed(SyncInstagramAccount::class, fn ($job) => $job->instagramAccountId === $account->id);
+        Queue::assertPushed(SyncInstagramAccount::class, fn ($job) => $job->instagramAccountId === $account->id
+            && $job->locale === 'fr');
     }
 
     public function test_callback_rejects_replayed_state_without_contacting_meta(): void

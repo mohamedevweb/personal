@@ -16,11 +16,11 @@ class InstagramAuthService
 {
     public function __construct(private readonly InstagramApiService $api) {}
 
-    public function authorizationUrl(User $user): string
+    public function authorizationUrl(User $user, string $locale = 'en'): string
     {
         $this->ensureConfigured();
 
-        $state = Str::random(64);
+        $state = Str::random(64).'.'.$this->supportedLocale($locale);
         InstagramOauthState::query()->create([
             'user_id' => $user->id,
             'state_hash' => hash('sha256', $state),
@@ -72,9 +72,19 @@ class InstagramAuthService
             ],
         );
 
-        SyncInstagramAccount::dispatch($account->id)->afterCommit();
+        SyncInstagramAccount::dispatch($account->id, $this->localeFromState($state))->afterCommit();
 
         return $account;
+    }
+
+    private function localeFromState(string $state): string
+    {
+        return $this->supportedLocale(Str::afterLast($state, '.'));
+    }
+
+    private function supportedLocale(string $locale): string
+    {
+        return Str::lower(Str::before($locale, '-')) === 'fr' ? 'fr' : 'en';
     }
 
     public function accessToken(InstagramAccount $account): string

@@ -191,7 +191,11 @@ class ProfileController extends Controller
         }
 
         $profile->forceFill(['analysis_status' => 'queued', 'analysis_error' => null])->save();
-        AnalyzeCreatorHandle::dispatch($request->user()->id, $profile->instagram_username);
+        AnalyzeCreatorHandle::dispatch(
+            $request->user()->id,
+            $profile->instagram_username,
+            app()->getLocale(),
+        );
     }
 
     private function profile(Request $request): CreatorProfile
