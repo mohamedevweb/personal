@@ -6,7 +6,7 @@ definePageMeta({ layout: false })
 
 const route = useRoute()
 const { t, te, tm, rt, locale } = useI18n()
-const { user } = useAuth()
+const { user, loadUser } = useAuth()
 const { status, connecting, error, analysisRunning, connect, loadStatus, startPolling, stopPolling } = useInstagram()
 const { apiFetch } = usePersonalApi()
 const toast = useToast()
@@ -232,6 +232,7 @@ watch(connectionError, (message) => {
 }, { immediate: true })
 
 const onboarded = useState('personal-onboarded', () => false)
+const enteringApp = ref(false)
 
 const parsedAccountHandle = computed(() => parseHandle(accountHandleInput.value))
 
@@ -328,8 +329,11 @@ watch(() => analysis.value?.status, (analysisStatus) => {
 })
 
 function enterApp() {
+  if (enteringApp.value) return
+
+  enteringApp.value = true
   onboarded.value = true
-  return navigateTo('/feed')
+  return enterAppAfterOnboarding(loadUser, () => navigateTo('/feed'))
 }
 
 onMounted(async () => {
