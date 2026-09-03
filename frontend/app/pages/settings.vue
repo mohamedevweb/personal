@@ -1,23 +1,8 @@
 <script setup lang="ts">
-const { status, connecting, error, connect, loadStatus } = useInstagram()
-const { apiFetch } = usePersonalApi()
-const { user, loadUser, updateAccount, updatePassword, resendVerification, logout } = useAuth()
+const { user, updateAccount, updatePassword, resendVerification, logout } = useAuth()
 const { address: supportAddress, mailto: supportMailto } = useSupportEmail()
 const { t } = useI18n()
 const toast = useToast()
-const instagramAvatarFailed = ref(false)
-
-async function disconnect() {
-  try {
-    await apiFetch('/api/integrations/instagram', { method: 'DELETE' })
-    await loadStatus()
-    await loadUser()
-    instagramAvatarFailed.value = false
-    if (error.value) return
-  } catch (exception: unknown) {
-    toast.error(apiErrorMessage(exception, t('settings.disconnectError')))
-  }
-}
 
 const account = reactive({ email: '' })
 const accountSaving = ref(false)
@@ -88,16 +73,9 @@ async function resend() {
   }
 }
 
-onMounted(async () => {
-  await loadStatus()
-  instagramAvatarFailed.value = false
-  syncAccountForm()
-})
+onMounted(syncAccountForm)
 
 watch(user, syncAccountForm)
-watch(error, (message) => {
-  if (message) toast.error(message)
-})
 </script>
 
 <template>
@@ -168,28 +146,6 @@ watch(error, (message) => {
           {{ passwordSaving ? $t('settings.saving') : $t('settings.password.save') }}
         </button>
       </form>
-    </section>
-
-    <!-- Instagram -->
-    <section class="mt-5 rounded-[18px] border border-[var(--line)] bg-[var(--surface)] p-6 md:p-8">
-      <h2 class="font-serif text-[26px] tracking-[-.02em]">{{ $t('settings.instagram') }}</h2>
-      <p class="mt-1 text-sm leading-6 text-[var(--muted)]">{{ $t('settings.instagramCopy') }}</p>
-      <div v-if="status.connected" class="mt-7 flex items-center gap-3 rounded-[14px] border border-[var(--line-soft)] bg-[var(--paper)] p-4">
-        <img
-          v-if="status.account?.profile_picture_url && !instagramAvatarFailed"
-          :src="status.account.profile_picture_url"
-          :alt="status.account.display_name || `@${status.account.username}`"
-          class="h-10 w-10 rounded-full object-cover"
-          @error="instagramAvatarFailed = true"
-        >
-        <div v-else class="grid h-10 w-10 place-items-center rounded-full bg-[var(--surface)] text-xs font-medium">IG</div>
-        <div>
-          <p class="text-sm font-medium">{{ $t('settings.instagramConnected') }}</p>
-          <p class="text-xs text-[var(--faint)]">{{ $t('settings.postsImported', { count: status.account?.imported_media_count, status: status.account?.sync_status }) }}</p>
-        </div>
-        <button class="ml-auto text-xs text-[var(--faint)] transition hover:text-[var(--danger)]" @click="disconnect">{{ $t('settings.disconnect') }}</button>
-      </div>
-      <button v-else class="mt-7 inline-flex h-11 items-center justify-center rounded-full b-btn-red px-5 text-[14px] font-medium transition disabled:opacity-60" :disabled="connecting" @click="connect">{{ $t('settings.continueWithInstagram') }}</button>
     </section>
 
     <!-- Support -->

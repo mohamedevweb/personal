@@ -806,13 +806,6 @@
       "pending": "Signing out…",
       "error": "Personal could not sign you out. Please try again."
     },
-    "instagram": "Instagram",
-    "instagramCopy": "Your own account data is the real foundation of Personal.",
-    "instagramConnected": "Instagram account connected",
-    "postsImported": "{count} posts imported · {status}",
-    "disconnect": "Disconnect",
-    "disconnectError": "Personal could not disconnect Instagram. Please try again.",
-    "continueWithInstagram": "Continue with Instagram",
     "privacy": "Privacy",
     "privacyCopy": "Instagram access tokens stay encrypted on the server. Personal never exposes them to the browser and deletes imported media when you disconnect.",
     "privacyLink": "Read the privacy policy"

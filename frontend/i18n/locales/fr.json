@@ -806,13 +806,6 @@
       "pending": "Déconnexion…",
       "error": "Personal n’a pas pu vous déconnecter. Réessayez."
     },
-    "instagram": "Instagram",
-    "instagramCopy": "Les données de votre propre compte sont la vraie fondation de Personal.",
-    "instagramConnected": "Compte Instagram connecté",
-    "postsImported": "{count} posts importés · {status}",
-    "disconnect": "Déconnecter",
-    "disconnectError": "Personal n’a pas pu déconnecter Instagram. Réessaie.",
-    "continueWithInstagram": "Continuer avec Instagram",
     "privacy": "Confidentialité",
     "privacyCopy": "Les jetons d’accès Instagram restent chiffrés sur le serveur. Personal ne les expose jamais au navigateur et supprime les médias importés lorsque vous vous déconnectez.",
     "privacyLink": "Lire la politique de confidentialité"

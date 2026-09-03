@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { InstagramAccount } from '~/types/instagram'
+import type { HandleAnalysis, InstagramAccount } from '~/types/instagram'
 import type { ContentPost, PersonalProfile } from '~/types/product'
 
 type PersonalProfileDraft = Pick<PersonalProfile,
@@ -123,12 +123,26 @@ async function saveProfile() {
 async function reanalyzeWithAi() {
   if (reanalyzing.value) return
 
+  const previousProfileStatus = profile.value?.analysis_status
+  const previousAnalysis = instagramStatus.value.analysis
+
   reanalyzing.value = true
+  if (profile.value) profile.value.analysis_status = 'queued'
+  if (previousAnalysis) {
+    instagramStatus.value.analysis = {
+      ...previousAnalysis,
+      status: 'queued',
+      error: null
+    }
+  }
+
   try {
-    await apiFetch('/api/integrations/instagram/handle/reanalyze', { method: 'POST' })
-    await loadInstagramStatus()
+    const response = await apiFetch<{ analysis: HandleAnalysis }>('/api/integrations/instagram/handle/reanalyze', { method: 'POST' })
+    instagramStatus.value.analysis = response.analysis
     startInstagramPolling()
   } catch (exception: unknown) {
+    if (profile.value) profile.value.analysis_status = previousProfileStatus
+    instagramStatus.value.analysis = previousAnalysis
     toast.error(apiErrorMessage(exception, t('personal.reanalyzeError')))
   } finally {
     reanalyzing.value = false
