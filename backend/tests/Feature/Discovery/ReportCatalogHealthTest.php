@@ -29,28 +29,28 @@ class ReportCatalogHealthTest extends TestCase
 
     public function test_it_reports_eligible_format_coverage_by_vertical(): void
     {
-        $first = $this->creator('first', 'events');
-        $second = $this->creator('second', 'events');
+        $first = $this->creator('first', 'local-culture-events');
+        $second = $this->creator('second', 'local-culture-events');
         $this->storePost($first, 'reel');
         $this->storePost($second, 'reel');
         $this->storePost($first, 'carousel');
 
-        $this->artisan('personal:catalog-health', ['--vertical' => 'events'])
+        $this->artisan('personal:catalog-health', ['--vertical' => 'local-culture-events'])
             ->assertSuccessful()
             ->expectsTable(
                 ['Vertical', 'Approved creators', 'Eligible posts', 'Reels', 'Carousels', 'Status'],
-                [['events', 2, 3, 2, 1, 'ready']],
+                [['local-culture-events', 2, 3, 2, 1, 'ready']],
             );
     }
 
     public function test_it_excludes_unapproved_or_stale_posts_from_coverage(): void
     {
-        $creator = $this->creator('first', 'events');
+        $creator = $this->creator('first', 'local-culture-events');
         $this->storePost($creator, 'reel');
         $this->storePost($creator, 'carousel', daysAgo: 31);
         $creator->update(['curation_status' => 'discovered']);
 
-        $this->artisan('personal:catalog-health', ['--vertical' => 'events'])
+        $this->artisan('personal:catalog-health', ['--vertical' => 'local-culture-events'])
             ->assertSuccessful()
             ->expectsOutputToContain('gap');
     }

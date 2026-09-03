@@ -169,10 +169,10 @@ class FeedRankingTest extends TestCase
         );
     }
 
-    public function test_local_culture_profile_receives_same_vertical_posts_without_shared_topics(): void
+    public function test_local_culture_and_events_profile_receives_same_vertical_posts_without_shared_topics(): void
     {
         $this->user->creatorProfile()->update([
-            'primary_vertical' => 'local-culture',
+            'primary_vertical' => 'local-culture-events',
             'niche' => 'Sorties sociales locales',
             'creator_dna' => [
                 'primary_niche' => 'Sorties sociales locales',
@@ -184,11 +184,11 @@ class FeedRankingTest extends TestCase
         $creator->update([
             'niche' => 'Découverte culturelle',
             'niche_topics' => ['patrimoine', 'visites guidées'],
-            'primary_vertical' => 'local-culture',
+            'primary_vertical' => 'local-culture-events',
         ]);
         $post = $this->storePost($creator, 1.5, [
             'metadata' => ['feed_classification' => [
-                'vertical' => 'local-culture',
+                'vertical' => 'local-culture-events',
                 'primary_niche' => 'Découverte culturelle',
                 'topics' => ['patrimoine'],
             ]],
@@ -200,20 +200,20 @@ class FeedRankingTest extends TestCase
         $this->assertContains($post->id, app(RecommendationService::class)->forUser($this->user)->pluck('id'));
     }
 
-    public function test_creator_primary_vertical_keeps_travel_and_lifestyle_out_of_local_culture_for_you(): void
+    public function test_creator_primary_vertical_keeps_travel_and_lifestyle_out_of_local_culture_and_events_for_you(): void
     {
-        $this->user->creatorProfile()->update(['primary_vertical' => 'local-culture']);
+        $this->user->creatorProfile()->update(['primary_vertical' => 'local-culture-events']);
 
         $travelCreator = $this->creator('travel.guide', 30_000, 900);
         $travelCreator->update(['primary_vertical' => 'travel', 'niche' => 'City guides']);
         $travelPost = $this->storePost($travelCreator, 2.0, [
-            'metadata' => ['feed_classification' => ['vertical' => 'local-culture']],
+            'metadata' => ['feed_classification' => ['vertical' => 'local-culture-events']],
         ]);
 
         $lifestyleCreator = $this->creator('lifestyle.creator', 30_000, 900);
         $lifestyleCreator->update(['primary_vertical' => 'lifestyle', 'niche' => 'Lifestyle']);
         $lifestylePost = $this->storePost($lifestyleCreator, 2.0, [
-            'metadata' => ['feed_classification' => ['vertical' => 'local-culture']],
+            'metadata' => ['feed_classification' => ['vertical' => 'local-culture-events']],
         ]);
 
         $relevance = app(PostRelevance::class);

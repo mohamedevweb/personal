@@ -6,8 +6,8 @@ const { apiFetch } = usePersonalApi()
 const { locale, t } = useI18n()
 
 const verticals: CatalogVertical[] = [
-  'sport-fitness', 'food-cooking', 'personal-branding', 'tech-ai', 'wellness', 'events',
-  'languages', 'lifestyle', 'local-culture', 'travel', 'startup', 'business'
+  'sport-fitness', 'food-cooking', 'personal-branding', 'tech-ai', 'wellness', 'local-culture-events',
+  'languages', 'lifestyle', 'travel', 'startup', 'business'
 ]
 const countries = ['FR', 'GB', 'US'] as const
 

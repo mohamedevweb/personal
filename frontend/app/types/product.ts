@@ -16,10 +16,9 @@ export type CatalogVertical =
   | 'personal-branding'
   | 'tech-ai'
   | 'wellness'
-  | 'events'
+  | 'local-culture-events'
   | 'languages'
   | 'lifestyle'
-  | 'local-culture'
   | 'travel'
   | 'startup'
   | 'business'
@@ -186,7 +185,7 @@ export interface PersonalProfile {
   niche: string | null
   market: 'FR' | 'GB' | 'US' | null
   market_confidence: number | null
-  primary_vertical: 'sport-fitness' | 'food-cooking' | 'personal-branding' | 'tech-ai' | 'beauty-fashion' | 'wellness' | 'events' | 'languages' | 'lifestyle' | 'local-culture' | 'travel' | 'startup' | 'business' | null
+  primary_vertical: 'sport-fitness' | 'food-cooking' | 'personal-branding' | 'tech-ai' | 'beauty-fashion' | 'wellness' | 'local-culture-events' | 'languages' | 'lifestyle' | 'travel' | 'startup' | 'business' | null
   audience_description: string | null
   positioning: string | null
   topics: string[] | null

@@ -195,7 +195,10 @@ $additional = [
 ];
 
 foreach ($additional as $vertical => $creators) {
-    $catalog[$vertical] = [...($catalog[$vertical] ?? []), ...$creators];
+    $canonicalVertical = in_array($vertical, ['events', 'local-culture'], true)
+        ? 'local-culture-events'
+        : $vertical;
+    $catalog[$canonicalVertical] = [...($catalog[$canonicalVertical] ?? []), ...$creators];
 }
 
 $entries = [];

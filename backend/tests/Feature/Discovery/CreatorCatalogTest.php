@@ -40,9 +40,12 @@ class CreatorCatalogTest extends TestCase
         }
 
         $this->assertNull(app(CanonicalCreatorVerticals::class)->canonical('Événementiel'));
+        $this->assertNull(app(CanonicalCreatorVerticals::class)->canonical('events'));
         $this->assertNull(app(CanonicalCreatorVerticals::class)->canonical('Langues'));
         $this->assertSame('lifestyle', app(CanonicalCreatorVerticals::class)->canonical('Lifestyle'));
         $this->assertNull(app(CanonicalCreatorVerticals::class)->canonical('Local / Culture'));
+        $this->assertNull(app(CanonicalCreatorVerticals::class)->canonical('local-culture'));
+        $this->assertSame('local-culture-events', app(CanonicalCreatorVerticals::class)->canonical('Local-Culture-Events'));
         $this->assertNull(app(CanonicalCreatorVerticals::class)->canonical('Voyage'));
 
         $this->assertCount(77, $entries->where('status', 'approved'));

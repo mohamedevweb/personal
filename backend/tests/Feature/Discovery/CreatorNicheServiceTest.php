@@ -92,7 +92,7 @@ class CreatorNicheServiceTest extends TestCase
         $this->assertNotContains('pasta', $signals['topics']);
     }
 
-    public function test_the_model_can_classify_a_local_event_organizer_as_events(): void
+    public function test_the_model_can_classify_a_local_event_organizer_in_the_merged_vertical(): void
     {
         $profile = new DiscoveredProfile(
             username: 'soiree_comptoir_lumiere',
@@ -139,13 +139,12 @@ class CreatorNicheServiceTest extends TestCase
         $llm->shouldReceive('object')
             ->once()
             ->withArgs(function (string $instructions): bool {
-                $this->assertStringContainsString('belongs to events', $instructions);
-                $this->assertStringContainsString('local-culture', $instructions);
+                $this->assertStringContainsString('local-culture-events', $instructions);
 
                 return true;
             })
             ->andReturn([
-                'primary_vertical' => 'events',
+                'primary_vertical' => 'local-culture-events',
                 'niche' => 'Social events',
                 'topics' => ['guided social events', 'local meetups'],
                 'content_mechanics' => [],
@@ -155,6 +154,6 @@ class CreatorNicheServiceTest extends TestCase
 
         $signals = (new CreatorNicheService($llm, app(CanonicalCreatorVerticals::class)))->detect($profile);
 
-        $this->assertSame('events', $signals['primary_vertical']);
+        $this->assertSame('local-culture-events', $signals['primary_vertical']);
     }
 }

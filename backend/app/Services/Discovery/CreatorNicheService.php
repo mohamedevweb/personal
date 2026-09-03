@@ -88,8 +88,8 @@ class CreatorNicheService
             .'summary, and confidence from 0 to 1. After synthesizing that Creator DNA summary, choose exactly one '
             .'primary_vertical from this closed taxonomy: '
             .$verticalChoices.'. The vertical describes the account’s main subject, not its location, format, audience '
-            .'or a one-off campaign. An account that creates and promotes recurring social events belongs to events, '
-            .'even when those events are local. Use local-culture only when local discovery or culture is the actual subject. '
+            .'or a one-off campaign. Accounts centered on recurring events, local discovery or local culture belong to '
+            .'local-culture-events. '
             .'Prefer a broad defensible label such as entrepreneurship over a campaign-specific hybrid such as '
             .'entrepreneurship giveaways.',
             collect($context)->map(fn ($value, $key): string => "{$key}: {$value}")->implode("\n"),

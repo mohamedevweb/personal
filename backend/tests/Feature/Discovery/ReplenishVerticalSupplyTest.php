@@ -32,16 +32,16 @@ class ReplenishVerticalSupplyTest extends TestCase
     {
         Bus::fake();
 
-        $events = $this->profile('events');
-        $this->profile('events');
+        $localCultureEvents = $this->profile('local-culture-events');
+        $this->profile('local-culture-events');
         $travel = $this->profile('travel');
 
-        $this->artisan('personal:replenish-vertical-supply', ['--vertical' => 'events', '--force' => true])
+        $this->artisan('personal:replenish-vertical-supply', ['--vertical' => 'local-culture-events', '--force' => true])
             ->assertSuccessful();
 
         Bus::assertDispatched(
             DiscoverNicheContent::class,
-            fn (DiscoverNicheContent $job): bool => $job->userId === $events->user_id && $job->force,
+            fn (DiscoverNicheContent $job): bool => $job->userId === $localCultureEvents->user_id && $job->force,
         );
         Bus::assertDispatchedTimes(DiscoverNicheContent::class, 1);
         Bus::assertNotDispatched(
@@ -53,15 +53,15 @@ class ReplenishVerticalSupplyTest extends TestCase
     public function test_it_does_not_replenish_a_vertical_that_has_enough_inventory(): void
     {
         Bus::fake();
-        $profile = $this->profile('events');
-        $first = $this->creator('event-one', 'events');
-        $second = $this->creator('event-two', 'events');
+        $profile = $this->profile('local-culture-events');
+        $first = $this->creator('event-one', 'local-culture-events');
+        $second = $this->creator('event-two', 'local-culture-events');
 
         $this->storePost($first, 'event-one-a');
         $this->storePost($first, 'event-one-b');
         $this->storePost($second, 'event-two-a');
 
-        $this->artisan('personal:replenish-vertical-supply', ['--vertical' => 'events'])
+        $this->artisan('personal:replenish-vertical-supply', ['--vertical' => 'local-culture-events'])
             ->assertSuccessful();
 
         Bus::assertNotDispatched(DiscoverNicheContent::class);

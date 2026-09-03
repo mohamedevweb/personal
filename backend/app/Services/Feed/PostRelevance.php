@@ -48,7 +48,7 @@ class PostRelevance
         $contentVertical = $postClassification['vertical'];
         // The publishing creator's canonical vertical is authoritative. A post
         // can carry an old or campaign-specific content classification, but it
-        // must not move a travel or lifestyle creator into a local-culture For You shelf.
+        // must not move a travel or lifestyle creator into a Local Culture & Events For You shelf.
         $candidateVertical = $creatorClassification['vertical'];
 
         // Temporary rollout rule: the canonical primary vertical is the only
